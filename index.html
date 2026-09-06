@@ -56,7 +56,7 @@
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 15</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 16</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -120,6 +120,9 @@ function paint(kind,size=256){
       x.beginPath();const rr=9,w=cw-6,h=ch-6,X=px+3,Y=py+3;x.moveTo(X+rr,Y);x.arcTo(X+w,Y,X+w,Y+h,rr);x.arcTo(X+w,Y+h,X,Y+h,rr);x.arcTo(X,Y+h,X,Y,rr);x.arcTo(X,Y,X+w,Y,rr);x.fill();
       x.globalAlpha=.25;x.fillStyle='#fff';x.beginPath();x.ellipse(X+w*.4,Y+h*.35,w*.22,h*.16,0,0,7);x.fill();x.globalAlpha=1;}
     blot(50,'#3c3530',.3,3,12);blot(35,'#b4a48c',.18,3,10);}
+  else if(kind==='steel'){x.fillStyle='#3c6b7c';x.fillRect(0,0,size,size);blot(60,'#34606f',.35,10,50);blot(40,'#4b7f90',.3,10,50);blot(18,'#8a4a2a',.45,4,16);blot(26,'#6b3a22',.35,2,8);
+    x.globalAlpha=.35;x.fillStyle='#7a3f22';for(let i=0;i<8;i++){const rx=R(0,size),ry=R(0,size*.5);x.fillRect(rx,ry,R(2,5),R(30,110));}x.globalAlpha=1;
+    x.fillStyle='#22393f';for(let i=0;i<48;i++){x.beginPath();x.arc(R(0,size),R(0,size),2.2,0,7);x.fill();}}
   else if(kind==='metal'){x.fillStyle='#3f7a5a';x.fillRect(0,0,size,size);blot(50,'#356649',.35,10,50);blot(30,'#4f8d6b',.3,10,50);blot(20,'#7a4b2a',.35,4,14);blot(12,'#2d4a3a',.5,3,8);}
   else if(kind==='cloth'){x.fillStyle='#d9a441';x.fillRect(0,0,size,size);blot(60,'#c48f2f',.3,6,20);blot(40,'#e8bb63',.3,6,20);}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;TEX[kind]=t;return t;
@@ -340,20 +343,42 @@ function endCutscene(){if(cs)clearTimeout(cs.subT);ui.sub.style.opacity=0;ui.sub
 let sc;
 function startScavenge(){
   phase='scavenge';clear();inv=[];bag();ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Behind the takeaway';
-  scene.fog=new THREE.Fog(0x4a2c1e,25,60);
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),MT(0xc9c0b4,'cobble',20,20));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.userData.noInk=true;root.add(ground);
-  const puddle=new THREE.Mesh(new THREE.CircleGeometry(4,24),M(0x5c8fa0));puddle.userData.noInk=true;puddle.rotation.x=-Math.PI/2;puddle.position.set(-9,0.01,4);root.add(puddle);
-  const wall=box(60,8,1,MT(0xd9b8a0,'brick',14,1.9));wall.position.set(0,4,-10);wall.userData.noInk=true;root.add(wall);
-  for(let i=0;i<12;i++){const b=box(1.6,0.6,0.3,M(0x8f5a45));b.position.set(-25+i*4.6+(i%2)*1.5,0.3+(i%3)*0.62,-9.4);root.add(b);}
+  scene.fog=new THREE.Fog(0x4a2c1e,28,75);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(140,80),MT(0xc9c0b4,'cobble',46,26));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.userData.noInk=true;root.add(ground);
+  [[-9,4,4],[18,9,3],[-28,-2,2.5],[34,-4,3.5]].forEach(([x,z,r])=>{const puddle=new THREE.Mesh(new THREE.CircleGeometry(r,24),M(0x5c8fa0));puddle.rotation.x=-Math.PI/2;puddle.position.set(x,0.01,z);puddle.userData.noInk=true;root.add(puddle);});
+  const wall=box(140,8,1,MT(0xd9b8a0,'brick',32,1.9));wall.position.set(0,4,-10);wall.userData.noInk=true;root.add(wall);
+  // far ends: chain-link fence posts + a gate
+  [[-45,0],[45,0]].forEach(([x])=>{for(let i=0;i<9;i++){const post=cyl(0.12,0.12,4,M(0x6b6f72),6);post.position.set(x,2,-9+i*4.5);root.add(post);}
+    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(36,3.6),new THREE.MeshToonMaterial({color:0x9aa0a3,gradientMap:gradTex,transparent:true,opacity:.35,side:THREE.DoubleSide}));mesh.rotation.y=Math.PI/2;mesh.position.set(x,1.9,9);mesh.userData.noInk=true;root.add(mesh);});
+  for(let i=0;i<28;i++){const b=box(1.6,0.6,0.3,M(0x8f5a45));b.position.set(-64+i*4.6+(i%2)*1.5,0.3+(i%3)*0.62,-9.4);root.add(b);}
+  // back-door steps, drain, crates, pipes
+  const step=box(5,0.5,2,M(0x8a8580));step.position.set(22,0.25,-8.5);root.add(step);const step2=box(5,0.5,1,M(0x8a8580));step2.position.set(22,0.75,-9);root.add(step2);
+  const door2=box(2.6,4,0.15,M(0x5a3a22));door2.position.set(22,2.5,-9.45);door2.userData.noInk=true;root.add(door2);
+  const drain=cyl(1.1,1.1,0.05,M(0x3a3634),20);drain.position.set(-18,0.03,6);root.add(drain);
+  [[-22,-6,0],[-23.4,-6,0.9],[-22.6,-4.9,-6.1],[30,2,0.4],[28.6,3.6,-0.3]].forEach(([x,z,ry])=>{const c=box(1.8,1.8,1.8,MT(0xb99268,'wood',1,1));c.position.set(x,0.9,z);c.rotation.y=ry;root.add(c);});
+  const pipe=cyl(0.35,0.35,8,M(0x7a7f83),10);pipe.position.set(-32,4,-9.2);root.add(pipe);const pipe2=cyl(0.35,0.35,3,M(0x7a7f83),10);pipe2.rotation.z=Math.PI/2;pipe2.position.set(-30.5,7.8,-9.2);root.add(pipe2);
+  const lamp=cyl(0.15,0.15,7,M(0x4a4a4a),8);lamp.position.set(12,3.5,-9.3);root.add(lamp);const lampHead=box(1.2,0.4,0.8,M(0x4a4a4a));lampHead.position.set(12,7,-8.8);root.add(lampHead);
+  const lampLight=new THREE.PointLight(0xffc070,1.4,26);lampLight.position.set(12,6.6,-7.5);root.add(lampLight);
+  const glow=sph(0.35,M(0xffe6b0,{emissive:0xffb347,emissiveIntensity:2}),8,6);glow.position.set(12,6.7,-8.3);glow.userData.noInk=true;root.add(glow);
+  // the dumpster
   const dump=new THREE.Group();dump.position.set(0,0,-4);root.add(dump);
-  const dm=MT(0xffffff,'metal',2,1);
-  const body=box(9,2,4,dm);body.position.y=1;dump.add(body);
-  [[-4.7,1],[4.7,1]].forEach(([x])=>{const w=cyl(0.5,0.5,0.4,M(0x222),12);w.rotation.z=Math.PI/2;w.position.set(x*0.85,0.3,1.6);dump.add(w);const w2=w.clone();w2.position.z=-1.6;dump.add(w2);});
-  const lid=box(9.2,0.3,4.2,M(0x2f5f45));lid.position.set(0,2.3,-2.4);lid.rotation.x=-1.1;lid.userData.noInk=true;dump.add(lid);
-  const chute=box(2.4,1.4,0.2,M(0x1a1210));chute.position.set(0,1.2,2.05);chute.userData.noInk=true;dump.add(chute);
+  const dm=MT(0xffffff,'steel',2,1),dmDark=M(0x2c4a55);
+  const body=box(9,2,4,dm);body.position.y=1.15;dump.add(body);
+  for(let i=-3;i<=3;i++){const rib=box(0.18,1.7,4.15,dmDark);rib.position.set(i*1.3,1.15,0);dump.add(rib);}
+  const rail=box(9.3,0.22,0.3,dmDark);rail.position.set(0,2.2,2.1);dump.add(rail);const rail2=rail.clone();rail2.position.z=-2.1;dump.add(rail2);
+  const skirtF=box(9.3,0.35,0.3,dmDark);skirtF.position.set(0,0.35,2.1);dump.add(skirtF);const skirtB=skirtF.clone();skirtB.position.z=-2.1;dump.add(skirtB);
+  [[-4.7,1.6],[4.7,1.6],[-4.7,-1.6],[4.7,-1.6]].forEach(([x,z])=>{const w=cyl(0.42,0.42,0.35,M(0x1c1a1a),14);w.rotation.z=Math.PI/2;w.position.set(x*0.9,0.42,z);dump.add(w);const hub=cyl(0.18,0.18,0.4,M(0x8a8a8a),8);hub.rotation.z=Math.PI/2;hub.position.copy(w.position);dump.add(hub);});
+  const lid=box(9.2,0.25,4.2,MT(0xffffff,'steel',2,1));lid.position.set(0,2.35,-2.35);lid.rotation.x=-1.15;lid.userData.noInk=true;dump.add(lid);
+  const lidLip=box(9.3,0.3,0.3,dmDark);lidLip.position.set(0,2.35+Math.sin(1.15)*2.0,-2.35+Math.cos(1.15)*-2.0);lidLip.rotation.x=-1.15;dump.add(lidLip);
+  [[-3.2],[3.2]].forEach(([x])=>{const h=box(0.4,0.3,0.5,dmDark);h.position.set(x,2.3,-2.0);dump.add(h);});
+  const chute=box(3,1.3,0.12,M(0x14100e));chute.position.set(0,1.25,2.02);chute.userData.noInk=true;dump.add(chute);
+  const chuteDoor=box(3.1,0.6,0.16,dmDark);chuteDoor.position.set(0,0.75,2.05);chuteDoor.userData.noInk=true;dump.add(chuteDoor);
+  // graffiti tag + rust streaks as decals
+  const tagC=document.createElement('canvas');tagC.width=512;tagC.height=160;const tx=tagC.getContext('2d');tx.font='bold 110px Impact, Arial Black, sans-serif';tx.textAlign='center';tx.lineWidth=14;tx.strokeStyle='#2b1d14';tx.strokeText('BRONX',256,120);tx.fillStyle='#e2a53a';tx.fillText('BRONX',256,120);tx.font='bold 40px Arial';tx.fillStyle='#e0d8cc';tx.fillText('no cats',256,150);
+  const tag=new THREE.Mesh(new THREE.PlaneGeometry(3.4,1.05),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(tagC),transparent:true}));tag.position.set(2.4,1.15,2.09);tag.rotation.z=-0.06;tag.userData.noInk=true;dump.add(tag);
   const ramp=box(4,0.25,4.9,MT(0xb99268,'wood',1.2,1.6));ramp.position.set(0,1,4.25);ramp.rotation.x=0.42;ramp.receiveShadow=true;ramp.userData.noInk=true;dump.add(ramp);
-  const bags=[[-12,0,-4],[6.5,0,-1],[-13,0,1],[7,0,2.5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x111,{roughness:.5}),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
-  const spots=[[-1.5,2,-4],[1.4,2,-4.4],[0,2,-3],[-2.8,2,-3.2],[2.6,2,-3],[-5.5,0,5.8],[5,0,1.8],[-1,0,6.5],[3.5,0,5.5],[-6.5,0,-6]];
+  const bags=[[-12,0,-4],[6.5,0,-1],[-13,0,1],[7,0,2.5],[16,0,-6],[-26,0,5],[38,0,3],[-38,0,-5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x1a1816),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
+  const spots=[[-1.5,2,-4],[1.4,2,-4.4],[0,2,-3],[-2.8,2,-3.2],[2.6,2,-3],[-19,0,7.5],[9,0,4],[-1,0,9],[23,0,-6.2],[-34,0,-3]];
   const ids=Object.keys(ITEMS);sc={items:[],near:null,talk:null,nearNb:false};ui.talk.style.display='none';
   ids.forEach((id,i)=>{const m=ITEMS[id].build();const [x,y,z]=spots[i];m.position.set(x,y,z);m.rotation.y=Math.random()*6;root.add(m);sc.items.push({id,m,taken:false});});
   rat=makeRat();rat.position.set(0,0,10);rat.rotation.y=Math.PI;root.add(rat);outline(root);
@@ -394,7 +419,7 @@ function startTalk(){sc.talk={i:0,chars:0,t:0};ui.talk.style.display='block';ui.
 function showLine(){const l=TALK[sc.talk.i];$('tname').textContent=l[0];$('ttext').textContent='';sc.talk.chars=0;sc.talk.t=0;}
 function advanceTalk(){if(!sc||!sc.talk)return;const l=TALK[sc.talk.i];
   if(sc.talk.chars<l[1].length){sc.talk.chars=l[1].length;$('ttext').textContent=l[1];return;}
-  sc.talk.i++;if(sc.talk.i>=TALK.length){sc.talk=null;ui.talk.style.display='none';rat.rotation.y=Math.atan2(NB.x-rat.position.x,NB.z-rat.position.z);return;}showLine();}
+  sc.talk.i++;if(sc.talk.i>=TALK.length){sc.talk=null;ui.talk.style.display='none';joy.x=joy.z=0;joyId=null;keys={};knob.style.left='35px';knob.style.top='35px';rat.rotation.y=Math.atan2(NB.x-rat.position.x,NB.z-rat.position.z);return;}showLine();}
 ui.talk=$('talk');ui.talk.addEventListener('pointerdown',e=>{e.stopPropagation();advanceTalk();});
 function grab(){
   if(phase!=='scavenge')return;
