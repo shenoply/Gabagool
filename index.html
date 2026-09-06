@@ -32,12 +32,13 @@
   .slot.used{opacity:.4}
   #buildbar{display:flex;justify-content:space-between;align-items:center;font-size:14px;gap:10px}
   #done{padding:8px 18px;font-size:15px}
-  #pad{position:absolute;left:14px;bottom:14px;display:none;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px);gap:8px;pointer-events:auto}
-  #pad button{width:56px;height:56px;background:rgba(233,220,195,.25);color:var(--paper);border:0;border-radius:50%;font-size:20px;touch-action:none}
-  #pad .g{grid-column:3;grid-row:2;width:64px;height:64px;margin:-4px 0 0 4px;background:var(--ochre);color:var(--ink);font-size:15px}
+  #pad{position:absolute;left:0;right:0;bottom:18px;display:none;justify-content:space-between;align-items:flex-end;padding:0 22px;pointer-events:none}
+  #stick{width:130px;height:130px;border-radius:50%;background:rgba(233,220,195,.16);border:2px solid rgba(233,220,195,.35);position:relative;pointer-events:auto;touch-action:none}
+  #knob{width:56px;height:56px;border-radius:50%;background:var(--paper);position:absolute;left:35px;top:35px;opacity:.9}
+  #pad .g{width:78px;height:78px;border-radius:50%;border:0;background:var(--ochre);color:var(--ink);font:inherit;font-size:16px;pointer-events:auto;touch-action:none}
   #end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(43,29,20,.85);text-align:center;padding:24px;pointer-events:auto}
   #end h2{font-size:clamp(32px,6vw,60px);font-weight:400}
-  @media (pointer:coarse){#pad{display:grid}}
+  @media (pointer:coarse){#pad{display:flex}}
   @media (prefers-reduced-motion:reduce){#sub{transition:none}}
 </style>
 </head>
@@ -57,9 +58,7 @@
   <button class="btn" id="skip" style="display:none">Skip scene</button>
   <button class="btn" id="go">Head home and rebuild</button>
   <div id="pad">
-    <button data-k="ArrowUp" style="grid-column:2">▲</button>
-    <button data-k="ArrowLeft" style="grid-column:1;grid-row:2">◀</button>
-    <button data-k="ArrowDown" style="grid-column:2;grid-row:2">▼</button>
+    <div id="stick"><div id="knob"></div></div>
     <button class="g" id="padE">Grab</button>
   </div>
   <div id="build">
@@ -93,79 +92,62 @@ const box=(w,h,d,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat)
 const sph=(r,mat,ws=10,hs=8)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,ws,hs),mat);m.castShadow=true;return m};
 const cyl=(rt,rb,h,mat,s=12)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),mat);m.castShadow=m.receiveShadow=true;return m};
 
-// ---------- rat model (Pip: cartoon, upright, big-eyed) ----------
+// ---------- rat model (Pip: long, realistic quadruped) ----------
 function makeRat(){
-  const fur=M(0x7b7f86,{roughness:.9}),belly=M(0xe6e4dc),dark=M(0x4a4d52,{roughness:.9}),pink=M(0xf2a6a0,{roughness:.6}),ink=M(0x14100e,{roughness:.25}),eyeW=M(0xfdf8ef,{roughness:.2}),iris=M(0x2c6b57,{roughness:.2});
+  const fur=M(0x6e6a66,{roughness:.95}),furD=M(0x4d4946,{roughness:.95}),belly=M(0xb9b2aa,{roughness:.9}),pink=M(0xc98f88,{roughness:.7}),ink=M(0x120e0c,{roughness:.2});
   const g=new THREE.Group();
-  // pear-shaped body, upright
-  const body=sph(0.42,fur,16,12);body.scale.set(1,1.25,0.9);body.position.y=0.62;g.add(body);
-  const tum=sph(0.34,belly,16,12);tum.scale.set(0.95,1.1,0.6);tum.position.set(0,0.55,0.22);g.add(tum);
-  // big head
-  const head=new THREE.Group();head.position.set(0,1.28,0.08);g.add(head);
-  const skull=sph(0.42,fur,18,14);skull.scale.set(1,0.95,1);head.add(skull);
-  const muzzle=sph(0.26,belly,14,10);muzzle.scale.set(1.15,0.8,1);muzzle.position.set(0,-0.12,0.32);head.add(muzzle);
-  const nose=sph(0.09,pink,10,8);nose.scale.set(1.2,0.9,1);nose.position.set(0,-0.04,0.6);head.add(nose);
-  const teeth=box(0.1,0.09,0.03,eyeW);teeth.position.set(0,-0.24,0.5);head.add(teeth);
-  const blaze=sph(0.1,belly,10,8);blaze.scale.set(0.7,1.8,0.6);blaze.position.set(0,0.2,0.36);head.add(blaze);
-  const saddle=sph(0.4,dark,14,10);saddle.scale.set(0.95,0.7,0.85);saddle.position.set(0,0.82,-0.12);g.add(saddle);
+  // long body: hips high, shoulders lower, arched back
+  const rump=sph(0.48,fur,16,12);rump.scale.set(1,0.9,1.3);rump.position.set(0,0.5,-0.55);g.add(rump);
+  const mid=sph(0.42,fur,16,12);mid.scale.set(1,0.85,1.6);mid.position.set(0,0.47,0.1);g.add(mid);
+  const chest=sph(0.36,fur,16,12);chest.scale.set(0.95,0.85,1.3);chest.position.set(0,0.42,0.7);g.add(chest);
+  const back=sph(0.44,furD,16,12);back.scale.set(0.85,0.55,2.1);back.position.set(0,0.68,-0.1);g.add(back);
+  const tum=sph(0.4,belly,16,12);tum.scale.set(0.9,0.55,1.9);tum.position.set(0,0.3,0.05);g.add(tum);
+  // head: long wedge snout
+  const head=new THREE.Group();head.position.set(0,0.52,1.15);g.add(head);
+  const skull=sph(0.3,fur,16,12);skull.scale.set(0.95,0.85,1.1);head.add(skull);
+  const snout=cyl(0.09,0.26,0.6,fur,12);snout.rotation.x=Math.PI/2;snout.position.set(0,-0.05,0.45);head.add(snout);
+  const chin=cyl(0.08,0.22,0.55,belly,12);chin.rotation.x=Math.PI/2;chin.position.set(0,-0.12,0.42);chin.scale.y=0.9;head.add(chin);
+  const nose=sph(0.07,pink,10,8);nose.scale.set(1.1,0.8,0.9);nose.position.set(0,-0.03,0.76);head.add(nose);
   const eyes=[];
   [-1,1].forEach(sx=>{
-    const eye=new THREE.Group();eye.position.set(sx*0.19,0.08,0.34);head.add(eye);
-    const white=sph(0.15,eyeW,14,12);white.scale.set(1,1.15,0.7);eye.add(white);
-    const ir=sph(0.085,iris,12,10);ir.position.z=0.1;eye.add(ir);
-    const pu=sph(0.05,ink,10,8);pu.position.z=0.15;eye.add(pu);
-    const gl=sph(0.02,eyeW,6,6);gl.position.set(-0.03*sx,0.03,0.19);eye.add(gl);
-    const lid=sph(0.155,fur,14,12);lid.scale.set(1.02,1.2,0.75);lid.position.y=0.17;eye.add(lid);
-    eyes.push({eye,lid});
-    const ear=cyl(0.2,0.2,0.05,fur,16);ear.rotation.x=Math.PI/2;ear.rotation.y=sx*0.35;ear.position.set(sx*0.36,0.33,-0.06);head.add(ear);
-    const inner=cyl(0.13,0.13,0.05,pink,16);inner.rotation.copy(ear.rotation);inner.position.set(sx*0.36,0.33,-0.04);head.add(inner);
-    for(let i=0;i<3;i++){const w=cyl(0.006,0.006,0.55,M(0xfdf8ef),4);w.rotation.z=Math.PI/2;w.rotation.y=sx*(0.3+i*0.25);w.position.set(sx*0.3,-0.08+i*0.05,0.5);head.add(w);}
+    const eye=sph(0.055,ink,10,8);eye.position.set(sx*0.19,0.06,0.2);head.add(eye);
+    const gl=sph(0.015,M(0xffffff),6,6);gl.position.set(sx*0.2,0.085,0.24);head.add(gl);eyes.push(eye);
+    const ear=cyl(0.15,0.15,0.03,fur,16);ear.rotation.x=Math.PI/2;ear.rotation.y=sx*0.5;ear.position.set(sx*0.24,0.24,-0.12);head.add(ear);
+    const inner=cyl(0.1,0.1,0.03,pink,16);inner.rotation.copy(ear.rotation);inner.position.set(sx*0.235,0.24,-0.105);head.add(inner);
+    for(let i=0;i<4;i++){const w=cyl(0.004,0.004,0.7,M(0xe8e2d8),4);w.rotation.z=Math.PI/2;w.rotation.y=sx*(0.25+i*0.22);w.rotation.x=(i-1.5)*0.12;w.position.set(sx*0.28,-0.06+i*0.03,0.6);head.add(w);}
   });
-  // arms
-  const arms=[];
-  [-1,1].forEach(sx=>{
-    const arm=new THREE.Group();arm.position.set(sx*0.36,0.9,0.05);g.add(arm);
-    const up=cyl(0.07,0.06,0.42,fur,8);up.position.y=-0.2;up.rotation.z=-sx*0.35;up.position.x=sx*0.07;arm.add(up);
-    const hand=sph(0.09,pink,8,6);hand.position.set(sx*0.15,-0.42,0.05);arm.add(hand);
-    arms.push(arm);
-  });
-  // legs (short, wide stance)
+  // four legs
   const legs=[];
-  [-1,1].forEach(sx=>{
-    const leg=new THREE.Group();leg.position.set(sx*0.18,0.32,0);g.add(leg);
-    const th=cyl(0.1,0.08,0.3,fur,8);th.position.y=-0.15;leg.add(th);
-    const foot=box(0.18,0.08,0.34,pink);foot.position.set(0,-0.3,0.08);leg.add(foot);
+  [[-0.32,0.75,0.42,'f'],[0.32,0.75,0.42,'f'],[-0.36,-0.65,0.5,'b'],[0.36,-0.65,0.5,'b']].forEach(([x,z,h,k])=>{
+    const leg=new THREE.Group();leg.position.set(x,h,z);g.add(leg);
+    const th=cyl(k==='b'?0.16:0.1,0.07,h*0.7,fur,8);th.position.y=-h*0.35;leg.add(th);
+    const sh=cyl(0.06,0.05,h*0.45,pink,7);sh.position.y=-h*0.8;leg.add(sh);
+    const foot=box(0.13,0.05,k==='b'?0.36:0.24,pink);foot.position.set(0,-h,0.07);leg.add(foot);
     legs.push(leg);
   });
-  // tail
+  // long tail
   const tail=[];let parent=g;
-  for(let i=0;i<8;i++){
-    const seg=new THREE.Group();seg.position.set(0,i?0:0.38,i?-0.2:-0.3);
-    const m=cyl(0.055-i*0.005,0.05-i*0.005,0.22,pink,7);m.rotation.x=Math.PI/2;m.position.z=-0.1;seg.add(m);
+  for(let i=0;i<12;i++){
+    const seg=new THREE.Group();seg.position.set(0,i?0:0.45,i?-0.24:-1.1);
+    const m=cyl(0.05-i*0.0035,0.047-i*0.0035,0.26,pink,7);m.rotation.x=Math.PI/2;m.position.z=-0.12;seg.add(m);
     parent.add(seg);parent=seg;tail.push(seg);
   }
-  g.userData={body,tum,head,eyes,arms,legs,tail,phase:0,blink:2+Math.random()*3};
+  g.userData={head,legs,tail,body:[rump,mid,chest,back,tum],phase:0,sniff:0};
   g.animate=function(dt,speed,panic){
-    const u=g.userData;u.phase+=dt*(speed>0.05?11:2.2)*(panic?1.7:1);const t=u.phase;
-    // blink
-    u.blink-=dt;let lidY=0.17;
-    if(u.blink<0.12)lidY=0.02;if(u.blink<0)u.blink=2.5+Math.random()*3.5;
-    u.eyes.forEach(e=>{e.lid.position.y+= (lidY-e.lid.position.y)*Math.min(1,dt*25);});
+    const u=g.userData;u.phase+=dt*(speed>0.05?12:2)*(panic?1.7:1);const t=u.phase;u.sniff+=dt*18;
     if(speed>0.05){
-      u.legs.forEach((l,i)=>{l.rotation.x=Math.sin(t+(i?Math.PI:0))*0.9;});
-      u.arms.forEach((a,i)=>{a.rotation.x=Math.sin(t+(i?0:Math.PI))*0.8;});
-      const bob=Math.abs(Math.sin(t))*0.09;u.body.position.y=0.62+bob;u.tum.position.y=0.55+bob;u.head.position.y=1.28+bob;
-      g.rotation.z=Math.sin(t)*0.06;u.head.rotation.z=-Math.sin(t)*0.08;
-      u.head.rotation.x=-0.1;
+      // trot: diagonal pairs
+      const ph=[0,Math.PI,Math.PI,0];
+      u.legs.forEach((l,i)=>{l.rotation.x=Math.sin(t+ph[i])*0.75;});
+      const bob=Math.abs(Math.sin(t))*0.04;g.position.y=g.position.y; u.body.forEach(b=>b.position.y=b.userData.y??(b.userData.y=b.position.y));u.body.forEach(b=>b.position.y=b.userData.y+bob);
+      u.head.rotation.x=0.05+Math.sin(t*2)*0.05;u.head.rotation.y=0;
     }else{
-      u.legs.forEach(l=>l.rotation.x*=0.8);u.arms.forEach(a=>{a.rotation.x*=0.8;a.rotation.z=Math.sin(t*0.9)*0.08;});
-      const br=Math.sin(t)*0.02;u.body.scale.y=1.25+br;u.tum.scale.y=1.1+br;u.head.position.y=1.28+br;
-      g.rotation.z*=0.9;
-      u.head.rotation.x=panic?Math.sin(t*3)*0.18:Math.sin(t*0.7)*0.05;
-      u.head.rotation.y=panic?Math.sin(t*2.3)*0.5:Math.sin(t*0.35)*0.3;
-      u.head.rotation.z=Math.sin(t*0.5)*0.06;
+      u.legs.forEach(l=>l.rotation.x*=0.8);
+      u.body.forEach(b=>{if(b.userData.y===undefined)b.userData.y=b.position.y;b.position.y=b.userData.y+Math.sin(t)*0.012;});
+      u.head.rotation.x=panic?Math.sin(t*3)*0.2:Math.sin(u.sniff)*0.02+Math.sin(t*0.7)*0.06;
+      u.head.rotation.y=panic?Math.sin(t*2.5)*0.6:Math.sin(t*0.35)*0.35;
     }
-    u.tail.forEach((s,i)=>{s.rotation.y=Math.sin(t*1.2+i*0.6)*0.3;s.rotation.x=0.18+Math.sin(t*0.8+i*0.4)*0.06;});
+    u.tail.forEach((s,i)=>{s.rotation.y=Math.sin(t*1.1+i*0.5)*0.22;s.rotation.x=-0.04+Math.sin(t*0.7+i*0.4)*0.04;});
   };
   return g;
 }
@@ -224,7 +206,12 @@ function clear(){if(root)scene.remove(root);root=new THREE.Group();scene.add(roo
 function bag(){ui.bag.textContent=inv.length?`Bag: ${inv.length} item${inv.length>1?'s':''}`:'Bag: empty';}
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(phase==='cutscene'&&e.key===' ')endCutscene();if(e.key.toLowerCase()==='e')grab();if(e.key.toLowerCase()==='r')rotateSel();if(e.key==='Enter'&&phase==='scavenge'&&inv.length)startBuild();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
-ui.pad.querySelectorAll('[data-k]').forEach(b=>{const k=b.dataset.k.toLowerCase();const on=e=>{e.preventDefault();keys[k]=true};const off=e=>{e.preventDefault();keys[k]=false};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off);});
+const stick=$('stick'),knob=$('knob');let joy={x:0,z:0},joyId=null;
+function joyMove(e){const r=stick.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const max=r.width/2-28;const l=Math.hypot(dx,dy);if(l>max){dx*=max/l;dy*=max/l;}knob.style.left=(35+dx)+'px';knob.style.top=(35+dy)+'px';joy.x=dx/max;joy.z=dy/max;}
+stick.addEventListener('pointerdown',e=>{joyId=e.pointerId;stick.setPointerCapture(joyId);joyMove(e);});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===joyId)joyMove(e);});
+const joyEnd=e=>{if(e.pointerId!==joyId)return;joyId=null;joy.x=joy.z=0;knob.style.left='35px';knob.style.top='35px';};
+stick.addEventListener('pointerup',joyEnd);stick.addEventListener('pointercancel',joyEnd);
 $('padE').addEventListener('click',grab);
 
 // ---------- cutscene ----------
@@ -237,7 +224,7 @@ function startCutscene(){
   add('matchbox',-2.4,-2.2);add('cap',1.2,-1);add('cork',2.2,-0.6);add('cork',0.3,-0.3,1);add('can',3.6,-2.6);add('spool',-3.4,0.8);add('candle',1.2,-1);add('sponge',0.5,1.6);add('teacup',3.5,1.5);
   const water=new THREE.Mesh(new THREE.PlaneGeometry(9,7,20,20),new THREE.MeshStandardMaterial({color:0x3e6b7a,transparent:true,opacity:.75,roughness:.2,metalness:.1}));
   water.rotation.x=-Math.PI/2;water.position.y=-0.3;root.add(water);
-  rat=makeRat();rat.scale.setScalar(0.75);rat.position.set(-2.4,0,-2.2);root.add(rat);
+  rat=makeRat();rat.scale.setScalar(0.7);rat.position.set(-2.4,0,-2.2);root.add(rat);
   const rain=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(Array.from({length:600},()=>[(Math.random()-.5)*14,Math.random()*8,(Math.random()-.5)*10]).flat(),3)),new THREE.PointsMaterial({color:0xbcd6e0,size:0.06,transparent:true,opacity:.7}));root.add(rain);
   cs={t:0,furn,water,rain,line:-1,waveDone:false};
   camera.position.set(0,4.5,9);camera.lookAt(0,0.8,0);
@@ -296,8 +283,9 @@ function tickScavenge(dt){
   if(fatMixer)fatMixer.update(dt);
   let dx=0,dz=0;
   if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
-  const len=Math.hypot(dx,dz);let speed=0;
-  if(len){dx/=len;dz/=len;speed=1;rat.position.x+=dx*dt*6;rat.position.z+=dz*dt*6;rat.rotation.y=Math.atan2(dx,dz);}
+  if(Math.hypot(joy.x,joy.z)>0.15){dx=joy.x;dz=joy.z;}
+  let len=Math.hypot(dx,dz);let speed=0;
+  if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=len;rat.position.x+=dx*dt*6;rat.position.z+=dz*dt*6;rat.rotation.y=Math.atan2(dx,dz);}
   rat.position.x=Math.max(-25,Math.min(25,rat.position.x));
   if(rat.position.distanceTo(new THREE.Vector3(-12.5,0,-3))<3.2){const d=rat.position.clone().sub(new THREE.Vector3(-12.5,0,-3));d.y=0;d.setLength(3.2);rat.position.x=-12.5+d.x;rat.position.z=-3+d.z;}rat.position.z=Math.max(-8.5,Math.min(20,rat.position.z));
   // dumpster ramp / roof height
@@ -329,7 +317,7 @@ function startBuild(){
   const gp=[];for(let i=0;i<=COLS;i++)gp.push(i-COLS/2,0.01,-ROWS/2,i-COLS/2,0.01,ROWS/2);for(let j=0;j<=ROWS;j++)gp.push(-COLS/2,0.01,j-ROWS/2,COLS/2,0.01,j-ROWS/2);const grid=new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(gp,3)),new THREE.LineBasicMaterial({color:0x5a3a22}));root.add(grid);
   const cursor=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:0xd9a441,transparent:true,opacity:.35}));cursor.rotation.x=-Math.PI/2;cursor.position.y=0.02;cursor.visible=false;root.add(cursor);
   const floorPick=new THREE.Mesh(new THREE.PlaneGeometry(COLS,ROWS),new THREE.MeshBasicMaterial({visible:false}));floorPick.rotation.x=-Math.PI/2;root.add(floorPick);
-  rat=makeRat();rat.scale.setScalar(0.7);rat.position.set(3.6,0,2.6);rat.rotation.y=-2.3;root.add(rat);
+  rat=makeRat();rat.scale.setScalar(0.6);rat.position.set(3.6,0,2.6);rat.rotation.y=-2.3;root.add(rat);
   bd={cursor,floorPick,sel:null,rot:0,placed:[],ghost:null,occ:{},slots:[]};
   camera.position.set(0,9,8.5);camera.lookAt(0,0,0.3);
   ui.build.style.display='flex';renderInv();
