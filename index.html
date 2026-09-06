@@ -71,7 +71,7 @@
     <button class="btn" id="start">Start</button>
     <button class="btn" id="newgame" style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
     <p style="font-size:13px;opacity:.6">WASD move · Shift run · Space jump · Q roll · F bite · E grab · R rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 23</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 24</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -89,7 +89,7 @@
     <div id="hplace"><span id="hsel"></span><button class="btn" id="hrot">Rotate</button><button class="btn" id="hplacebtn">Place</button><button class="btn" id="hcancel" style="background:rgba(233,220,195,.25);color:var(--paper)">Cancel</button></div>
   </div>
   <div id="radioui">
-    <div id="rtitle">Tin radio</div>
+    <div id="rtitle">Radio</div>
     <div id="rnow">Radio off</div>
     <div class="rrow"><button class="btn" id="rplay">Play</button><button class="btn" id="rnext" style="background:rgba(233,220,195,.25);color:var(--paper)">Next</button><label class="btn" style="background:rgba(233,220,195,.25);color:var(--paper)">Load songs from phone<input id="rfile" type="file" accept="audio/*" multiple style="display:none"></label><button class="btn" id="rclose" style="background:rgba(233,220,195,.25);color:var(--paper)">Close</button></div>
     <div id="rlist" style="font-size:12px;opacity:.7"></div>
@@ -399,6 +399,14 @@ $('rfile').addEventListener('change',e=>{const files=[...e.target.files].filter(
   radio.tracks=files.map(f=>({name:f.name.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)}));radio.idx=0;$('rlist').textContent=files.length?files.length+' song'+(files.length>1?'s':'')+' loaded from your phone (they stay on your device)':'';if(files.length)radioPlay();});}
 function openRadio(){$('radioui').style.display='block';}
 
+function makeBoombox(){const g=new THREE.Group();const body=box(4.2,2.2,1.4,M(0x2a2a2e));body.position.y=1.1;const face=box(4.0,1.9,0.1,M(0x8a8f96));face.position.set(0,1.1,0.7);
+  const sp=[];[-1.35,1.35].forEach(x=>{const ring=cyl(0.75,0.75,0.12,M(0x1a1a1c),24);ring.rotation.x=Math.PI/2;ring.position.set(x,1.0,0.78);const cone=cyl(0.15,0.6,0.1,M(0x3a3a40),24);cone.rotation.x=Math.PI/2;cone.position.set(x,1.0,0.82);g.add(ring,cone);sp.push(cone);});
+  const deck=box(1.1,0.6,0.08,M(0x1d1d20));deck.position.set(0,1.05,0.78);const win=box(0.9,0.35,0.02,M(0x6fa3b5,{emissive:0x224455,emissiveIntensity:.5}));win.position.set(0,1.1,0.83);
+  const handle=new THREE.Mesh(new THREE.TorusGeometry(1.2,0.08,8,20,Math.PI),M(0x1a1a1c));handle.position.set(0,2.2,0);g.add(handle);
+  const ant=cyl(0.03,0.03,2.2,tin,6);ant.position.set(-1.8,3.0,-0.3);ant.rotation.z=0.35;
+  for(let i=0;i<5;i++){const k=cyl(0.09,0.09,0.12,M(i===2?0xb23a2a:0xd9d9d9),10);k.rotation.x=Math.PI/2;k.position.set(-0.6+i*0.3,1.75,0.78);g.add(k);}
+  const led=sph(0.06,M(0xff5533,{emissive:0xff2200,emissiveIntensity:2}),6,6);led.position.set(1.0,1.75,0.8);g.add(body,face,deck,win,ant,led);g.userData.speakers=sp;g.userData.led=led;return g;}
+
 // ---------- cat (built in code, toon) ----------
 function makeCat(){
   const fur=M(0x2a2624,{}),furL=M(0x3d3633),pink=M(0xb9757a),eye=M(0xf6d34a,{emissive:0xf0c020,emissiveIntensity:1.4}),ink=M(0x0b0908);
@@ -574,10 +582,11 @@ function startScavenge(){
   const tagC=document.createElement('canvas');tagC.width=512;tagC.height=160;const tx=tagC.getContext('2d');tx.font='bold 110px Impact, Arial Black, sans-serif';tx.textAlign='center';tx.lineWidth=14;tx.strokeStyle='#2b1d14';tx.strokeText('BRONX',256,120);tx.fillStyle='#e2a53a';tx.fillText('BRONX',256,120);tx.font='bold 40px Arial';tx.fillStyle='#e0d8cc';tx.fillText('no cats',256,150);
   const tag=new THREE.Mesh(new THREE.PlaneGeometry(3.4,1.05),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(tagC),transparent:true}));tag.position.set(2.4,1.15,2.09);tag.rotation.z=-0.06;tag.userData.noInk=true;dump.add(tag);
   const ramp=box(4,0.25,4.9,MT(0xb99268,'wood',1.2,1.6));ramp.position.set(0,1,4.25);ramp.rotation.x=0.42;ramp.receiveShadow=true;ramp.userData.noInk=true;dump.add(ramp);
-  const bags=[[-12,0,-4],[6.5,0,-1],[-13,0,1],[7,0,2.5],[16,0,-6],[-26,0,5],[38,0,3],[-38,0,-5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x1a1816),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
+  const bags=[[-12,0,-4],[12.5,0,-3],[-13,0,1],[13,0,2.5],[16,0,-6],[-26,0,5],[38,0,3],[-38,0,-5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x1a1816),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
   const spots=[[-3.8,2,-4],[3.8,2,-4.2],[0,2,-2.5],[-2,2,-5.55],[2.4,2,-2.5],[-1,2,-5.55],[3.9,2,-5.2],[-19,0,7.5],[9,0,4],[-1,0,9],[23,0,-6.2],[-34,0,-3],[16,0,-4],[-12,0,6],[30,0,6],[-27,0,8],[38,0,-2],[-40,0,4],[6,0,14],[-8,0,16],[20,0,18],[-25,0,-6.5]];
   const pool=Object.keys(ITEMS);const weights={stick:4,paper:2,nail:2,foil:2,string:2,button:2,coin:1,bulb:1,cloth:1};
-  sc={items:[],near:null,talk:null,nearNb:false,catT:0,cat:null,catDelay:40+Math.random()*30};ui.talk.style.display='none';
+  sc={items:[],near:null,talk:null,nearNb:false,catT:0,cat:null,catDelay:40+Math.random()*30,boom:null};
+  sc.boom=makeBoombox();sc.boom.position.set(8.2,0,-1.2);sc.boom.rotation.y=-0.35;root.add(sc.boom);ui.talk.style.display='none';
   const bagIds=[];pool.forEach(id=>{for(let k=0;k<(weights[id]||1);k++)bagIds.push(id);});
   const shuffled=spots.slice().sort(()=>Math.random()-0.5).slice(0,14);
   shuffled.forEach(([x,y,z])=>{const id=bagIds[Math.floor(Math.random()*bagIds.length)];const m=ITEMS[id].build();m.position.set(x,y,z);m.rotation.y=Math.random()*6;outline(m);root.add(m);sc.items.push({id,m,taken:false});});
@@ -613,6 +622,7 @@ function tickScavenge(dt){
   const groundAlley=(x,z)=>{const lx=x,lz=z+4;if(Math.abs(lx)<2&&lz>2&&lz<6.5)return Math.max(0,(6.5-lz)/4.5*2);if(Math.abs(lx)<4.5&&Math.abs(lz)<=2)return 2;return 0;};
   const speed=control(dt,{walk:6,bounds:[-43,43,-8.2,28],ground:groundAlley,locked:!!sc.talk});
   {const nb=new THREE.Vector3(-4.4,rat.position.y,1.0);const dn=rat.position.distanceTo(nb);if(dn<3.2){const d=rat.position.clone().sub(nb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(3.2);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}
+  {const bb=new THREE.Vector3(8.2,rat.position.y,-1.2);const db=rat.position.distanceTo(bb);if(db<2.6&&rat.position.y<1){const d=rat.position.clone().sub(bb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(2.6);rat.position.x=bb.x+d.x;rat.position.z=bb.z+d.z;}}
   const lx=rat.position.x,lz=rat.position.z+4;
   sc.onTop=(Math.abs(lx)<4.2&&Math.abs(lz)<1.8&&rat.position.y>1.5);
   // the lid is open: walk into the middle of the top and you fall in
@@ -622,6 +632,8 @@ function tickScavenge(dt){
   sc.near=null;let best=2.6;
   sc.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
   sc.nearNb=rat.position.distanceTo(new THREE.Vector3(NB.x,rat.position.y,NB.z))<4.6;
+  sc.nearBoom=sc.boom&&Math.hypot(rat.position.x-8.2,rat.position.z+1.2)<3.8&&rat.position.y<1;
+  if(sc.boom){const pulse=radio.on?1+Math.abs(Math.sin(t*9))*0.12:1;sc.boom.userData.speakers.forEach(c=>c.scale.set(pulse,pulse,1));sc.boom.userData.led.material.emissiveIntensity=radio.on?2:0.2;}
   if(sc.talk){ui.prompt.style.display='none';$('padE').textContent='Next';const k=sc.talk;
     if(k.audio){const ct=bigratAudio.currentTime;if(bigratAudio.ended||ct>=TALK_CUES[TALK.length]-0.05){endTalk();}
       else{let i=0;while(i<TALK.length-1&&ct>=TALK_CUES[i+1])i++;if(i!==k.i){k.i=i;showLine();}
@@ -631,6 +643,7 @@ function tickScavenge(dt){
   else if(sc.onTop){ui.prompt.style.display='block';ui.prompt.textContent='Walk into the opening to dive in';$('padE').textContent='Grab';}
   else if(sc.cat&&sc.cat.state==='chase'){ui.prompt.style.display='block';ui.prompt.textContent='A cat! Get on the dumpster or run home!';$('padE').textContent='Grab';}
   else if(sc.nearNb){ui.prompt.style.display='block';ui.prompt.textContent='E · talk to the big rat';$('padE').textContent='Talk';}
+  else if(sc.nearBoom){ui.prompt.style.display='block';ui.prompt.textContent=radio.on?'E · boombox':'E · turn on the boombox';$('padE').textContent='Radio';}
   else{ui.prompt.style.display='none';$('padE').textContent='Grab';}
   if(sc.talk){const dir=new THREE.Vector3(1,0,0.12).normalize();const cp=NB.clone().addScaledVector(dir,4.6);cp.y=2.3;camera.position.lerp(cp,Math.min(1,dt*3.5));camera.lookAt(NB.x+0.3,1.7,NB.z);rat.visible=false;}
   else{rat.visible=true;const portrait=innerHeight>innerWidth;const back=portrait?14:10,up=portrait?12:8;const cx=rat.position.x*0.6,cz=rat.position.z+back;
@@ -667,7 +680,7 @@ function grab(){
   if(phase==='house'){if(hs.sel)place();else if(hs.nearRadio){openRadio();if(!radio.on)radioPlay();}else if(hs.nearDoor){cancelPlace();save();startScavenge();}return;}
   if(phase!=='scavenge')return;
   if(sc.talk){advanceTalk();return;}
-  if(!sc.near){if(sc.nearNb)startTalk();return;}
+  if(!sc.near){if(sc.nearNb)startTalk();else if(sc.nearBoom){openRadio();if(!radio.on)radioPlay();}return;}
   const it=sc.near;it.taken=true;root.remove(it.m);inv[it.id]=(inv[it.id]||0)+1;bag();save();sfx.pickup();
   const u=rat.userData;if(u.pick&&u.pick.item)u.pick.item.parent.remove(u.pick.item);
   const held=ITEMS[it.id].build();outline(held);held.traverse(o=>{if(o.isLight)o.intensity=0.4;});
@@ -681,7 +694,7 @@ ui.go.addEventListener('click',()=>startHouse());
 // ---------- inside the dumpster ----------
 let ins;const IW=9,ID=6;
 function startInside(){
-  phase='inside';clear();sfx.rain(false);ui.prompt.style.display='none';ui.go.style.display='none';ui.talk.style.display='none';ui.hb.style.display='none';
+  phase='inside';clear();sfx.rain(false);radioStop();$('radioui').style.display='none';ui.prompt.style.display='none';ui.go.style.display='none';ui.talk.style.display='none';ui.hb.style.display='none';
   ui.phase.textContent='Inside the dumpster';scene.fog=new THREE.Fog(0x120e0c,4,16);scene.background=new THREE.Color(0x120e0c);
   const steel=MT(0x6f8a94,'steel',2,1),cardboard=MT(0xb98f5e,'wood',1,1),rubbish=[M(0x8a5a3a),M(0x9c9c94),M(0x4b6a52),M(0x7c3e3e),paper,foil,M(0x2a2a2a)];
   const floor=box(IW,0.2,ID,MT(0x5a6a70,'steel',3,2));floor.position.y=-0.1;floor.userData.noInk=true;root.add(floor);
@@ -729,7 +742,7 @@ function grabInside(){if(ins.near){const it=ins.near;it.taken=true;root.remove(i
 // ---------- house: free 3D placement, crafting, decorating ----------
 let hs;
 function startHouse(){
-  phase='house';clear();sfx.rain(false);ui.prompt.style.display='none';ui.go.style.display='none';ui.talk.style.display='none';ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';
+  phase='house';clear();sfx.rain(false);radioStop();$('radioui').style.display='none';ui.prompt.style.display='none';ui.go.style.display='none';ui.talk.style.display='none';ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';
   ui.phase.textContent=home.door?'Home':'Home — no door yet';scene.fog=null;bag();
   hs={house:null,placed:[],ghost:null,sel:null,rot:0,tab:'bag',lights:[]};
   rebuildHouse();
