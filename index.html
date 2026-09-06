@@ -50,13 +50,13 @@
 <canvas id="c"></canvas>
 <div id="ui">
   <div id="vig"></div>
-  <div id="talk"><div id="tname"></div><div id="ttext"></div><div id="tnext">tap to continue</div></div>
+  <div id="talk"><div id="tname"></div><div id="ttext"></div><div id="tnext">tap to skip</div></div>
   <div id="title">
     <h1>Wet Whiskers</h1>
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 17</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 18</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -405,7 +405,11 @@ function tickScavenge(dt){
   sc.near=null;let best=2.6;
   sc.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
   sc.nearNb=rat.position.distanceTo(new THREE.Vector3(NB.x,rat.position.y,NB.z))<4.6;
-  if(sc.talk){ui.prompt.style.display='none';$('padE').textContent='Next';const k=sc.talk;k.t+=dt;const line=TALK[k.i][1];const want=Math.min(line.length,Math.floor(k.t*16));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}
+  if(sc.talk){ui.prompt.style.display='none';$('padE').textContent='Next';const k=sc.talk;
+    if(k.audio){const ct=bigratAudio.currentTime;if(bigratAudio.ended||ct>=TALK_CUES[TALK.length]-0.05){endTalk();}
+      else{let i=0;while(i<TALK.length-1&&ct>=TALK_CUES[i+1])i++;if(i!==k.i){k.i=i;showLine();}
+        const line=TALK[k.i][1];const frac=(ct-TALK_CUES[k.i])/(TALK_CUES[k.i+1]-TALK_CUES[k.i]-0.25);const want=Math.max(0,Math.min(line.length,Math.floor(frac*line.length)));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}}
+    else{k.t+=dt;const line=TALK[k.i][1];const want=Math.min(line.length,Math.floor(k.t*16));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}}
   else if(sc.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${ITEMS[sc.near.id].name}`;$('padE').textContent='Grab';}
   else if(sc.nearNb){ui.prompt.style.display='block';ui.prompt.textContent='E · talk to the big rat';$('padE').textContent='Talk';}
   else{ui.prompt.style.display='none';$('padE').textContent='Grab';}
@@ -414,9 +418,13 @@ function tickScavenge(dt){
   camera.position.x+=(cx-camera.position.x)*dt*3;camera.position.z+=(cz-camera.position.z)*dt*3;camera.position.y+=(up+rat.position.y-camera.position.y)*dt*3;
   camera.lookAt(rat.position.x*0.6,1+rat.position.y,rat.position.z-2);}
 }
-const TALK=[["The Fat Rat","Hey kid."],["The Fat Rat","Welcome to the Bronx dumpster. Find what you need and bounce."],["The Fat Rat","Don't stay too long. The cats may show up and pull your guts out."]];
+const TALK=[["The Fat Rat","Hey, kid."],["The Fat Rat","Welcome to the Bronx dumpster, kid. Find what you need and bounce."],["The Fat Rat","Whole block got flooded. Everybody's stuff ends up here eventually."],["The Fat Rat","Don't stay too long. The cats show up after dark, and they'll pull your guts out."],["The Fat Rat","Go on. And take the sponge, it's the only thing in there that's dry."]];
+const TALK_CUES=[0,2.44,5.47,7.73,9.11,12.36]; // line start times in bigrat.mp3
+const bigratAudio=new Audio('bigrat.mp3');bigratAudio.preload='auto';
 const NB=new THREE.Vector3(-4.4,0,1.0),NBF=new THREE.Vector3(Math.sin(1.3),0,Math.cos(1.3));
-function startTalk(){sc.talk={i:0,chars:0,t:0};ui.talk.style.display='block';ui.prompt.style.display='none';showLine();}
+function startTalk(){sc.talk={i:0,chars:0,t:0,audio:false};ui.talk.style.display='block';ui.prompt.style.display='none';
+  if(voiceOn){bigratAudio.currentTime=0;const pr=bigratAudio.play();if(pr&&pr.then){pr.then(()=>{sc.talk&&(sc.talk.audio=true);}).catch(()=>{});}}
+  showLine();}
 // gruff voice via the browser's speech engine, with a mumble fallback
 let AC=null;function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
 function pickVoice(){const vs=speechSynthesis.getVoices();const en=vs.filter(v=>/^en/i.test(v.lang));
@@ -429,10 +437,11 @@ function say(text,onend){if(!voiceOn)return false;
   for(let i=0;i<n;i++){const o=ac.createOscillator(),g=ac.createGain();o.type='sawtooth';o.frequency.value=85+Math.random()*30;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.25,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.11);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+0.12);t+=0.13+Math.random()*0.05;}
   return true;}
 if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
-function showLine(){const l=TALK[sc.talk.i];$('tname').textContent=l[0];$('ttext').textContent='';sc.talk.chars=0;sc.talk.t=0;say(l[1]);}
-function advanceTalk(){if(!sc||!sc.talk)return;const l=TALK[sc.talk.i];
+function showLine(){const l=TALK[sc.talk.i];$('tname').textContent=l[0];$('ttext').textContent='';sc.talk.chars=0;sc.talk.t=0;if(!(bigratAudio&&!bigratAudio.paused))say(l[1]);}
+function endTalk(){if('speechSynthesis' in window)speechSynthesis.cancel();bigratAudio.pause();sc.talk=null;ui.talk.style.display='none';joy.x=joy.z=0;joyId=null;keys={};knob.style.left='35px';knob.style.top='35px';rat.rotation.y=Math.atan2(NB.x-rat.position.x,NB.z-rat.position.z);}
+function advanceTalk(){if(!sc||!sc.talk)return;if(sc.talk.audio){bigratAudio.currentTime=Math.min(bigratAudio.duration||99,TALK_CUES[sc.talk.i+1]||99);return;}const l=TALK[sc.talk.i];
   if(sc.talk.chars<l[1].length){sc.talk.chars=l[1].length;$('ttext').textContent=l[1];return;}
-  sc.talk.i++;if(sc.talk.i>=TALK.length){if('speechSynthesis' in window)speechSynthesis.cancel();sc.talk=null;ui.talk.style.display='none';joy.x=joy.z=0;joyId=null;keys={};knob.style.left='35px';knob.style.top='35px';rat.rotation.y=Math.atan2(NB.x-rat.position.x,NB.z-rat.position.z);return;}showLine();}
+  sc.talk.i++;if(sc.talk.i>=TALK.length){endTalk();return;}showLine();}
 ui.talk=$('talk');ui.talk.addEventListener('pointerdown',e=>{e.stopPropagation();advanceTalk();});
 function grab(){
   if(phase!=='scavenge')return;
