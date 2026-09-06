@@ -45,6 +45,9 @@
   #stick{width:130px;height:130px;border-radius:50%;background:rgba(233,220,195,.16);border:2px solid rgba(233,220,195,.35);position:relative;pointer-events:auto;touch-action:none}
   #knob{width:56px;height:56px;border-radius:50%;background:var(--paper);position:absolute;left:35px;top:35px;opacity:.9}
   #pad .g{width:78px;height:78px;border-radius:50%;border:0;background:var(--ochre);color:var(--ink);font:inherit;font-size:16px;pointer-events:auto;touch-action:none}
+  #acts{display:grid;grid-template-columns:56px 78px;grid-template-rows:56px 56px;gap:8px;align-items:end;justify-items:end}
+  #acts .s{width:56px;height:56px;border-radius:50%;border:0;background:rgba(233,220,195,.28);color:var(--paper);font:inherit;font-size:13px;pointer-events:auto;touch-action:none}
+  #padB{grid-column:1;grid-row:1}#padR{grid-column:2;grid-row:1;justify-self:start}#padJ{grid-column:1;grid-row:2}#padE{grid-column:2;grid-row:2}
   #vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(30,16,8,.55) 100%);pointer-events:none}
   #talk{position:absolute;left:12px;right:12px;bottom:22%;background:rgba(43,29,20,.92);border:2px solid var(--ochre);border-radius:14px;padding:12px 16px 10px;display:none;pointer-events:auto}
   #tname{color:var(--ochre);font-size:14px;margin-bottom:4px}
@@ -65,8 +68,8 @@
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <button class="btn" id="newgame" style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
-    <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 21</p>
+    <p style="font-size:13px;opacity:.6">WASD move · Shift run · Space jump · Q roll · F bite · E grab · R rotate</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 22</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -76,7 +79,7 @@
   <button class="btn" id="go">Head home and rebuild</button>
   <div id="pad">
     <div id="stick"><div id="knob"></div></div>
-    <button class="g" id="padE">Grab</button>
+    <div id="acts"><button class="s" id="padB">Bite</button><button class="s" id="padR">Roll</button><button class="s" id="padJ">Jump</button><button class="g" id="padE">Grab</button></div>
   </div>
   <div id="hb">
     <div id="htabs"></div>
@@ -173,11 +176,12 @@ function makeRat(){
   const snout=cyl(0.08,0.24,0.58,fur,12);snout.rotation.x=Math.PI/2;snout.position.set(0,-0.05,0.42);head.add(snout);
   const chin=cyl(0.07,0.2,0.52,belly,12);chin.rotation.x=Math.PI/2;chin.position.set(0,-0.12,0.4);head.add(chin);
   const nose=sph(0.065,pink,10,8);nose.scale.set(1.1,0.8,0.9);nose.position.set(0,-0.03,0.72);head.add(nose);
+  const ears=[];
   [-1,1].forEach(sx=>{
     const eye=sph(0.055,ink,10,8);eye.position.set(sx*0.18,0.06,0.18);head.add(eye);
     const gl=sph(0.015,M(0xffffff),6,6);gl.position.set(sx*0.19,0.085,0.22);head.add(gl);
-    const ear=cyl(0.14,0.14,0.03,fur,16);ear.rotation.x=Math.PI/2;ear.rotation.y=sx*0.5;ear.position.set(sx*0.23,0.22,-0.12);head.add(ear);
-    const inner=cyl(0.095,0.095,0.03,pink,16);inner.rotation.copy(ear.rotation);inner.position.set(sx*0.225,0.22,-0.105);head.add(inner);
+    const earG=new THREE.Group();earG.position.set(sx*0.23,0.22,-0.12);head.add(earG);const ear=cyl(0.14,0.14,0.03,fur,16);ear.rotation.x=Math.PI/2;ear.rotation.y=sx*0.5;earG.add(ear);
+    const inner=cyl(0.095,0.095,0.03,pink,16);inner.rotation.copy(ear.rotation);inner.position.set(0,0,0.015);earG.add(inner);ears.push(earG);
     for(let i=0;i<4;i++){const w=cyl(0.004,0.004,0.65,M(0xe8e2d8),4);w.rotation.z=Math.PI/2;w.rotation.y=sx*(0.25+i*0.22);w.rotation.x=(i-1.5)*0.12;w.position.set(sx*0.26,-0.06+i*0.03,0.56);head.add(w);}
   });
   // arms (front legs) hang from the chest
@@ -205,9 +209,9 @@ function makeRat(){
     const m=cyl(0.05-i*0.0035,0.047-i*0.0035,0.26,pink,7);m.rotation.x=Math.PI/2;m.position.z=-0.12;seg.add(m);
     parent.add(seg);parent=seg;tail.push(seg);
   }
-  g.userData={hips,torso,head,arms,legs,tail,phase:0,sniff:0};
+  g.userData={hips,torso,head,arms,legs,tail,ears,phase:0,sniff:0,act:null,air:false,vy:0,land:0,run:false};
   g.animate=function(dt,speed,panic){
-    const u=g.userData;u.phase+=dt*(speed>0.05?11:2)*(panic?1.7:1);const t=u.phase;u.sniff+=dt*18;
+    const u=g.userData;u.phase+=dt*(speed>0.05?(u.run?15:11):2)*(panic?1.7:1);const t=u.phase;u.sniff+=dt*18;
     if(u.pick){
       const k=u.pick;k.t+=dt;const T=k.t;
       const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
@@ -227,20 +231,36 @@ function makeRat(){
       u.tail.forEach((s,i)=>{if(i){s.rotation.y=Math.sin(t*2.2+i*0.5)*0.3;}});
       return;
     }
+    const act=u.act;const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
+    if(act){act.t+=dt;const T=act.t;
+      if(act.type==='roll'){const a=T/0.55;g.rotation.x=-a*Math.PI*2;u.hips.position.y=0.55;u.torso.rotation.x=-0.6;u.head.rotation.x=0.6;u.legs.forEach(l=>l.rotation.x=1.2);u.arms.forEach(ar=>ar.rotation.x=-1.6);
+        u.tail.forEach((sg,i)=>{if(i)sg.rotation.x=0.35;});if(T>=0.55){u.act=null;g.rotation.x=0;u.hips.position.y=0.74;}return;}
+      if(act.type==='bite'){const a=T<0.12?T/0.12:T<0.32?1:1-(T-0.32)/0.2;u.torso.rotation.x=-1.4+a*0.7;u.head.rotation.x=1.25-a*0.9;u.head.rotation.y=0;u.arms.forEach((ar,i)=>ar.rotation.x=-a*1.9+(i?0.2:-0.2));u.legs.forEach((l,i)=>l.rotation.x=(i?-1:1)*a*0.5);
+        u.hips.position.y=0.74-a*0.12;if(T>=0.52){u.act=null;u.torso.rotation.x=-1.4;u.head.rotation.x=1.25;}return;}
+    }
+    if(u.air){ // in the air: tuck, arms up, tail out
+      const up=u.vy>0;u.legs.forEach((l,i)=>l.rotation.x+=((up?-0.9:0.9)-l.rotation.x)*Math.min(1,dt*10));u.arms.forEach(ar=>ar.rotation.x+=((up?-2.2:-0.8)-ar.rotation.x)*Math.min(1,dt*10));
+      u.torso.rotation.x+=((up?-1.2:-1.55)-u.torso.rotation.x)*Math.min(1,dt*8);u.head.rotation.x+=((up?1.0:1.35)-u.head.rotation.x)*Math.min(1,dt*8);
+      u.tail.forEach((sg,i)=>{if(i){sg.rotation.x+=(0.25-sg.rotation.x)*Math.min(1,dt*6);sg.rotation.y=Math.sin(t*2+i*0.5)*0.15;}});u.hips.position.y=0.74;return;}
+    if(u.land>0){u.land-=dt;const a=ease(u.land/0.18);u.hips.position.y=0.74-a*0.16;u.torso.rotation.x=-1.4+a*0.35;u.legs.forEach(l=>l.rotation.x=a*0.5);u.head.rotation.x=1.25-a*0.2;return;}
     if(speed>0.05){
-      u.legs[0].rotation.x=Math.sin(t)*0.8;u.legs[1].rotation.x=Math.sin(t+Math.PI)*0.8;
-      u.arms[0].rotation.x=Math.sin(t+Math.PI)*0.6;u.arms[1].rotation.x=Math.sin(t)*0.6;
-      u.hips.position.y=0.74+Math.abs(Math.sin(t))*0.05;
-      u.torso.rotation.x=-1.4+Math.sin(t*2)*0.03; u.torso.rotation.z=Math.sin(t)*0.05;
-      u.head.rotation.x=1.25+Math.sin(t*2)*0.04;u.head.rotation.y=0;
+      const run=u.run;const amp=run?1.05:0.8,arm=run?1.4:0.6;
+      u.legs[0].rotation.x=Math.sin(t)*amp;u.legs[1].rotation.x=Math.sin(t+Math.PI)*amp;
+      u.arms[0].rotation.x=Math.sin(t+Math.PI)*arm-(run?0.6:0);u.arms[1].rotation.x=Math.sin(t)*arm-(run?0.6:0);
+      u.hips.position.y=0.74+Math.abs(Math.sin(t))*(run?0.09:0.05);
+      u.torso.rotation.x=(run?-1.15:-1.4)+Math.sin(t*2)*0.04; u.torso.rotation.z=Math.sin(t)*(run?0.08:0.05);
+      u.head.rotation.x=(run?1.05:1.25)+Math.sin(t*2)*0.05;u.head.rotation.y=0;
+      u.ears&&u.ears.forEach((e,i)=>e.rotation.x=Math.sin(t*2+i)*0.15*(run?1:0.4));
+      u.tail.forEach((sg,i)=>{if(i){sg.rotation.y=Math.sin(t*1.1+i*0.5)*(run?0.12:0.22);sg.rotation.x=(run?0.12:-0.06)+Math.sin(t*0.7+i*0.4)*0.04;}});
     }else{
       u.legs.forEach(l=>l.rotation.x*=0.8);u.arms.forEach(a=>{a.rotation.x*=0.8;});
       u.hips.position.y=0.74+Math.sin(t)*0.01;
       u.torso.rotation.x=-1.4+Math.sin(t)*0.015;u.torso.rotation.z*=0.9;
       u.head.rotation.x=1.25+(panic?Math.sin(t*3)*0.2:Math.sin(u.sniff)*0.02+Math.sin(t*0.7)*0.06);
       u.head.rotation.y=panic?Math.sin(t*2.5)*0.6:Math.sin(t*0.35)*0.35;
+      u.ears&&u.ears.forEach((e,i)=>{e.rotation.x=(Math.sin(t*0.9+i*2)>0.92?0.5:0)*0.6;});
+      u.tail.forEach((sg,i)=>{if(i){sg.rotation.y=Math.sin(t*1.1+i*0.5)*0.22;sg.rotation.x=-0.06+Math.sin(t*0.7+i*0.4)*0.04;}});
     }
-    u.tail.forEach((s,i)=>{if(i){s.rotation.y=Math.sin(t*1.1+i*0.5)*0.22;s.rotation.x=-0.06+Math.sin(t*0.7+i*0.4)*0.04;}});
   };
   return g;
 }
@@ -447,6 +467,34 @@ function tickCutscene(dt){
 }
 function endCutscene(){inv={};Object.assign(home,{floor:'wood',wall:'plaster',door:false,placed:[]});if(cs)clearTimeout(cs.subT);ui.sub.style.opacity=0;ui.sub.textContent='';ui.skip.style.display='none';startScavenge();}
 
+// ---------- shared movement: walk, run, jump, roll, bite ----------
+const ctl={jump:false,roll:false,bite:false};
+function doJump(){if(!rat||rat.userData.air||rat.userData.act||rat.userData.pick)return;rat.userData.air=true;rat.userData.vy=6.2;sfx.step('wood');}
+function doRoll(){const u=rat&&rat.userData;if(!u||u.act||u.air||u.pick)return;u.act={type:'roll',t:0};u.rollDir=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));sfx.step('cobble');}
+function doBite(){const u=rat&&rat.userData;if(!u||u.act||u.pick)return;u.act={type:'bite',t:0};sfx.hiss();
+  if(phase==='scavenge'&&sc.cat){const c=sc.cat;const to=c.m.position.clone().sub(rat.position);to.y=0;const f=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));
+    if(to.length()<3.2&&to.normalize().dot(f)>0.3&&c.state!=='leave'){c.state='leave';sfx.yowl();ui.prompt.textContent='Got him on the nose!';}}}
+// moves the rat with the joystick/keys; returns speed 0..1 (2 when running). ground(x,z) gives floor height.
+function control(dt,{walk=6,bounds,ground,locked=false}){
+  const u=rat.userData;let dx=0,dz=0;
+  if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
+  const jl=Math.hypot(joy.x,joy.z);if(jl>0.15){dx=joy.x;dz=joy.z;}
+  let len=Math.hypot(dx,dz);let speed=0;
+  u.run=(len>0.15)&&(keys.shift||jl>0.93);
+  if(locked||u.pick||(u.act&&u.act.type==='bite'))len=0;
+  if(u.act&&u.act.type==='roll'){const d=u.rollDir;rat.position.x+=d.x*dt*10;rat.position.z+=d.z*dt*10;speed=0;}
+  else if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=u.run?1:len;const v=walk*(u.run?1.7:1)*len*(u.air?0.85:1);rat.position.x+=dx*dt*v;rat.position.z+=dz*dt*v;rat.rotation.y=Math.atan2(dx,dz);}
+  if(bounds){rat.position.x=Math.max(bounds[0],Math.min(bounds[1],rat.position.x));rat.position.z=Math.max(bounds[2],Math.min(bounds[3],rat.position.z));}
+  const gy=ground?ground(rat.position.x,rat.position.z):0;
+  if(u.air){u.vy-=dt*18;rat.position.y+=u.vy*dt;if(rat.position.y<=gy&&u.vy<0){rat.position.y=gy;u.air=false;u.vy=0;u.land=0.18;sfx.step('wood');}}
+  else{ if(rat.position.y>gy+0.6){u.air=true;u.vy=0;} else rat.position.y+=(gy-rat.position.y)*Math.min(1,dt*10);}
+  return speed;
+}
+addEventListener('keydown',e=>{if(e.repeat)return;const k=e.key.toLowerCase();if(k===' '&&(phase==='scavenge'||phase==='house'||phase==='inside')&&!(sc&&sc.talk)){e.preventDefault();doJump();}if(k==='q')doRoll();if(k==='f')doBite();});
+$('padJ').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();doJump();});
+$('padR').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();doRoll();});
+$('padB').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();doBite();});
+
 // ---------- scavenge ----------
 let sc;
 function startScavenge(){
@@ -476,9 +524,10 @@ function startScavenge(){
   const rail=box(9.3,0.22,0.3,dmDark);rail.position.set(0,2.2,2.1);dump.add(rail);const rail2=rail.clone();rail2.position.z=-2.1;dump.add(rail2);
   const skirtF=box(9.3,0.35,0.3,dmDark);skirtF.position.set(0,0.35,2.1);dump.add(skirtF);const skirtB=skirtF.clone();skirtB.position.z=-2.1;dump.add(skirtB);
   [[-4.7,1.6],[4.7,1.6],[-4.7,-1.6],[4.7,-1.6]].forEach(([x,z])=>{const w=cyl(0.42,0.42,0.35,M(0x1c1a1a),14);w.rotation.z=Math.PI/2;w.position.set(x*0.9,0.42,z);dump.add(w);const hub=cyl(0.18,0.18,0.4,M(0x8a8a8a),8);hub.rotation.z=Math.PI/2;hub.position.copy(w.position);dump.add(hub);});
-  const lid=box(9.2,0.25,4.2,MT(0xffffff,'steel',2,1));lid.position.set(0,2.35,-2.35);lid.rotation.x=-1.15;lid.userData.noInk=true;dump.add(lid);
-  const lidLip=box(9.3,0.3,0.3,dmDark);lidLip.position.set(0,2.35+Math.sin(1.15)*2.0,-2.35+Math.cos(1.15)*-2.0);lidLip.rotation.x=-1.15;dump.add(lidLip);
+  const lid=box(9.2,0.25,4.2,MT(0xffffff,'steel',2,1));lid.position.set(0,2.35,-2.25);lid.rotation.x=-1.5;lid.userData.noInk=true;dump.add(lid);
+  const lidLip=box(9.3,0.3,0.3,dmDark);lidLip.position.set(0,2.35+Math.sin(1.5)*2.0,-2.25+Math.cos(1.5)*-2.0);lidLip.rotation.x=-1.5;dump.add(lidLip);
   [[-3.2],[3.2]].forEach(([x])=>{const h=box(0.4,0.3,0.5,dmDark);h.position.set(x,2.3,-2.0);dump.add(h);});
+  const opening=box(7,0.06,2.7,M(0x0e0b0a));opening.position.set(0,2.17,0);opening.userData.noInk=true;dump.add(opening);
   const chute=box(3,1.3,0.12,M(0x14100e));chute.position.set(0,1.25,2.02);chute.userData.noInk=true;dump.add(chute);
   const chuteDoor=box(3.1,0.6,0.16,dmDark);chuteDoor.position.set(0,0.75,2.05);chuteDoor.userData.noInk=true;dump.add(chuteDoor);
   // graffiti tag + rust streaks as decals
@@ -486,7 +535,7 @@ function startScavenge(){
   const tag=new THREE.Mesh(new THREE.PlaneGeometry(3.4,1.05),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(tagC),transparent:true}));tag.position.set(2.4,1.15,2.09);tag.rotation.z=-0.06;tag.userData.noInk=true;dump.add(tag);
   const ramp=box(4,0.25,4.9,MT(0xb99268,'wood',1.2,1.6));ramp.position.set(0,1,4.25);ramp.rotation.x=0.42;ramp.receiveShadow=true;ramp.userData.noInk=true;dump.add(ramp);
   const bags=[[-12,0,-4],[6.5,0,-1],[-13,0,1],[7,0,2.5],[16,0,-6],[-26,0,5],[38,0,3],[-38,0,-5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x1a1816),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
-  const spots=[[-1.5,2,-4],[1.4,2,-4.4],[0,2,-3],[-2.8,2,-3.2],[2.6,2,-3],[-3.8,2,-4.8],[3.9,2,-5],[-19,0,7.5],[9,0,4],[-1,0,9],[23,0,-6.2],[-34,0,-3],[16,0,-4],[-12,0,6],[30,0,6],[-27,0,8],[38,0,-2],[-40,0,4],[6,0,14],[-8,0,16],[20,0,18],[-25,0,-6.5]];
+  const spots=[[-3.8,2,-4],[3.8,2,-4.2],[0,2,-2.5],[-2,2,-5.55],[2.4,2,-2.5],[-1,2,-5.55],[3.9,2,-5.2],[-19,0,7.5],[9,0,4],[-1,0,9],[23,0,-6.2],[-34,0,-3],[16,0,-4],[-12,0,6],[30,0,6],[-27,0,8],[38,0,-2],[-40,0,4],[6,0,14],[-8,0,16],[20,0,18],[-25,0,-6.5]];
   const pool=Object.keys(ITEMS);const weights={stick:4,paper:2,nail:2,foil:2,string:2,button:2,coin:1,bulb:1,cloth:1};
   sc={items:[],near:null,talk:null,nearNb:false,catT:0,cat:null,catDelay:40+Math.random()*30};ui.talk.style.display='none';
   const bagIds=[];pool.forEach(id=>{for(let k=0;k<(weights[id]||1);k++)bagIds.push(id);});
@@ -503,14 +552,14 @@ function catchRat(){sfx.hiss();const ids=Object.keys(inv);if(ids.length){const i
   ui.sub.textContent='Claws. Pip bolts for home and drops something on the way.';ui.sub.style.opacity=1;
   setTimeout(()=>{$('vig').style.background='';ui.sub.style.opacity=0;ui.sub.textContent='';startHouse();},1600);phase='caught';}
 function tickCat(dt){const c=sc.cat;if(!c){sc.catT+=dt;if(sc.catT>sc.catDelay)spawnCat();return;}
-  c.life+=dt;const m=c.m;const toRat=rat.position.clone().sub(m.position);toRat.y=0;const d=toRat.length();const safe=rat.position.y>1.2||sc.talk;
+  c.life+=dt;const m=c.m;const toRat=rat.position.clone().sub(m.position);toRat.y=0;const d=toRat.length();const safe=rat.position.y>1.2||!!sc.talk;
   if(c.state==='prowl'){if(d<11&&!safe){c.state='chase';sfx.hiss();ui.prompt.style.display='block';ui.prompt.textContent='A cat! Get on the dumpster or run home!';}
     const to=c.wp.clone().sub(m.position);to.y=0;if(to.length()<1.5){c.wp.set((Math.random()-0.5)*80,0,-4+Math.random()*24);}
     else{to.normalize();m.position.addScaledVector(to,dt*3.2);m.rotation.y=Math.atan2(to.x,to.z);}m.animate(dt,0.5);
     if(c.life>50){c.state='leave';}}
   else if(c.state==='chase'){if(safe){c.state='circle';c.wp.set(rat.position.x+(Math.random()-0.5)*6,0,3.5);}
     else{const dir=toRat.clone().normalize();m.position.addScaledVector(dir,dt*6.8);m.rotation.y=Math.atan2(dir.x,dir.z);m.animate(dt,1);
-      if(d<1.6){catchRat();return;}}}
+      if(d<1.6&&!(rat.userData.act&&rat.userData.act.type==='roll')){catchRat();return;}}}
   else if(c.state==='circle'){const to=c.wp.clone().sub(m.position);to.y=0;if(to.length()<1){c.wp.set((Math.random()-0.5)*12,0,2+Math.random()*6);c.life+=6;}else{to.normalize();m.position.addScaledVector(to,dt*2.5);m.rotation.y=Math.atan2(to.x,to.z);}
     m.animate(dt,0.4);if(!safe&&d<9){c.state='chase';sfx.hiss();}if(c.life>50){c.state='leave';}}
   else if(c.state==='leave'){const to=new THREE.Vector3(m.position.x<0?-48:48,0,6).sub(m.position);to.y=0;if(to.length()<2){root.remove(m);sc.cat=null;sc.catT=0;sc.catDelay=50+Math.random()*40;ui.phase.textContent='Behind the takeaway';}
@@ -521,20 +570,13 @@ function tickCat(dt){const c=sc.cat;if(!c){sc.catT+=dt;if(sc.catT>sc.catDelay)sp
 }
 function tickScavenge(dt){
   if(fatMixer)fatMixer.update(dt);tickCat(dt);if(phase!=='scavenge')return;
-  let dx=0,dz=0;
-  if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
-  if(Math.hypot(joy.x,joy.z)>0.15){dx=joy.x;dz=joy.z;}
-  let len=Math.hypot(dx,dz);let speed=0;
-  if(rat.userData.pick||sc.talk)len=0;
-  if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=len;rat.position.x+=dx*dt*6;rat.position.z+=dz*dt*6;rat.rotation.y=Math.atan2(dx,dz);}
-  rat.position.x=Math.max(-25,Math.min(25,rat.position.x));
-  {const nb=new THREE.Vector3(-4.4,rat.position.y,1.0);if(rat.position.distanceTo(nb)<3.2){const d=rat.position.clone().sub(nb);d.y=0;d.setLength(3);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}rat.position.z=Math.max(-8.5,Math.min(20,rat.position.z));
-  // dumpster ramp / roof height
-  const lx=rat.position.x,lz=rat.position.z+4;let h=0;
-  if(Math.abs(lx)<2&&lz>2&&lz<6.5)h=Math.max(0,(6.5-lz)/4.5*2);
-  else if(Math.abs(lx)<4.5&&Math.abs(lz)<=2)h=2;
-  sc.onTop=(Math.abs(lx)<4.2&&Math.abs(lz)<1.8);
-  rat.position.y+= (h-rat.position.y)*Math.min(1,dt*10);
+  const groundAlley=(x,z)=>{const lx=x,lz=z+4;if(Math.abs(lx)<2&&lz>2&&lz<6.5)return Math.max(0,(6.5-lz)/4.5*2);if(Math.abs(lx)<4.5&&Math.abs(lz)<=2)return 2;return 0;};
+  const speed=control(dt,{walk:6,bounds:[-43,43,-8.2,28],ground:groundAlley,locked:!!sc.talk});
+  {const nb=new THREE.Vector3(-4.4,rat.position.y,1.0);const dn=rat.position.distanceTo(nb);if(dn<3.2){const d=rat.position.clone().sub(nb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(3.2);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}
+  const lx=rat.position.x,lz=rat.position.z+4;
+  sc.onTop=(Math.abs(lx)<4.2&&Math.abs(lz)<1.8&&rat.position.y>1.5);
+  // the lid is open: walk into the middle of the top and you fall in
+  if(sc.onTop&&Math.abs(lx)<3.4&&Math.abs(lz)<1.3&&!rat.userData.air){startInside();return;}
   rat.animate(dt,speed,false);steps(dt,speed,rat.position.y>1?'steel':'cobble');
   if(speed>0.05){const inP=[[-9,4,4],[18,9,3],[-28,-2,2.5],[34,-4,3.5]].some(([px,pz,r])=>Math.hypot(rat.position.x-px,rat.position.z-pz)<r);if(inP&&!sc.wet){sfx.splash();}sc.wet=inP;}
   sc.near=null;let best=2.6;
@@ -546,7 +588,7 @@ function tickScavenge(dt){
         const line=TALK[k.i][1];const frac=(ct-TALK_CUES[k.i])/(TALK_CUES[k.i+1]-TALK_CUES[k.i]-0.25);const want=Math.max(0,Math.min(line.length,Math.floor(frac*line.length)));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}}
     else{k.t+=dt;const line=TALK[k.i][1];const want=Math.min(line.length,Math.floor(k.t*16));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}}
   else if(sc.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${ITEMS[sc.near.id].name}`;$('padE').textContent='Grab';}
-  else if(sc.onTop){ui.prompt.style.display='block';ui.prompt.textContent='E · dive into the dumpster';$('padE').textContent='Dive';}
+  else if(sc.onTop){ui.prompt.style.display='block';ui.prompt.textContent='Walk into the opening to dive in';$('padE').textContent='Grab';}
   else if(sc.cat&&sc.cat.state==='chase'){ui.prompt.style.display='block';ui.prompt.textContent='A cat! Get on the dumpster or run home!';$('padE').textContent='Grab';}
   else if(sc.nearNb){ui.prompt.style.display='block';ui.prompt.textContent='E · talk to the big rat';$('padE').textContent='Talk';}
   else{ui.prompt.style.display='none';$('padE').textContent='Grab';}
@@ -585,7 +627,7 @@ function grab(){
   if(phase==='house'){if(hs.sel)place();else if(hs.nearDoor){cancelPlace();save();startScavenge();}return;}
   if(phase!=='scavenge')return;
   if(sc.talk){advanceTalk();return;}
-  if(!sc.near){if(sc.onTop)startInside();else if(sc.nearNb)startTalk();return;}
+  if(!sc.near){if(sc.nearNb)startTalk();return;}
   const it=sc.near;it.taken=true;root.remove(it.m);inv[it.id]=(inv[it.id]||0)+1;bag();save();sfx.pickup();
   const u=rat.userData;if(u.pick&&u.pick.item)u.pick.item.parent.remove(u.pick.item);
   const held=ITEMS[it.id].build();outline(held);held.traverse(o=>{if(o.isLight)o.intensity=0.4;});
@@ -628,11 +670,7 @@ function startInside(){
   ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';
 }
 function tickInside(dt){
-  let dx=0,dz=0;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
-  if(Math.hypot(joy.x,joy.z)>0.15){dx=joy.x;dz=joy.z;}
-  let len=Math.hypot(dx,dz);let speed=0;if(rat.userData.pick)len=0;
-  if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=len;rat.position.x+=dx*dt*4.5;rat.position.z+=dz*dt*4.5;rat.rotation.y=Math.atan2(dx,dz);}
-  rat.position.x=Math.max(-IW/2+1.2,Math.min(IW/2-1.2,rat.position.x));rat.position.z=Math.max(-ID/2+1.3,Math.min(ID/2-0.9,rat.position.z));
+  const speed=control(dt,{walk:4.5,bounds:[-IW/2+1.2,IW/2-1.2,-ID/2+1.3,ID/2-0.9]});
   rat.animate(dt,speed,false);steps(dt,speed,'steel');
   ins.near=null;let best=1.8;ins.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;ins.near=it;}});
   ins.nearHole=rat.position.distanceTo(new THREE.Vector3(-3.2,0,ID/2-0.5))<1.5;
@@ -712,11 +750,7 @@ const ray2=new THREE.Raycaster(),ptr2=new THREE.Vector2();
 canvas.addEventListener('pointerdown',e=>{if(phase!=='house'||!hs||hs.sel)return;const rect=canvas.getBoundingClientRect();ptr2.x=((e.clientX-rect.left)/rect.width)*2-1;ptr2.y=-((e.clientY-rect.top)/rect.height)*2+1;ray2.setFromCamera(ptr2,camera);
   const hits=ray2.intersectObjects(hs.placed.map(e=>e.m),true);if(!hits.length)return;let o=hits[0].object;const entry=hs.placed.find(e=>{let ok=false;e.m.traverse(c=>{if(c===o)ok=true;});return ok;});if(entry)pickUp(entry);});
 function tickHouse(dt){
-  let dx=0,dz=0;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
-  if(Math.hypot(joy.x,joy.z)>0.15){dx=joy.x;dz=joy.z;}
-  let len=Math.hypot(dx,dz);let speed=0;
-  if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=len;rat.position.x+=dx*dt*4.5;rat.position.z+=dz*dt*4.5;rat.rotation.y=Math.atan2(dx,dz);}
-  rat.position.x=Math.max(-HW/2+0.5,Math.min(HW/2-0.5,rat.position.x));rat.position.z=Math.max(-HD/2+0.5,Math.min(HD/2-0.5,rat.position.z));
+  const speed=control(dt,{walk:4.5,bounds:[-HW/2+0.5,HW/2-0.5,-HD/2+0.5,HD/2-0.5]});
   // furniture blocks walking (except flat things)
   hs.placed.forEach(({p,m})=>{if(p.wall||defOf(p.id).flat)return;const r=(defOf(p.id).r||.4)+0.35;const d=Math.hypot(rat.position.x-p.x,rat.position.z-p.z);if(d<r&&d>1e-4){const k=(r-d)/d;rat.position.x+=(rat.position.x-p.x)*k;rat.position.z+=(rat.position.z-p.z)*k;}});
   rat.animate(dt,speed,false);steps(dt,speed,home.floor==='wood'?'wood':home.floor==='tiles'?'cobble':'soft');
