@@ -16,6 +16,7 @@
   #title h1{font-size:clamp(40px,9vw,88px);font-weight:400;letter-spacing:-.02em;line-height:.95}
   #title p{max-width:34ch;font-size:17px;line-height:1.5;opacity:.85}
   .btn{pointer-events:auto;background:var(--ochre);color:var(--ink);border:0;font:inherit;font-size:18px;padding:12px 26px;border-radius:999px;cursor:pointer}
+  .slot{border-radius:999px !important}
   .btn:focus-visible{outline:3px solid var(--paper);outline-offset:3px}
   #sub{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);font-size:clamp(18px,3vw,26px);text-shadow:0 2px 6px #000;max-width:90vw;text-align:center;opacity:0;transition:opacity .4s}
   #hud{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;font-size:16px}
@@ -31,9 +32,9 @@
   .slot.used{opacity:.4}
   #buildbar{display:flex;justify-content:space-between;align-items:center;font-size:14px;gap:10px}
   #done{padding:8px 18px;font-size:15px}
-  #pad{position:absolute;left:14px;bottom:14px;display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,52px);gap:6px;pointer-events:auto}
-  #pad button{background:rgba(233,220,195,.25);color:var(--paper);border:0;border-radius:10px;font-size:20px;touch-action:none}
-  #pad .g{grid-column:3;grid-row:1/3;background:var(--ochre);color:var(--ink);font-size:16px}
+  #pad{position:absolute;left:14px;bottom:14px;display:none;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px);gap:8px;pointer-events:auto}
+  #pad button{width:56px;height:56px;background:rgba(233,220,195,.25);color:var(--paper);border:0;border-radius:50%;font-size:20px;touch-action:none}
+  #pad .g{grid-column:3;grid-row:2;width:64px;height:64px;margin:-4px 0 0 4px;background:var(--ochre);color:var(--ink);font-size:15px}
   #end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(43,29,20,.85);text-align:center;padding:24px;pointer-events:auto}
   #end h2{font-size:clamp(32px,6vw,60px);font-weight:400}
   @media (pointer:coarse){#pad{display:grid}}
@@ -92,7 +93,7 @@ const cyl=(rt,rb,h,mat,s=12)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry
 
 // ---------- rat model (Pip: cartoon, upright, big-eyed) ----------
 function makeRat(){
-  const fur=M(0xb56a3c,{roughness:.9}),belly=M(0xf1dcb8),pink=M(0xf2a6a0,{roughness:.6}),ink=M(0x14100e,{roughness:.25}),eyeW=M(0xfdf8ef,{roughness:.2}),iris=M(0x2c6b57,{roughness:.2});
+  const fur=M(0x7b7f86,{roughness:.9}),belly=M(0xe6e4dc),dark=M(0x4a4d52,{roughness:.9}),pink=M(0xf2a6a0,{roughness:.6}),ink=M(0x14100e,{roughness:.25}),eyeW=M(0xfdf8ef,{roughness:.2}),iris=M(0x2c6b57,{roughness:.2});
   const g=new THREE.Group();
   // pear-shaped body, upright
   const body=sph(0.42,fur,16,12);body.scale.set(1,1.25,0.9);body.position.y=0.62;g.add(body);
@@ -103,6 +104,8 @@ function makeRat(){
   const muzzle=sph(0.26,belly,14,10);muzzle.scale.set(1.15,0.8,1);muzzle.position.set(0,-0.12,0.32);head.add(muzzle);
   const nose=sph(0.09,pink,10,8);nose.scale.set(1.2,0.9,1);nose.position.set(0,-0.04,0.6);head.add(nose);
   const teeth=box(0.1,0.09,0.03,eyeW);teeth.position.set(0,-0.24,0.5);head.add(teeth);
+  const blaze=sph(0.1,belly,10,8);blaze.scale.set(0.7,1.8,0.6);blaze.position.set(0,0.2,0.36);head.add(blaze);
+  const saddle=sph(0.4,dark,14,10);saddle.scale.set(0.95,0.7,0.85);saddle.position.set(0,0.82,-0.12);g.add(saddle);
   const eyes=[];
   [-1,1].forEach(sx=>{
     const eye=new THREE.Group();eye.position.set(sx*0.19,0.08,0.34);head.add(eye);
