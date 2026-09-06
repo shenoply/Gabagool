@@ -38,7 +38,6 @@
   #pad .g{width:78px;height:78px;border-radius:50%;border:0;background:var(--ochre);color:var(--ink);font:inherit;font-size:16px;pointer-events:auto;touch-action:none}
   #end{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(43,29,20,.85);text-align:center;padding:24px;pointer-events:auto}
   #end h2{font-size:clamp(32px,6vw,60px);font-weight:400}
-  @media (pointer:coarse){#pad{display:flex}}
   @media (prefers-reduced-motion:reduce){#sub{transition:none}}
 </style>
 </head>
@@ -69,7 +68,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js" onerror="console.warn('GLTFLoader unavailable')"></script>
+<script src="GLTFLoader.js" onerror="console.warn('GLTFLoader unavailable')"></script>
 <script>
 // ---------- setup ----------
 const canvas=document.getElementById('c');
@@ -229,7 +228,7 @@ $('padE').addEventListener('click',grab);
 // ---------- cutscene ----------
 let cs;
 function startCutscene(){
-  phase='cutscene';clear();ui.title.style.display='none';ui.skip.style.display='block';ui.phase.textContent='Pip\'s house, 3am';
+  phase='cutscene';clear();ui.title.style.display='none';ui.pad.style.display='none';ui.skip.style.display='block';ui.phase.textContent='Pip\'s house, 3am';
   const house=makeHouse();root.add(house);
   const furn=[];
   const add=(id,x,z,ry=0)=>{const m=ITEMS[id].build();m.position.set(x,0,z);m.rotation.y=ry;root.add(m);furn.push({m,x,z,ry,o:Math.random()*6});};
@@ -270,7 +269,7 @@ function endCutscene(){ui.sub.style.opacity=0;ui.skip.style.display='none';start
 // ---------- scavenge ----------
 let sc;
 function startScavenge(){
-  phase='scavenge';clear();inv=[];bag();ui.pad.style.display='';ui.phase.textContent='Behind the takeaway';
+  phase='scavenge';clear();inv=[];bag();ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Behind the takeaway';
   scene.fog=new THREE.Fog(0x2b1d14,25,60);
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),M(0x4a4340));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;root.add(ground);
   const puddle=new THREE.Mesh(new THREE.CircleGeometry(4,24),M(0x3e6b7a,{roughness:.2}));puddle.rotation.x=-Math.PI/2;puddle.position.set(-9,0.01,4);root.add(puddle);
