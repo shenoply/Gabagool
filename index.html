@@ -24,8 +24,17 @@
   #prompt{position:absolute;left:50%;bottom:22%;transform:translateX(-50%);background:var(--ochre);color:var(--ink);padding:8px 16px;border-radius:8px;font-size:17px;display:none}
   #skip{position:absolute;right:14px;bottom:14px;font-size:14px;padding:8px 14px;background:rgba(233,220,195,.2);color:var(--paper)}
   #go{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:none}
-  #build{position:absolute;left:0;right:0;bottom:0;display:none;flex-direction:column;gap:8px;padding:10px 12px 12px;background:rgba(43,29,20,.86);pointer-events:auto}
-  #inv{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  #hb{position:absolute;left:0;right:0;top:56px;display:none;flex-direction:column;gap:6px;padding:8px 12px;background:rgba(43,29,20,.86);pointer-events:auto}
+  #htabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tab{background:rgba(233,220,195,.15);color:var(--paper);border:0;font:inherit;font-size:14px;padding:6px 12px;border-radius:999px}
+  .tab.on{background:var(--ochre);color:var(--ink)}
+  #hout{margin-left:auto;background:rgba(95,122,75,.7)}
+  #hlist{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  #hplace{display:none;gap:8px;align-items:center;flex-wrap:wrap}
+  #hplace .btn{font-size:14px;padding:8px 14px}
+  #hsel{flex:1 1 100%;font-size:15px}
+  .hint{opacity:.7;padding:8px;font-size:14px}
+  #hplacebtn:disabled{opacity:.5}
   .slot{flex:0 0 auto;min-width:96px;background:var(--paper);color:var(--ink);border:3px solid transparent;border-radius:10px;padding:8px 10px;cursor:pointer;font:inherit;text-align:left}
   .slot small{display:block;opacity:.7;font-size:12px}
   .slot.sel{border-color:var(--ochre)}
@@ -55,8 +64,9 @@
     <h1>Wet Whiskers</h1>
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
+    <button class="btn" id="newgame" style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 18</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 19</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -68,9 +78,10 @@
     <div id="stick"><div id="knob"></div></div>
     <button class="g" id="padE">Grab</button>
   </div>
-  <div id="build">
-    <div id="inv"></div>
-    <div id="buildbar"><span id="hint">Pick an item, then tap a floor tile. R rotates. Tap a placed item to pick it up.</span><button class="btn" id="done">Move in</button></div>
+  <div id="hb">
+    <div id="htabs"></div>
+    <div id="hlist"></div>
+    <div id="hplace"><span id="hsel"></span><button class="btn" id="hrot">Rotate</button><button class="btn" id="hplacebtn">Place</button><button class="btn" id="hcancel" style="background:rgba(233,220,195,.25);color:var(--paper)">Cancel</button></div>
   </div>
   <div id="end"><h2 id="endh"></h2><p id="endp"></p><button class="btn" id="again">Play again</button></div>
 </div>
@@ -124,6 +135,7 @@ function paint(kind,size=256){
   else if(kind==='steel'){x.fillStyle='#3c6b7c';x.fillRect(0,0,size,size);blot(60,'#34606f',.35,10,50);blot(40,'#4b7f90',.3,10,50);blot(18,'#8a4a2a',.45,4,16);blot(26,'#6b3a22',.35,2,8);
     x.globalAlpha=.35;x.fillStyle='#7a3f22';for(let i=0;i<8;i++){const rx=R(0,size),ry=R(0,size*.5);x.fillRect(rx,ry,R(2,5),R(30,110));}x.globalAlpha=1;
     x.fillStyle='#22393f';for(let i=0;i<48;i++){x.beginPath();x.arc(R(0,size),R(0,size),2.2,0,7);x.fill();}}
+  else if(kind==='stripes'){x.fillStyle='#efe0c6';x.fillRect(0,0,size,size);x.fillStyle='#c98b7a';for(let i=0;i<size;i+=size/4)x.fillRect(i,0,size/8,size);blot(30,'#e0c9a8',.25,8,30);}
   else if(kind==='metal'){x.fillStyle='#3f7a5a';x.fillRect(0,0,size,size);blot(50,'#356649',.35,10,50);blot(30,'#4f8d6b',.3,10,50);blot(20,'#7a4b2a',.35,4,14);blot(12,'#2d4a3a',.5,3,8);}
   else if(kind==='cloth'){x.fillStyle='#d9a441';x.fillRect(0,0,size,size);blot(60,'#c48f2f',.3,6,20);blot(40,'#e8bb63',.3,6,20);}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;TEX[kind]=t;return t;
@@ -234,32 +246,74 @@ function makeRat(){
 }
 
 // ---------- item catalogue ----------
-const wood=M(0xb98b58),tin=M(0xb8b8b0,{metalness:.6,roughness:.35}),cork=M(0xc9a674),red=M(0xb23a2a),blue=M(0x3d5f8f),yellow=M(0xd9a441),white=M(0xf1ead8),green=M(0x5f7a4b);
+const wood=M(0xb98b58),tin=M(0xb8b8b0),cork=M(0xc9a674),red=M(0xb23a2a),blue=M(0x3d5f8f),yellow=M(0xd9a441),white=M(0xf1ead8),green=M(0x5f7a4b);
+const paper=M(0xefe4cc),foil=M(0xd0d4d8),cloth=M(0x9c4a5a),string=M(0xd7c7a0),coin=M(0xc9a13a),bulbM=M(0xfff2c0,{emissive:0xffd070,emissiveIntensity:.6});
 const ITEMS={
-  cap:{name:'Bottle cap',use:'Table',w:1,d:1,build(){const g=new THREE.Group();const c=cyl(0.42,0.42,0.12,red,16);c.position.y=0.45;const s=cyl(0.05,0.05,0.4,tin,6);s.position.y=0.2;const b=cyl(0.2,0.2,0.04,tin,10);b.position.y=0.02;g.add(c,s,b);return g}},
-  matchbox:{name:'Matchbox',use:'Bed',w:2,d:1,build(){const g=new THREE.Group();const b=box(1.7,0.3,0.8,blue);b.position.y=0.15;const m=box(1.5,0.14,0.6,white);m.position.y=0.37;const p=box(0.4,0.12,0.5,yellow);p.position.set(-0.5,0.5,0);g.add(b,m,p);return g}},
-  cork:{name:'Wine cork',use:'Stool',w:1,d:1,build(){const g=new THREE.Group();const c=cyl(0.28,0.28,0.55,cork,14);c.position.y=0.28;g.add(c);return g}},
-  can:{name:'Tin can',use:'Cupboard',w:1,d:1,build(){const g=new THREE.Group();const c=cyl(0.35,0.35,1.1,tin,16);c.position.y=0.55;const l=box(0.7,0.7,0.02,red);l.position.set(0,0.55,0.35);g.add(c,l);return g}},
-  spool:{name:'Thread spool',use:'Side table',w:1,d:1,build(){const g=new THREE.Group();const a=cyl(0.35,0.35,0.08,wood,14);a.position.y=0.04;const b=cyl(0.35,0.35,0.08,wood,14);b.position.y=0.7;const c=cyl(0.2,0.2,0.62,green,14);c.position.y=0.37;g.add(a,b,c);return g}},
-  sponge:{name:'Kitchen sponge',use:'Rug',w:2,d:2,build(){const g=new THREE.Group();const s=box(1.8,0.12,1.8,yellow);s.position.y=0.06;const t=box(1.8,0.04,1.8,green);t.position.y=0.14;g.add(s,t);return g}},
-  candle:{name:'Candle stub',use:'Lamp',w:1,d:1,build(){const g=new THREE.Group();const c=cyl(0.2,0.22,0.5,white,12);c.position.y=0.25;const f=sph(0.07,M(0xffb347,{emissive:0xff7b1a,emissiveIntensity:1.5}),8,6);f.position.y=0.6;const l=new THREE.PointLight(0xffa040,0.9,4);l.position.y=0.7;g.add(c,f,l);return g}},
-  teacup:{name:'Chipped teacup',use:'Bath',w:1,d:1,build(){const g=new THREE.Group();const c=cyl(0.38,0.28,0.5,white,16);c.position.y=0.25;const w=cyl(0.33,0.33,0.02,M(0x6fa3b5),16);w.position.y=0.47;const h=new THREE.Mesh(new THREE.TorusGeometry(0.16,0.04,8,14),white);h.position.set(0.42,0.28,0);g.add(c,w,h);return g}},
-  book:{name:'Matchbook',use:'Doormat',w:1,d:1,build(){const g=new THREE.Group();const b=box(0.8,0.06,0.6,red);b.position.y=0.03;const s=box(0.8,0.02,0.15,white);s.position.set(0,0.07,0.2);g.add(b,s);return g}},
-  button:{name:'Coat button',use:'Wall clock',w:1,d:1,build(){const g=new THREE.Group();const c=cyl(0.3,0.3,0.06,blue,16);c.rotation.x=Math.PI/2;c.position.y=0.9;const p=cyl(0.04,0.04,0.9,wood,6);p.position.y=0.45;g.add(c,p);return g}},
+  // raw parts (found in the alley)
+  cap:{name:'Bottle cap',r:.45,build(){const g=new THREE.Group();const c=cyl(0.42,0.42,0.12,red,16);c.position.y=0.06;g.add(c);return g}},
+  matchbox:{name:'Matchbox',r:.9,build(){const g=new THREE.Group();const b=box(1.7,0.3,0.8,blue);b.position.y=0.15;g.add(b);return g}},
+  cork:{name:'Wine cork',r:.3,build(){const g=new THREE.Group();const c=cyl(0.28,0.28,0.55,cork,14);c.position.y=0.28;g.add(c);return g}},
+  can:{name:'Tin can',r:.4,build(){const g=new THREE.Group();const c=cyl(0.35,0.35,1.1,tin,16);c.position.y=0.55;const l=box(0.7,0.7,0.02,red);l.position.set(0,0.55,0.35);g.add(c,l);return g}},
+  spool:{name:'Thread spool',r:.4,build(){const g=new THREE.Group();const a=cyl(0.35,0.35,0.08,wood,14);a.position.y=0.04;const b=cyl(0.35,0.35,0.08,wood,14);b.position.y=0.7;const c=cyl(0.2,0.2,0.62,green,14);c.position.y=0.37;g.add(a,b,c);return g}},
+  sponge:{name:'Kitchen sponge',r:.9,build(){const g=new THREE.Group();const s=box(1.8,0.12,1.8,yellow);s.position.y=0.06;const t=box(1.8,0.04,1.8,green);t.position.y=0.14;g.add(s,t);return g}},
+  candle:{name:'Candle stub',r:.25,build(){const g=new THREE.Group();const c=cyl(0.2,0.22,0.5,white,12);c.position.y=0.25;g.add(c);return g}},
+  teacup:{name:'Chipped teacup',r:.45,build(){const g=new THREE.Group();const c=cyl(0.38,0.28,0.5,white,16);c.position.y=0.25;const h=new THREE.Mesh(new THREE.TorusGeometry(0.16,0.04,8,14),white);h.position.set(0.42,0.28,0);g.add(c,h);return g}},
+  book:{name:'Matchbook',r:.45,build(){const g=new THREE.Group();const b=box(0.8,0.06,0.6,red);b.position.y=0.03;const s=box(0.8,0.02,0.15,white);s.position.set(0,0.07,0.2);g.add(b,s);return g}},
+  button:{name:'Coat button',r:.3,build(){const g=new THREE.Group();const c=cyl(0.3,0.3,0.06,blue,16);c.position.y=0.03;g.add(c);return g}},
+  stick:{name:'Matchstick',r:.3,build(){const g=new THREE.Group();const c=cyl(0.04,0.04,1.1,wood,6);c.rotation.z=Math.PI/2;c.position.y=0.04;const h=sph(0.07,red,8,6);h.position.set(0.55,0.05,0);g.add(c,h);return g}},
+  foil:{name:'Foil scrap',r:.5,build(){const g=new THREE.Group();const f=box(0.9,0.04,0.7,foil);f.position.y=0.02;f.rotation.y=0.3;g.add(f);return g}},
+  string:{name:'Bit of string',r:.3,build(){const g=new THREE.Group();const c=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.035,6,16),string);c.rotation.x=Math.PI/2;c.position.y=0.04;g.add(c);return g}},
+  paper:{name:'Scrap of paper',r:.5,build(){const g=new THREE.Group();const f=box(0.9,0.02,1.1,paper);f.position.y=0.01;g.add(f);return g}},
+  coin:{name:'Old coin',r:.25,build(){const g=new THREE.Group();const c=cyl(0.24,0.24,0.04,coin,16);c.position.y=0.02;g.add(c);return g}},
+  bulb:{name:'Tiny bulb',r:.25,build(){const g=new THREE.Group();const c=sph(0.18,bulbM,10,8);c.position.y=0.22;const b=cyl(0.09,0.09,0.12,tin,8);b.position.y=0.05;g.add(c,b);return g}},
+  nail:{name:'Bent nail',r:.25,build(){const g=new THREE.Group();const c=cyl(0.03,0.03,0.7,tin,6);c.rotation.z=Math.PI/2;c.rotation.y=0.5;c.position.y=0.03;g.add(c);return g}},
+  cloth:{name:'Cloth scrap',r:.6,build(){const g=new THREE.Group();const f=box(1.2,0.05,0.9,cloth);f.position.y=0.02;g.add(f);return g}},
 };
+// crafted furniture: needs = parts consumed; wall = hangs on a wall; light = emits light
+const CRAFT={
+  bed:{name:'Matchbox bed',needs:{matchbox:1,sponge:1},r:.95,build(){const g=new THREE.Group();const b=box(1.7,0.3,0.8,blue);b.position.y=0.15;const m=box(1.5,0.16,0.6,yellow);m.position.y=0.38;const p=box(0.4,0.12,0.5,white);p.position.set(-0.5,0.52,0);g.add(b,m,p);return g}},
+  table:{name:'Cap table',needs:{cap:1,stick:4},r:.5,top:.55,build(){const g=new THREE.Group();const c=cyl(0.45,0.45,0.1,red,16);c.position.y=0.5;[[-.25,-.25],[.25,-.25],[-.25,.25],[.25,.25]].forEach(([x,z])=>{const l=cyl(0.035,0.035,0.5,wood,6);l.position.set(x,0.25,z);g.add(l);});g.add(c);return g}},
+  stool:{name:'Cork stool',needs:{cork:1,button:1},r:.32,build(){const g=new THREE.Group();const c=cyl(0.28,0.28,0.55,cork,14);c.position.y=0.28;const b=cyl(0.3,0.3,0.06,blue,16);b.position.y=0.58;g.add(c,b);return g}},
+  chair:{name:'Stick chair',needs:{cork:1,stick:3},r:.35,build(){const g=new THREE.Group();const c=cyl(0.28,0.28,0.5,cork,14);c.position.y=0.25;for(let i=-1;i<=1;i++){const s=cyl(0.03,0.03,0.9,wood,6);s.position.set(i*0.18,0.85,-0.22);g.add(s);}const bar=cyl(0.03,0.03,0.5,wood,6);bar.rotation.z=Math.PI/2;bar.position.set(0,1.2,-0.22);g.add(bar);return g}},
+  lamp:{name:'Candle lamp',needs:{can:1,candle:1},r:.4,light:{color:0xffa040,i:1.1,d:7},build(){const g=new THREE.Group();const c=cyl(0.35,0.35,0.5,tin,16);c.position.y=0.25;const s=cyl(0.2,0.22,0.5,white,12);s.position.y=0.75;const f=sph(0.08,M(0xffb347,{emissive:0xff7b1a,emissiveIntensity:1.6}),8,6);f.position.y=1.06;g.add(c,s,f);return g}},
+  ledlamp:{name:'Bulb wall light',needs:{bulb:1,string:1},wall:true,r:.3,light:{color:0xfff0c0,i:1.0,d:8},build(){const g=new THREE.Group();const b=sph(0.2,bulbM,10,8);b.position.set(0,0,0.25);const w=cyl(0.03,0.03,0.5,string,6);w.position.set(0,0.3,0.05);const p=box(0.3,0.3,0.06,tin);g.add(b,w,p);return g}},
+  cupboard:{name:'Can cupboard',needs:{can:1,nail:2},r:.42,build(){const g=new THREE.Group();const c=cyl(0.38,0.38,1.3,tin,16);c.position.y=0.65;const d=box(0.5,0.9,0.03,red);d.position.set(0,0.65,0.38);const k=sph(0.04,coin,6,6);k.position.set(0.15,0.65,0.41);g.add(c,d,k);return g}},
+  bath:{name:'Teacup bath',needs:{teacup:1,foil:1},r:.5,build(){const g=new THREE.Group();const c=cyl(0.42,0.3,0.55,white,16);c.position.y=0.28;const w=cyl(0.36,0.36,0.02,M(0x6fa3b5),16);w.position.y=0.53;const h=new THREE.Mesh(new THREE.TorusGeometry(0.18,0.045,8,14),white);h.position.set(0.46,0.3,0);const tap=cyl(0.03,0.03,0.4,foil,6);tap.position.set(-0.3,0.7,0);g.add(c,w,h,tap);return g}},
+  rug:{name:'Rag rug',needs:{cloth:1,string:1},r:.9,flat:true,build(){const g=new THREE.Group();const f=cyl(0.95,0.95,0.05,cloth,20);f.position.y=0.025;const r=new THREE.Mesh(new THREE.TorusGeometry(0.6,0.05,6,24),string);r.rotation.x=Math.PI/2;r.position.y=0.06;g.add(f,r);return g}},
+  doormat:{name:'Matchbook mat',needs:{book:1},r:.45,flat:true,build(){return ITEMS.book.build()}},
+  frame:{name:'Picture frame',needs:{paper:1,stick:4},wall:true,r:.5,build(){const g=new THREE.Group();const f=box(1.0,0.8,0.06,wood);const pic=box(0.82,0.62,0.02,M(0x7fb3c9));pic.position.z=0.04;const hill=sph(0.3,green,10,8);hill.scale.set(1,0.5,0.2);hill.position.set(0,-0.2,0.06);g.add(f,pic,hill);return g}},
+  clock:{name:'Coin clock',needs:{coin:1,nail:1},wall:true,r:.3,build(){const g=new THREE.Group();const c=cyl(0.32,0.32,0.05,coin,20);c.rotation.x=Math.PI/2;const h1=box(0.03,0.22,0.02,M(0x2b1d14));h1.position.set(0,0.1,0.04);const h2=box(0.03,0.16,0.02,M(0x2b1d14));h2.rotation.z=-1.2;h2.position.set(0.06,0.03,0.04);g.add(c,h1,h2);return g}},
+  mirror:{name:'Foil mirror',needs:{foil:1,button:2},wall:true,r:.35,build(){const g=new THREE.Group();const f=cyl(0.4,0.4,0.04,M(0xe8ecf0,{emissive:0x334455,emissiveIntensity:.3}),20);f.rotation.x=Math.PI/2;const rim=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.04,6,24),blue);g.add(f,rim);return g}},
+  shelf:{name:'Stick shelf',needs:{stick:2,nail:2},wall:true,r:.6,build(){const g=new THREE.Group();const s=box(1.2,0.06,0.35,wood);s.position.z=0.17;const b1=cyl(0.03,0.03,0.4,wood,6);b1.rotation.x=Math.PI/2;b1.position.set(-0.4,-0.15,0.18);const b2=b1.clone();b2.position.x=0.4;const cup=cyl(0.1,0.08,0.14,white,10);cup.position.set(0.2,0.1,0.2);g.add(s,b1,b2,cup);return g}},
+  door:{name:'Front door',needs:{stick:6,foil:1},special:'door',build(){const g=new THREE.Group();const d=box(0.12,2.2,1.3,wood);d.position.y=1.1;const k=sph(0.06,coin,6,6);k.position.set(0.1,1.05,0.45);g.add(d,k);return g}},
+};
+const FLOORS=[{id:'wood',name:'Bare planks',cost:{},mat:()=>MT(0xa3835e,'wood',4,3)},{id:'tiles',name:'Stone tiles',cost:{paper:1},mat:()=>MT(0xbfb6aa,'cobble',4.5,3.4)},{id:'carpet',name:'Sponge carpet',cost:{sponge:1},mat:()=>M(0x7d9a4b)},{id:'red',name:'Red cloth floor',cost:{cloth:1},mat:()=>M(0x8f3f4a)},{id:'foil',name:'Foil floor',cost:{foil:2},mat:()=>M(0xc9ced4)}];
+const WALLS=[{id:'plaster',name:'Old plaster',cost:{},mat:()=>MT(0xd9c6a4,'plaster',2,1)},{id:'paper',name:'Striped paper',cost:{paper:1},mat:()=>MT(0xffffff,'stripes',6,1)},{id:'green',name:'Green paint',cost:{cap:1},mat:()=>M(0x6f8a5a)},{id:'blue',name:'Blue paint',cost:{button:1},mat:()=>M(0x5d7a95)},{id:'brick',name:'Bare brick',cost:{nail:1},mat:()=>MT(0xd9b8a0,'brick',5,1.2)}];
+function defOf(id){return CRAFT[id]||ITEMS[id];}
+
 
 // ---------- rat house (used in cutscene and build) ----------
-function makeHouse(){
-  const g=new THREE.Group();
-  const floor=box(9,0.2,7,MT(0xa3835e,'wood',3,2.4));floor.position.y=-0.1;g.add(floor);
-  const wallMat=MT(0xd9c6a4,'plaster',2,1);
-  const back=box(9,3,0.2,wallMat);back.position.set(0,1.5,-3.5);g.add(back);
-  const left=box(0.2,3,7,wallMat);left.position.set(-4.5,1.5,0);g.add(left);
-  const right=box(0.2,3,7,wallMat);right.position.set(4.5,1.5,0);g.add(right);
-  const skirt=box(9,0.3,0.1,M(0x6e4c30));skirt.position.set(0,0.15,-3.44);g.add(skirt);
-  const win=box(1.6,1.2,0.1,M(0x8fb7c9,{emissive:0x3a5a6a,emissiveIntensity:.4}));win.position.set(1.5,1.8,-3.45);g.add(win);
-  const door=box(0.1,2.2,1.2,M(0x5a3a22));door.position.set(-4.45,1.1,2);g.add(door);
-  [floor,back,left,right,skirt,win,door].forEach(o=>o.userData.noInk=true);[left,right,back].forEach(o=>o.castShadow=false);
+const HW=12,HD=9,DOORZ=2.2;
+function makeHouse(state){
+  const g=new THREE.Group();g.userData.parts={};
+  const fl=FLOORS.find(f=>f.id===(state?state.floor:'wood'))||FLOORS[0];
+  const wl=WALLS.find(w=>w.id===(state?state.wall:'plaster'))||WALLS[0];
+  const floor=box(HW,0.2,HD,fl.mat());floor.position.y=-0.1;g.add(floor);g.userData.parts.floor=floor;
+  const wallMat=wl.mat();
+  const back=box(HW,3,0.2,wallMat);back.position.set(0,1.5,-HD/2);g.add(back);
+  const right=box(0.2,3,HD,wallMat);right.position.set(HW/2,1.5,0);g.add(right);
+  // left wall has the doorway gap at DOORZ (width 1.4)
+  const lz1=(-HD/2+(DOORZ-0.7))/2, ll1=(DOORZ-0.7)+HD/2;const leftA=box(0.2,3,ll1,wallMat);leftA.position.set(-HW/2,1.5,lz1);g.add(leftA);
+  const ll2=HD/2-(DOORZ+0.7);const leftB=box(0.2,3,ll2,wallMat);leftB.position.set(-HW/2,1.5,DOORZ+0.7+ll2/2);g.add(leftB);
+  const lintel=box(0.2,0.6,1.4,wallMat);lintel.position.set(-HW/2,2.7,DOORZ);g.add(lintel);
+  const skirt=box(HW,0.3,0.1,M(0x6e4c30));skirt.position.set(0,0.15,-HD/2+0.06);g.add(skirt);
+  const win=box(1.8,1.3,0.1,M(0x8fb7c9,{emissive:0x3a5a6a,emissiveIntensity:.4}));win.position.set(2,1.8,-HD/2+0.05);g.add(win);
+  const sill=box(2,0.08,0.3,M(0x6e4c30));sill.position.set(2,1.12,-HD/2+0.2);g.add(sill);
+  g.userData.parts.walls=[back,right,leftA,leftB,lintel];
+  [floor,back,right,leftA,leftB,lintel,skirt,win,sill].forEach(o=>o.userData.noInk=true);[back,right,leftA,leftB].forEach(o=>o.castShadow=false);
+  if(state&&state.door){const d=CRAFT.door.build();d.position.set(-HW/2,0,DOORZ);g.add(d);g.userData.parts.door=d;}
+  else{ // no door yet: a draught of rain blows in
+    const gap=box(0.05,2.3,1.3,new THREE.MeshToonMaterial({color:0x223a44,gradientMap:gradTex,transparent:true,opacity:.5}));gap.position.set(-HW/2,1.15,DOORZ);gap.userData.noInk=true;g.add(gap);}
   return g;
 }
 
@@ -282,12 +336,19 @@ function addNeighbour(){
 }
 
 // ---------- state ----------
-let phase='title',rat,root,t=0,last=performance.now(),inv=[],keys={},moveTouch={};
+let phase='title',rat,root,t=0,last=performance.now(),keys={},moveTouch={};
+let inv={}; // part counts
+const home={floor:'wood',wall:'plaster',door:false,placed:[]}; // placed: {id,x,z,rot,wall?,y?}
+function invCount(){return Object.values(inv).reduce((a,b)=>a+b,0);}
+function has(needs){return Object.entries(needs).every(([k,n])=>(inv[k]||0)>=n);}
+function spend(needs){Object.entries(needs).forEach(([k,n])=>{inv[k]-=n;if(inv[k]<=0)delete inv[k];});}
+function save(){try{localStorage.setItem('ww-save',JSON.stringify({inv,home,v:1}));}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('ww-save'));if(d&&d.v===1){inv=d.inv||{};Object.assign(home,d.home);return true;}}catch(e){}return false;}
 const $=id=>document.getElementById(id);
-const ui={title:$('title'),sub:$('sub'),phase:$('phase'),bag:$('bag'),prompt:$('prompt'),skip:$('skip'),go:$('go'),build:$('build'),inv:$('inv'),end:$('end'),pad:$('pad')};
+const ui={title:$('title'),sub:$('sub'),phase:$('phase'),bag:$('bag'),prompt:$('prompt'),skip:$('skip'),go:$('go'),hb:$('hb'),end:$('end'),pad:$('pad')};
 function clear(){if(root)scene.remove(root);root=new THREE.Group();scene.add(root);}
-function bag(){ui.bag.textContent=inv.length?`Bag: ${inv.length} item${inv.length>1?'s':''}`:'Bag: empty';}
-addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(phase==='cutscene'&&e.key===' ')endCutscene();if(e.key.toLowerCase()==='e')grab();if(e.key===' '&&phase==='scavenge'&&sc&&sc.talk)advanceTalk();if(e.key.toLowerCase()==='r')rotateSel();if(e.key==='Enter'&&phase==='scavenge'&&inv.length)startBuild();});
+function bag(){const n=invCount();ui.bag.textContent=n?`Bag: ${n} part${n>1?'s':''}`:'Bag: empty';}
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(phase==='cutscene'&&e.key===' ')endCutscene();if(e.key.toLowerCase()==='e')grab();if(e.key===' '&&phase==='scavenge'&&sc&&sc.talk)advanceTalk();if(e.key.toLowerCase()==='r')rotateSel();if(e.key==='Enter'&&phase==='scavenge')startHouse();if(e.key==='Escape'&&phase==='house')cancelPlace();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 const stick=$('stick'),knob=$('knob');let joy={x:0,z:0},joyId=null;
 function joyMove(e){const r=stick.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const max=r.width/2-28;const l=Math.hypot(dx,dy);if(l>max){dx*=max/l;dy*=max/l;}knob.style.left=(35+dx)+'px';knob.style.top=(35+dy)+'px';joy.x=dx/max;joy.z=dy/max;}
@@ -303,13 +364,14 @@ $('padE').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagatio
 let cs;
 function startCutscene(){
   phase='cutscene';clear();ui.title.style.display='none';ui.pad.style.display='none';ui.skip.style.display='block';ui.phase.textContent='Pip\'s house, 3am';
-  const house=makeHouse();root.add(house);
+  const house=makeHouse({floor:'wood',wall:'plaster',door:true});root.add(house);
   const furn=[];
   const add=(id,x,z,ry=0)=>{const m=ITEMS[id].build();m.position.set(x,0,z);m.rotation.y=ry;root.add(m);furn.push({m,x,z,ry,o:Math.random()*6});};
-  add('matchbox',-2.4,-2.2);add('cap',1.2,-1);add('cork',2.2,-0.6);add('cork',0.3,-0.3,1);add('can',3.6,-2.6);add('spool',-3.4,0.8);add('candle',1.2,-1);add('sponge',0.5,1.6);add('teacup',3.5,1.5);
-  const water=new THREE.Mesh(new THREE.PlaneGeometry(9,7,20,20),new THREE.MeshToonMaterial({color:0x5c8fa0,gradientMap:gradTex,transparent:true,opacity:.8}));
+  const addC=(id,x,z,ry=0)=>{const m=CRAFT[id].build();m.position.set(x,0,z);m.rotation.y=ry;root.add(m);furn.push({m,x,z,ry,o:Math.random()*6});};
+  addC('bed',-3.4,-2.6);addC('table',1.2,-1.2);addC('stool',2.4,-0.6);addC('chair',0,-0.2,1);addC('cupboard',4.6,-3.2);add('spool',-4.6,1.2);addC('lamp',1.2,-1.2);addC('rug',0.5,2);addC('bath',4.6,2.4);
+  const water=new THREE.Mesh(new THREE.PlaneGeometry(HW,HD,20,20),new THREE.MeshToonMaterial({color:0x5c8fa0,gradientMap:gradTex,transparent:true,opacity:.8}));
   water.rotation.x=-Math.PI/2;water.position.y=-0.3;root.add(water);
-  rat=makeRat();rat.scale.setScalar(0.7);rat.position.set(-2.4,0,-2.2);root.add(rat);
+  rat=makeRat();rat.scale.setScalar(0.7);rat.position.set(-3.4,0,-2.6);root.add(rat);
   const rain=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(Array.from({length:600},()=>[(Math.random()-.5)*14,Math.random()*8,(Math.random()-.5)*10]).flat(),3)),new THREE.PointsMaterial({color:0xbcd6e0,size:0.06,transparent:true,opacity:.7}));root.add(rain);
   water.userData.noInk=true;rain.userData.noInk=true;cs={t:0,furn,water,rain,line:-1,waveDone:false};outline(root);
   camera.position.set(0,4.5,innerHeight>innerWidth?13:9);camera.lookAt(0,0.8,0);
@@ -328,22 +390,22 @@ function tickCutscene(dt){
   for(let i=0;i<rp.count;i++){let y=rp.getY(i)-dt*9;if(y<0)y=8;rp.setY(i,y);}rp.needsUpdate=true;
   cs.furn.forEach(f=>{
     if(level>0.15){const fl=level-0.1+Math.sin(T*1.5+f.o)*0.08;f.m.position.y=Math.max(0,fl);f.m.rotation.set(Math.sin(T+f.o)*0.15,f.ry+Math.sin(T*0.5+f.o)*0.4,Math.cos(T*0.8+f.o)*0.12);
-      if(T>10){f.m.position.x-=dt*(0.6+f.o*0.1);f.m.position.z+=dt*0.25;}}
+      if(T>10){f.m.position.x-=dt*(0.6+f.o*0.1);f.m.position.z+=dt*(DOORZ-f.m.position.z)*0.15;}}
   });
   let speed=0,panic=false;
-  if(T>6.5){panic=true;const target=new THREE.Vector3(3.6,0,2.6);const d=target.clone().sub(rat.position);d.y=0;
+  if(T>6.5){panic=true;const target=new THREE.Vector3(-HW/2+1.2,0,DOORZ);const d=target.clone().sub(rat.position);d.y=0;
     if(d.length()>0.2&&T<11){d.normalize();rat.position.addScaledVector(d,dt*2.2);rat.rotation.y=Math.atan2(d.x,d.z);speed=1;}
     rat.position.y=Math.max(0,level-0.2);}
   rat.animate(dt,speed,panic);
   camera.position.x=Math.sin(T*0.15)*1.5;camera.position.y=4.5-Math.min(1.5,T*0.1);camera.lookAt(rat.position.x*0.5,0.8,0);
   if(T>17.5)endCutscene();
 }
-function endCutscene(){if(cs)clearTimeout(cs.subT);ui.sub.style.opacity=0;ui.sub.textContent='';ui.skip.style.display='none';startScavenge();}
+function endCutscene(){inv={};Object.assign(home,{floor:'wood',wall:'plaster',door:false,placed:[]});if(cs)clearTimeout(cs.subT);ui.sub.style.opacity=0;ui.sub.textContent='';ui.skip.style.display='none';startScavenge();}
 
 // ---------- scavenge ----------
 let sc;
 function startScavenge(){
-  phase='scavenge';clear();inv=[];bag();ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Behind the takeaway';
+  phase='scavenge';clear();bag();ui.hb.style.display='none';ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Behind the takeaway';
   scene.fog=new THREE.Fog(0x4a2c1e,28,75);
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(140,80),MT(0xc9c0b4,'cobble',46,26));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.userData.noInk=true;root.add(ground);
   [[-9,4,4],[18,9,3],[-28,-2,2.5],[34,-4,3.5]].forEach(([x,z,r])=>{const puddle=new THREE.Mesh(new THREE.CircleGeometry(r,24),M(0x5c8fa0));puddle.rotation.x=-Math.PI/2;puddle.position.set(x,0.01,z);puddle.userData.noInk=true;root.add(puddle);});
@@ -379,9 +441,12 @@ function startScavenge(){
   const tag=new THREE.Mesh(new THREE.PlaneGeometry(3.4,1.05),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(tagC),transparent:true}));tag.position.set(2.4,1.15,2.09);tag.rotation.z=-0.06;tag.userData.noInk=true;dump.add(tag);
   const ramp=box(4,0.25,4.9,MT(0xb99268,'wood',1.2,1.6));ramp.position.set(0,1,4.25);ramp.rotation.x=0.42;ramp.receiveShadow=true;ramp.userData.noInk=true;dump.add(ramp);
   const bags=[[-12,0,-4],[6.5,0,-1],[-13,0,1],[7,0,2.5],[16,0,-6],[-26,0,5],[38,0,3],[-38,0,-5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x1a1816),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
-  const spots=[[-1.5,2,-4],[1.4,2,-4.4],[0,2,-3],[-2.8,2,-3.2],[2.6,2,-3],[-19,0,7.5],[9,0,4],[-1,0,9],[23,0,-6.2],[-34,0,-3]];
-  const ids=Object.keys(ITEMS);sc={items:[],near:null,talk:null,nearNb:false};ui.talk.style.display='none';
-  ids.forEach((id,i)=>{const m=ITEMS[id].build();const [x,y,z]=spots[i];m.position.set(x,y,z);m.rotation.y=Math.random()*6;root.add(m);sc.items.push({id,m,taken:false});});
+  const spots=[[-1.5,2,-4],[1.4,2,-4.4],[0,2,-3],[-2.8,2,-3.2],[2.6,2,-3],[-3.8,2,-4.8],[3.9,2,-5],[-19,0,7.5],[9,0,4],[-1,0,9],[23,0,-6.2],[-34,0,-3],[16,0,-4],[-12,0,6],[30,0,6],[-27,0,8],[38,0,-2],[-40,0,4],[6,0,14],[-8,0,16],[20,0,18],[-25,0,-6.5]];
+  const pool=Object.keys(ITEMS);const weights={stick:4,paper:2,nail:2,foil:2,string:2,button:2,coin:1,bulb:1,cloth:1};
+  sc={items:[],near:null,talk:null,nearNb:false};ui.talk.style.display='none';
+  const bagIds=[];pool.forEach(id=>{for(let k=0;k<(weights[id]||1);k++)bagIds.push(id);});
+  const shuffled=spots.slice().sort(()=>Math.random()-0.5).slice(0,14);
+  shuffled.forEach(([x,y,z])=>{const id=bagIds[Math.floor(Math.random()*bagIds.length)];const m=ITEMS[id].build();m.position.set(x,y,z);m.rotation.y=Math.random()*6;outline(m);root.add(m);sc.items.push({id,m,taken:false});});
   rat=makeRat();rat.position.set(0,0,10);rat.rotation.y=Math.PI;root.add(rat);outline(root);
   fatMixer=null;try{addNeighbour();}catch(e){console.warn(e);}
   camera.position.set(0,8,18);
@@ -444,74 +509,112 @@ function advanceTalk(){if(!sc||!sc.talk)return;if(sc.talk.audio){bigratAudio.cur
   sc.talk.i++;if(sc.talk.i>=TALK.length){endTalk();return;}showLine();}
 ui.talk=$('talk');ui.talk.addEventListener('pointerdown',e=>{e.stopPropagation();advanceTalk();});
 function grab(){
+  if(phase==='house'){if(hs.sel)place();else if(hs.nearDoor){cancelPlace();save();startScavenge();}return;}
   if(phase!=='scavenge')return;
   if(sc.talk){advanceTalk();return;}
   if(!sc.near){if(sc.nearNb)startTalk();return;}
-  const it=sc.near;it.taken=true;root.remove(it.m);inv.push(it.id);bag();
+  const it=sc.near;it.taken=true;root.remove(it.m);inv[it.id]=(inv[it.id]||0)+1;bag();save();
   const u=rat.userData;if(u.pick&&u.pick.item)u.pick.item.parent.remove(u.pick.item);
   const held=ITEMS[it.id].build();outline(held);held.traverse(o=>{if(o.isLight)o.intensity=0.4;});
   const bb=new THREE.Box3().setFromObject(held);const size=bb.getSize(new THREE.Vector3());const sc0=0.55/Math.max(size.x,size.y,size.z);
   held.scale.setScalar(sc0);held.position.set(0,-0.55,1.45);held.rotation.x=-0.6;held.visible=false;u.torso.add(held);
   u.pick={t:0,item:held,scale:sc0};
-  ui.go.style.display='block';ui.go.textContent=inv.length>=sc.items.length?'Got everything — head home':'Head home and rebuild ('+inv.length+')';
+  ui.go.style.display='block';ui.go.textContent='Head home ('+invCount()+' parts)';
 }
-ui.go.addEventListener('click',startBuild);
+ui.go.addEventListener('click',()=>startHouse());
 
-// ---------- build ----------
-let bd;const CELL=1,COLS=8,ROWS=6;
-function startBuild(){
-  phase='build';clear();ui.prompt.style.display='none';ui.go.style.display='none';ui.pad.style.display='none';ui.phase.textContent='Home again — drained, not dry';
-  scene.fog=null;
-  const house=makeHouse();root.add(house);
-  const gp=[];for(let i=0;i<=COLS;i++)gp.push(i-COLS/2,0.01,-ROWS/2,i-COLS/2,0.01,ROWS/2);for(let j=0;j<=ROWS;j++)gp.push(-COLS/2,0.01,j-ROWS/2,COLS/2,0.01,j-ROWS/2);const grid=new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(gp,3)),new THREE.LineBasicMaterial({color:0x5a3a22}));root.add(grid);
-  const cursor=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:0xd9a441,transparent:true,opacity:.35}));cursor.rotation.x=-Math.PI/2;cursor.position.y=0.02;cursor.visible=false;root.add(cursor);
-  const floorPick=new THREE.Mesh(new THREE.PlaneGeometry(COLS,ROWS),new THREE.MeshBasicMaterial({visible:false}));floorPick.rotation.x=-Math.PI/2;root.add(floorPick);
-  rat=makeRat();rat.scale.setScalar(0.6);rat.position.set(2.6,0,2.7);rat.rotation.y=-2.4;root.add(rat);
-  bd={cursor,floorPick,sel:null,rot:0,placed:[],ghost:null,occ:{},slots:[]};
-  if(innerHeight>innerWidth)camera.position.set(0,13,10);else camera.position.set(0,9,8.5);camera.lookAt(0,0,0.3);outline(root);
-  ui.build.style.display='flex';renderInv();
+// ---------- house: free 3D placement, crafting, decorating ----------
+let hs;
+function startHouse(){
+  phase='house';clear();ui.prompt.style.display='none';ui.go.style.display='none';ui.talk.style.display='none';ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';
+  ui.phase.textContent=home.door?'Home':'Home — no door yet';scene.fog=null;bag();
+  hs={house:null,placed:[],ghost:null,sel:null,rot:0,tab:'bag',lights:[]};
+  rebuildHouse();
+  home.placed.forEach(p=>spawnPlaced(p));
+  rat=makeRat();rat.scale.setScalar(0.62);rat.position.set(-HW/2+1.6,0,DOORZ);rat.rotation.y=Math.PI/2;root.add(rat);
+  camera.position.set(rat.position.x,10,rat.position.z+10);camera.lookAt(rat.position);
+  ui.hb.style.display='flex';renderPanel();save();
 }
-function renderInv(){
-  ui.inv.innerHTML='';bd.slots=[];
-  inv.forEach((id,i)=>{const used=bd.placed.some(p=>p.slot===i);const b=document.createElement('button');b.className='slot'+(used?' used':'')+(bd.sel===i?' sel':'');b.innerHTML=`${ITEMS[id].name}<small>${ITEMS[id].use} · ${ITEMS[id].w}×${ITEMS[id].d}</small>`;b.disabled=used;b.addEventListener('click',()=>select(i));ui.inv.appendChild(b);});
-  if(!inv.length)ui.inv.innerHTML='<div style="opacity:.7;padding:8px">Nothing in the bag. The floor stays bare.</div>';
+function rebuildHouse(){if(hs.house)root.remove(hs.house);hs.house=makeHouse(home);root.add(hs.house);outline(hs.house);}
+function spawnPlaced(p){const def=defOf(p.id);const m=def.build();outline(m);
+  if(p.wall){m.position.set(p.x,p.y,p.z);m.rotation.y=p.rot;}else{m.position.set(p.x,0,p.z);m.rotation.y=p.rot;}
+  if(def.light){const l=new THREE.PointLight(def.light.color,def.light.i,def.light.d);l.position.y=def.wall?0:1.0;m.add(l);}
+  root.add(m);hs.placed.push({p,m});}
+// --- panel ---
+function renderPanel(){
+  const tabs=[['bag','Bag'],['craft','Craft'],['floor','Floor'],['wall','Walls']];
+  $('htabs').innerHTML=tabs.map(([k,n])=>`<button class="tab${hs.tab===k?' on':''}" data-t="${k}">${n}</button>`).join('')+`<button class="tab" id="hout">Go scavenging</button>`;
+  $('htabs').querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{hs.tab=b.dataset.t;renderPanel();}));
+  $('hout').addEventListener('click',()=>{cancelPlace();save();startScavenge();});
+  const L=$('hlist');L.innerHTML='';
+  const chip=(html,cls,fn)=>{const b=document.createElement('button');b.className='slot '+(cls||'');b.innerHTML=html;if(fn)b.addEventListener('click',fn);else b.disabled=true;L.appendChild(b);};
+  if(hs.tab==='bag'){const ids=Object.keys(inv);if(!ids.length)L.innerHTML='<div class="hint">Bag is empty — go scavenging.</div>';
+    ids.forEach(id=>chip(`${ITEMS[id].name}<small>×${inv[id]} · place as-is</small>`,'',()=>beginPlace(id)));}
+  if(hs.tab==='craft'){Object.entries(CRAFT).forEach(([id,c])=>{if(id==='door'&&home.door)return;const ok=has(c.needs);const need=Object.entries(c.needs).map(([k,n])=>`${n} ${ITEMS[k].name.toLowerCase()}`).join(', ');
+    chip(`${c.name}<small>${need}</small>`,ok?'':'used',ok?()=>craft(id):null);});}
+  if(hs.tab==='floor'){FLOORS.forEach(f=>{const cur=home.floor===f.id;const ok=cur||has(f.cost);const cost=Object.entries(f.cost).map(([k,n])=>`${n} ${ITEMS[k].name.toLowerCase()}`).join(', ')||'free';
+    chip(`${f.name}<small>${cur?'current':cost}</small>`,cur?'sel':(ok?'':'used'),(!cur&&ok)?()=>{spend(f.cost);home.floor=f.id;rebuildHouse();save();renderPanel();bag();}:null);});}
+  if(hs.tab==='wall'){WALLS.forEach(w=>{const cur=home.wall===w.id;const ok=cur||has(w.cost);const cost=Object.entries(w.cost).map(([k,n])=>`${n} ${ITEMS[k].name.toLowerCase()}`).join(', ')||'free';
+    chip(`${w.name}<small>${cur?'current':cost}</small>`,cur?'sel':(ok?'':'used'),(!cur&&ok)?()=>{spend(w.cost);home.wall=w.id;rebuildHouse();save();renderPanel();bag();}:null);});}
+  $('hplace').style.display=hs.sel?'flex':'none';$('hlist').style.display=hs.sel?'none':'flex';$('htabs').style.display=hs.sel?'none':'flex';
 }
-function select(i){bd.sel=bd.sel===i?null:i;bd.rot=0;if(bd.ghost){root.remove(bd.ghost);bd.ghost=null;}
-  if(bd.sel!==null){bd.ghost=ITEMS[inv[bd.sel]].build();bd.ghost.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.5;}});bd.ghost.visible=false;root.add(bd.ghost);}
-  renderInv();}
-function rotateSel(){if(phase==='build'&&bd.sel!==null)bd.rot=(bd.rot+1)%4;}
-function footprint(id,rot){const it=ITEMS[id];return rot%2?{w:it.d,d:it.w}:{w:it.w,d:it.d};}
-function cellsOf(c,r,fp){const out=[];for(let i=0;i<fp.w;i++)for(let j=0;j<fp.d;j++)out.push((c+i)+','+(r+j));return out;}
-function canPlace(c,r,fp){if(c<0||r<0||c+fp.w>COLS||r+fp.d>ROWS)return false;return cellsOf(c,r,fp).every(k=>!bd.occ[k]);}
-const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let hover=null;
-function pointerCell(e){const rect=canvas.getBoundingClientRect();ptr.x=((e.clientX-rect.left)/rect.width)*2-1;ptr.y=-((e.clientY-rect.top)/rect.height)*2+1;ray.setFromCamera(ptr,camera);
-  const hit=ray.intersectObject(bd.floorPick)[0];if(!hit)return null;return{c:Math.floor(hit.point.x+COLS/2),r:Math.floor(hit.point.z+ROWS/2)};}
-canvas.addEventListener('pointermove',e=>{if(phase!=='build')return;hover=pointerCell(e);});
-canvas.addEventListener('pointerdown',e=>{if(phase!=='build')return;const cell=pointerCell(e);if(!cell)return;
-  if(bd.sel!==null){const id=inv[bd.sel];const fp=footprint(id,bd.rot);if(!canPlace(cell.c,cell.r,fp))return;
-    const m=ITEMS[id].build();outline(m);placeAt(m,cell.c,cell.r,fp,bd.rot);root.add(m);const p={slot:bd.sel,m,c:cell.c,r:cell.r,fp};bd.placed.push(p);cellsOf(cell.c,cell.r,fp).forEach(k=>bd.occ[k]=p);select(bd.sel);return;}
-  const k=cell.c+','+cell.r;const p=bd.occ[k];if(p){root.remove(p.m);bd.placed=bd.placed.filter(x=>x!==p);cellsOf(p.c,p.r,p.fp).forEach(kk=>delete bd.occ[kk]);select(p.slot);}
-});
-function placeAt(m,c,r,fp,rot){m.position.set(c-COLS/2+fp.w/2,0,r-ROWS/2+fp.d/2);m.rotation.y=rot*Math.PI/2;}
-function tickBuild(dt){
-  rat.animate(dt,0,false);
-  if(bd.sel!==null&&hover){const fp=footprint(inv[bd.sel],bd.rot);const ok=canPlace(hover.c,hover.r,fp);
-    bd.cursor.visible=true;bd.cursor.scale.set(fp.w,fp.d,1);bd.cursor.position.set(hover.c-COLS/2+fp.w/2,0.02,hover.r-ROWS/2+fp.d/2);bd.cursor.material.color.set(ok?0xd9a441:0xb23a2a);
-    bd.ghost.visible=ok;if(ok)placeAt(bd.ghost,hover.c,hover.r,fp,bd.rot);}
-  else{bd.cursor.visible=false;if(bd.ghost)bd.ghost.visible=false;}
+function craft(id){const c=CRAFT[id];if(!has(c.needs))return;spend(c.needs);bag();
+  if(c.special==='door'){home.door=true;rebuildHouse();ui.phase.textContent='Home';save();renderPanel();return;}
+  beginPlace(id);}
+// --- placing ---
+function beginPlace(id){cancelPlace();const def=defOf(id);const g=def.build();g.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.55;}});
+  hs.sel=id;hs.rot=0;hs.ghost=g;root.add(g);$('hsel').textContent=def.name;renderPanel();}
+function cancelPlace(){if(!hs)return;if(hs.ghost){root.remove(hs.ghost);hs.ghost=null;}hs.sel=null;renderPanel();}
+function rotateSel(){if(phase==='house'&&hs&&hs.sel)hs.rot=(hs.rot+1)%8;}
+function ghostPose(){const def=defOf(hs.sel);const f=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));
+  let x=rat.position.x+f.x*1.5,z=rat.position.z+f.z*1.5,y=0,rot=rat.rotation.y+hs.rot*Math.PI/4,wall=null;
+  if(def.wall){ // snap to nearest wall
+    const cands=[{wall:'back',d:Math.abs(z+HD/2),x,z:-HD/2+0.16,rot:0},{wall:'right',d:Math.abs(HW/2-x),x:HW/2-0.16,z,rot:-Math.PI/2},{wall:'left',d:Math.abs(x+HW/2),x:-HW/2+0.16,z,rot:Math.PI/2}];
+    const c=cands.sort((a,b)=>a.d-b.d)[0];if(c.d<2.6){wall=c.wall;x=c.x;z=c.z;rot=c.rot;y=1.7;if(wall==='left'&&Math.abs(z-DOORZ)<1.2)wall='blocked';}else wall='none';}
+  x=Math.max(-HW/2+0.4,Math.min(HW/2-0.4,x));z=Math.max(-HD/2+0.4,Math.min(HD/2-0.4,z));
+  let ok=true;if(def.wall){ok=wall&&wall!=='none'&&wall!=='blocked';}
+  else{const r=def.r||.4;hs.placed.forEach(({p,m})=>{if(p.wall)return;const pd=defOf(p.id);if(pd.flat||def.flat)return;if(Math.hypot(p.x-x,p.z-z)<r+(pd.r||.4))ok=false;});
+    if(x<-HW/2+r+0.15&&Math.abs(z-DOORZ)<1.2)ok=false;}
+  return {x,y,z,rot,ok,wall};}
+function place(){if(!hs.sel)return;const g=ghostPose();if(!g.ok)return;const id=hs.sel;const def=defOf(id);
+  if(!CRAFT[id]){inv[id]--;if(inv[id]<=0)delete inv[id];}
+  const p={id,x:g.x,z:g.z,rot:g.rot};if(def.wall){p.wall=g.wall;p.y=g.y;}
+  home.placed.push(p);spawnPlaced(p);bag();save();
+  const again=!CRAFT[id]&&inv[id]>0;cancelPlace();if(again)beginPlace(id);}
+function pickUp(entry){root.remove(entry.m);hs.placed=hs.placed.filter(e=>e!==entry);home.placed=home.placed.filter(p=>p!==entry.p);
+  const id=entry.p.id;if(CRAFT[id]){Object.entries(CRAFT[id].needs).forEach(([k,n])=>inv[k]=(inv[k]||0)+n);}else inv[id]=(inv[id]||0)+1;bag();save();renderPanel();}
+const ray2=new THREE.Raycaster(),ptr2=new THREE.Vector2();
+canvas.addEventListener('pointerdown',e=>{if(phase!=='house'||!hs||hs.sel)return;const rect=canvas.getBoundingClientRect();ptr2.x=((e.clientX-rect.left)/rect.width)*2-1;ptr2.y=-((e.clientY-rect.top)/rect.height)*2+1;ray2.setFromCamera(ptr2,camera);
+  const hits=ray2.intersectObjects(hs.placed.map(e=>e.m),true);if(!hits.length)return;let o=hits[0].object;const entry=hs.placed.find(e=>{let ok=false;e.m.traverse(c=>{if(c===o)ok=true;});return ok;});if(entry)pickUp(entry);});
+function tickHouse(dt){
+  let dx=0,dz=0;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
+  if(Math.hypot(joy.x,joy.z)>0.15){dx=joy.x;dz=joy.z;}
+  let len=Math.hypot(dx,dz);let speed=0;
+  if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=len;rat.position.x+=dx*dt*4.5;rat.position.z+=dz*dt*4.5;rat.rotation.y=Math.atan2(dx,dz);}
+  rat.position.x=Math.max(-HW/2+0.5,Math.min(HW/2-0.5,rat.position.x));rat.position.z=Math.max(-HD/2+0.5,Math.min(HD/2-0.5,rat.position.z));
+  // furniture blocks walking (except flat things)
+  hs.placed.forEach(({p,m})=>{if(p.wall||defOf(p.id).flat)return;const r=(defOf(p.id).r||.4)+0.35;const d=Math.hypot(rat.position.x-p.x,rat.position.z-p.z);if(d<r&&d>1e-4){const k=(r-d)/d;rat.position.x+=(rat.position.x-p.x)*k;rat.position.z+=(rat.position.z-p.z)*k;}});
+  rat.animate(dt,speed,false);
+  if(hs.ghost){const g=ghostPose();hs.ghost.position.set(g.x,g.y,g.z);hs.ghost.rotation.y=g.rot;hs.ghost.traverse(o=>{if(o.material&&o.material.color)o.material.color.set(g.ok?0xffffff:0xff5544);});
+    $('hplacebtn').disabled=!g.ok;$('hplacebtn').textContent=g.ok?'Place':(g.wall==='none'?'Walk to a wall':g.wall==='blocked'?'Not over the door':'Blocked');}
+  // door exit
+  const nearDoor=Math.abs(rat.position.z-DOORZ)<1.1&&rat.position.x<-HW/2+1.3;
+  if(nearDoor&&!hs.sel){ui.prompt.style.display='block';ui.prompt.textContent='E · go scavenging';$('padE').textContent='Out';}else{ui.prompt.style.display='none';$('padE').textContent=hs.sel?'Place':'Grab';}
+  hs.nearDoor=nearDoor;
+  const portrait=innerHeight>innerWidth;const up=portrait?13:8.5,back=portrait?10.5:8;
+  const cx=rat.position.x*0.5,cz=rat.position.z*0.4+back;camera.position.x+=(cx-camera.position.x)*dt*3;camera.position.z+=(cz-camera.position.z)*dt*3;camera.position.y+=(up-camera.position.y)*dt*3;
+  camera.lookAt(rat.position.x*0.5,0.6,rat.position.z*0.4-1);
 }
-$('done').addEventListener('click',()=>{phase='end';ui.build.style.display='none';const n=bd.placed.length;
-  $('endh').textContent=n===0?'Bare boards.':n<4?'A start.':n<8?'Home again.':'Better than before.';
-  $('endp').textContent=n===0?'Pip sleeps on the floor. It could be worse — it could be wet.':`${n} thing${n>1?'s':''} back where ${n>1?'they':'it'} belong${n>1?'':'s'}. The candle throws a small, dry light.`;
-  ui.end.style.display='flex';camera.position.set(-5,4,6);});
+$('hplacebtn').addEventListener('click',place);$('hrot').addEventListener('click',rotateSel);$('hcancel').addEventListener('click',cancelPlace);
 $('again').addEventListener('click',()=>{ui.end.style.display='none';startCutscene();});
-$('start').addEventListener('click',startCutscene);
+$('start').addEventListener('click',()=>{if(load()){startHouse();ui.title.style.display='none';}else startCutscene();});
+$('newgame').addEventListener('click',()=>{try{localStorage.removeItem('ww-save');}catch(e){}inv={};Object.assign(home,{floor:'wood',wall:'plaster',door:false,placed:[]});startCutscene();});
 ui.skip.addEventListener('click',endCutscene);
 
 // ---------- loop ----------
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;t+=dt;
   try{
-  if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='build')tickBuild(dt);else if(phase==='end'){camera.lookAt(0,0.5,0);rat.animate(dt,0,false);}
+  if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='end'){camera.lookAt(0,0.5,0);rat.animate(dt,0,false);}
   renderer.render(scene,camera);
   }catch(e){console.error(e);}}
 requestAnimationFrame(loop);
