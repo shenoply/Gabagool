@@ -9,7 +9,7 @@
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden;background:var(--ink);font-family:Georgia,"Times New Roman",serif;color:var(--paper)}
+  html,body{height:100%;overflow:hidden;touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none;background:var(--ink);font-family:Georgia,"Times New Roman",serif;color:var(--paper)}
   #c{display:block;width:100%;height:100%}
   #ui{position:fixed;inset:0;pointer-events:none}
   #title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(43,29,20,.92);pointer-events:auto;text-align:center;padding:24px}
@@ -49,7 +49,7 @@
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 8</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 9</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -73,7 +73,7 @@
 // ---------- setup ----------
 const canvas=document.getElementById('c');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
 renderer.shadowMap.enabled=true;
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x2b1d14);
@@ -84,7 +84,7 @@ addEventListener('resize',resize);resize();
 
 const hemi=new THREE.HemisphereLight(0xf0e6cf,0x3a2a1c,0.75);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe4b3,1.0);sun.position.set(10,18,8);sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25,near:1,far:60});sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
+sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25,near:1,far:60});sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
 
 const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.85},o));
 const box=(w,h,d,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.castShadow=m.receiveShadow=true;return m};
@@ -200,7 +200,7 @@ function addNeighbour(){
     const k=4.2/size.y;m.scale.setScalar(k);
     m.position.set(-c.x*k,-bb.min.y*k,-c.z*k);
     const pivot=new THREE.Group();pivot.add(m);pivot.position.set(-12.5,0,-3);pivot.rotation.y=0.9;
-    m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+    m.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.frustumCulled=true;}});
     root.add(pivot);
     if(g.animations.length){fatMixer=new THREE.AnimationMixer(m);const a=fatMixer.clipAction(g.animations[0]);a.play();}
   };
@@ -222,8 +222,10 @@ function joyMove(e){const r=stick.getBoundingClientRect();let dx=e.clientX-(r.le
 stick.addEventListener('pointerdown',e=>{joyId=e.pointerId;stick.setPointerCapture(joyId);joyMove(e);});
 stick.addEventListener('pointermove',e=>{if(e.pointerId===joyId)joyMove(e);});
 const joyEnd=e=>{if(e.pointerId!==joyId)return;joyId=null;joy.x=joy.z=0;knob.style.left='35px';knob.style.top='35px';};
-stick.addEventListener('pointerup',joyEnd);stick.addEventListener('pointercancel',joyEnd);
-$('padE').addEventListener('click',grab);
+stick.addEventListener('pointerup',joyEnd);stick.addEventListener('pointercancel',joyEnd);stick.addEventListener('lostpointercapture',joyEnd);
+addEventListener('pointerup',joyEnd);addEventListener('pointercancel',joyEnd);addEventListener('touchend',()=>{if(joyId!==null&&!navigator.maxTouchPoints)return;},{passive:true});
+addEventListener('blur',()=>{joyId=null;joy.x=joy.z=0;keys={};});document.addEventListener('visibilitychange',()=>{joyId=null;joy.x=joy.z=0;keys={};});
+$('padE').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();grab();});
 
 // ---------- cutscene ----------
 let cs;
@@ -305,7 +307,7 @@ function tickScavenge(dt){
   else if(Math.abs(lx)<4.5&&Math.abs(lz)<=2)h=2;
   rat.position.y+= (h-rat.position.y)*Math.min(1,dt*10);
   rat.animate(dt,speed,false);
-  sc.near=null;let best=1.9;
+  sc.near=null;let best=2.6;
   sc.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
   if(sc.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${ITEMS[sc.near.id].name}`;}else ui.prompt.style.display='none';
   const cx=rat.position.x*0.6,cz=rat.position.z+10;
