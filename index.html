@@ -56,10 +56,11 @@
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 16</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 17</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
+  <button class="btn" id="mute" style="position:absolute;top:56px;right:14px;font-size:13px;padding:6px 12px;background:rgba(43,29,20,.7);color:var(--paper)">Voice: on</button>
   <div id="prompt"></div>
   <button class="btn" id="skip" style="display:none">Skip scene</button>
   <button class="btn" id="go">Head home and rebuild</button>
@@ -404,7 +405,7 @@ function tickScavenge(dt){
   sc.near=null;let best=2.6;
   sc.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
   sc.nearNb=rat.position.distanceTo(new THREE.Vector3(NB.x,rat.position.y,NB.z))<4.6;
-  if(sc.talk){ui.prompt.style.display='none';$('padE').textContent='Next';const k=sc.talk;k.t+=dt;const line=TALK[k.i][1];const want=Math.min(line.length,Math.floor(k.t*28));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}
+  if(sc.talk){ui.prompt.style.display='none';$('padE').textContent='Next';const k=sc.talk;k.t+=dt;const line=TALK[k.i][1];const want=Math.min(line.length,Math.floor(k.t*16));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}
   else if(sc.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${ITEMS[sc.near.id].name}`;$('padE').textContent='Grab';}
   else if(sc.nearNb){ui.prompt.style.display='block';ui.prompt.textContent='E · talk to the big rat';$('padE').textContent='Talk';}
   else{ui.prompt.style.display='none';$('padE').textContent='Grab';}
@@ -416,10 +417,22 @@ function tickScavenge(dt){
 const TALK=[["The Fat Rat","Hey kid."],["The Fat Rat","Welcome to the Bronx dumpster. Find what you need and bounce."],["The Fat Rat","Don't stay too long. The cats may show up and pull your guts out."]];
 const NB=new THREE.Vector3(-4.4,0,1.0),NBF=new THREE.Vector3(Math.sin(1.3),0,Math.cos(1.3));
 function startTalk(){sc.talk={i:0,chars:0,t:0};ui.talk.style.display='block';ui.prompt.style.display='none';showLine();}
-function showLine(){const l=TALK[sc.talk.i];$('tname').textContent=l[0];$('ttext').textContent='';sc.talk.chars=0;sc.talk.t=0;}
+// gruff voice via the browser's speech engine, with a mumble fallback
+let AC=null;function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function pickVoice(){const vs=speechSynthesis.getVoices();const en=vs.filter(v=>/^en/i.test(v.lang));
+  return en.find(v=>/male|David|Daniel|Fred|Google UK English Male|en-US-.*Male/i.test(v.name))||en.find(v=>/US/i.test(v.lang))||en[0]||vs[0]||null;}
+let voiceOn=true;$('mute').addEventListener('click',()=>{voiceOn=!voiceOn;$('mute').textContent='Voice: '+(voiceOn?'on':'off');if(!voiceOn&&'speechSynthesis' in window)speechSynthesis.cancel();});
+function say(text,onend){if(!voiceOn)return false;
+  if('speechSynthesis' in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);const v=pickVoice();if(v)u.voice=v;u.pitch=0.35;u.rate=0.82;u.volume=1;u.onend=onend||null;speechSynthesis.speak(u);return true;}
+  const ac=audio();if(!ac)return false; // mumble: short pulses
+  const n=Math.min(24,Math.ceil(text.length/3));let t=ac.currentTime;
+  for(let i=0;i<n;i++){const o=ac.createOscillator(),g=ac.createGain();o.type='sawtooth';o.frequency.value=85+Math.random()*30;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.25,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.11);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+0.12);t+=0.13+Math.random()*0.05;}
+  return true;}
+if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
+function showLine(){const l=TALK[sc.talk.i];$('tname').textContent=l[0];$('ttext').textContent='';sc.talk.chars=0;sc.talk.t=0;say(l[1]);}
 function advanceTalk(){if(!sc||!sc.talk)return;const l=TALK[sc.talk.i];
   if(sc.talk.chars<l[1].length){sc.talk.chars=l[1].length;$('ttext').textContent=l[1];return;}
-  sc.talk.i++;if(sc.talk.i>=TALK.length){sc.talk=null;ui.talk.style.display='none';joy.x=joy.z=0;joyId=null;keys={};knob.style.left='35px';knob.style.top='35px';rat.rotation.y=Math.atan2(NB.x-rat.position.x,NB.z-rat.position.z);return;}showLine();}
+  sc.talk.i++;if(sc.talk.i>=TALK.length){if('speechSynthesis' in window)speechSynthesis.cancel();sc.talk=null;ui.talk.style.display='none';joy.x=joy.z=0;joyId=null;keys={};knob.style.left='35px';knob.style.top='35px';rat.rotation.y=Math.atan2(NB.x-rat.position.x,NB.z-rat.position.z);return;}showLine();}
 ui.talk=$('talk');ui.talk.addEventListener('pointerdown',e=>{e.stopPropagation();advanceTalk();});
 function grab(){
   if(phase!=='scavenge')return;
