@@ -7,3 +7,5 @@ Play: https://shenoply.github.io/Gabagool/
 Controls: WASD / arrows to move, E to grab, click to place, R to rotate. Touch controls on mobile.
 
 Single file, no build step — Three.js r128 from CDN.
+
+Credits: "The Fat Rat" by Ryan Honey (https://sketchfab.com/Raditsys), CC-BY 4.0, used as the neighbour by the dumpster.
