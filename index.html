@@ -49,6 +49,7 @@
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0)</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -69,6 +70,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 // ---------- setup ----------
 const canvas=document.getElementById('c');
@@ -197,6 +199,23 @@ function makeHouse(){
   return g;
 }
 
+// ---------- neighbour (The Fat Rat by Ryan Honey, CC-BY 4.0) ----------
+let fatGltf=null,fatMixer=null;
+function addNeighbour(){
+  const place=(g)=>{
+    const m=g.scene.clone();
+    const bb=new THREE.Box3().setFromObject(m);const size=bb.getSize(new THREE.Vector3());const c=bb.getCenter(new THREE.Vector3());
+    const k=4.2/size.y;m.scale.setScalar(k);
+    m.position.set(-c.x*k,-bb.min.y*k,-c.z*k);
+    const pivot=new THREE.Group();pivot.add(m);pivot.position.set(-12.5,0,-3);pivot.rotation.y=0.9;
+    m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+    root.add(pivot);
+    if(g.animations.length){fatMixer=new THREE.AnimationMixer(m);const a=fatMixer.clipAction(g.animations[0]);a.play();}
+  };
+  if(fatGltf){place(fatGltf);return;}
+  new THREE.GLTFLoader().load('fat-rat.glb',g=>{fatGltf=g;if(phase==='scavenge')place(g);},undefined,()=>{});
+}
+
 // ---------- state ----------
 let phase='title',rat,root,t=0,last=performance.now(),inv=[],keys={},moveTouch={};
 const $=id=>document.getElementById(id);
@@ -270,14 +289,17 @@ function startScavenge(){
   const ids=Object.keys(ITEMS);sc={items:[],near:null};
   ids.forEach((id,i)=>{const m=ITEMS[id].build();const [x,y,z]=spots[i];m.position.set(x,y,z);m.rotation.y=Math.random()*6;root.add(m);sc.items.push({id,m,taken:false});});
   rat=makeRat();rat.position.set(0,0,10);rat.rotation.y=Math.PI;root.add(rat);
+  fatMixer=null;addNeighbour();
   camera.position.set(0,8,18);
 }
 function tickScavenge(dt){
+  if(fatMixer)fatMixer.update(dt);
   let dx=0,dz=0;
   if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
   const len=Math.hypot(dx,dz);let speed=0;
   if(len){dx/=len;dz/=len;speed=1;rat.position.x+=dx*dt*6;rat.position.z+=dz*dt*6;rat.rotation.y=Math.atan2(dx,dz);}
-  rat.position.x=Math.max(-25,Math.min(25,rat.position.x));rat.position.z=Math.max(-8.5,Math.min(20,rat.position.z));
+  rat.position.x=Math.max(-25,Math.min(25,rat.position.x));
+  if(rat.position.distanceTo(new THREE.Vector3(-12.5,0,-3))<3.2){const d=rat.position.clone().sub(new THREE.Vector3(-12.5,0,-3));d.y=0;d.setLength(3.2);rat.position.x=-12.5+d.x;rat.position.z=-3+d.z;}rat.position.z=Math.max(-8.5,Math.min(20,rat.position.z));
   // dumpster ramp / roof height
   const lx=rat.position.x,lz=rat.position.z+4;let h=0;
   if(Math.abs(lx)<2&&lz>2&&lz<6.5)h=Math.max(0,(6.5-lz)/4.5*2);
