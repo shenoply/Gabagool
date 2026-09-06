@@ -49,7 +49,7 @@
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 13</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 14</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -108,6 +108,11 @@ function paint(kind,size=256){
     blot(60,'#5a3a2e',.25,6,24);blot(30,'#c97a5c',.15,6,20);}
   else if(kind==='asphalt'){x.fillStyle='#6b615a';x.fillRect(0,0,size,size);blot(120,'#5a514b',.3,6,26);blot(70,'#7a6f66',.25,6,26);blot(50,'#4a423d',.25,2,7);
     x.strokeStyle='#3d3632';x.globalAlpha=.5;x.lineWidth=1.5;for(let i=0;i<3;i++){x.beginPath();let px=R(0,size),py=R(0,size);x.moveTo(px,py);for(let k=0;k<5;k++){px+=R(-22,22);py+=R(-22,22);x.lineTo(px,py);}x.stroke();}x.globalAlpha=1;}
+  else if(kind==='cobble'){x.fillStyle='#4e463f';x.fillRect(0,0,size,size);const cw=size/6,ch=size/6;
+    for(let r=0;r<6;r++)for(let cI=-1;cI<7;cI++){const px=cI*cw+(r%2?cw/2:0),py=r*ch;x.fillStyle=['#8c7d6e','#806f61','#988a78','#76685c','#a08f7a'][Math.floor(R(0,5))];
+      x.beginPath();const rr=9,w=cw-6,h=ch-6,X=px+3,Y=py+3;x.moveTo(X+rr,Y);x.arcTo(X+w,Y,X+w,Y+h,rr);x.arcTo(X+w,Y+h,X,Y+h,rr);x.arcTo(X,Y+h,X,Y,rr);x.arcTo(X,Y,X+w,Y,rr);x.fill();
+      x.globalAlpha=.25;x.fillStyle='#fff';x.beginPath();x.ellipse(X+w*.4,Y+h*.35,w*.22,h*.16,0,0,7);x.fill();x.globalAlpha=1;}
+    blot(50,'#3c3530',.3,3,12);blot(35,'#b4a48c',.18,3,10);}
   else if(kind==='metal'){x.fillStyle='#3f7a5a';x.fillRect(0,0,size,size);blot(50,'#356649',.35,10,50);blot(30,'#4f8d6b',.3,10,50);blot(20,'#7a4b2a',.35,4,14);blot(12,'#2d4a3a',.5,3,8);}
   else if(kind==='cloth'){x.fillStyle='#d9a441';x.fillRect(0,0,size,size);blot(60,'#c48f2f',.3,6,20);blot(40,'#e8bb63',.3,6,20);}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;TEX[kind]=t;return t;
@@ -329,7 +334,7 @@ let sc;
 function startScavenge(){
   phase='scavenge';clear();inv=[];bag();ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Behind the takeaway';
   scene.fog=new THREE.Fog(0x4a2c1e,25,60);
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),MT(0xcfc4b8,'asphalt',22,22));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.userData.noInk=true;root.add(ground);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),MT(0xc9c0b4,'cobble',20,20));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.userData.noInk=true;root.add(ground);
   const puddle=new THREE.Mesh(new THREE.CircleGeometry(4,24),M(0x5c8fa0));puddle.userData.noInk=true;puddle.rotation.x=-Math.PI/2;puddle.position.set(-9,0.01,4);root.add(puddle);
   const wall=box(60,8,1,MT(0xd9b8a0,'brick',14,1.9));wall.position.set(0,4,-10);wall.userData.noInk=true;root.add(wall);
   for(let i=0;i<12;i++){const b=box(1.6,0.6,0.3,M(0x8f5a45));b.position.set(-25+i*4.6+(i%2)*1.5,0.3+(i%3)*0.62,-9.4);root.add(b);}
