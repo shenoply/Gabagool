@@ -49,7 +49,7 @@
     <p>The river came up in the night and Pip's home went under. Everything's in the dumpster now — go and get it back.</p>
     <button class="btn" id="start">Start</button>
     <p style="font-size:13px;opacity:.6">WASD / arrows to move · E to grab · click to place · R to rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 9</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 11</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -144,6 +144,25 @@ function makeRat(){
   g.userData={hips,torso,head,arms,legs,tail,phase:0,sniff:0};
   g.animate=function(dt,speed,panic){
     const u=g.userData;u.phase+=dt*(speed>0.05?11:2)*(panic?1.7:1);const t=u.phase;u.sniff+=dt*18;
+    if(u.pick){
+      const k=u.pick;k.t+=dt;const T=k.t;
+      const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
+      if(T<0.35){ // crouch and reach
+        const a=ease(T/0.35);u.torso.rotation.x=-1.4+a*0.75;u.head.rotation.x=1.25-a*0.5;
+        u.arms.forEach(ar=>{ar.rotation.x=-a*1.3;});u.legs.forEach(l=>l.rotation.x=a*0.5);u.hips.position.y=0.74-a*0.18;
+        if(k.item){k.item.visible=T>0.25;}
+      }else if(T<1.3){ // stand and lift the item
+        const a=ease((T-0.35)/0.3);u.torso.rotation.x=-1.4+0.75*(1-a)-a*0.15;u.head.rotation.x=1.25-0.5*(1-a)+a*0.15;
+        u.arms.forEach(ar=>{ar.rotation.x=-1.3-a*1.4;});u.legs.forEach(l=>l.rotation.x=0.5*(1-a));u.hips.position.y=0.74-0.18*(1-a)+Math.sin(T*20)*0.01*a;
+        u.torso.rotation.z=Math.sin(T*14)*0.05*a;
+        if(k.item){k.item.visible=true;const held=T>0.65;const s2=held?1:0.7+0.3*a;k.item.scale.setScalar(k.scale*s2);}
+      }else if(T<1.55){ // tuck it away
+        const a=ease((T-1.3)/0.25);u.arms.forEach(ar=>{ar.rotation.x=-2.7+a*2.7;});u.torso.rotation.x=-1.55+a*0.15;u.head.rotation.x=1.4-a*0.15;u.torso.rotation.z*=0.8;
+        if(k.item){k.item.scale.setScalar(k.scale*(1-a));}
+      }else{ if(k.item)k.item.parent.remove(k.item);u.pick=null;u.torso.rotation.x=-1.4;u.head.rotation.x=1.25;u.arms.forEach(ar=>ar.rotation.x=0);}
+      u.tail.forEach((s,i)=>{if(i){s.rotation.y=Math.sin(t*2.2+i*0.5)*0.3;}});
+      return;
+    }
     if(speed>0.05){
       u.legs[0].rotation.x=Math.sin(t)*0.8;u.legs[1].rotation.x=Math.sin(t+Math.PI)*0.8;
       u.arms[0].rotation.x=Math.sin(t+Math.PI)*0.6;u.arms[1].rotation.x=Math.sin(t)*0.6;
@@ -197,10 +216,10 @@ function addNeighbour(){
   const place=(g)=>{
     const m=g.scene.clone();
     const bb=new THREE.Box3().setFromObject(m);const size=bb.getSize(new THREE.Vector3());const c=bb.getCenter(new THREE.Vector3());
-    const k=4.2/size.y;m.scale.setScalar(k);
+    const k=3.6/size.y;m.scale.setScalar(k);
     m.position.set(-c.x*k,-bb.min.y*k,-c.z*k);
-    const pivot=new THREE.Group();pivot.add(m);pivot.position.set(-12.5,0,-3);pivot.rotation.y=0.9;
-    m.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.frustumCulled=true;}});
+    const pivot=new THREE.Group();pivot.add(m);pivot.position.set(-4.4,0,1.0);pivot.rotation.y=1.3;
+    m.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;const g=o.geometry;for(const k of Object.keys(g.attributes))if(!g.attributes[k])delete g.attributes[k];}});
     root.add(pivot);
     if(g.animations.length){fatMixer=new THREE.AnimationMixer(m);const a=fatMixer.clipAction(g.animations[0]);a.play();}
   };
@@ -246,7 +265,7 @@ const LINES=[[0,'Rain hammered the drainpipe all night.'],[3,'Pip slept through 
 function tickCutscene(dt){
   cs.t+=dt;const T=cs.t;
   const idx=LINES.findIndex((l,i)=>T>=l[0]&&(!LINES[i+1]||T<LINES[i+1][0]));
-  if(idx!==cs.line){cs.line=idx;ui.sub.style.opacity=0;setTimeout(()=>{ui.sub.textContent=LINES[idx]?LINES[idx][1]:'';ui.sub.style.opacity=1;},350);}
+  if(idx!==cs.line){cs.line=idx;ui.sub.style.opacity=0;clearTimeout(cs.subT);cs.subT=setTimeout(()=>{if(phase!=='cutscene')return;ui.sub.textContent=LINES[idx]?LINES[idx][1]:'';ui.sub.style.opacity=1;},350);}
   const level=T<6?-0.3:Math.min(1.6,-0.3+(T-6)*0.32);
   cs.water.position.y=level;
   const pos=cs.water.geometry.attributes.position;
@@ -266,7 +285,7 @@ function tickCutscene(dt){
   camera.position.x=Math.sin(T*0.15)*1.5;camera.position.y=4.5-Math.min(1.5,T*0.1);camera.lookAt(rat.position.x*0.5,0.8,0);
   if(T>17.5)endCutscene();
 }
-function endCutscene(){ui.sub.style.opacity=0;ui.skip.style.display='none';startScavenge();}
+function endCutscene(){if(cs)clearTimeout(cs.subT);ui.sub.style.opacity=0;ui.sub.textContent='';ui.skip.style.display='none';startScavenge();}
 
 // ---------- scavenge ----------
 let sc;
@@ -284,8 +303,8 @@ function startScavenge(){
   const lid=box(9.2,0.3,4.2,M(0x2f5f45));lid.position.set(0,2.3,-2.4);lid.rotation.x=-1.1;dump.add(lid);
   const chute=box(2.4,1.4,0.2,M(0x1a1210));chute.position.set(0,1.2,2.05);dump.add(chute);
   const ramp=box(4,0.25,4.9,M(0x6b5a4a));ramp.position.set(0,1,4.25);ramp.rotation.x=0.42;ramp.receiveShadow=true;dump.add(ramp);
-  const bags=[[-6,0,1],[6.5,0,-1],[-7.5,0,-2],[7,0,2.5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x111,{roughness:.5}),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
-  const spots=[[-1.5,2,-4],[1.4,2,-4.4],[0,2,-3],[-2.8,2,-3.2],[2.6,2,-3],[-4.2,0,1],[5,0,1.8],[-1,0,6.5],[3.5,0,5.5],[-6.5,0,-5]];
+  const bags=[[-12,0,-4],[6.5,0,-1],[-13,0,1],[7,0,2.5]];bags.forEach(([x,y,z])=>{const b=sph(1,M(0x111,{roughness:.5}),10,8);b.scale.set(1,0.7,1);b.position.set(x,0.6,z);root.add(b);});
+  const spots=[[-1.5,2,-4],[1.4,2,-4.4],[0,2,-3],[-2.8,2,-3.2],[2.6,2,-3],[-5.5,0,5.8],[5,0,1.8],[-1,0,6.5],[3.5,0,5.5],[-6.5,0,-6]];
   const ids=Object.keys(ITEMS);sc={items:[],near:null};
   ids.forEach((id,i)=>{const m=ITEMS[id].build();const [x,y,z]=spots[i];m.position.set(x,y,z);m.rotation.y=Math.random()*6;root.add(m);sc.items.push({id,m,taken:false});});
   rat=makeRat();rat.position.set(0,0,10);rat.rotation.y=Math.PI;root.add(rat);
@@ -298,9 +317,10 @@ function tickScavenge(dt){
   if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;
   if(Math.hypot(joy.x,joy.z)>0.15){dx=joy.x;dz=joy.z;}
   let len=Math.hypot(dx,dz);let speed=0;
+  if(rat.userData.pick)len=0;
   if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=len;rat.position.x+=dx*dt*6;rat.position.z+=dz*dt*6;rat.rotation.y=Math.atan2(dx,dz);}
   rat.position.x=Math.max(-25,Math.min(25,rat.position.x));
-  if(rat.position.distanceTo(new THREE.Vector3(-12.5,0,-3))<3.2){const d=rat.position.clone().sub(new THREE.Vector3(-12.5,0,-3));d.y=0;d.setLength(3.2);rat.position.x=-12.5+d.x;rat.position.z=-3+d.z;}rat.position.z=Math.max(-8.5,Math.min(20,rat.position.z));
+  {const nb=new THREE.Vector3(-4.4,rat.position.y,1.0);if(rat.position.distanceTo(nb)<3){const d=rat.position.clone().sub(nb);d.y=0;d.setLength(3);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}rat.position.z=Math.max(-8.5,Math.min(20,rat.position.z));
   // dumpster ramp / roof height
   const lx=rat.position.x,lz=rat.position.z+4;let h=0;
   if(Math.abs(lx)<2&&lz>2&&lz<6.5)h=Math.max(0,(6.5-lz)/4.5*2);
@@ -310,13 +330,18 @@ function tickScavenge(dt){
   sc.near=null;let best=2.6;
   sc.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
   if(sc.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${ITEMS[sc.near.id].name}`;}else ui.prompt.style.display='none';
-  const cx=rat.position.x*0.6,cz=rat.position.z+10;
-  camera.position.x+=(cx-camera.position.x)*dt*3;camera.position.z+=(cz-camera.position.z)*dt*3;camera.position.y+=(8+rat.position.y-camera.position.y)*dt*3;
+  const portrait=innerHeight>innerWidth;const back=portrait?14:10,up=portrait?12:8;const cx=rat.position.x*0.6,cz=rat.position.z+back;
+  camera.position.x+=(cx-camera.position.x)*dt*3;camera.position.z+=(cz-camera.position.z)*dt*3;camera.position.y+=(up+rat.position.y-camera.position.y)*dt*3;
   camera.lookAt(rat.position.x*0.6,1+rat.position.y,rat.position.z-2);
 }
 function grab(){
   if(phase!=='scavenge'||!sc.near)return;
   const it=sc.near;it.taken=true;root.remove(it.m);inv.push(it.id);bag();
+  const u=rat.userData;if(u.pick&&u.pick.item)u.pick.item.parent.remove(u.pick.item);
+  const held=ITEMS[it.id].build();held.traverse(o=>{if(o.isLight)o.intensity=0.4;});
+  const bb=new THREE.Box3().setFromObject(held);const size=bb.getSize(new THREE.Vector3());const sc0=0.55/Math.max(size.x,size.y,size.z);
+  held.scale.setScalar(sc0);held.position.set(0,-0.55,1.45);held.rotation.x=-0.6;held.visible=false;u.torso.add(held);
+  u.pick={t:0,item:held,scale:sc0};
   ui.go.style.display='block';ui.go.textContent=inv.length>=sc.items.length?'Got everything — head home':'Head home and rebuild ('+inv.length+')';
 }
 ui.go.addEventListener('click',startBuild);
