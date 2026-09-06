@@ -97,15 +97,15 @@ function makeRat(){
   const fur=M(0x6e6a66,{roughness:.95}),furD=M(0x4d4946,{roughness:.95}),belly=M(0xb9b2aa,{roughness:.9}),pink=M(0xc98f88,{roughness:.7}),ink=M(0x120e0c,{roughness:.2});
   const g=new THREE.Group();
   // hips pivot; torso leans back from it, standing upright-ish
-  const hips=new THREE.Group();hips.position.set(0,0.72,0);g.add(hips);
-  const torso=new THREE.Group();torso.rotation.x=-1.05;hips.add(torso);   // long body tilted up
+  const hips=new THREE.Group();hips.position.set(0,0.74,0);g.add(hips);
+  const torso=new THREE.Group();torso.rotation.x=-1.4;hips.add(torso);   // long body tilted up
   const rump=sph(0.4,fur,16,12);rump.scale.set(1,0.9,1.1);rump.position.set(0,0,-0.05);torso.add(rump);
   const mid=sph(0.36,fur,16,12);mid.scale.set(1,0.85,1.6);mid.position.set(0,0.03,0.55);torso.add(mid);
   const chest=sph(0.3,fur,16,12);chest.scale.set(0.95,0.85,1.3);chest.position.set(0,0,1.1);torso.add(chest);
   const back=sph(0.36,furD,16,12);back.scale.set(0.85,0.55,2.2);back.position.set(0,0.2,0.5);torso.add(back);
   const tum=sph(0.34,belly,16,12);tum.scale.set(0.9,0.55,1.9);tum.position.set(0,-0.16,0.5);torso.add(tum);
   // head at the top of the torso, tilted forward to look ahead
-  const head=new THREE.Group();head.position.set(0,0.05,1.5);head.rotation.x=0.95;torso.add(head);
+  const head=new THREE.Group();head.position.set(0,0.05,1.5);head.rotation.x=1.25;torso.add(head);
   const skull=sph(0.28,fur,16,12);skull.scale.set(0.95,0.85,1.1);head.add(skull);
   const snout=cyl(0.08,0.24,0.58,fur,12);snout.rotation.x=Math.PI/2;snout.position.set(0,-0.05,0.42);head.add(snout);
   const chin=cyl(0.07,0.2,0.52,belly,12);chin.rotation.x=Math.PI/2;chin.position.set(0,-0.12,0.4);head.add(chin);
@@ -148,14 +148,14 @@ function makeRat(){
     if(speed>0.05){
       u.legs[0].rotation.x=Math.sin(t)*0.8;u.legs[1].rotation.x=Math.sin(t+Math.PI)*0.8;
       u.arms[0].rotation.x=Math.sin(t+Math.PI)*0.6;u.arms[1].rotation.x=Math.sin(t)*0.6;
-      u.hips.position.y=0.72+Math.abs(Math.sin(t))*0.05;
-      u.torso.rotation.x=-1.05+Math.sin(t*2)*0.03; u.torso.rotation.z=Math.sin(t)*0.05;
-      u.head.rotation.x=0.95+Math.sin(t*2)*0.04;u.head.rotation.y=0;
+      u.hips.position.y=0.74+Math.abs(Math.sin(t))*0.05;
+      u.torso.rotation.x=-1.4+Math.sin(t*2)*0.03; u.torso.rotation.z=Math.sin(t)*0.05;
+      u.head.rotation.x=1.25+Math.sin(t*2)*0.04;u.head.rotation.y=0;
     }else{
       u.legs.forEach(l=>l.rotation.x*=0.8);u.arms.forEach(a=>{a.rotation.x*=0.8;});
-      u.hips.position.y=0.72+Math.sin(t)*0.01;
-      u.torso.rotation.x=-1.05+Math.sin(t)*0.015;u.torso.rotation.z*=0.9;
-      u.head.rotation.x=0.95+(panic?Math.sin(t*3)*0.2:Math.sin(u.sniff)*0.02+Math.sin(t*0.7)*0.06);
+      u.hips.position.y=0.74+Math.sin(t)*0.01;
+      u.torso.rotation.x=-1.4+Math.sin(t)*0.015;u.torso.rotation.z*=0.9;
+      u.head.rotation.x=1.25+(panic?Math.sin(t*3)*0.2:Math.sin(u.sniff)*0.02+Math.sin(t*0.7)*0.06);
       u.head.rotation.y=panic?Math.sin(t*2.5)*0.6:Math.sin(t*0.35)*0.35;
     }
     u.tail.forEach((s,i)=>{if(i){s.rotation.y=Math.sin(t*1.1+i*0.5)*0.22;s.rotation.x=-0.06+Math.sin(t*0.7+i*0.4)*0.04;}});
