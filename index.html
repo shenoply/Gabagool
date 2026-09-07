@@ -104,9 +104,9 @@
     <button class="btn" id="newgame" disabled style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
     <p class="controls" style="font-size:13px;opacity:.6">WASD move · Shift run · Space jump · Q roll · F bite · E grab · R rotate</p>
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
-    <p style="font-size:11px;opacity:.7">Zaytona: owner-provided Meshy model and animations.</p>
+    <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
     <p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat & crow models · build 33 · Pip comes home</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat & crow models · build 34 · Pip comes home</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -293,9 +293,12 @@ function loadApprovedPip(){
  if(pipAssetPromise)return pipAssetPromise;
  if(!THREE.GLTFLoader){pipLoadStatus('Model loader unavailable. Reload to retry.');const retry=document.getElementById('pipRetry');if(retry)retry.style.display='block';return Promise.resolve(null);}
  pipLoadStatus('Loading animated Pip…');
- pipAssetPromise=new Promise(resolve=>new THREE.GLTFLoader().load('pip-animated.glb?v=30',asset=>{
+ pipAssetPromise=new Promise(resolve=>new THREE.GLTFLoader().load('pip-build34.glb',asset=>{
   asset.scene.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.frustumCulled=false;o.userData.noInk=true;o.userData.keepGeometry=true;}});
-  asset.animations=asset.animations.map(clip=>{const c=clip.clone();if(c.name==='Jump')c.tracks=c.tracks.filter(t=>t.name!=='root.position');return c;});
+  // Physics owns travel; keep native vertical body motion and remove horizontal root drift.
+  const aliases={Idle_4:'Idle',Walking:'Walk',Running:'Run',Regular_Jump:'Jump',climbing_up_wall:'Climb',climbing_down_wall:'ClimbDown',Lean_Forward_Sprint_inplace:'Sprint'};
+  const idle=asset.animations.find(c=>c.name==='Idle_4'),hip=idle.tracks.find(t=>t.name==='Hips.position');
+  asset.animations=asset.animations.map(clip=>{const c=clip.clone();c.name=aliases[c.name]||c.name;c.tracks.forEach(t=>{if(t.name==='Hips.position')for(let i=0;i<t.values.length;i+=3){t.values[i]=hip.values[0];t.values[i+2]=hip.values[2];if(['Jump','Climb','ClimbDown'].includes(c.name))t.values[i+1]=hip.values[1];}});return c;});
   Promise.all([loadJunkyard(),loadZaytona()]).then(()=>{pipLoadStatus('Pip, Zaytona and junkyard ready');for(const id of ['start','newgame']){const b=document.getElementById(id);if(b)b.disabled=false;}resolve(asset);}).catch(error=>{console.warn(error);pipLoadStatus('Map or Zaytona download failed — reload to retry.');document.getElementById('pipRetry').style.display='block';resolve(null);});
  },p=>{if(p.total)pipLoadStatus('Loading Pip · '+Math.round(p.loaded/p.total*100)+'%');},error=>{console.warn('Pip model could not load',error);pipLoadStatus('Pip download failed — reload to retry.');const retry=document.getElementById('pipRetry');if(retry)retry.style.display='block';resolve(null);}));
  return pipAssetPromise;
@@ -311,6 +314,11 @@ function attachApprovedPip(g,asset){
  const pivot=new THREE.Group(),offset=new THREE.Group();pivot.position.y=.9;offset.position.y=-.93;pivot.add(offset);g.add(pivot);
  const model=clonePipScene(asset.scene);offset.add(model);const mixer=new THREE.AnimationMixer(model),actions={};
  asset.animations.forEach(c=>{actions[c.name]=mixer.clipAction(c);});
+ actions.Idle.play();mixer.update(0);model.updateMatrixWorld(true);
+ const box=new THREE.Box3(),v=new THREE.Vector3();model.traverse(o=>{if(!o.isMesh)return;if(o.isSkinnedMesh)o.skeleton.update();for(let i=0;i<o.geometry.attributes.position.count;i++){if(o.isSkinnedMesh)o.boneTransform(i,v);else v.fromBufferAttribute(o.geometry.attributes.position,i);o.localToWorld(v);model.worldToLocal(v);box.expandByPoint(v);}});
+ const k=2/Math.max(.01,box.max.y-box.min.y);model.scale.multiplyScalar(k);model.position.y=-box.min.y*k+.03;
+ const head=model.getObjectByName('Head'),front=model.getObjectByName('headfront');if(head&&front){const dir=front.getWorldPosition(new THREE.Vector3()).sub(head.getWorldPosition(new THREE.Vector3()));model.rotation.y=-Math.atan2(dir.x,dir.z);}
+ actions.Idle.stop();
  const bones={};model.traverse(o=>{if(o.isBone)bones[o.name]=o;});
  const rest={};for(const [name,b] of Object.entries(bones))rest[name]=b.quaternion.clone();
  Object.assign(u,{approvedPip:model,pipPivot:pivot,pipMixer:mixer,pipActions:actions,pipBones:bones,pipRest:rest,pipClip:null,pipJumpTime:0,pipWasAir:false});
@@ -323,17 +331,18 @@ function makeRat(){
   const act=u.act&&{type:u.act.type,t:u.act.t},air=u.air,picking=!!u.pick,climbing=!!u.climb;
   legacyAnimate(dt,speed,panic);
   if(!u.approvedPip)return;
-  const still=picking||climbing||!!act||u.sleeping;let desired=air?'Jump':!still&&speed>.05?(u.run?'Run':'Walk'):'Idle';
+  const still=picking||climbing||!!act||u.sleeping;let desired=climbing?(u.climb.to.y<u.climb.from.y?'ClimbDown':'Climb'):air?'Jump':!still&&speed>.05?(u.run?(panic?'Sprint':'Run'):'Walk'):'Idle';
   if(desired!==u.pipClip){const old=u.pipActions[u.pipClip],next=u.pipActions[desired];if(old)old.fadeOut(.16);if(next){next.reset().setEffectiveWeight(1).fadeIn(.16).play();if(desired==='Jump'){next.setLoop(THREE.LoopOnce,1);next.clampWhenFinished=true;}else next.setLoop(THREE.LoopRepeat,Infinity);}u.pipClip=desired;}
   if(air&&!u.pipWasAir)u.pipJumpTime=0;u.pipWasAir=air;
   for(const [name,b] of Object.entries(u.pipBones))b.quaternion.copy(u.pipRest[name]);
-  const active=u.pipActions[desired];if(active){active.paused=desired==='Jump';if(desired==='Walk'||desired==='Run')active.setEffectiveTimeScale(Math.max(.6,Math.min(1.65,(u.vel||speed*3)/(u.run?4.3:3.0))));if(desired==='Jump'){u.pipJumpTime+=dt;active.time=Math.min(.98,.27+u.pipJumpTime);}}
+  const active=u.pipActions[desired];if(active){active.paused=desired==='Jump'||climbing;if(desired==='Walk'||desired==='Run')active.setEffectiveTimeScale(Math.max(.6,Math.min(1.65,(u.vel||speed*3)/(u.run?4.3:3.0))));if(desired==='Jump'){u.pipJumpTime+=dt;active.time=Math.min(active.getClip().duration-.05,.35+u.pipJumpTime*1.8);}}
+  if(climbing&&active)active.time=Math.min(.99,u.climb.t/.9)*active.getClip().duration;
   u.pipMixer.update(dt);
   const p=u.pipPivot;p.rotation.set(0,0,0);p.position.set(0,.9,0);
   if(act&&act.type==='roll'){const q=Math.min(1,(act.t+dt)/.55);p.rotation.x=-q*Math.PI*2;p.position.y=.78;}
-  if(act&&act.type==='bite'){const q=Math.sin(Math.min(1,(act.t+dt)/.52)*Math.PI);p.rotation.x=q*.18;p.position.z=q*.12;const head=u.pipBones.head;if(head)head.rotateX(q*.13);}
-  if(climbing){p.rotation.x=-.16;for(const name of ['upper_arm.L','upper_arm.R'])if(u.pipBones[name])u.pipBones[name].rotateX(-.32+Math.sin(u.clock*8+(name.endsWith('L')?0:Math.PI))*.14);}
-  if(u.sleeping){p.rotation.z=.18;if(u.pipBones.head)u.pipBones.head.rotateX(.16);}
+  if(act&&act.type==='bite'){const q=Math.sin(Math.min(1,(act.t+dt)/.52)*Math.PI);p.rotation.x=q*.18;p.position.z=q*.12;const head=u.pipBones.Head;if(head)head.rotateX(q*.13);}
+
+  if(u.sleeping){p.rotation.z=.18;if(u.pipBones.Head)u.pipBones.Head.rotateX(.16);}
   if(u.pick&&u.pick.item){ // held parts remain visible even while the previous model is hidden
    u.pick.item.visible=u.pick.t>.12;
   }
@@ -647,7 +656,7 @@ function yardGround(x,z,y){let h=0;for(const p of YARD_DATA.platforms)if(Math.ab
 function yardResolve(pos,before){for(const p of [...YARD_DATA.obstacles,...YARD_DATA.platforms]){if(pos.y>=p.h-.46)continue;const hx=p.hx+.16,hz=p.hz+.16;if(Math.abs(pos.x-p.x)>=hx||Math.abs(pos.z-p.z)>=hz)continue;if(Math.abs(before.x-p.x)>=hx)pos.x=before.x;else if(Math.abs(before.z-p.z)>=hz)pos.z=before.z;else{const dx=hx-Math.abs(pos.x-p.x),dz=hz-Math.abs(pos.z-p.z);if(dx<dz)pos.x=p.x+(pos.x<p.x?-hx:hx);else pos.z=p.z+(pos.z<p.z?-hz:hz);}}}
 // Zaytona: user-provided Meshy model, cached once; independent skeleton per area.
 let zaytonaAsset,zaytonaPromise,zaytona=null;
-function loadZaytona(){if(zaytonaPromise)return zaytonaPromise;zaytonaPromise=new Promise((resolve,reject)=>new THREE.GLTFLoader().load('zaytona-build33.glb',g=>{
+function loadZaytona(){if(zaytonaPromise)return zaytonaPromise;zaytonaPromise=new Promise((resolve,reject)=>new THREE.GLTFLoader().load('zaytona-build34.glb',g=>{
  const walk=g.animations.find(c=>c.name==='Walk'),hip=walk&&walk.tracks.find(t=>t.name==='Hips.position');const x=hip?hip.values[0]:0,z=hip?hip.values[2]:0;
  g.animations.forEach(c=>c.tracks.forEach(t=>{if(t.name==='Hips.position')for(let i=0;i<t.values.length;i+=3){t.values[i]=x;t.values[i+2]=z;}}));
  // A held walk pose gives a grounded pause without playing a seated animation in mid-air.
@@ -671,13 +680,26 @@ function addZaytona(){if(!zaytonaAsset||!rat)return;const g=new THREE.Group(),vi
  const solids=phase==='scavenge'?[...YARD_DATA.obstacles,...YARD_DATA.platforms,{x:0,z:-4,hx:5,hz:2.3},{x:0,z:.3,hx:2.15,hz:2.3},{x:-4.4,z:1,hx:.65,hz:.65},{x:8.2,z:-1.2,hx:.6,hz:.3}]:area.obstacles;
  const grid=makeZayGrid(phase==='scavenge'?[-20.7,30.7,-13.7,37.7]:[-10.6,10.6,-8.1,9.6],solids);const spawn=grid.point(grid.nearest(rat.position.x+1.0,rat.position.z+1.6));g.position.set(spawn.x,0,spawn.z);
  zaytona={g,mixer,actions,grid,path:[],replan:0,clip:'Idle',speed:0,owner:root};}
+// Independent outings: commit to a destination, then stop for a full activity.
+// No chase state, player-facing velocity, catch-up sprint or visible teleport.
 function tickZaytona(dt){const c=zaytona;if(!c||c.owner!==root||!rat)return;if(photo.active||document.hidden||$('modal').style.display==='flex'||sc&&sc.talk&&phase==='scavenge')return;
- const p=c.g.position,d=Math.hypot(p.x-rat.position.x,p.z-rat.position.z);c.replan-=dt;
- if(c.replan<=0){c.replan=.65;const angle=rat.rotation.y;const desired={x:rat.position.x-Math.sin(angle)*1.9+Math.cos(angle)*.7,z:rat.position.z-Math.cos(angle)*1.9-Math.sin(angle)*.7};let target=null,best=Infinity;
- for(const radius of [2.0,2.6,1.5])for(let i=0;i<16;i++){const a=i*Math.PI/8,q={x:rat.position.x+Math.cos(a)*radius,z:rat.position.z+Math.sin(a)*radius};if(!c.grid.free(q.x,q.z))continue;let score=(q.x-desired.x)**2+(q.z-desired.z)**2+.2*((q.x-p.x)**2+(q.z-p.z)**2);if(typeof camera!=='undefined'){const screen=new THREE.Vector3(q.x,.65,q.z).project(camera);score+=Math.max(0,Math.abs(screen.x)-.60)**2*25+Math.max(0,Math.abs(screen.y)-.65)**2*10;}if(score<best){best=score;target=q;}}
- c.path=target&&(d>2.6||d<1.1||Math.hypot(target.x-p.x,target.z-p.z)>1.1)?c.grid.path(p,target):[];}
- c.running=d>4?true:d<2.8?false:!!c.running;let moving=false;const aim=c.path[0];if(aim){const dx=aim.x-p.x,dz=aim.z-p.z,len=Math.hypot(dx,dz);const speed=c.running?4.8:2.8,step=Math.min(len,dt*speed);if(len>.015){p.x+=dx/len*step;p.z+=dz/len*step;const yaw=Math.atan2(dx,dz),delta=Math.atan2(Math.sin(yaw-c.g.rotation.y),Math.cos(yaw-c.g.rotation.y));c.g.rotation.y+=delta*(1-Math.exp(-dt*10));moving=true;}if(len<=step+.02)c.path.shift();}
- const name=moving?(c.running?'Run':'Walk'):'Idle';if(name!==c.clip){c.actions[c.clip].fadeOut(.2);c.actions[name].reset().fadeIn(.2).play();c.clip=name;}if(!moving){const yaw=Math.atan2(rat.position.x-p.x,rat.position.z-p.z),delta=Math.atan2(Math.sin(yaw-c.g.rotation.y),Math.cos(yaw-c.g.rotation.y));c.g.rotation.y+=delta*(1-Math.exp(-dt*2));}c.mixer.update(dt);}
+ c.dwell=(c.dwell||0)-dt;c.outing=(c.outing||0)+dt;
+ const p=c.g.position;
+ if(!c.path.length&&c.dwell<=0){
+  const candidates=[];
+  for(let i=0;i<24;i++){const a=Math.random()*Math.PI*2,r=1.8+Math.random()*2.2,q={x:rat.position.x+Math.cos(a)*r,z:rat.position.z+Math.sin(a)*r};if(!c.grid.free(q.x,q.z))continue;
+   const screen=new THREE.Vector3(q.x,.65,q.z).project(camera);const score=Math.max(0,Math.abs(screen.x)-.65)*20+Math.max(0,Math.abs(screen.y)-.65)*20+Math.hypot(q.x-p.x,q.z-p.z)*.12+Math.random()*2;candidates.push({q,score});}
+  candidates.sort((a,b)=>a.score-b.score);for(const item of candidates){const path=c.grid.path(p,item.q);if(path.length){c.path=path;break;}}
+  c.walkClip=['Walk','ConfidentWalk','Strut'][Math.floor(Math.random()*3)];c.dwell=4+Math.random()*5;c.outing=0;
+ }
+ let moving=false;const aim=c.path[0];if(aim){const dx=aim.x-p.x,dz=aim.z-p.z,len=Math.hypot(dx,dz),step=Math.min(len,dt*1.35);if(len>.01){p.x+=dx/len*step;p.z+=dz/len*step;const yaw=Math.atan2(dx,dz);c.g.rotation.y+=Math.atan2(Math.sin(yaw-c.g.rotation.y),Math.cos(yaw-c.g.rotation.y))*(1-Math.exp(-dt*7));moving=true;}if(len<=step+.01)c.path.shift();
+  if(!c.path.length){c.activityIndex=((c.activityIndex||0)+1)%3;c.activity=['Idle','LookBack','Gesture'][c.activityIndex];c.dwell=Math.max(4,c.actions[c.activity].getClip().duration)+1+Math.random()*3;}
+ }
+ const name=moving?c.walkClip:(c.activity||'Idle');if(name!==c.clip){c.actions[c.clip].fadeOut(.3);const a=c.actions[name];a.reset().setEffectiveWeight(1).setEffectiveTimeScale(1).fadeIn(.3).play();a.setLoop(moving||name==='Idle'?THREE.LoopRepeat:THREE.LoopOnce,moving||name==='Idle'?Infinity:1);a.clampWhenFinished=true;c.clip=name;}
+ c.mixer.update(dt);
+ // Different Meshy clips use different hip heights; keep paws on the ground.
+ const model=c.g.userData.zayModel;if(c.baseY===undefined)c.baseY=model.position.y;model.position.y=c.baseY;c.g.updateMatrixWorld(true);let floor=Infinity;const v=new THREE.Vector3();model.traverse(o=>{if(!o.isSkinnedMesh)return;o.skeleton.update();for(let i=0;i<o.geometry.attributes.position.count;i+=30){o.boneTransform(i,v);o.localToWorld(v);floor=Math.min(floor,v.y);}});if(Number.isFinite(floor))model.position.y+=.008-floor;
+}
 
 // ---------- scavenge ----------
 let sc;
