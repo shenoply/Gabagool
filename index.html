@@ -88,6 +88,7 @@
 
 @media(max-width:600px){#hud{top:10px;left:10px;right:10px}#hud span{font:12px Arial,sans-serif;padding:7px 9px}#pad{padding:0 15px;bottom:20px}#stick{width:104px;height:104px;background:#d9e2d51c;border-color:#e5e7dc44}#knob{width:44px;height:44px;left:28px;top:28px}#acts{grid-template-columns:48px 62px;grid-template-rows:48px 62px;gap:7px}#acts .s{width:48px;height:48px;background:#2337389c;font:12px Arial,sans-serif}#pad .g{width:62px;height:62px;font-size:14px;background:#d6b77d}#prompt{font-size:14px;bottom:25%}}
 @media(max-width:600px){#settings{top:46px;right:10px;gap:4px}#settings .btn{min-height:44px;font-size:10px;padding:5px 8px}#mute{top:94px!important;right:10px!important;font-size:11px!important;padding:8px 12px!important}#hb{top:132px}}
+#title .btn:disabled{opacity:.5;cursor:wait}
 </style>
 </head>
 <body>
@@ -99,10 +100,12 @@
   <div id="title">
     <div class="eyebrow">A little rat. A fresh start.</div><h1>Wet<br>Whiskers</h1>
     <p>The storm took almost everything. Find little treasures. Make something lovely. Build a home that feels like you.</p>
-    <button class="btn" id="start">Begin Pip’s story</button>
-    <button class="btn" id="newgame" style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
+    <button class="btn" id="start" disabled>Begin Pip’s story</button>
+    <button class="btn" id="newgame" disabled style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
     <p class="controls" style="font-size:13px;opacity:.6">WASD move · Shift run · Space jump · Q roll · F bite · E grab · R rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat & crow models · build 29 · Small paws, softer world</p>
+    <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
+    <p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat & crow models · build 30 · Pip comes home</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -139,6 +142,7 @@
 const canvas=document.getElementById('c');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.outputEncoding=THREE.sRGBEncoding;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene();
@@ -187,7 +191,7 @@ function paint(kind,size=256){
   else if(kind==='cloth'){x.fillStyle='#d9a441';x.fillRect(0,0,size,size);blot(60,'#c48f2f',.3,6,20);blot(40,'#e8bb63',.3,6,20);x.strokeStyle='#f5dfa8';x.globalAlpha=.13;x.lineWidth=.7;for(let k=0;k<size;k+=4){x.beginPath();x.moveTo(k,0);x.lineTo(k,size);x.moveTo(0,k);x.lineTo(size,k);x.stroke();}x.globalAlpha=1;}
   // Fine pigment grain breaks up flat areas without adding geometry.
   x.globalAlpha=.065;for(let i=0;i<1400;i++){x.fillStyle=i%2?'#ffffff':'#241c18';x.fillRect(R(0,size),R(0,size),1,1);}x.globalAlpha=1;
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;TEX[kind]=t;return t;
+  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;TEX[kind]=t;return t;
 }
 const M=(c,o={})=>{const opt={color:c};if(o.emissive){opt.emissive=o.emissive;opt.emissiveIntensity=o.emissiveIntensity||1;}if(o.transparent){opt.transparent=true;opt.opacity=o.opacity;}if(o.map){opt.map=o.map;}return new THREE.MeshLambertMaterial(opt);};
 const MT=(c,kind,rx=1,ry=1)=>{const t=paint(kind).clone();t.needsUpdate=true;t.repeat.set(rx,ry);return M(c,{map:t});};
@@ -210,7 +214,7 @@ const PIP_SKIN={"p":[-0.4872,0.88,0.0,-0.48,0.8686,0.0,-0.48,0.88,-0.0051,-0.504
 let furTexture29,contactTexture29;
 function pipFur(){if(furTexture29)return furTexture29;const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.fillStyle='#808080';x.fillRect(0,0,256,256);let seed=218;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};for(let i=0;i<7500;i++){const a=rand()*256,b=rand()*256;x.strokeStyle=rand()>.5?'#a1a1a1':'#666666';x.globalAlpha=.32;x.lineWidth=.65;x.beginPath();x.moveTo(a,b);x.lineTo(a+(rand()-.5)*2,b+2+rand()*5);x.stroke();}furTexture29=new THREE.CanvasTexture(c);furTexture29.wrapS=furTexture29.wrapT=THREE.RepeatWrapping;furTexture29.repeat.set(3,3);return furTexture29;}
 function contactTexture(){if(contactTexture29)return contactTexture29;const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),r=x.createRadialGradient(32,32,1,32,32,32);r.addColorStop(0,'rgba(20,28,31,.7)');r.addColorStop(1,'rgba(20,28,31,0)');x.fillStyle=r;x.fillRect(0,0,64,64);return contactTexture29=new THREE.CanvasTexture(c);}
-function makeRat(){
+function makeRatFallback(){
  const g=new THREE.Group();g.name='Pip';
  const skin=(color,shine=8)=>new THREE.MeshPhongMaterial({color,shininess:shine,specular:0x25292d});
  const fur=skin(0x90939a),belly=skin(0xd9d0be),pink=skin(0xd5a29d),rose=skin(0xad7374),black=skin(0x171d24,55),ivory=skin(0xfff7de,25),iris=skin(0x685039,35),scarfMat=skin(0xb77746);
@@ -279,6 +283,61 @@ function makeRat(){
   for(let i=0;i<=segments;i++){const q=i/segments,rad=.053*(1-q)+.004,x=Math.sin(q*3+tm*1.3)*q*.15-u.tailLag*q,z=-.27-q*1.75,y=.31*(1-q)+.075+Math.sin(q*Math.PI)*.085;for(let j=0;j<sides;j++){const a=j/sides*Math.PI*2,k=(i*sides+j)*3;tp[k]=x+Math.cos(a)*rad;tp[k+1]=y+Math.sin(a)*rad;tp[k+2]=z;}}tailGeo.attributes.position.needsUpdate=true;tailGeo.computeVertexNormals();
  };
  g.animate(0,0);return g;
+}
+
+// Approved Pip: one cached GLB, independently cloned skeletons per scene.
+let pipAssetPromise;
+function pipLoadStatus(message){const el=document.getElementById('pipLoading');if(el)el.textContent=message;}
+function loadApprovedPip(){
+ if(pipAssetPromise)return pipAssetPromise;
+ if(!THREE.GLTFLoader){pipLoadStatus('Model loader unavailable. Reload to retry.');const retry=document.getElementById('pipRetry');if(retry)retry.style.display='block';return Promise.resolve(null);}
+ pipLoadStatus('Loading animated Pip…');
+ pipAssetPromise=new Promise(resolve=>new THREE.GLTFLoader().load('pip-animated.glb?v=30',asset=>{
+  asset.scene.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.frustumCulled=false;o.userData.noInk=true;o.userData.keepGeometry=true;}});
+  asset.animations=asset.animations.map(clip=>{const c=clip.clone();if(c.name==='Jump')c.tracks=c.tracks.filter(t=>t.name!=='root.position');return c;});
+  pipLoadStatus('Animated Pip ready');for(const id of ['start','newgame']){const b=document.getElementById(id);if(b)b.disabled=false;}resolve(asset);
+ },p=>{if(p.total)pipLoadStatus('Loading Pip · '+Math.round(p.loaded/p.total*100)+'%');},error=>{console.warn('Pip model could not load',error);pipLoadStatus('Pip download failed — reload to retry.');const retry=document.getElementById('pipRetry');if(retry)retry.style.display='block';resolve(null);}));
+ return pipAssetPromise;
+}
+function clonePipScene(source){
+ const copy=source.clone(true),map=new Map();function match(a,b){map.set(a,b);for(let i=0;i<a.children.length;i++)match(a.children[i],b.children[i]);}match(source,copy);
+ source.traverse(o=>{if(!o.isSkinnedMesh)return;const c=map.get(o);c.skeleton=o.skeleton.clone();c.skeleton.bones=o.skeleton.bones.map(b=>map.get(b));c.bindMatrix.copy(o.bindMatrix);c.bindMatrixInverse.copy(o.bindMatrixInverse);});return copy;
+}
+function attachApprovedPip(g,asset){
+ const u=g.userData;if(!asset||u.pipDisposed||u.approvedPip)return;
+ // Keep controller bones and their held-item attachment, hiding just the old drawing.
+ g.traverse(o=>{if((o.isMesh||o.isLine)&&o!==u.contact)o.visible=false;});
+ const pivot=new THREE.Group(),offset=new THREE.Group();pivot.position.y=.9;offset.position.y=-.93;pivot.add(offset);g.add(pivot);
+ const model=clonePipScene(asset.scene);offset.add(model);const mixer=new THREE.AnimationMixer(model),actions={};
+ asset.animations.forEach(c=>{actions[c.name]=mixer.clipAction(c);});
+ const bones={};model.traverse(o=>{if(o.isBone)bones[o.name]=o;});
+ const rest={};for(const [name,b] of Object.entries(bones))rest[name]=b.quaternion.clone();
+ Object.assign(u,{approvedPip:model,pipPivot:pivot,pipMixer:mixer,pipActions:actions,pipBones:bones,pipRest:rest,pipClip:null,pipJumpTime:0,pipWasAir:false});
+}
+function makeRat(){
+ const g=makeRatFallback(),u=g.userData,legacyAnimate=g.animate;u.pipOwner=true;
+ loadApprovedPip().then(asset=>attachApprovedPip(g,asset));
+ g.animate=(dt,speed=0,panic=false)=>{
+  // Legacy controller maintains cooldowns, pickup timing, collision state and action durations.
+  const act=u.act&&{type:u.act.type,t:u.act.t},air=u.air,picking=!!u.pick,climbing=!!u.climb;
+  legacyAnimate(dt,speed,panic);
+  if(!u.approvedPip)return;
+  const still=picking||climbing||!!act||u.sleeping;let desired=air?'Jump':!still&&speed>.05?(u.run?'Run':'Walk'):'Idle';
+  if(desired!==u.pipClip){const old=u.pipActions[u.pipClip],next=u.pipActions[desired];if(old)old.fadeOut(.16);if(next){next.reset().setEffectiveWeight(1).fadeIn(.16).play();if(desired==='Jump'){next.setLoop(THREE.LoopOnce,1);next.clampWhenFinished=true;}else next.setLoop(THREE.LoopRepeat,Infinity);}u.pipClip=desired;}
+  if(air&&!u.pipWasAir)u.pipJumpTime=0;u.pipWasAir=air;
+  for(const [name,b] of Object.entries(u.pipBones))b.quaternion.copy(u.pipRest[name]);
+  const active=u.pipActions[desired];if(active){active.paused=desired==='Jump';if(desired==='Walk'||desired==='Run')active.setEffectiveTimeScale(Math.max(.6,Math.min(1.65,(u.vel||speed*3)/(u.run?4.3:3.0))));if(desired==='Jump'){u.pipJumpTime+=dt;active.time=Math.min(.98,.27+u.pipJumpTime);}}
+  u.pipMixer.update(dt);
+  const p=u.pipPivot;p.rotation.set(0,0,0);p.position.set(0,.9,0);
+  if(act&&act.type==='roll'){const q=Math.min(1,(act.t+dt)/.55);p.rotation.x=-q*Math.PI*2;p.position.y=.78;}
+  if(act&&act.type==='bite'){const q=Math.sin(Math.min(1,(act.t+dt)/.52)*Math.PI);p.rotation.x=q*.18;p.position.z=q*.12;const head=u.pipBones.head;if(head)head.rotateX(q*.13);}
+  if(climbing){p.rotation.x=-.16;for(const name of ['upper_arm.L','upper_arm.R'])if(u.pipBones[name])u.pipBones[name].rotateX(-.32+Math.sin(u.clock*8+(name.endsWith('L')?0:Math.PI))*.14);}
+  if(u.sleeping){p.rotation.z=.18;if(u.pipBones.head)u.pipBones.head.rotateX(.16);}
+  if(u.pick&&u.pick.item){ // held parts remain visible even while the previous model is hidden
+   u.pick.item.visible=u.pick.t>.12;
+  }
+ };
+ return g;
 }
 
 // ---------- item catalogue ----------
@@ -478,7 +537,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem('ww-save'));if(d&&d.
 const $=id=>document.getElementById(id);bindRadio();
 const ui={title:$('title'),sub:$('sub'),phase:$('phase'),bag:$('bag'),prompt:$('prompt'),skip:$('skip'),go:$('go'),hb:$('hb'),end:$('end'),pad:$('pad')};
 function clear(){
-  if(root){scene.remove(root);const geo=new Set();root.traverse(o=>{if(o.geometry&&!o.userData.keepGeometry)geo.add(o.geometry);});geo.forEach(g=>g.dispose());}
+  if(root){scene.remove(root);const geo=new Set();root.traverse(o=>{if(o.userData.pipOwner){o.userData.pipDisposed=true;if(o.userData.pipMixer){o.userData.pipMixer.stopAllAction();o.userData.pipMixer.uncacheRoot(o.userData.approvedPip);}}if(o.geometry&&!o.userData.keepGeometry)geo.add(o.geometry);});geo.forEach(g=>g.dispose());}
   root=new THREE.Group();scene.add(root);
 }
 function bag(){shoppingList();const n=invCount();ui.bag.textContent=n?`Bag: ${n} part${n>1?'s':''}`:'Bag: empty';}
