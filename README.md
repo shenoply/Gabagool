@@ -95,3 +95,13 @@ Zaytona uses the owner-provided Meshy_AI_Zaytona_biped model and its Walking and
 She spawns with Pip in the junkyard, courtyard and garden, follows at roughly two game units, catches up when farther away, and pauses facing Pip. Ground navigation routes around scenery and through gates; she stays on the ground while Pip climbs. The previous attacking cat loop is disabled. Indoor scenes retain their existing behaviour; Zaytona rejoins on returning outside. Existing saves and Fat Rat audio are unchanged.
 
 Validation: actual Three.js r128 GLB parsing and animation evaluation, posed-skin scale measurement, finite skeleton transforms, obstacle/gate navigation and a simulated follow-and-stop sequence. Browser GPU gameplay was not available for verification.
+
+## Build 34 — new Pip and ambient Zaytona
+
+Pip now uses the owner's supplied Meshy merged-animation character. All 14 source clips remain in the asset. Gameplay selects idle, walk, run, sprint, jump and upward/downward climbing where appropriate; root travel is controlled by game physics. Roll and bite retain procedural action overlays because the supplied pack has no dedicated clips for those actions. Door, pushing and failed-climb clips are retained for future matching interactions rather than playing them at unrelated moments.
+
+Zaytona now wanders between nearby camera-preferred destinations, completes her route and pauses for an activity. She uses Walking, Confident Walk, Confident Strut, Crawl and Look Back, and Don't You Dare, plus a held standing idle. There is no chase, attack or catch-up sprint. Sitting is omitted because the current routes have no validated seats. Shared geometry/textures keep the five-clip cat download near 8.2 MB.
+
+Pip and Zaytona models and animation packs supplied by the project owner (Meshy). Existing Fat Rat creator credit and audio remain unchanged.
+
+Validation: Three.js r128 parsed both GLBs; animated skinning, Pip grounding/scale and seven gameplay clips checked; a five-minute stationary-player simulation exercised all six Zaytona states without blocked-cell intersections. JavaScript syntax checked. Browser rendering and mobile performance were not verified in this environment.
