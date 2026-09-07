@@ -105,3 +105,13 @@ Zaytona now wanders between nearby camera-preferred destinations, completes her 
 Pip and Zaytona models and animation packs supplied by the project owner (Meshy). Existing Fat Rat creator credit and audio remain unchanged.
 
 Validation: Three.js r128 parsed both GLBs; animated skinning, Pip grounding/scale and seven gameplay clips checked; a five-minute stationary-player simulation exercised all six Zaytona states without blocked-cell intersections. JavaScript syntax checked. Browser rendering and mobile performance were not verified in this environment.
+
+## Build 35 — facing, contextual climbing and full animation mapping
+
+Corrects the owner-reported inverted Pip facing by rotating the imported visual 180 degrees, retaining movement controls and physics direction.
+
+Nearby junkyard surfaces and courtyard props offer Up, Down, Left, Right and Let go controls. Hold touch buttons, or attach with E and use movement keys/joystick. Jump releases the grip. Climbing supports sideways movement, descent, platform top-out and returning down from edges. Candidate positions and sideways paths reject overlapping props; very smooth refrigerator sides trigger the failed attempt animation. Climb controls pause with photo mode, hidden tabs and modals. Home transitions play the door animation.
+
+All 13 substantive clips now have contextual mappings: Idle_4 (idle), Walking, Running, Run_03 (initial jog), Lean_Forward_Sprint_inplace (sustained sprint), Regular_Jump, climbing_up_wall, climbing_down_wall, both Climb_Left clips (traverse/grip adjustment), Climb_Attempt_and_Fall_5 (slippery failure), Push_and_Walk_Forward (blocked pushing), open_door_3 (door interaction). The one-frame clip0 reference pose is intentionally not played as an action. Movement remains physics-driven; root translation is removed from climbing clips. Native roll/bite clips were not supplied, so these remain procedural overlays.
+
+Validation: JavaScript syntax, Three r128 parsing/skinning for all 13 mapped clips, outdoor scale and grounding, wall attach/up/sideways/down/top-out/descent/failure/photo-pause checks. Zaytona's existing ambient behavior remains. No browser GPU or mobile playtest was available; the facing correction follows the owner's live observation.
