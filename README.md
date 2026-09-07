@@ -70,3 +70,10 @@ Original procedural models made for Wet Whiskers. No third-party animal model, t
 22 logic and geometry checks passed using Three.js r128 with stubbed DOM, WebGL renderer and audio. Covers gameplay/save compatibility, the complete intro transition, character geometry and animated action transforms. These checks do not validate GPU rendering, actual sound playback or mobile touch interaction.
 
 Approved GLB SHA-256: d94551a2d15b2d2549aed06038e8fee1c58a5acab29c2cce32ac71de0f190df7
+
+
+## Build 31 — reference-led junkyard
+
+The main scavenging area now uses an original 3D junkyard built from the owner’s supplied layout reference: teal perimeter fencing, a timber shed, three stepped platforms, crates, tyres, drums and scattered paving. The shed door returns to the existing decorated home; the right gate leads to the courtyard. Pip, dumpster access, Fat Rat and bigrat.mp3 dialogue remain in place.
+
+`junkyard.glb` contains original geometry and procedural colour textures, with meshes combined by material for mobile rendering. Map collision is embedded in index.html. The reference-driven map asset was created for Wet Whiskers; no third-party models or music were added.
