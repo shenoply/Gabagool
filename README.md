@@ -1,8 +1,19 @@
-# Wet Whiskers — Build 28: A little place in the world
+# Wet Whiskers — Build 29: Small paws, softer world
 
-Play at https://shenoply.github.io/Gabagool/?build=28
+Play at https://shenoply.github.io/Gabagool/?build=29
 
 Single-file Three.js r128 game, with no build step. Serve `index.html` with `GLTFLoader.js`, `fat-rat.glb`, `bigrat.mp3`, and `opening-scene.webp` alongside it.
+
+## Build 29
+
+- Pip's torso, neck, head and limbs now form one connected, smoothly shaded surface: 3,674 vertices / 7,312 triangles, weighted to 13 bones. Facial features, ears, scarf and paws remain attached details. Original mesh generated for this project, embedded directly in index.html; no external model service or download at runtime.
+- A subtle procedural fur bump texture, blended colour markings and soft contact shadow. Distance-driven footsteps, reduced arm swing and gentler body bounce. Existing action poses deform the new skin.
+- Alley paving uses lower-contrast irregular stones without repeated white highlights. Larger texture coverage plus a single non-repeating dirt/moss wash breaks up the surface. Added instanced wall plants, fallen leaves and dumpster contact shade.
+- Cooler sky fill, gentler warm sunlight, and a closer, lower portrait camera.
+- Smaller mobile joystick and action group, with at least 48px action targets and responsive joystick centring. Compact settings row.
+- Existing opening artwork, neighbour/audio, inventory/save format, crafting and areas retained.
+
+24 logic/geometry checks passed, including normalized skin weights, 13 real bones, connected surface topology checked separately, and CPU skin deformation through walk/run/jump/roll/bite/climb. GPU animation and phone touch interaction remain unverified: the available preview browser cannot create a WebGL context. The title illustration is pre-rendered artwork and does not represent gameplay graphics.
 
 ## Build 28
 
