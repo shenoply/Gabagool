@@ -115,3 +115,13 @@ Nearby junkyard surfaces and courtyard props offer Up, Down, Left, Right and Let
 All 13 substantive clips now have contextual mappings: Idle_4 (idle), Walking, Running, Run_03 (initial jog), Lean_Forward_Sprint_inplace (sustained sprint), Regular_Jump, climbing_up_wall, climbing_down_wall, both Climb_Left clips (traverse/grip adjustment), Climb_Attempt_and_Fall_5 (slippery failure), Push_and_Walk_Forward (blocked pushing), open_door_3 (door interaction). The one-frame clip0 reference pose is intentionally not played as an action. Movement remains physics-driven; root translation is removed from climbing clips. Native roll/bite clips were not supplied, so these remain procedural overlays.
 
 Validation: JavaScript syntax, Three r128 parsing/skinning for all 13 mapped clips, outdoor scale and grounding, wall attach/up/sideways/down/top-out/descent/failure/photo-pause checks. Zaytona's existing ambient behavior remains. No browser GPU or mobile playtest was available; the facing correction follows the owner's live observation.
+
+## Build 36 — pocket crafting and garden scavenging
+
+Adds an original 3×3 shapeless crafting grid with manual ingredient selection/removal, recipe auto-fill, missing-material hints, batch crafting and shopping-list pinning. Grid slots are a preview: inventory is consumed only after a validated craft. Crafting is accessible from the top Craft button as well as the home recipe panel. Existing furniture recipes remain available; crafted furniture goes to home storage.
+
+Adds plant fibre, leaf scraps, pebbles, sap, dew and acorn shells, plus braided twine, a permanent pebble-axe unlock, a placeable scrap workbench, leaf hammock, amber lantern, acorn seat and dew refreshment. Advanced garden furniture requires a workbench placed at home. Nature recipes become known through collecting their ingredients. Sap requires the axe; harvest nodes regrow after 75 active seconds. Dew refreshment provides a visible 60-second running boost. Oversized foliage and harvest nodes appear in the rain garden and outside the junkyard. All geometry is original procedural art; no Minecraft or Grounded assets are used.
+
+Existing ww-save v1 inventories and homes migrate with empty discovery/tool fields; newly learned materials and tools autosave. Character models, climbing, Zaytona, Fat Rat and audio remain in place.
+
+Validation: JS syntax; grid matching; batch accounting/output; permanent-tool and placed-workbench gates; legacy furniture crafting; discovery; procedural asset creation; harvest gating, yields, duplicate prevention and regrowth. Browser/mobile rendering has not been verified in this environment.
