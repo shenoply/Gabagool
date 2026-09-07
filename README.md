@@ -1,8 +1,18 @@
-# Wet Whiskers — Build 29: Small paws, softer world
+# Wet Whiskers — Build 30: Pip comes home
 
-Play at https://shenoply.github.io/Gabagool/?build=29
+Play at https://shenoply.github.io/Gabagool/?build=30
 
 Single-file Three.js r128 game, with no build step. Serve `index.html` with `GLTFLoader.js`, `fat-rat.glb`, `bigrat.mp3`, and `opening-scene.webp` alongside it.
+
+## Build 30 — approved animated Pip in game
+
+- Loads the approved `pip-animated.glb` with Idle, Walk, Run and Jump clips. This is the reviewed 28-bone model, including its fur geometry, with no substitute or reshaping.
+- One cached download and separate skeleton instances for each scene. Detailed meshes cast no shadows. The title shows download progress and enables Begin/New game when the approved asset is ready; Retry reloads after a download failure.
+- Crossfades between idle/walk/run, removes the Jump root-position track so existing game physics control height, and preserves pickup, bite, roll, climbing, cutscene and save behavior. Roll, bite and climbing use small procedural additions to the approved rig.
+- Shared model geometry survives scene disposal, and late downloads cannot attach to discarded scenes. Rendering uses sRGB output and painted colour textures are marked sRGB.
+- Keep `pip-animated.glb` beside index.html, along with existing GLTFLoader.js, fat-rat.glb, bigrat.mp3 and opening-scene.webp. The model is approximately 13 MB; this release retains the approved detailed asset. Mobile optimization remains future work.
+
+Validation: 24 existing logic/geometry checks plus 6 real-GLB integration checks pass under Three.js r128 with stubbed DOM/WebGL/audio. The reviewed animations were previously rendered after GLB import in Blender. Final live gameplay rendering and touch interaction have not been visually verified because the available browser cannot create a WebGL context.
 
 ## Build 29
 
@@ -58,3 +68,5 @@ Original procedural models made for Wet Whiskers. No third-party animal model, t
 ## Validation
 
 22 logic and geometry checks passed using Three.js r128 with stubbed DOM, WebGL renderer and audio. Covers gameplay/save compatibility, the complete intro transition, character geometry and animated action transforms. These checks do not validate GPU rendering, actual sound playback or mobile touch interaction.
+
+Approved GLB SHA-256: d94551a2d15b2d2549aed06038e8fee1c58a5acab29c2cce32ac71de0f190df7
