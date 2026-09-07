@@ -105,7 +105,7 @@
     <p class="controls" style="font-size:13px;opacity:.6">WASD move · Shift run · Space jump · Q roll · F bite · E grab · R rotate</p>
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
     <p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat & crow models · build 31 · Pip comes home</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat & crow models · build 32 · Pip comes home</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -510,7 +510,7 @@ function addNeighbour(){
   const place=(g)=>{
     const m=g.scene.clone();
     const bb=new THREE.Box3().setFromObject(m);const size=bb.getSize(new THREE.Vector3());const c=bb.getCenter(new THREE.Vector3());
-    const k=3.6/size.y;m.scale.setScalar(k);
+    const k=.8/size.y;m.scale.setScalar(k);
     m.position.set(-c.x*k,-bb.min.y*k,-c.z*k);
     const pivot=new THREE.Group();pivot.add(m);pivot.position.set(-4.4,0,1.0);pivot.rotation.y=1.3;
     m.traverse(o=>{if(o.isMesh){o.userData.keepGeometry=true;o.castShadow=false;o.receiveShadow=false;const g=o.geometry;for(const k of Object.keys(g.attributes))if(!g.attributes[k])delete g.attributes[k];const old=o.material;o.material=new THREE.MeshToonMaterial({map:old.map||null,color:old.color||0xffffff,gradientMap:gradTex,transparent:old.transparent,opacity:old.opacity,alphaTest:old.alphaTest||0,side:old.side});}});
@@ -518,7 +518,7 @@ function addNeighbour(){
     if(g.animations.length){fatMixer=new THREE.AnimationMixer(m);const a=fatMixer.clipAction(g.animations[0]);a.play();}
   };
   if(fatGltf){place(fatGltf);return;}
-  placeholder=makeRat();placeholder.scale.set(1.8,1.35,1.8);placeholder.position.set(-4.4,0,1);placeholder.rotation.y=1.3;owner.add(placeholder);
+  placeholder=makeRat();placeholder.scale.set(.36,.32,.36);placeholder.position.set(-4.4,0,1);placeholder.rotation.y=1.3;owner.add(placeholder);
   const fail=()=>{if(root===owner)sayToast('The neighbour model could not load. Try the complete HTML download.');};
   if(!THREE.GLTFLoader){fail();return;}
   const loaded=g=>{fatGltf=g;if(phase==='scavenge'&&root===owner)place(g);};
@@ -609,7 +609,7 @@ function doJump(){if(photo.active||!rat||rat.userData.climb||rat.userData.air||r
 function doRoll(){const u=rat&&rat.userData;if(photo.active||!u||u.climb||u.act||u.air||u.pick)return;u.act={type:'roll',t:0};u.rollDir=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));sfx.step('cobble');}
 function doBite(){const u=rat&&rat.userData;if(!u||u.climb||u.act||u.pick||u.biteCD>0||photo.active)return;u.biteCD=1.4;u.act={type:'bite',t:0};sfx.hiss();
   if(phase==='scavenge'&&sc.cat){const c=sc.cat;const to=c.m.position.clone().sub(rat.position);to.y=0;const f=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));
-    if(to.length()<3.2&&to.normalize().dot(f)>0.3&&c.state!=='leave'){c.state='leave';sfx.yowl();ui.prompt.textContent='Got him on the nose!';}}}
+    if(to.length()<.9&&to.normalize().dot(f)>0.3&&c.state!=='leave'){c.state='leave';sfx.yowl();ui.prompt.textContent='Got him on the nose!';}}}
 // moves the rat with the joystick/keys; returns speed 0..1 (2 when running). ground(x,z) gives floor height.
 function control(dt,{walk=6,bounds,ground,locked=false}){
   const u=rat.userData;let dx=0,dz=0;
@@ -636,18 +636,18 @@ $('padB').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagatio
 
 
 // Build 31: reference-led junkyard, shared mesh and matching collision surfaces.
-const YARD_DATA={"obstacles":[{"x":22,"z":-6,"hx":5.5,"hz":4.5,"h":8},{"x":-16,"z":-11,"hx":0.9,"hz":0.9,"h":1.8},{"x":-14,"z":-10.2,"hx":0.7,"hz":0.7,"h":1.4},{"x":-12,"z":-11,"hx":0.9,"hz":0.9,"h":1.8},{"x":-10,"z":-10.2,"hx":0.7,"hz":0.7,"h":1.4},{"x":-18,"z":7,"hx":0.9,"hz":0.9,"h":1.8},{"x":-16,"z":7.8,"hx":0.7,"hz":0.7,"h":1.4},{"x":26,"z":22,"hx":0.9,"hz":0.9,"h":1.8},{"x":28,"z":22.8,"hx":0.7,"hz":0.7,"h":1.4},{"x":-17,"z":21,"hx":0.9,"hz":0.9,"h":1.8},{"x":-15,"z":21.8,"hx":0.7,"hz":0.7,"h":1.4},{"x":10,"z":-11,"hx":0.9,"hz":0.9,"h":1.8},{"x":12,"z":-10.2,"hx":0.7,"hz":0.7,"h":1.4},{"x":-18,"z":10,"hx":0.65,"hz":0.65,"h":1.75},{"x":-16,"z":18,"hx":0.65,"hz":0.65,"h":1.75},{"x":11,"z":-10,"hx":0.65,"hz":0.65,"h":1.75},{"x":13,"z":-9,"hx":0.65,"hz":0.65,"h":1.75},{"x":12,"z":14,"hx":0.65,"hz":0.65,"h":1.75},{"x":27,"z":20,"hx":0.65,"hz":0.65,"h":1.75},{"x":-8,"z":7,"hx":0.65,"hz":0.65,"h":1.75},{"x":-18,"z":-5,"hx":0.65,"hz":0.65,"h":1.75},{"x":28,"z":1,"hx":0.65,"hz":0.65,"h":1.75},{"x":28,"z":8,"hx":2.5,"hz":0.06,"h":2},{"x":25.5,"z":10,"hx":0.06,"hz":2.0,"h":2},{"x":30.5,"z":10,"hx":0.06,"hz":2.0,"h":2}],"platforms":[{"x":-11,"z":-9,"hx":4.5,"hz":2.0,"h":1.6},{"x":-11,"z":-5.2,"hx":1.1,"hz":0.3,"h":0.4},{"x":-11,"z":-5.8,"hx":1.1,"hz":0.3,"h":0.8},{"x":-11,"z":-6.4,"hx":1.1,"hz":0.3,"h":1.2000000000000002},{"x":-12,"z":2,"hx":3.0,"hz":2.0,"h":1.35},{"x":-12,"z":5.8,"hx":1.1,"hz":0.3,"h":0.3375},{"x":-12,"z":5.2,"hx":1.1,"hz":0.3,"h":0.675},{"x":-12,"z":4.6,"hx":1.1,"hz":0.3,"h":1.0125000000000002},{"x":7,"z":13,"hx":3.0,"hz":2.0,"h":1.35},{"x":7,"z":16.8,"hx":1.1,"hz":0.3,"h":0.3375},{"x":7,"z":16.2,"hx":1.1,"hz":0.3,"h":0.675},{"x":7,"z":15.600000000000001,"hx":1.1,"hz":0.3,"h":1.0125000000000002}]};
+const YARD_DATA={"obstacles":[{"x":12,"z":33,"hx":1.32,"hz":1.08,"h":2},{"x":-11.8,"z":27,"hx":10.2,"hz":0.1,"h":3.5},{"x":17.8,"z":27,"hx":14.2,"hz":0.1,"h":3.5},{"x":-16,"z":-11,"hx":0.9,"hz":0.9,"h":1.8},{"x":-14,"z":-10.2,"hx":0.7,"hz":0.7,"h":1.4},{"x":-12,"z":-11,"hx":0.9,"hz":0.9,"h":1.8},{"x":-10,"z":-10.2,"hx":0.7,"hz":0.7,"h":1.4},{"x":-18,"z":7,"hx":0.9,"hz":0.9,"h":1.8},{"x":-16,"z":7.8,"hx":0.7,"hz":0.7,"h":1.4},{"x":26,"z":22,"hx":0.9,"hz":0.9,"h":1.8},{"x":28,"z":22.8,"hx":0.7,"hz":0.7,"h":1.4},{"x":-17,"z":21,"hx":0.9,"hz":0.9,"h":1.8},{"x":-15,"z":21.8,"hx":0.7,"hz":0.7,"h":1.4},{"x":10,"z":-11,"hx":0.9,"hz":0.9,"h":1.8},{"x":12,"z":-10.2,"hx":0.7,"hz":0.7,"h":1.4},{"x":-18,"z":10,"hx":0.65,"hz":0.65,"h":1.75},{"x":-16,"z":18,"hx":0.65,"hz":0.65,"h":1.75},{"x":11,"z":-10,"hx":0.65,"hz":0.65,"h":1.75},{"x":13,"z":-9,"hx":0.65,"hz":0.65,"h":1.75},{"x":12,"z":14,"hx":0.65,"hz":0.65,"h":1.75},{"x":27,"z":20,"hx":0.65,"hz":0.65,"h":1.75},{"x":-8,"z":7,"hx":0.65,"hz":0.65,"h":1.75},{"x":-18,"z":-5,"hx":0.65,"hz":0.65,"h":1.75},{"x":28,"z":1,"hx":0.65,"hz":0.65,"h":1.75},{"x":28,"z":8,"hx":2.5,"hz":0.06,"h":2},{"x":25.5,"z":10,"hx":0.06,"hz":2.0,"h":2},{"x":30.5,"z":10,"hx":0.06,"hz":2.0,"h":2},{"x":23,"z":-7,"hx":0.75,"hz":0.7,"h":3.4},{"x":19,"z":-6,"hx":0.85,"hz":0.7,"h":1.7},{"x":20,"z":17,"hx":1.15,"hz":1.15,"h":1.45},{"x":14,"z":4,"hx":0.75,"hz":1.1,"h":1.4},{"x":-19,"z":-5,"hx":0.75,"hz":0.7,"h":2.2},{"x":26,"z":-10,"hx":1.5,"hz":0.55,"h":1.7}],"platforms":[{"x":-11,"z":-9,"hx":4.5,"hz":2.0,"h":1.6},{"x":-11,"z":-5.2,"hx":1.1,"hz":0.3,"h":0.4},{"x":-11,"z":-5.8,"hx":1.1,"hz":0.3,"h":0.8},{"x":-11,"z":-6.4,"hx":1.1,"hz":0.3,"h":1.2000000000000002},{"x":-12,"z":2,"hx":3.0,"hz":2.0,"h":1.35},{"x":-12,"z":5.8,"hx":1.1,"hz":0.3,"h":0.3375},{"x":-12,"z":5.2,"hx":1.1,"hz":0.3,"h":0.675},{"x":-12,"z":4.6,"hx":1.1,"hz":0.3,"h":1.0125000000000002},{"x":7,"z":13,"hx":3.0,"hz":2.0,"h":1.35},{"x":7,"z":16.8,"hx":1.1,"hz":0.3,"h":0.3375},{"x":7,"z":16.2,"hx":1.1,"hz":0.3,"h":0.675},{"x":7,"z":15.600000000000001,"hx":1.1,"hz":0.3,"h":1.0125000000000002}]};
 let yardPromise,yardAsset;
-function loadJunkyard(){if(!yardPromise)yardPromise=new Promise((resolve,reject)=>new THREE.GLTFLoader().load('junkyard-build31.glb?v=31',g=>{yardAsset=g.scene;yardAsset.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.userData.noInk=true;o.userData.keepGeometry=true;}});resolve(yardAsset);},undefined,reject));return yardPromise;}
+function loadJunkyard(){if(!yardPromise)yardPromise=new Promise((resolve,reject)=>new THREE.GLTFLoader().load('junkyard-build32.glb?v=32',g=>{yardAsset=g.scene;yardAsset.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.userData.noInk=true;o.userData.keepGeometry=true;const old=o.material;o.material=new THREE.MeshToonMaterial({color:old.color,map:old.map,gradientMap:gradTex,side:THREE.DoubleSide,emissive:old.emissive,emissiveIntensity:old.emissiveIntensity||0});}});resolve(yardAsset);},undefined,reject));return yardPromise;}
 function attachJunkyard(owner){if(yardAsset){owner.add(yardAsset.clone(true));return;}loadJunkyard().then(g=>{if(root===owner)owner.add(g.clone(true));}).catch(()=>{});}
 function yardExit(){return rat.position.x>29&&Math.abs(rat.position.z-19)<2.5;}
 function yardGround(x,z,y){let h=0;for(const p of YARD_DATA.platforms)if(Math.abs(x-p.x)<p.hx&&Math.abs(z-p.z)<p.hz&&y>=p.h-.46)h=Math.max(h,p.h);return h;}
-function yardResolve(pos,before){for(const p of [...YARD_DATA.obstacles,...YARD_DATA.platforms]){if(pos.y>=p.h-.46)continue;const hx=p.hx+.43,hz=p.hz+.43;if(Math.abs(pos.x-p.x)>=hx||Math.abs(pos.z-p.z)>=hz)continue;if(Math.abs(before.x-p.x)>=hx)pos.x=before.x;else if(Math.abs(before.z-p.z)>=hz)pos.z=before.z;else{const dx=hx-Math.abs(pos.x-p.x),dz=hz-Math.abs(pos.z-p.z);if(dx<dz)pos.x=p.x+(pos.x<p.x?-hx:hx);else pos.z=p.z+(pos.z<p.z?-hz:hz);}}}
+function yardResolve(pos,before){for(const p of [...YARD_DATA.obstacles,...YARD_DATA.platforms]){if(pos.y>=p.h-.46)continue;const hx=p.hx+.16,hz=p.hz+.16;if(Math.abs(pos.x-p.x)>=hx||Math.abs(pos.z-p.z)>=hz)continue;if(Math.abs(before.x-p.x)>=hx)pos.x=before.x;else if(Math.abs(before.z-p.z)>=hz)pos.z=before.z;else{const dx=hx-Math.abs(pos.x-p.x),dz=hz-Math.abs(pos.z-p.z);if(dx<dz)pos.x=p.x+(pos.x<p.x?-hx:hx);else pos.z=p.z+(pos.z<p.z?-hz:hz);}}}
 // ---------- scavenge ----------
 let sc;
 function startScavenge(){
   exitPhoto();
-  phase='scavenge';clear();bag();ui.hb.style.display='none';radioStop();$('radioui').style.display='none';scene.background=new THREE.Color(0x7d918f);sun.intensity=.58;hemi.intensity=.82;rim.intensity=.32;sfx.rain(true);ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='The junkyard';
+  phase='scavenge';clear();bag();ui.hb.style.display='none';radioStop();$('radioui').style.display='none';scene.background=new THREE.Color(0x7d918f);sun.intensity=.95;hemi.intensity=.95;rim.intensity=.45;sfx.rain(true);ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Junkyard · Pip’s lane';
   scene.fog=new THREE.Fog(0x7d918f,36,100);
   attachJunkyard(root);
   // the dumpster
@@ -671,33 +671,33 @@ function startScavenge(){
   const spots=[[-3.8,2,-4],[3.8,2,-4.2],[-2,2,-5.55],[3.9,2,-5.2],[-11,1.6,-9],[-12,1.35,2],[7,1.35,13],[-8,0,13],[-17,0,13],[-8,0,21],[15,0,19],[19,0,7],[12,0,4],[26,0,15],[3,0,19],[-16,0,-3],[-6,0,-10],[12,0,-6],[3,0,5],[15,0,10]];
   const pool=Object.keys(ITEMS);const weights={stick:4,paper:2,nail:2,foil:2,string:2,button:2,coin:1,bulb:1,cloth:1};
   sc={items:[],near:null,talk:null,nearNb:false,catT:0,cat:null,catDelay:40+Math.random()*30,boom:null};
-  sc.boom=makeBoombox();sc.boom.position.set(8.2,0,-1.2);sc.boom.rotation.y=-0.35;root.add(sc.boom);ui.talk.style.display='none';
+  sc.boom=makeBoombox();sc.boom.scale.setScalar(.25);sc.boom.position.set(8.2,0,-1.2);sc.boom.rotation.y=-0.35;root.add(sc.boom);ui.talk.style.display='none';
   const bagIds=[];pool.forEach(id=>{for(let k=0;k<(weights[id]||1);k++)bagIds.push(id);});
   const shuffled=spots.slice().sort(()=>Math.random()-0.5).slice(0,14);
-  shuffled.forEach(([x,y,z])=>{const id=bagIds[Math.floor(Math.random()*bagIds.length)];const m=ITEMS[id].build();m.position.set(x,y,z);m.rotation.y=Math.random()*6;outline(m);root.add(m);sc.items.push({id,m,taken:false});});
-  rat=makeRat();rat.position.set(1,0,21);rat.rotation.y=Math.PI;root.add(rat);outline(root);
+  shuffled.forEach(([x,y,z])=>{const id=bagIds[Math.floor(Math.random()*bagIds.length)];const m=ITEMS[id].build();m.scale.setScalar(.22);m.position.set(x,y,z);m.rotation.y=Math.random()*6;outline(m);root.add(m);sc.items.push({id,m,taken:false});});
+  rat=makeRat();rat.scale.setScalar(.25);rat.position.set(1,0,29);rat.rotation.y=Math.PI;root.add(rat);outline(root);
   fatMixer=null;try{addNeighbour();}catch(e){console.warn(e);}
-  newWildlife(root,'cat',[28,3.2,-14.8],1.45);newWildlife(root,'crow',[-15,3.2,-14.8],1.7);ui.go.style.display='block';ui.go.textContent='Home';
-  camera.position.set(1,10,31);
+  newWildlife(root,'cat',[28,3.2,-14.8],.35);newWildlife(root,'crow',[-15,3.2,-14.8],.35);ui.go.style.display='block';ui.go.textContent='Home';
+  camera.position.set(1,3,33);
 }
-function spawnCat(){const c=makeCat();c.scale.setScalar(0.85);const side=Math.random()<0.5?-1:1;c.position.set(30,0,19);c.rotation.y=side>0?-Math.PI/2:Math.PI/2;outline(c);root.add(c);
+function spawnCat(){const c=makeCat();c.scale.setScalar(.32);const side=Math.random()<0.5?-1:1;c.position.set(30,0,19);c.rotation.y=side>0?-Math.PI/2:Math.PI/2;outline(c);root.add(c);
   sc.cat={m:c,state:'prowl',wp:new THREE.Vector3(side*20,0,6),life:0,warned:false};sfx.yowl();ui.phase.textContent='Cat in the junkyard';}
 function catchRat(){sfx.hiss();const ids=Object.keys(inv);if(ids.length){const id=ids[Math.floor(Math.random()*ids.length)];inv[id]--;if(inv[id]<=0)delete inv[id];}
   save();$('vig').style.background='radial-gradient(ellipse at 50% 45%,rgba(120,0,0,.35) 30%,rgba(60,0,0,.85) 100%)';
   ui.sub.textContent='Claws. Pip bolts for home and drops something on the way.';ui.sub.style.opacity=1;
   setTimeout(()=>{$('vig').style.background='';ui.sub.style.opacity=0;ui.sub.textContent='';startHouse();},1600);phase='caught';}
 function tickCat(dt){const c=sc.cat;if(!c){sc.catT+=dt;if(sc.catT>sc.catDelay)spawnCat();return;}
-  c.life+=dt;const m=c.m;const toRat=rat.position.clone().sub(m.position);toRat.y=0;const d=toRat.length();const safe=rat.position.y>1.2||!!sc.talk||!!rat.userData.climb;
+  c.life+=dt;const m=c.m;const toRat=rat.position.clone().sub(m.position);toRat.y=0;const d=toRat.length();const safe=rat.position.z>27||rat.position.y>1.2||!!sc.talk||!!rat.userData.climb;
   if(c.state==='prowl'){if(d<11&&!safe){c.state='chase';sfx.hiss();ui.prompt.style.display='block';ui.prompt.textContent='A cat! Get on the dumpster or run home!';}
     const to=c.wp.clone().sub(m.position);to.y=0;if(to.length()<1.5){c.wp.set(-17+Math.random()*45,0,3+Math.random()*20);}
     else{to.normalize();m.position.addScaledVector(to,dt*3.2);m.rotation.y=Math.atan2(to.x,to.z);}m.animate(dt,0.5);
     if(c.life>50){c.state='leave';}}
   else if(c.state==='chase'){if(safe){c.state='circle';c.wp.set(rat.position.x+(Math.random()-0.5)*6,0,3.5);}
     else{const dir=toRat.clone().normalize();m.position.addScaledVector(dir,dt*6.8);m.rotation.y=Math.atan2(dir.x,dir.z);m.animate(dt,1);
-      if(d<1.6&&!(rat.userData.act&&rat.userData.act.type==='roll')){catchRat();return;}}}
+      if(d<.55&&!(rat.userData.act&&rat.userData.act.type==='roll')){catchRat();return;}}}
   else if(c.state==='circle'){const to=c.wp.clone().sub(m.position);to.y=0;if(to.length()<1){c.wp.set((Math.random()-0.5)*12,0,2+Math.random()*6);c.life+=6;}else{to.normalize();m.position.addScaledVector(to,dt*2.5);m.rotation.y=Math.atan2(to.x,to.z);}
     m.animate(dt,0.4);if(!safe&&d<9){c.state='chase';sfx.hiss();}if(c.life>50){c.state='leave';}}
-  else if(c.state==='leave'){const to=new THREE.Vector3(30,0,19).sub(m.position);to.y=0;if(to.length()<2){root.remove(m);sc.cat=null;sc.catT=0;sc.catDelay=50+Math.random()*40;ui.phase.textContent='The junkyard';}
+  else if(c.state==='leave'){const to=new THREE.Vector3(30,0,19).sub(m.position);to.y=0;if(to.length()<2){root.remove(m);sc.cat=null;sc.catT=0;sc.catDelay=50+Math.random()*40;ui.phase.textContent='Junkyard · Pip’s lane';}
     else{to.normalize();m.position.addScaledVector(to,dt*4);m.rotation.y=Math.atan2(to.x,to.z);m.animate(dt,0.7);}}
   m.position.x=Math.max(-21,Math.min(31,m.position.x));m.position.z=Math.max(-14,Math.min(26,m.position.z));
   // keep the cat out of the dumpster block
@@ -707,23 +707,23 @@ function tickScavenge(dt){
   if(fatMixer)fatMixer.update(dt);const catBefore=sc.cat&&sc.cat.m.position.clone();tickCat(dt);if(sc.cat&&catBefore)yardResolve(sc.cat.m.position,catBefore);if(phase!=='scavenge')return;
   const groundAlley=(x,z)=>{const lx=x,lz=z+4;if(Math.abs(lx)<2&&lz>2&&lz<6.5)return Math.max(0,(6.5-lz)/4.5*2);if(Math.abs(lx)<4.5&&Math.abs(lz)<=2)return 2;return 0;};
   const before=rat.position.clone();
-  const speed=control(dt,{walk:4.6,bounds:[-21,31,-14,26],ground:(x,z)=>Math.max(groundAlley(x,z),yardGround(x,z,rat.position.y)),locked:!!sc.talk});
+  const speed=control(dt,{walk:2.7,bounds:[-21,31,-14,38],ground:(x,z)=>Math.max(groundAlley(x,z),yardGround(x,z,rat.position.y)),locked:!!sc.talk});
   yardResolve(rat.position,before);
   if(!rat.userData.climb&&Math.abs(rat.position.x)<4.7&&rat.position.z>-6.2&&rat.position.z<-1.8&&before.y<1.45&&!(Math.abs(before.x)<2.1&&before.z>=-2.15)){rat.position.x=before.x;rat.position.z=before.z;rat.position.y=before.y;}
-  {const nb=new THREE.Vector3(-4.4,rat.position.y,1.0);const dn=rat.position.distanceTo(nb);if(dn<3.2){const d=rat.position.clone().sub(nb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(3.2);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}
-  {const bb=new THREE.Vector3(8.2,rat.position.y,-1.2);const db=rat.position.distanceTo(bb);if(db<2.6&&rat.position.y<1){const d=rat.position.clone().sub(bb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(2.6);rat.position.x=bb.x+d.x;rat.position.z=bb.z+d.z;}}
+  {const nb=new THREE.Vector3(-4.4,rat.position.y,1.0);const dn=rat.position.distanceTo(nb);if(dn<.8){const d=rat.position.clone().sub(nb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(.8);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}
+  {const bb=new THREE.Vector3(8.2,rat.position.y,-1.2);const db=rat.position.distanceTo(bb);if(db<.65&&rat.position.y<1){const d=rat.position.clone().sub(bb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(.65);rat.position.x=bb.x+d.x;rat.position.z=bb.z+d.z;}}
   const lx=rat.position.x,lz=rat.position.z+4;
   sc.onTop=(Math.abs(lx)<4.2&&Math.abs(lz)<1.8&&rat.position.y>1.5);
   // the lid is open: walk into the middle of the top and you fall in
   if(sc.onTop&&Math.abs(lx)<3.4&&Math.abs(lz)<1.3&&!rat.userData.air){startInside();return;}
   rat.animate(dt,speed,false);steps(dt,speed,rat.position.y>1?'steel':'cobble');
   if(speed>0.05){const inP=[[-9,4,4],[18,9,3],[-28,-2,2.5],[34,-4,3.5]].some(([px,pz,r])=>Math.hypot(rat.position.x-px,rat.position.z-pz)<r);if(inP&&!sc.wet){sfx.splash();}sc.wet=inP;}
-  sc.near=null;let best=2.6;
+  sc.near=null;let best=.9;
   sc.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
-  sc.nearHome=Math.hypot(rat.position.x-22,rat.position.z-1)<3.1||(Math.abs(rat.position.x-1)<2.6&&rat.position.z>24);
+  sc.nearHome=Math.hypot(rat.position.x-12,rat.position.z-34.4)<1.1;
   sc.nearClimb=Math.hypot(rat.position.x-5.3,rat.position.z+2.5)<1.7&&rat.position.y<.5;
-  sc.nearNb=rat.position.distanceTo(new THREE.Vector3(NB.x,rat.position.y,NB.z))<4.6;
-  sc.nearBoom=sc.boom&&Math.hypot(rat.position.x-8.2,rat.position.z+1.2)<3.8&&rat.position.y<1;
+  sc.nearNb=rat.position.distanceTo(new THREE.Vector3(NB.x,rat.position.y,NB.z))<1.6;
+  sc.nearBoom=sc.boom&&Math.hypot(rat.position.x-8.2,rat.position.z+1.2)<1.4&&rat.position.y<1;
   if(sc.boom){const pulse=radio.on?1+Math.abs(Math.sin(t*9))*0.12:1;sc.boom.userData.speakers.forEach(c=>c.scale.set(pulse,pulse,1));sc.boom.userData.led.material.emissiveIntensity=radio.on?2:0.2;}
   if(sc.talk){ui.prompt.style.display='none';$('padE').textContent='Next';const k=sc.talk;
     if(k.audio){const ct=bigratAudio.currentTime;if(bigratAudio.ended||ct>=TALK_CUES[TALK.length]-0.05){endTalk();}
@@ -739,10 +739,10 @@ function tickScavenge(dt){
   else if(sc.nearNb){ui.prompt.style.display='block';ui.prompt.textContent='E · talk to the big rat';$('padE').textContent='Talk';}
   else if(sc.nearBoom){ui.prompt.style.display='block';ui.prompt.textContent=radio.on?'E · boombox':'E · turn on the boombox';$('padE').textContent='Radio';}
   else{ui.prompt.style.display='none';$('padE').textContent='Grab';}
-  if(sc.talk){const dir=new THREE.Vector3(1,0,0.12).normalize();const cp=NB.clone().addScaledVector(dir,4.6);cp.y=2.3;camera.position.lerp(cp,Math.min(1,dt*3.5));camera.lookAt(NB.x+0.3,1.7,NB.z);rat.visible=false;}
-  else{rat.visible=true;const portrait=innerHeight>innerWidth;const back=portrait?9.0:8.5,up=portrait?6.3:6.5;const cx=rat.position.x*.86,cz=rat.position.z+back;
+  if(sc.talk){const dir=new THREE.Vector3(1,0,0.12).normalize();const cp=NB.clone().addScaledVector(dir,1.7);cp.y=.85;camera.position.lerp(cp,Math.min(1,dt*3.5));camera.lookAt(NB.x,.42,NB.z);rat.visible=false;}
+  else{rat.visible=true;const portrait=innerHeight>innerWidth;const back=portrait?3.8:4.2,up=portrait?2.5:2.8;const cx=rat.position.x,cz=rat.position.z+back;
   camera.position.x+=(cx-camera.position.x)*dt*3;camera.position.z+=(cz-camera.position.z)*dt*3;camera.position.y+=(up+rat.position.y-camera.position.y)*dt*3;
-  camera.lookAt(rat.position.x*.86,1.05+rat.position.y,rat.position.z-1.2);}
+  camera.lookAt(rat.position.x,.3+rat.position.y,rat.position.z-.3);}
 }
 const TALK=[["The Fat Rat","Hey, kid."],["The Fat Rat","Welcome to the Bronx dumpster, kid. Find what you need and bounce."],["The Fat Rat","Whole block got flooded. Everybody's stuff ends up here eventually."],["The Fat Rat","Don't stay too long. The cats show up after dark, and they'll pull your guts out."],["The Fat Rat","Go on. And take the sponge, it's the only thing in there that's dry."]];
 const TALK_CUES=[0,2.44,5.47,7.73,9.11,12.36]; // line start times in bigrat.mp3
@@ -1079,18 +1079,18 @@ function startArea(id){if(!zones[id])return;exitPhoto();closeModal();phase='expl
     const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(-10,4.8,-5),new THREE.Vector3(0,3.9,-5),new THREE.Vector3(10,4.8,-5)]);root.add(new THREE.Mesh(new THREE.TubeGeometry(curve,20,.018,4,false),M(0x786c51)));
     for(let i=0;i<6;i++){const clothMesh=box(1.7,1.6,.035,MT([0xbfcbd0,0xd4a292,0xe7d8b0][i%3],'cloth',1,1));clothMesh.position.set(-7.5+i*3,3.2+Math.abs(i-2.5)*.15,-5);clothMesh.userData.noInk=true;clothMesh.castShadow=false;root.add(clothMesh);}
     for(const x of [-8,8]){area.obstacles.push({x,z:-7,hx:1.15,hz:1.15});const tub=cyl(1.15,.85,1.3,MT(0xd6dfdc,'steel'),14);tub.position.set(x,.65,-7);root.add(tub);const lid=cyl(1.02,1.02,.025,M(0x7e9b9d),14);lid.position.set(x,1.31,-7);root.add(lid);}
-    newWildlife(root,'cat',[-3,2.58,-10],1.5);newWildlife(root,'crow',[7,2.58,-10],1.7);
+    newWildlife(root,'cat',[-3,2.58,-10],.35);newWildlife(root,'crow',[7,2.58,-10],.35);
   }else{
     const path=box(3,.035,21,MT(0xd6c7a5,'cobble',1,7));path.position.set(0,.02,0);path.userData.noInk=true;root.add(path);
     for(const [x,zp] of [[-7,-6],[6,-5],[-7,1],[6,3]]){area.obstacles.push({x,z:zp,hx:1.75,hz:1.5});const bed=box(3.5,.42,3,MT(0xbfa480,'wood'));bed.position.set(x,.21,zp);root.add(bed);const soil=box(3.2,.03,2.7,MT(0xc0b58c,'soil'));soil.position.set(x,.44,zp);root.add(soil);for(let j=0;j<5;j++){const stem=cyl(.035,.045,.6,M(0x56714d),5);stem.position.set(x+(j%3-1)*.7,.73,zp+(Math.floor(j/3)-.5)*.9);root.add(stem);const leaf=sph(.25,M(j%2?0x8b9f61:0x698853),6,4);leaf.scale.set(1,.25,1.5);leaf.position.copy(stem.position);leaf.position.y+=.23;leaf.rotation.z=j*.8;leaf.castShadow=false;root.add(leaf);}}
-    const pond=new THREE.Mesh(new THREE.CircleGeometry(2.4,24),M(0x6c9fa7));pond.rotation.x=-Math.PI/2;pond.position.set(7,.04,7.5);pond.userData.noInk=true;root.add(pond);newWildlife(root,'crow',[-5,.48,2],1.8);
+    const pond=new THREE.Mesh(new THREE.CircleGeometry(2.4,24),M(0x6c9fa7));pond.rotation.x=-Math.PI/2;pond.position.set(7,.04,7.5);pond.userData.noInk=true;root.add(pond);newWildlife(root,'crow',[-5,.48,2],.35);
   }
   for(let i=0;i<16;i++){const itemId=z.pool[i%z.pool.length],m=ITEMS[itemId].build();m.position.set(-9+(i%4)*6+(i%2)*.5,0,-6+Math.floor(i/4)*4);m.rotation.y=i*1.7;outline(m);root.add(m);area.items.push({id:itemId,m,taken:false});}
   const exit=decal(3.8,1,(x,w,h)=>{x.fillStyle='#eadbb8';x.fillRect(0,0,w,h);x.fillStyle='#354744';x.textAlign='center';x.font='42px Georgia';x.fillText('← BACK TO THE ALLEY',w/2,150)});exit.position.set(0,1.8,10);exit.rotation.y=Math.PI;root.add(exit);
-  rat=makeRat();rat.position.set(0,0,7.5);rat.rotation.y=Math.PI;root.add(rat);outline(rat);camera.position.set(0,9,17);addMotes(root,35,22,5,20,0xf6e4b5);}
-function tickArea(dt){const speed=control(dt,{walk:4.5,bounds:[-11,11,-8.5,10]});for(const o of area.obstacles){const dx=rat.position.x-o.x,dz=rat.position.z-o.z,ox=o.hx+.3-Math.abs(dx),oz=o.hz+.3-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz)rat.position.x+=(dx<0?-1:1)*ox;else rat.position.z+=(dz<0?-1:1)*oz;}}rat.animate(dt,speed,false);steps(dt,speed,area.id==='garden'?'soft':'cobble');area.near=null;let d=1.8;area.items.forEach(it=>{if(it.taken)return;const dist=it.m.position.distanceTo(rat.position);if(dist<d){d=dist;area.near=it}});area.exit=rat.position.z>8.8&&Math.abs(rat.position.x)<3;
-  ui.prompt.style.display=area.near||area.exit?'block':'none';ui.prompt.textContent=area.near?'E · grab '+ITEMS[area.near.id].name:'E · return to the alley';$('padE').textContent=area.exit&&!area.near?'Out':'Grab';
-  const portrait=innerHeight>innerWidth;camera.position.lerp(new THREE.Vector3(rat.position.x*.55,portrait?12:8.5,rat.position.z+(portrait?13:10)),Math.min(1,dt*3));camera.lookAt(rat.position.x*.55,.8,rat.position.z-1);}
+  rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,0,7.5);rat.rotation.y=Math.PI;root.add(rat);outline(rat);camera.position.set(0,9,17);addMotes(root,35,22,5,20,0xf6e4b5);}
+function tickArea(dt){const speed=control(dt,{walk:2.7,bounds:[-11,11,-8.5,10]});for(const o of area.obstacles){const dx=rat.position.x-o.x,dz=rat.position.z-o.z,ox=o.hx+.3-Math.abs(dx),oz=o.hz+.3-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz)rat.position.x+=(dx<0?-1:1)*ox;else rat.position.z+=(dz<0?-1:1)*oz;}}rat.animate(dt,speed,false);steps(dt,speed,area.id==='garden'?'soft':'cobble');area.near=null;let d=1.8;area.items.forEach(it=>{if(it.taken)return;const dist=it.m.position.distanceTo(rat.position);if(dist<d){d=dist;area.near=it}});area.exit=rat.position.z>8.8&&Math.abs(rat.position.x)<3;
+  ui.prompt.style.display=area.near||area.exit?'block':'none';ui.prompt.textContent=area.near?'E · grab '+ITEMS[area.near.id].name:'E · return to the junkyard';$('padE').textContent=area.exit&&!area.near?'Out':'Grab';
+  const portrait=innerHeight>innerWidth;camera.position.lerp(new THREE.Vector3(rat.position.x,portrait?2.5:2.8,rat.position.z+(portrait?3.8:4.2)),Math.min(1,dt*3));camera.lookAt(rat.position.x,.3,rat.position.z-.3);}
 function grabArea(){if(rat.userData.pick)return;if(area.near){const it=area.near;it.taken=true;root.remove(it.m);inv[it.id]=(inv[it.id]||0)+1;area.near=null;bag();save();sfx.pickup();sayToast(ITEMS[it.id].name+' added');}else if(area.exit)startScavenge();}
 // New handmade furniture uses the same part economy.
 Object.assign(CRAFT,{
