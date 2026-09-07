@@ -86,3 +86,12 @@ Pip now uses quarter scale outdoors, with the neighbour, cats, crow, boombox and
 Pip’s rat-sized shelter is outside the front fence, connected by a paved path. The former shed site now holds discarded appliances. Added fridge, washing machine, wheelbarrow, cupboard, chair, cable spool, pipes, cones, bottles, tins and pots. Colours are brighter, major props have softened edges, and the loaded map uses Three.js toon materials. Existing saves, crafting and the Fat Rat recording are retained.
 
 Verified JavaScript syntax, gate and fence collision, house approach, platform steps, spawn and fridge collision; inspected actual 3D asset renders. Browser GPU gameplay was not verified in this environment.
+
+
+## Build 33 — Zaytona follows Pip
+
+Zaytona uses the owner-provided Meshy_AI_Zaytona_biped model and its Walking and Running animations. Both animations share one GLB mesh/texture set. A held pose supplies idle; the biped movement is retained from the supplied asset. Credit: owner-provided Meshy model and animations.
+
+She spawns with Pip in the junkyard, courtyard and garden, follows at roughly two game units, catches up when farther away, and pauses facing Pip. Ground navigation routes around scenery and through gates; she stays on the ground while Pip climbs. The previous attacking cat loop is disabled. Indoor scenes retain their existing behaviour; Zaytona rejoins on returning outside. Existing saves and Fat Rat audio are unchanged.
+
+Validation: actual Three.js r128 GLB parsing and animation evaluation, posed-skin scale measurement, finite skeleton transforms, obstacle/gate navigation and a simulated follow-and-stop sequence. Browser GPU gameplay was not available for verification.
