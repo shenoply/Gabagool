@@ -1,14 +1,22 @@
-# Wet Whiskers — Build 27: The neighbourhood
+# Wet Whiskers — Build 28: A little place in the world
 
-## Play this download
+Play at https://shenoply.github.io/Gabagool/?build=28
 
-The downloadable bundle contains **wet-whiskers-build-27.html**, which can be opened in a browser. It contains Three.js r128, the GLTF loader, the original Fat Rat GLB and the original `bigrat.mp3` recording. The neighbour and voice no longer depend on separate files beside this HTML. Tap Begin / Come on home before playing sound. Some phone file-preview apps do not run WebGL; use a browser when available.
+Single-file Three.js r128 game, with no build step. Serve `index.html` with `GLTFLoader.js`, `fat-rat.glb`, `bigrat.mp3`, and `opening-scene.webp` alongside it.
 
-For GitHub Pages, `index.html` is the smaller source version. Keep `GLTFLoader.js`, `fat-rat.glb` and `bigrat.mp3` alongside it. Build 27 is published on the main branch. Play at https://shenoply.github.io/Gabagool/.
+## Build 28
+
+- Rounded original Pip with sculpted body, expressive eyes, scarf, articulated legs and a continuous flexible tail. Distance-driven strides, eased movement, blinking, breathing and secondary ear/scarf motion. Existing jump, roll, bite and climbing actions remain.
+- Smoother cat and crow surfaces, softer diffuse environment shading, rounded furnishings, an arched home doorway and a moonlit circular window.
+- New original generated opening artwork on the title screen and a slow-moving prologue, fading into the playable 3D flood sequence. The full introduction lasts 32 seconds and can be skipped. The illustration is pre-rendered artwork; gameplay remains real-time Three.js.
+- Existing neighbour model and recorded dialogue, crafting, storage, home placement, courtyard and garden are retained. Saves continue using `ww-save`.
+- Phone rendering remains capped at 1.5 pixel ratio and 1024 sun shadows; detailed character meshes do not cast shadows.
+
+The changes below describe the retained Build 27 systems. The separate exported cat/crow GLBs remain Build 27 assets; Build 28's smoother models are inline in the game.
 
 ## What changed
 
-- The existing big rat and voice recording are embedded unchanged in the portable HTML. Recorded dialogue begins from a user interaction, avoids overlapping device speech, and stops when muted. A temporary procedural neighbour appears while the original model loads.
+- The existing big rat and voice recording remain available in the Build 27 portable HTML; the live game loads the original local files. Recorded dialogue begins from a user interaction, avoids overlapping device speech, and stops when muted. A temporary procedural neighbour appears while the original model loads.
 - The workbench groups 20 recipes into furniture, lighting and decoration, lists missing parts, puts affordable recipes first, and lets you pin a shopping list.
 - Crafting now puts a finished item in Furniture. Place it when ready. Cancelling placement does not lose it. Tap existing furniture to move, store or recycle it; recycling returns the original parts.
 - Tap the floor to position a placement ghost; toggle a quarter-unit grid; rotate before confirming. Wall items snap and reject overlaps. Old version-1 saves remain supported; finished furniture is saved in `home.storage`.
@@ -30,19 +38,12 @@ Original procedural models made for Wet Whiskers. No third-party animal model, t
 
 ## Credits
 
+- Opening illustration: AI-generated original artwork for Wet Whiskers; no third-party character assets added.
 - Original neighbour: **The Fat Rat**, Ryan Honey / Raditsys, [creator page](https://sketchfab.com/Raditsys), CC-BY 4.0. The existing project recording `bigrat.mp3` is retained byte-for-byte.
 - Three.js r128 and GLTFLoader: Three.js contributors, MIT.
 - Pip, procedural environments, new cat and crow: built in code for this project.
 - The optional Quaternius rat is not used.
 
-## Validation and limits
+## Validation
 
-20 logic integration checks passed using actual Three.js r128 scene/geometry classes with stubbed DOM, renderer and audio. Covered startup, cutscene transition, neighbour fallback, pickups, distinct area loot, old-save migration, finished crafting, cancellation, placement, moving, storing, recycling, wall overlap, all recipe geometry, shopping lists, animal animation, climbing, exploration photo/map controls, mute and light quality.
-
-All three scripts in the portable HTML parse. Embedded neighbour/audio bytes match the existing files. Exported GLB buffer bounds and animation targets validate. The model preview was rendered directly from the exported mesh geometry with a software depth buffer; it is not a game screenshot.
-
-The session's browser policy prevented local game preview. GPU rendering, actual audio playback, mobile touch layout and browser photo downloads have not been visually/end-to-end verified. Existing browser save data is scoped to the URL/origin used to open the game.
-
-## Next ideas
-
-A crow that trades shiny coins for rare parts; neighbour visits after the home has seating; a dry pantry alcove unlocked by repair materials; small ambient events such as laundry blowing loose. These are ideas, not implemented features, and would keep the game open-ended without compulsory missions.
+22 logic and geometry checks passed using Three.js r128 with stubbed DOM, WebGL renderer and audio. Covers gameplay/save compatibility, the complete intro transition, character geometry and animated action transforms. These checks do not validate GPU rendering, actual sound playback or mobile touch interaction.
