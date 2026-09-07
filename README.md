@@ -77,3 +77,12 @@ Approved GLB SHA-256: d94551a2d15b2d2549aed06038e8fee1c58a5acab29c2cce32ac71de0f
 The main scavenging area now uses an original 3D junkyard built from the owner’s supplied layout reference: teal perimeter fencing, a timber shed, three stepped platforms, crates, tyres, drums and scattered paving. The shed door returns to the existing decorated home; the right gate leads to the courtyard. Pip, dumpster access, Fat Rat and bigrat.mp3 dialogue remain in place.
 
 `junkyard.glb` contains original geometry and procedural colour textures, with meshes combined by material for mobile rendering. Map collision is embedded in index.html. The reference-driven map asset was created for Wet Whiskers; no third-party models or music were added.
+
+
+## Build 32 — scale, outside home and cartoon salvage
+
+Pip now uses quarter scale outdoors, with the neighbour, cats, crow, boombox and loot resized to match. Outdoor cameras follow closer; pickup and bite ranges fit the smaller character. The yard uses a consistent design scale of one unit per half metre: the rat is about 25 cm upright, drums about 85 cm high. These are gameplay scale targets, not a biological simulation.
+
+Pip’s rat-sized shelter is outside the front fence, connected by a paved path. The former shed site now holds discarded appliances. Added fridge, washing machine, wheelbarrow, cupboard, chair, cable spool, pipes, cones, bottles, tins and pots. Colours are brighter, major props have softened edges, and the loaded map uses Three.js toon materials. Existing saves, crafting and the Fat Rat recording are retained.
+
+Verified JavaScript syntax, gate and fence collision, house approach, platform steps, spawn and fridge collision; inspected actual 3D asset renders. Browser GPU gameplay was not verified in this environment.
