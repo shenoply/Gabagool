@@ -71,7 +71,7 @@
     <button class="btn" id="start">Start</button>
     <button class="btn" id="newgame" style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
     <p style="font-size:13px;opacity:.6">WASD move · Shift run · Space jump · Q roll · F bite · E grab · R rotate</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 24</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · build 25</p>
   </div>
   <div id="sub"></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
@@ -166,109 +166,111 @@ function outline(group){
     h.scale.setScalar(k);o.add(h);o.userData.inked=true;});
 }
 
-// ---------- rat model (Pip: long realistic rat, walks upright) ----------
+// ---------- rat model (Pip v3: smooth lathe body, real face, spring tail) ----------
 function makeRat(){
-  const fur=M(0x6e6a66,{roughness:.95}),furD=M(0x4d4946,{roughness:.95}),belly=M(0xb9b2aa,{roughness:.9}),pink=M(0xc98f88,{roughness:.7}),ink=M(0x120e0c,{roughness:.2});
+  const FUR=new THREE.Color(0x6e6a66),BACK=new THREE.Color(0x4a4643),BELLY=new THREE.Color(0xbdb5ab);
+  const fur=M(0x6e6a66),pink=M(0xd39a95,{}),pinkD=M(0xb9757a),ink=M(0x120e0c),eyeW=M(0xf7f2ea),iris=M(0x3a2a1c),hl=M(0xffffff,{emissive:0xffffff,emissiveIntensity:.6});
+  const vc=new THREE.MeshToonMaterial({vertexColors:true,gradientMap:gradTex});
   const g=new THREE.Group();
-  // hips pivot; torso leans back from it, standing upright-ish
   const hips=new THREE.Group();hips.position.set(0,0.74,0);g.add(hips);
-  const torso=new THREE.Group();torso.rotation.x=-1.4;hips.add(torso);   // long body tilted up
-  const rump=sph(0.4,fur,16,12);rump.scale.set(1,0.9,1.1);rump.position.set(0,0,-0.05);torso.add(rump);
-  const mid=sph(0.36,fur,16,12);mid.scale.set(1,0.85,1.6);mid.position.set(0,0.03,0.55);torso.add(mid);
-  const chest=sph(0.3,fur,16,12);chest.scale.set(0.95,0.85,1.3);chest.position.set(0,0,1.1);torso.add(chest);
-  const back=sph(0.36,furD,16,12);back.scale.set(0.85,0.55,2.2);back.position.set(0,0.2,0.5);torso.add(back);
-  const tum=sph(0.34,belly,16,12);tum.scale.set(0.9,0.55,1.9);tum.position.set(0,-0.16,0.5);torso.add(tum);
-  // head at the top of the torso, tilted forward to look ahead
-  const head=new THREE.Group();head.position.set(0,0.05,1.5);head.rotation.x=1.25;torso.add(head);
-  const skull=sph(0.28,fur,16,12);skull.scale.set(0.95,0.85,1.1);head.add(skull);
-  const snout=cyl(0.08,0.24,0.58,fur,12);snout.rotation.x=Math.PI/2;snout.position.set(0,-0.05,0.42);head.add(snout);
-  const chin=cyl(0.07,0.2,0.52,belly,12);chin.rotation.x=Math.PI/2;chin.position.set(0,-0.12,0.4);head.add(chin);
-  const nose=sph(0.065,pink,10,8);nose.scale.set(1.1,0.8,0.9);nose.position.set(0,-0.03,0.72);head.add(nose);
-  const ears=[];
+  const torso=new THREE.Group();torso.rotation.x=-1.4;hips.add(torso);
+  // one continuous body from rump to neck (lathe along local z)
+  const prof=[[0,-0.42],[0.24,-0.38],[0.38,-0.25],[0.44,-0.05],[0.45,0.22],[0.42,0.5],[0.37,0.78],[0.3,1.0],[0.23,1.18],[0.15,1.3],[0.0,1.36]].map(([r,h])=>new THREE.Vector2(r,h));
+  const bodyGeo=new THREE.LatheGeometry(prof,28);bodyGeo.rotateX(Math.PI/2);
+  {const pos=bodyGeo.attributes.position;const col=new Float32Array(pos.count*3);const c=new THREE.Color();
+    for(let i=0;i<pos.count;i++){const y=pos.getY(i),z=pos.getZ(i);const t=THREE.MathUtils.clamp((y+0.12)/0.5,0,1);c.copy(BELLY).lerp(FUR,t);if(y>0.18)c.lerp(BACK,THREE.MathUtils.clamp((y-0.18)/0.25,0,1)*0.9);if(z<-0.2)c.lerp(BACK,0.15);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
+    bodyGeo.setAttribute('color',new THREE.BufferAttribute(col,3));}
+  const body=new THREE.Mesh(bodyGeo,vc);body.castShadow=body.receiveShadow=true;body.position.set(0,-0.02,0.15);torso.add(body);
+  // head
+  const head=new THREE.Group();head.position.set(0,0.06,1.36);head.rotation.x=1.25;head.scale.setScalar(1.15);torso.add(head);
+  const skullGeo=new THREE.SphereGeometry(0.3,28,20);skullGeo.scale(1,0.92,1.05);
+  {const pos=skullGeo.attributes.position;const col=new Float32Array(pos.count*3);const c=new THREE.Color();for(let i=0;i<pos.count;i++){const y=pos.getY(i);const t=THREE.MathUtils.clamp((y+0.3)/0.45,0,1);c.copy(BELLY).lerp(FUR,t);if(y>0.1)c.lerp(BACK,0.5);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}skullGeo.setAttribute('color',new THREE.BufferAttribute(col,3));}
+  const skull=new THREE.Mesh(skullGeo,vc);skull.castShadow=true;head.add(skull);
+  const snProf=[[0.0,0],[0.14,0],[0.2,0.15],[0.25,0.32],[0.27,0.5]].map(([r,h])=>new THREE.Vector2(r,h)).reverse();
+  const snGeo=new THREE.LatheGeometry(snProf,20);snGeo.rotateX(Math.PI/2);snGeo.rotateX(Math.PI);
+  {const pos=snGeo.attributes.position;const col=new Float32Array(pos.count*3);const c=new THREE.Color();for(let i=0;i<pos.count;i++){const y=pos.getY(i);const t=THREE.MathUtils.clamp((y+0.2)/0.35,0,1);c.copy(BELLY).lerp(FUR,t);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}snGeo.setAttribute('color',new THREE.BufferAttribute(col,3));}
+  const snout=new THREE.Mesh(snGeo,vc);snout.castShadow=true;snout.position.set(0,-0.06,0.22);snout.scale.y=0.85;head.add(snout);
+  const nose=sph(0.075,pinkD,12,10);nose.scale.set(1.15,0.85,0.9);nose.position.set(0,-0.02,0.74);head.add(nose);
+  [-1,1].forEach(sx=>{const nz=sph(0.022,ink,6,6);nz.position.set(sx*0.04,-0.03,0.8);head.add(nz);});
+  const teeth=box(0.07,0.06,0.02,eyeW);teeth.position.set(0,-0.11,0.62);head.add(teeth);
+  // eyes: white, iris, pupil, highlight, lid
+  const eyes=[],ears=[];
   [-1,1].forEach(sx=>{
-    const eye=sph(0.055,ink,10,8);eye.position.set(sx*0.18,0.06,0.18);head.add(eye);
-    const gl=sph(0.015,M(0xffffff),6,6);gl.position.set(sx*0.19,0.085,0.22);head.add(gl);
-    const earG=new THREE.Group();earG.position.set(sx*0.23,0.22,-0.12);head.add(earG);const ear=cyl(0.14,0.14,0.03,fur,16);ear.rotation.x=Math.PI/2;ear.rotation.y=sx*0.5;earG.add(ear);
-    const inner=cyl(0.095,0.095,0.03,pink,16);inner.rotation.copy(ear.rotation);inner.position.set(0,0,0.015);earG.add(inner);ears.push(earG);
-    for(let i=0;i<4;i++){const w=cyl(0.004,0.004,0.65,M(0xe8e2d8),4);w.rotation.z=Math.PI/2;w.rotation.y=sx*(0.25+i*0.22);w.rotation.x=(i-1.5)*0.12;w.position.set(sx*0.26,-0.06+i*0.03,0.56);head.add(w);}
+    const eye=new THREE.Group();eye.position.set(sx*0.17,0.07,0.2);eye.rotation.y=sx*0.55;head.add(eye);
+    const w=sph(0.085,eyeW,14,12);w.scale.set(1,1.15,0.8);eye.add(w);
+    const ir=sph(0.05,iris,12,10);ir.position.z=0.055;eye.add(ir);const pu=sph(0.03,ink,10,8);pu.position.z=0.085;eye.add(pu);
+    const h=sph(0.012,hl,6,6);h.position.set(-0.02*sx,0.025,0.105);eye.add(h);
+    const lid=sph(0.092,fur,14,12);lid.scale.set(1.02,1.18,0.82);lid.position.y=0.12;eye.add(lid);eyes.push({eye,lid});
+    const earG=new THREE.Group();earG.position.set(sx*0.24,0.22,-0.1);head.add(earG);
+    const ear=cyl(0.15,0.15,0.03,fur,20);ear.rotation.x=Math.PI/2;ear.rotation.y=sx*0.5;earG.add(ear);
+    const inner=cyl(0.1,0.1,0.03,pink,20);inner.rotation.copy(ear.rotation);inner.position.set(0,0,0.015);earG.add(inner);ears.push(earG);
+    for(let i=0;i<4;i++){const w=cyl(0.004,0.003,0.62,M(0xe8e2d8),4);w.rotation.z=Math.PI/2;w.rotation.y=sx*(0.25+i*0.22);w.rotation.x=(i-1.5)*0.12;w.position.set(sx*0.27,-0.05+i*0.03,0.56);head.add(w);}
   });
-  // arms (front legs) hang from the chest
+  // arms
   const arms=[];
-  [-1,1].forEach(sx=>{
-    const arm=new THREE.Group();arm.position.set(sx*0.26,-0.08,1.05);torso.add(arm);
-    const up=cyl(0.08,0.06,0.36,fur,8);up.position.y=-0.18;arm.add(up);
-    const fore=cyl(0.055,0.045,0.3,pink,7);fore.position.y=-0.48;arm.add(fore);
-    const paw=box(0.11,0.05,0.16,pink);paw.position.set(0,-0.63,0.04);arm.add(paw);
-    arms.push(arm);
-  });
-  // hind legs: stand straight down from the hips
+  [-1,1].forEach(sx=>{const arm=new THREE.Group();arm.position.set(sx*0.38,-0.22,0.95);torso.add(arm);
+    const up=cyl(0.075,0.06,0.36,fur,10);up.position.y=-0.18;arm.add(up);const el=sph(0.065,fur,8,6);el.position.y=-0.36;arm.add(el);
+    const fore=cyl(0.055,0.045,0.3,pink,8);fore.position.y=-0.5;arm.add(fore);
+    const paw=sph(0.085,pinkD,8,6);paw.scale.set(1,0.55,1.4);paw.position.set(0,-0.66,0.03);arm.add(paw);
+    for(let f=-1;f<=1;f++){const fg=cyl(0.018,0.014,0.12,pinkD,5);fg.rotation.x=Math.PI/2;fg.position.set(f*0.04,-0.68,0.14);arm.add(fg);}
+    arms.push(arm);});
+  // legs
   const legs=[];
-  [-1,1].forEach(sx=>{
-    const leg=new THREE.Group();leg.position.set(sx*0.24,0,-0.05);hips.add(leg);
-    const th=cyl(0.15,0.08,0.4,fur,8);th.position.y=-0.2;leg.add(th);
-    const sh=cyl(0.06,0.05,0.34,pink,7);sh.position.y=-0.55;leg.add(sh);
-    const foot=box(0.14,0.05,0.42,pink);foot.position.set(0,-0.72,0.12);leg.add(foot);
-    legs.push(leg);
-  });
-  // long tail trailing on the ground
+  [-1,1].forEach(sx=>{const leg=new THREE.Group();leg.position.set(sx*0.23,0,-0.05);hips.add(leg);
+    const th=sph(0.17,fur,10,8);th.scale.set(1,1.4,1);th.position.y=-0.14;leg.add(th);
+    const sh=cyl(0.06,0.05,0.34,pink,8);sh.position.y=-0.52;leg.add(sh);
+    const foot=box(0.13,0.05,0.4,pinkD);foot.position.set(0,-0.72,0.12);leg.add(foot);
+    for(let f=-1;f<=1;f++){const tg=cyl(0.02,0.016,0.12,pinkD,5);tg.rotation.x=Math.PI/2;tg.position.set(f*0.045,-0.72,0.36);leg.add(tg);}
+    legs.push(leg);});
+  // tail: spring chain
   const tail=[];let parent=hips;
-  for(let i=0;i<12;i++){
-    const seg=new THREE.Group();seg.position.set(0,i?0:-0.3,i?-0.24:-0.35);if(!i)seg.rotation.x=0.9;
-    const m=cyl(0.05-i*0.0035,0.047-i*0.0035,0.26,pink,7);m.rotation.x=Math.PI/2;m.position.z=-0.12;seg.add(m);
-    parent.add(seg);parent=seg;tail.push(seg);
-  }
-  g.userData={hips,torso,head,arms,legs,tail,ears,phase:0,sniff:0,act:null,air:false,vy:0,land:0,run:false};
+  for(let i=0;i<12;i++){const seg=new THREE.Group();seg.position.set(0,i?0:-0.3,i?-0.24:-0.35);if(!i)seg.rotation.x=0.9;
+    const m=cyl(0.05-i*0.0035,0.047-i*0.0035,0.26,pink,8);m.rotation.x=Math.PI/2;m.position.z=-0.12;seg.add(m);parent.add(seg);parent=seg;tail.push(seg);}
+  const u=g.userData={hips,torso,head,arms,legs,tail,ears,eyes,phase:0,sniff:0,act:null,air:false,vy:0,land:0,run:false,vel:0,
+    blink:2+Math.random()*3,walkB:0,runB:0,yawV:0,lastYaw:g.rotation.y,tailV:new Array(12).fill(0),tailA:new Array(12).fill(0),jig:0,jigV:0,earV:0,earA:0,
+    cur:{legs:[0,0],arms:[0,0],torsoX:-1.4,torsoZ:0,headX:1.25,headY:0,headZ:0,hipY:0.74}};
+  const sm=(cur,target,dt,k)=>cur+(target-cur)*(1-Math.exp(-dt*k));
   g.animate=function(dt,speed,panic){
-    const u=g.userData;u.phase+=dt*(speed>0.05?(u.run?15:11):2)*(panic?1.7:1);const t=u.phase;u.sniff+=dt*18;
-    if(u.pick){
-      const k=u.pick;k.t+=dt;const T=k.t;
-      const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
-      if(T<0.35){ // crouch and reach
-        const a=ease(T/0.35);u.torso.rotation.x=-1.4+a*0.75;u.head.rotation.x=1.25-a*0.5;
-        u.arms.forEach(ar=>{ar.rotation.x=-a*1.3;});u.legs.forEach(l=>l.rotation.x=a*0.5);u.hips.position.y=0.74-a*0.18;
-        if(k.item){k.item.visible=T>0.25;}
-      }else if(T<1.3){ // stand and lift the item
-        const a=ease((T-0.35)/0.3);u.torso.rotation.x=-1.4+0.75*(1-a)-a*0.15;u.head.rotation.x=1.25-0.5*(1-a)+a*0.15;
-        u.arms.forEach(ar=>{ar.rotation.x=-1.3-a*1.4;});u.legs.forEach(l=>l.rotation.x=0.5*(1-a));u.hips.position.y=0.74-0.18*(1-a)+Math.sin(T*20)*0.01*a;
-        u.torso.rotation.z=Math.sin(T*14)*0.05*a;
-        if(k.item){k.item.visible=true;const held=T>0.65;const s2=held?1:0.7+0.3*a;k.item.scale.setScalar(k.scale*s2);}
-      }else if(T<1.55){ // tuck it away
-        const a=ease((T-1.3)/0.25);u.arms.forEach(ar=>{ar.rotation.x=-2.7+a*2.7;});u.torso.rotation.x=-1.55+a*0.15;u.head.rotation.x=1.4-a*0.15;u.torso.rotation.z*=0.8;
-        if(k.item){k.item.scale.setScalar(k.scale*(1-a));}
-      }else{ if(k.item)k.item.parent.remove(k.item);u.pick=null;u.torso.rotation.x=-1.4;u.head.rotation.x=1.25;u.arms.forEach(ar=>ar.rotation.x=0);}
-      u.tail.forEach((s,i)=>{if(i){s.rotation.y=Math.sin(t*2.2+i*0.5)*0.3;}});
-      return;
+    const u=g.userData,C=u.cur;dt=Math.min(dt,0.05);
+    // blends
+    u.walkB=sm(u.walkB,speed>0.05?1:0,dt,9);u.runB=sm(u.runB,u.run&&speed>0.05?1:0,dt,6);
+    const vel=u.vel||0;u.phase+=dt*(u.walkB>0.02?Math.max(vel*2.3,3.5):1.8)*(panic?1.6:1);const t=u.phase;u.sniff+=dt*18;
+    // yaw velocity for look-ahead and tail lag
+    let dy=g.rotation.y-u.lastYaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));u.lastYaw=g.rotation.y;u.yawV=sm(u.yawV,dy/Math.max(dt,1e-3),dt,10);
+    // blink
+    u.blink-=dt;let lidY=0.12;if(u.blink<0.1)lidY=-0.02;if(u.blink<0)u.blink=2.5+Math.random()*3.5;u.eyes.forEach(e=>{e.lid.position.y=sm(e.lid.position.y,lidY,dt,28);});
+    // targets
+    let T={legs:[0,0],arms:[0,0],torsoX:-1.4,torsoZ:0,headX:1.25,headY:0,headZ:0,hipY:0.74,earX:0};
+    const w=u.walkB,r=u.runB;
+    const act=u.act;
+    if(act){act.t+=dt;const A=act.t;const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
+      if(act.type==='roll'){const a=A/0.55;g.rotation.x=-a*Math.PI*2;T.hipY=0.55;T.torsoX=-0.6;T.headX=0.6;T.legs=[1.2,1.2];T.arms=[-1.6,-1.6];if(A>=0.55){u.act=null;g.rotation.x=0;}}
+      else if(act.type==='bite'){const a=A<0.12?ease(A/0.12):A<0.32?1:ease(1-(A-0.32)/0.2);T.torsoX=-1.4+a*0.75;T.headX=1.25-a*0.95;T.arms=[-a*1.9-0.2,-a*1.9+0.2];T.legs=[a*0.5,-a*0.5];T.hipY=0.74-a*0.12;if(A>=0.52)u.act=null;}}
+    else if(u.air){const up=u.vy>0;T.legs=[up?-0.9:0.9,up?-0.9:0.9];T.arms=[up?-2.2:-0.8,up?-2.2:-0.8];T.torsoX=up?-1.2:-1.55;T.headX=up?1.0:1.35;T.earX=up?0.4:-0.5;}
+    else if(u.land>0){u.land-=dt;const a=u.land/0.18;T.hipY=0.74-a*0.16;T.torsoX=-1.4+a*0.35;T.legs=[a*0.5,a*0.5];T.headX=1.25-a*0.2;T.earX=-a*0.9;u.earV-=a*6*dt;}
+    else{
+      // idle
+      const idle={legs:[0,0],arms:[Math.sin(t*0.9)*0.06,Math.sin(t*0.9+1)*0.06],torsoX:-1.4+Math.sin(t)*0.015,torsoZ:0,headX:1.25+(panic?Math.sin(t*3)*0.2:Math.sin(u.sniff)*0.02+Math.sin(t*0.7)*0.06),headY:panic?Math.sin(t*2.5)*0.6:Math.sin(t*0.35)*0.35,headZ:0,hipY:0.74+Math.sin(t)*0.01,earX:(Math.sin(t*0.9)>0.92?0.5:0)};
+      // walk / run (blend by r)
+      const amp=0.8+r*0.3,arm=0.6+r*0.9,lean=-1.4+r*0.3;
+      const walk={legs:[Math.sin(t)*amp,Math.sin(t+Math.PI)*amp],arms:[Math.sin(t+Math.PI)*arm-r*0.6,Math.sin(t)*arm-r*0.6],torsoX:lean+Math.sin(t*2)*0.04,torsoZ:Math.sin(t)*(0.05+r*0.03)-u.yawV*0.03,headX:1.25-r*0.2+Math.sin(t*2)*0.05,headY:THREE.MathUtils.clamp(u.yawV*0.12,-0.5,0.5),headZ:-Math.sin(t)*0.04,hipY:0.74+Math.abs(Math.sin(t))*(0.05+r*0.04),earX:Math.sin(t*2)*0.15*(0.4+r)};
+      for(const k in T){if(Array.isArray(T[k]))T[k]=[idle[k][0]*(1-w)+walk[k][0]*w,idle[k][1]*(1-w)+walk[k][1]*w];else T[k]=idle[k]*(1-w)+walk[k]*w;}
     }
-    const act=u.act;const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
-    if(act){act.t+=dt;const T=act.t;
-      if(act.type==='roll'){const a=T/0.55;g.rotation.x=-a*Math.PI*2;u.hips.position.y=0.55;u.torso.rotation.x=-0.6;u.head.rotation.x=0.6;u.legs.forEach(l=>l.rotation.x=1.2);u.arms.forEach(ar=>ar.rotation.x=-1.6);
-        u.tail.forEach((sg,i)=>{if(i)sg.rotation.x=0.35;});if(T>=0.55){u.act=null;g.rotation.x=0;u.hips.position.y=0.74;}return;}
-      if(act.type==='bite'){const a=T<0.12?T/0.12:T<0.32?1:1-(T-0.32)/0.2;u.torso.rotation.x=-1.4+a*0.7;u.head.rotation.x=1.25-a*0.9;u.head.rotation.y=0;u.arms.forEach((ar,i)=>ar.rotation.x=-a*1.9+(i?0.2:-0.2));u.legs.forEach((l,i)=>l.rotation.x=(i?-1:1)*a*0.5);
-        u.hips.position.y=0.74-a*0.12;if(T>=0.52){u.act=null;u.torso.rotation.x=-1.4;u.head.rotation.x=1.25;}return;}
-    }
-    if(u.air){ // in the air: tuck, arms up, tail out
-      const up=u.vy>0;u.legs.forEach((l,i)=>l.rotation.x+=((up?-0.9:0.9)-l.rotation.x)*Math.min(1,dt*10));u.arms.forEach(ar=>ar.rotation.x+=((up?-2.2:-0.8)-ar.rotation.x)*Math.min(1,dt*10));
-      u.torso.rotation.x+=((up?-1.2:-1.55)-u.torso.rotation.x)*Math.min(1,dt*8);u.head.rotation.x+=((up?1.0:1.35)-u.head.rotation.x)*Math.min(1,dt*8);
-      u.tail.forEach((sg,i)=>{if(i){sg.rotation.x+=(0.25-sg.rotation.x)*Math.min(1,dt*6);sg.rotation.y=Math.sin(t*2+i*0.5)*0.15;}});u.hips.position.y=0.74;return;}
-    if(u.land>0){u.land-=dt;const a=ease(u.land/0.18);u.hips.position.y=0.74-a*0.16;u.torso.rotation.x=-1.4+a*0.35;u.legs.forEach(l=>l.rotation.x=a*0.5);u.head.rotation.x=1.25-a*0.2;return;}
-    if(speed>0.05){
-      const run=u.run;const amp=run?1.05:0.8,arm=run?1.4:0.6;
-      u.legs[0].rotation.x=Math.sin(t)*amp;u.legs[1].rotation.x=Math.sin(t+Math.PI)*amp;
-      u.arms[0].rotation.x=Math.sin(t+Math.PI)*arm-(run?0.6:0);u.arms[1].rotation.x=Math.sin(t)*arm-(run?0.6:0);
-      u.hips.position.y=0.74+Math.abs(Math.sin(t))*(run?0.09:0.05);
-      u.torso.rotation.x=(run?-1.15:-1.4)+Math.sin(t*2)*0.04; u.torso.rotation.z=Math.sin(t)*(run?0.08:0.05);
-      u.head.rotation.x=(run?1.05:1.25)+Math.sin(t*2)*0.05;u.head.rotation.y=0;
-      u.ears&&u.ears.forEach((e,i)=>e.rotation.x=Math.sin(t*2+i)*0.15*(run?1:0.4));
-      u.tail.forEach((sg,i)=>{if(i){sg.rotation.y=Math.sin(t*1.1+i*0.5)*(run?0.12:0.22);sg.rotation.x=(run?0.12:-0.06)+Math.sin(t*0.7+i*0.4)*0.04;}});
-    }else{
-      u.legs.forEach(l=>l.rotation.x*=0.8);u.arms.forEach(a=>{a.rotation.x*=0.8;});
-      u.hips.position.y=0.74+Math.sin(t)*0.01;
-      u.torso.rotation.x=-1.4+Math.sin(t)*0.015;u.torso.rotation.z*=0.9;
-      u.head.rotation.x=1.25+(panic?Math.sin(t*3)*0.2:Math.sin(u.sniff)*0.02+Math.sin(t*0.7)*0.06);
-      u.head.rotation.y=panic?Math.sin(t*2.5)*0.6:Math.sin(t*0.35)*0.35;
-      u.ears&&u.ears.forEach((e,i)=>{e.rotation.x=(Math.sin(t*0.9+i*2)>0.92?0.5:0)*0.6;});
-      u.tail.forEach((sg,i)=>{if(i){sg.rotation.y=Math.sin(t*1.1+i*0.5)*0.22;sg.rotation.x=-0.06+Math.sin(t*0.7+i*0.4)*0.04;}});
-    }
+    // smooth toward targets
+    const k=act?22:16;
+    C.legs[0]=sm(C.legs[0],T.legs[0],dt,k);C.legs[1]=sm(C.legs[1],T.legs[1],dt,k);C.arms[0]=sm(C.arms[0],T.arms[0],dt,k);C.arms[1]=sm(C.arms[1],T.arms[1],dt,k);
+    C.torsoX=sm(C.torsoX,T.torsoX,dt,12);C.torsoZ=sm(C.torsoZ,T.torsoZ,dt,12);C.headX=sm(C.headX,T.headX,dt,12);C.headY=sm(C.headY,T.headY,dt,8);C.headZ=sm(C.headZ,T.headZ,dt,10);C.hipY=sm(C.hipY,T.hipY,dt,18);
+    u.legs[0].rotation.x=C.legs[0];u.legs[1].rotation.x=C.legs[1];u.arms[0].rotation.x=1.15+C.arms[0];u.arms[1].rotation.x=1.15+C.arms[1];u.arms[0].rotation.z=0.25;u.arms[1].rotation.z=-0.25;
+    u.torso.rotation.x=C.torsoX;u.torso.rotation.z=C.torsoZ;u.head.rotation.x=C.headX;u.head.rotation.y=C.headY;u.head.rotation.z=C.headZ;u.hips.position.y=C.hipY;
+    // belly jiggle on stopping
+    const stopping=(u.walkB<0.5&&u.prevWalk>=0.5);if(stopping)u.jigV+=1.6;u.prevWalk=u.walkB;
+    u.jigV+=(-u.jig*140-u.jigV*9)*dt;u.jig+=u.jigV*dt;u.torso.scale.set(1+u.jig*0.06,1-u.jig*0.05,1+u.jig*0.06);
+    // ear spring (flops on landing, twitches otherwise)
+    u.earV+=((T.earX-u.earA)*160-u.earV*12)*dt;u.earA+=u.earV*dt;u.ears.forEach((e,i)=>{e.rotation.x=u.earA;e.rotation.z=Math.sin(t*0.7+i*2)*0.05;});
+    // tail: springs that lag behind turning and sway with the stride
+    const lag=THREE.MathUtils.clamp(u.yawV*0.09,-0.35,0.35);
+    for(let i=1;i<u.tail.length;i++){const sg=u.tail[i];const targetY=lag+Math.sin(t*1.1+i*0.5)*(0.22-r*0.1);const targetX=(-0.06+r*0.18)+Math.sin(t*0.7+i*0.4)*0.04;
+      u.tailV[i]+=((targetY-u.tailA[i])*(90-i*4)-u.tailV[i]*(10-i*0.4))*dt;u.tailA[i]+=u.tailV[i]*dt;sg.rotation.y=u.tailA[i];sg.rotation.x=sm(sg.rotation.x,targetX,dt,6);}
   };
   return g;
 }
@@ -531,7 +533,8 @@ function control(dt,{walk=6,bounds,ground,locked=false}){
   u.run=(len>0.15)&&(keys.shift||jl>0.93);
   if(locked||u.pick||(u.act&&u.act.type==='bite'))len=0;
   if(u.act&&u.act.type==='roll'){const d=u.rollDir;rat.position.x+=d.x*dt*10;rat.position.z+=d.z*dt*10;speed=0;}
-  else if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=u.run?1:len;const v=walk*(u.run?1.7:1)*len*(u.air?0.85:1);rat.position.x+=dx*dt*v;rat.position.z+=dz*dt*v;rat.rotation.y=Math.atan2(dx,dz);}
+  else if(len>0.15){if(len>1){dx/=len;dz/=len;len=1;}speed=u.run?1:len;const v=walk*(u.run?1.7:1)*len*(u.air?0.85:1);u.vel=v;rat.position.x+=dx*dt*v;rat.position.z+=dz*dt*v;const ty=Math.atan2(dx,dz);let d=ty-rat.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));rat.rotation.y+=d*Math.min(1,dt*14);}
+  else u.vel=0;
   if(bounds){rat.position.x=Math.max(bounds[0],Math.min(bounds[1],rat.position.x));rat.position.z=Math.max(bounds[2],Math.min(bounds[3],rat.position.z));}
   const gy=ground?ground(rat.position.x,rat.position.z):0;
   if(u.air){u.vy-=dt*18;rat.position.y+=u.vy*dt;if(rat.position.y<=gy&&u.vy<0){rat.position.y=gy;u.air=false;u.vy=0;u.land=0.18;sfx.step('wood');}}
@@ -826,12 +829,15 @@ $('newgame').addEventListener('click',()=>{try{localStorage.removeItem('ww-save'
 ui.skip.addEventListener('click',endCutscene);
 
 // ---------- loop ----------
-function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;t+=dt;
+let acc=0;const STEP=1/60;
+function loop(now){requestAnimationFrame(loop);let frame=Math.min(0.1,(now-last)/1000);last=now;acc+=frame;let n=0;
   try{
-  if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='inside')tickInside(dt);else if(phase==='caught'){rat.animate(dt,1,true);if(sc.cat)sc.cat.m.animate(dt,0);}else if(phase==='end'){camera.lookAt(0,0.5,0);rat.animate(dt,0,false);}
+  while(acc>=STEP&&n<4){const dt=STEP;t+=dt;acc-=dt;n++;
+    if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='inside')tickInside(dt);else if(phase==='caught'){rat.animate(dt,1,true);if(sc.cat)sc.cat.m.animate(dt,0);}}
+  if(n===4)acc=0;
   renderer.render(scene,camera);
   }catch(e){console.error(e);}}
-requestAnimationFrame(loop);
+
 </script>
 </body>
 </html>
