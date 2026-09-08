@@ -382,3 +382,12 @@ Validation: real rig head direction checked against all four spawn headings, ind
 Removed competing legacy backyard camera updates, reduced the camera near plane and increased its minimum collision distance. Mobile running activates at 72% joystick deflection, runs at 2.05x walk speed, and uses a consistent Run clip. Backyard walking increased to 3.15 units/second.
 
 Big Rat is 1.85 units high at the main entrance, with posed geometry used for grounding and source root-motion animation removed. Crow destinations no longer include a floating shelf coordinate; landing recalculates the resting model's base. Added eight collectible steel rods to salvage piles, recovered as metal/nail crafting parts.
+
+
+## Build 60 — Treasures worth finding
+
+Wider Big Rat dialogue framing and restored cat sizes. Added a permanent home storage chest for materials, furniture and unique treasures, with home crafting drawing from stored materials. The workshop separates Craft/Place/Repair/Recycle and renders larger 256px lit previews with rotation and size inspection. Added an old brown entry door and a display shelf populated by discoveries.
+
+Five unique finds persist once per save: a damaged turntable, three Beethoven-theme records with distinct synthesized arrangements, and a brass star. The player must uncover and collect them along tyre, sponge, fence and dumpster climbing routes. Added crates, narrow beams, hidden box/drawer/loose-board reveals, a lowered shortcut, ledge recovery, higher capped spring jumps and pickup cards. Unique items are stored safely as furniture, never consumed by ordinary crafting.
+
+Validation: runtime checks cover reveal-before-reward, unique reward idempotence and persistence across scenes, chest material consumption, home props, workshop/repair/record menus, preview rendering calls, dumpster route creation and ledge recovery. JavaScript syntax passes. Mobile/GPU visuals and full route playthrough remain unverified.
