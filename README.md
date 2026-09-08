@@ -341,3 +341,8 @@ Validation: runtime tests check portrait/landscape framing, load/warmup delay, h
 - Retained the creaking, collapsing timber platform, dust, crash and disappearing fighters. It plays once during that play session and resets on the next Start/Continue. The collapsed platform remains on backyard revisits.
 
 Validation: H.264 video/stereo AAC confirmed and the complete MP4 decodes without errors. Runtime checks cover save/new-game transitions, video mute, no forced cutscene, proximity/view gating, unchanged camera/player control, offscreen pause, completed collapse, session replay reset and dumpster exit. JavaScript syntax passes. Actual mobile playback and full-game GPU visuals remain unverified.
+
+
+## Build 54 — Rooftop rumble
+
+Moved the gameplay fight onto a raised timber platform directly above the dumpster. Fighters are 40% larger; the location hint points up. Platform supports sit outside the dumpster footprint. Collapsing boards disappear before obstructing the scavenging space. The event still waits for visibility, keeps player control and plays once each session.
