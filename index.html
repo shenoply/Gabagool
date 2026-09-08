@@ -128,7 +128,7 @@ body.fight-view55 #settings,body.fight-view55 #survival,body.fight-view55 #weath
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
     <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
     <p style="font-size:10px;opacity:.65">Crow: Alexei Ostapenko · CC-BY 4.0. Framed picture supplied by the owner.</p><p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Bird flock: Blender Artist · Grass: Natural_Disbuster · CC-BY 4.0. Cherry row, Meshy birds & dumpster supplied by owner. Trees & daisies: Márcio Meireles · CC-BY 4.0. Original raccoons and doghouse. Cities: Neberkenezer & smooth998 · MMA: mortaleiros · CC-BY 4.0. Textures: Poly Haven · CC0. Owner-supplied tabby. Mobile adaptations. Music: Beethoven, Ode to Joy (1824); original synthesized performance. Nature and animal effects synthesized for this game.</p><p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 58 · Backyard sounds</p>
+    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Bird flock: Blender Artist · Grass: Natural_Disbuster · CC-BY 4.0. Cherry row, Meshy birds & dumpster supplied by owner. Trees & daisies: Márcio Meireles · CC-BY 4.0. Original raccoons and doghouse. Cities: Neberkenezer & smooth998 · MMA: mortaleiros · CC-BY 4.0. Textures: Poly Haven · CC0. Owner-supplied tabby. Mobile adaptations. Music: Beethoven, Ode to Joy (1824); original synthesized performance. Nature and animal effects synthesized for this game.</p><p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 59 · Steady steps</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -186,7 +186,7 @@ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x2b1d14);
 scene.fog=new THREE.Fog(0x4a2c1e,30,70);
-const camera=new THREE.PerspectiveCamera(50,1,0.1,200);
+const camera=new THREE.PerspectiveCamera(50,1,0.03,200);
 function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
 addEventListener('resize',resize);resize();
 
@@ -375,7 +375,7 @@ function makeRat(){
   const act=u.act&&{type:u.act.type,t:u.act.t},air=u.air,picking=!!u.pick,climbing=!!u.climb;
   legacyAnimate(dt,speed,panic);
   if(!u.approvedPip)return;
-  u.runTime=u.run&&speed>.05?(u.runTime||0)+dt:0;const still=picking||climbing||!!act||u.sleeping;let desired=u.interaction?'Door':u.wallState?u.wallState.mode:u.pushing?'Push':climbing?(u.climb.to.y<u.climb.from.y?'ClimbDown':'Climb'):air?'Jump':!still&&speed>.05?(u.run?(panic||u.runTime>3?'Sprint':u.runTime<.8?'Jog':'Run'):'Walk'):'Idle';
+  u.runTime=u.run&&speed>.05?(u.runTime||0)+dt:0;const still=picking||climbing||!!act||u.sleeping;let desired=u.interaction?'Door':u.wallState?u.wallState.mode:u.pushing?'Push':climbing?(u.climb.to.y<u.climb.from.y?'ClimbDown':'Climb'):air?'Jump':!still&&speed>.05?(u.run?'Run':'Walk'):'Idle';
   if(desired!==u.pipClip){const old=u.pipActions[u.pipClip],next=u.pipActions[desired];if(old)old.fadeOut(.16);if(next){next.reset().setEffectiveWeight(1).fadeIn(.16).play();if(desired==='Jump'||desired==='Door'||desired==='ClimbFailed'){next.setLoop(THREE.LoopOnce,1);next.clampWhenFinished=true;}else next.setLoop(THREE.LoopRepeat,Infinity);}u.pipClip=desired;}
   if(air&&!u.pipWasAir)u.pipJumpTime=0;u.pipWasAir=air;
   for(const [name,b] of Object.entries(u.pipBones))b.quaternion.copy(u.pipRest[name]);
@@ -564,14 +564,15 @@ let fatGltf=null,fatMixer=null;
 function addNeighbour(){
   const owner=root;let placeholder=null;
   const place=(g)=>{
-    const m=g.scene.clone();
-    const bb=new THREE.Box3().setFromObject(m);const size=bb.getSize(new THREE.Vector3());const c=bb.getCenter(new THREE.Vector3());
-    const k=1.35/size.y;m.scale.setScalar(k);
+    const m=new THREE.Group();m.add(clonePipScene(g.scene));m.updateWorldMatrix(true,true);
+    const bb=posedBounds(m);const size=bb.getSize(new THREE.Vector3());const c=bb.getCenter(new THREE.Vector3());
+    const k=1.85/size.y;m.scale.setScalar(k);
     m.position.set(-c.x*k,-bb.min.y*k,-c.z*k);
     const pivot=new THREE.Group();pivot.add(m);pivot.name='Big Rat';pivot.position.copy(NB);pivot.rotation.y=1.3;
     m.traverse(o=>{if(o.isMesh){o.userData.keepGeometry=true;o.castShadow=false;o.receiveShadow=false;const g=o.geometry;for(const k of Object.keys(g.attributes))if(!g.attributes[k])delete g.attributes[k];const old=o.material;o.material=new THREE.MeshToonMaterial({map:old.map||null,color:old.color||0xffffff,gradientMap:gradTex,transparent:old.transparent,opacity:old.opacity,alphaTest:old.alphaTest||0,side:old.side});}});
     if(root!==owner)return;if(placeholder)owner.remove(placeholder);owner.add(pivot);
-    if(g.animations.length){fatMixer=new THREE.AnimationMixer(m);const a=fatMixer.clipAction(g.animations[0]);a.play();}
+    // Keep the grounded rest pose; the source clip's root motion lifted him off the ground.
+    fatMixer=null;
   };
   if(fatGltf){place(fatGltf);return;}
   placeholder=makeRat();placeholder.scale.set(.36,.32,.36);placeholder.position.copy(NB);placeholder.rotation.y=1.3;owner.add(placeholder);
@@ -713,10 +714,10 @@ function control(dt,{walk=6,bounds,ground,locked=false}){
   const jl=Math.hypot(joy.x,joy.z);if(jl>0.15){dx=joy.x;dz=joy.z;}
   if(!photo.active){const forward=(phase==='house'||phase==='inside')?new THREE.Vector3(-Math.sin(gameCam.yaw),0,-Math.cos(gameCam.yaw)):camera.getWorldDirection(new THREE.Vector3());forward.y=0;if(forward.lengthSq()<.001)forward.set(-Math.sin(gameCam.yaw),0,-Math.cos(gameCam.yaw));forward.normalize();const right=new THREE.Vector3(-forward.z,0,forward.x),ox=dx,oz=dz;dx=right.x*ox-forward.x*oz;dz=right.z*ox-forward.z*oz;}
   let len=Math.hypot(dx,dz);let speed=0;
-  if(ensureLife().stamina<8)u.exhausted=true;if(ensureLife().stamina>35)u.exhausted=false;u.run=(len>0.15)&&(keys.shift||jl>0.93)&&!u.exhausted&&ensureLife().hunger>5&&ensureLife().thirst>5;
+  if(ensureLife().stamina<8)u.exhausted=true;if(ensureLife().stamina>35)u.exhausted=false;u.run=(len>0.15)&&(keys.shift||jl>0.72)&&!u.exhausted&&ensureLife().hunger>5&&ensureLife().thirst>5;
   if(locked||u.pick||(u.act&&u.act.type==='bite'))len=0;
   if(u.act&&u.act.type==='roll'){u.motionX=u.motionZ=0;const d=u.rollDir;rat.position.x+=d.x*dt*10;rat.position.z+=d.z*dt*10;speed=0;}
-  else{const blocked=locked||u.pick||(u.act&&u.act.type==='bite');if(len>1){dx/=len;dz/=len;len=1;}const moving=len>.15;const target=walk*(u.run?1.6*(dewEnergy>0?1.15:1):1)*(u.air?.85:1),blend=1-Math.exp(-dt*(moving?9:15));u.motionX=blocked?0:THREE.MathUtils.lerp(u.motionX||0,moving?dx*target:0,blend);u.motionZ=blocked?0:THREE.MathUtils.lerp(u.motionZ||0,moving?dz*target:0,blend);u.vel=Math.hypot(u.motionX,u.motionZ);if(u.vel<.015)u.motionX=u.motionZ=u.vel=0;rat.position.x+=u.motionX*dt;rat.position.z+=u.motionZ*dt;speed=Math.min(1,u.vel/walk);if(moving&&!blocked){const ty=Math.atan2(dx,dz);let d=Math.atan2(Math.sin(ty-rat.rotation.y),Math.cos(ty-rat.rotation.y));rat.rotation.y+=d*(1-Math.exp(-dt*11));}}
+  else{const blocked=locked||u.pick||(u.act&&u.act.type==='bite');if(len>1||(u.run&&len>.15)){dx/=len;dz/=len;len=1;}const moving=len>.15;const target=walk*(u.run?2.05*(dewEnergy>0?1.15:1):1)*(u.air?.85:1),blend=1-Math.exp(-dt*(moving?9:15));u.motionX=blocked?0:THREE.MathUtils.lerp(u.motionX||0,moving?dx*target:0,blend);u.motionZ=blocked?0:THREE.MathUtils.lerp(u.motionZ||0,moving?dz*target:0,blend);u.vel=Math.hypot(u.motionX,u.motionZ);if(u.vel<.015)u.motionX=u.motionZ=u.vel=0;rat.position.x+=u.motionX*dt;rat.position.z+=u.motionZ*dt;speed=Math.min(1,u.vel/walk);if(moving&&!blocked){const ty=Math.atan2(dx,dz);let d=Math.atan2(Math.sin(ty-rat.rotation.y),Math.cos(ty-rat.rotation.y));rat.rotation.y+=d*(1-Math.exp(-dt*11));}}
   if(bounds){rat.position.x=Math.max(bounds[0],Math.min(bounds[1],rat.position.x));rat.position.z=Math.max(bounds[2],Math.min(bounds[3],rat.position.z));}
   const contact57=groundSurface57(rat.position.x,rat.position.z,rat.position.y),base57=ground?ground(rat.position.x,rat.position.z):0;
   const gy=Math.max(base57,contact57?contact57.h:0);u.floor57=gy;
@@ -763,7 +764,7 @@ function makeZayGrid(bounds,solids){const step=.4,nx=Math.floor((bounds[1]-bound
 function addZaytona(){if(!zaytonaAsset||!rat)return;const g=new THREE.Group(),visual=new THREE.Group(),model=clonePipScene(zaytonaAsset.scene);visual.add(model);g.add(visual);const shadow=new THREE.Mesh(new THREE.CircleGeometry(.38,20),new THREE.MeshBasicMaterial({color:0x182520,transparent:true,opacity:.18,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.008;shadow.userData.noInk=true;g.add(shadow);root.add(g);const mixer=new THREE.AnimationMixer(model),actions={};zaytonaAsset.animations.forEach(c=>actions[c.name]=mixer.clipAction(c));actions.Idle.play();mixer.update(0);model.updateMatrixWorld(true);
  const head=model.getObjectByName('Head'),front=model.getObjectByName('headfront');if(head&&front){const dir=front.getWorldPosition(new THREE.Vector3()).sub(head.getWorldPosition(new THREE.Vector3()));if(Math.hypot(dir.x,dir.z)>.001)visual.rotation.y=-Math.atan2(dir.x,dir.z);}
  const box=new THREE.Box3(),v=new THREE.Vector3();model.updateMatrixWorld(true);model.traverse(o=>{if(!o.isMesh||!o.visible)return;if(o.isSkinnedMesh)o.skeleton.update();for(let i=0;i<o.geometry.attributes.position.count;i++){if(o.isSkinnedMesh)o.boneTransform(i,v);else v.fromBufferAttribute(o.geometry.attributes.position,i);o.localToWorld(v);box.expandByPoint(v);}});const height=box.max.y-box.min.y,k=.6375/Math.max(.01,height);model.scale.multiplyScalar(k);model.position.y-=box.min.y*k;g.userData.zayMixer=mixer;g.userData.zayModel=model;
- const solids=phase==='scavenge'?[...YARD_DATA.obstacles,...YARD_DATA.platforms,{x:0,z:-4,hx:6.5,hz:2.99},{x:0,z:1.59,hx:2.8,hz:3},{x:5,z:24.8,hx:.9,hz:.9},{x:8.2,z:-1.2,hx:.6,hz:.3}]:area.obstacles;
+ const solids=phase==='scavenge'?[...YARD_DATA.obstacles,...YARD_DATA.platforms,{x:0,z:-4,hx:6.5,hz:2.99},{x:0,z:1.59,hx:2.8,hz:3},{x:3.2,z:29.2,hx:1.1,hz:1.1},{x:8.2,z:-1.2,hx:.6,hz:.3}]:area.obstacles;
  const grid=makeZayGrid(phase==='scavenge'?[-20.7,30.7,-13.7,37.7]:[-10.6,10.6,-8.1,9.6],solids);const spawn=grid.point(grid.nearest(rat.position.x+1.0,rat.position.z+1.6));g.position.set(spawn.x,0,spawn.z);
  zaytona={g,mixer,actions,grid,path:[],replan:0,clip:'Idle',speed:0,owner:root};}
 // Independent outings: commit to a destination, then stop for a full activity.
@@ -820,8 +821,8 @@ function startScavenge(){
   const shuffled=spots.slice().sort(()=>Math.random()-0.5).slice(0,14);
   shuffled.forEach(([x,y,z])=>{const id=bagIds[Math.floor(Math.random()*bagIds.length)];const m=ITEMS[id].build();m.scale.setScalar(.22);m.position.set(y===2?x*1.3:x,y===2?2.6:y,y===2?-4+(z+4)*1.3:z);m.rotation.y=Math.random()*6;outline(m);root.add(m);sc.items.push({id,m,taken:false});});
   rat=makeRat();rat.scale.setScalar(.25);rat.position.set(1,0,29);rat.rotation.y=Math.PI;root.add(rat);outline(root);
-  const neighbourSign=markerText('BIG RAT');neighbourSign.position.set(NB.x,1.75,NB.z);neighbourSign.scale.setScalar(.45);root.add(neighbourSign);fatMixer=null;try{addNeighbour();}catch(e){console.warn(e);}
-  addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();seedModels44();makeGate57();ui.go.style.display='block';ui.go.textContent='Home';
+  const neighbourSign=markerText('BIG RAT');neighbourSign.position.set(NB.x,2.2,NB.z);neighbourSign.scale.setScalar(.45);root.add(neighbourSign);fatMixer=null;try{addNeighbour();}catch(e){console.warn(e);}
+  addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();seedModels44();makeGate57();seedRods59();ui.go.style.display='block';ui.go.textContent='Home';
   camera.position.set(1,3,33);
 }
 function spawnCat(){const c=makeCat();c.scale.setScalar(.32);const side=Math.random()<0.5?-1:1;c.position.set(30,0,19);c.rotation.y=side>0?-Math.PI/2:Math.PI/2;outline(c);root.add(c);
@@ -851,12 +852,12 @@ function tickScavenge(dt){
   tickZaytona(dt);if(fatMixer)fatMixer.update(dt);const catBefore=sc.cat&&sc.cat.m.position.clone();tickCat(dt);if(sc.cat&&catBefore)yardResolve(sc.cat.m.position,catBefore);if(phase!=='scavenge')return;
   const groundAlley=(x,z)=>{const lx=x/1.3,lz=(z+4)/1.3;const c=Math.cos(.42),sn=Math.sin(.42),half=2.45*c;if(Math.abs(lx)<=2&&Math.abs(lz-4.25)<=half)return Math.max(0,1.3*(1-(lz-4.25)*Math.tan(.42)+.125/c));if(Math.abs(lx)<4.5&&Math.abs(lz)<=2)return 2.6;return 0;};
   const before=rat.position.clone();
-  const speed=control(dt,{walk:2.7,bounds:[-21,31,-14,38],ground:(x,z)=>Math.max(groundAlley(x,z),yardGround(x,z,rat.position.y)),locked:!!sc.talk});
+  const speed=control(dt,{walk:3.15,bounds:[-21,31,-14,38],ground:(x,z)=>Math.max(groundAlley(x,z),yardGround(x,z,rat.position.y)),locked:!!sc.talk});
   if(gate57&&!gate57.open&&rat.position.x>30.25&&Math.abs(rat.position.z-19)<2.8)rat.position.x=Math.min(before.x,30.25);
   if(!rat.userData.wallState)yardResolve(rat.position,before);
   rat.userData.pushing=!rat.userData.wallState&&!rat.userData.air&&speed>.1&&rat.position.distanceTo(before)<.002;
   if(!rat.userData.wallState&&!rat.userData.climb&&Math.abs(rat.position.x)<6.11&&rat.position.z>-6.86&&rat.position.z<-1.14&&before.y<1.9&&!(Math.abs(before.x)<2.73&&before.z>=-1.59)){rat.position.x=before.x;rat.position.z=before.z;rat.position.y=before.y;}
-  {const nb=new THREE.Vector3(NB.x,rat.position.y,NB.z);const dn=rat.position.distanceTo(nb);if(dn<.8){const d=rat.position.clone().sub(nb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(.8);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}
+  {const nb=new THREE.Vector3(NB.x,rat.position.y,NB.z);const dn=rat.position.distanceTo(nb);if(dn<1.05){const d=rat.position.clone().sub(nb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(1.05);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}
   {const bb=new THREE.Vector3(8.2,rat.position.y,-1.2);const db=rat.position.distanceTo(bb);if(db<.65&&rat.position.y<1){const d=rat.position.clone().sub(bb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(.65);rat.position.x=bb.x+d.x;rat.position.z=bb.z+d.z;}}
   const lx=rat.position.x/1.3,lz=(rat.position.z+4)/1.3;
   sc.onTop=(Math.abs(lx)<4.2&&Math.abs(lz)<1.8&&rat.position.y>2.05);
@@ -876,7 +877,7 @@ function tickScavenge(dt){
       else{let i=0;while(i<TALK.length-1&&ct>=TALK_CUES[i+1])i++;if(i!==k.i){k.i=i;showLine();}
         const line=TALK[k.i][1];const frac=(ct-TALK_CUES[k.i])/(TALK_CUES[k.i+1]-TALK_CUES[k.i]-0.25);const want=Math.max(0,Math.min(line.length,Math.floor(frac*line.length)));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}}
     else{k.t+=dt;const line=TALK[k.i][1];const want=Math.min(line.length,Math.floor(k.t*16));if(want>k.chars){k.chars=want;$('ttext').textContent=line.slice(0,want);}}}
-  else if(sc.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${ITEMS[sc.near.id].name}`;$('padE').textContent='Grab';}
+  else if(sc.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${(sc.near.label59||ITEMS[sc.near.id].name)}`;$('padE').textContent='Grab';}
   else if(sc.nearHome){ui.prompt.style.display='block';ui.prompt.textContent='E · enter home';$('padE').textContent='Home';}
   else if(yardExit()){ui.prompt.style.display='block';ui.prompt.textContent='E · laundry courtyard';$('padE').textContent='Explore';}
   else if(sc.nearClimb){ui.prompt.style.display='block';ui.prompt.textContent='E · climb the handles';$('padE').textContent='Climb';}
@@ -885,15 +886,13 @@ function tickScavenge(dt){
   else if(sc.nearNb){ui.prompt.style.display='block';ui.prompt.textContent='E · talk to the big rat';$('padE').textContent='Talk';}
   else if(sc.nearBoom){ui.prompt.style.display='block';ui.prompt.textContent=radio.on?'E · boombox':'E · turn on the boombox';$('padE').textContent='Radio';}
   else{ui.prompt.style.display='none';$('padE').textContent='Grab';}
-  if(sc.talk){const dir=new THREE.Vector3(1,0,0.12).normalize();const cp=NB.clone().addScaledVector(dir,1.7);cp.y=.85;camera.position.lerp(cp,Math.min(1,dt*3.5));camera.lookAt(NB.x,.42,NB.z);rat.visible=false;}
-  else{rat.visible=true;const portrait=innerHeight>innerWidth;const back=portrait?3.8:4.2,up=portrait?2.5:2.8;const cx=rat.position.x,cz=rat.position.z+back;
-  camera.position.x+=(cx-camera.position.x)*dt*3;camera.position.z+=(cz-camera.position.z)*dt*3;camera.position.y+=(up+rat.position.y-camera.position.y)*dt*3;
-  camera.lookAt(rat.position.x,.3+rat.position.y,rat.position.z-.3);}
+  if(sc.talk){const dir=new THREE.Vector3(1,0,0.12).normalize();const cp=NB.clone().addScaledVector(dir,1.7);cp.y=1.25;camera.position.lerp(cp,Math.min(1,dt*3.5));camera.lookAt(NB.x,.9,NB.z);rat.visible=false;}
+  else{rat.visible=true;}
 }
 const TALK=[["The Fat Rat","Hey, kid."],["The Fat Rat","Welcome to the Bronx dumpster, kid. Find what you need and bounce."],["The Fat Rat","Whole block got flooded. Everybody's stuff ends up here eventually."],["The Fat Rat","Don't stay too long. The cats show up after dark, and they'll pull your guts out."],["The Fat Rat","Go on. And take the sponge, it's the only thing in there that's dry."]];
 const TALK_CUES=[0,2.44,5.47,7.73,9.11,12.36]; // line start times in bigrat.mp3
 const bigratAudio=new Audio('bigrat.mp3');bigratAudio.preload='auto';
-const NB=new THREE.Vector3(5,0,24.8),NBF=new THREE.Vector3(Math.sin(1.3),0,Math.cos(1.3));
+const NB=new THREE.Vector3(3.2,0,29.2),NBF=new THREE.Vector3(Math.sin(1.3),0,Math.cos(1.3));
 function startTalk(){const talk=sc.talk={i:0,chars:0,t:0,audio:false,pending:false};ui.talk.style.display='block';ui.prompt.style.display='none';
   if(voiceOn){talk.pending=true;bigratAudio.currentTime=0;bigratAudio.play().then(()=>{if(sc.talk!==talk||!voiceOn){bigratAudio.pause();talk.pending=false;return;}talk.pending=false;talk.audio=true;if('speechSynthesis' in window)speechSynthesis.cancel();}).catch(()=>{if(sc.talk!==talk)return;talk.pending=false;showLine();sayToast('Recorded voice unavailable; using text and device voice.');});}
   showLine();}
@@ -1355,7 +1354,7 @@ function cameraBoxHit(origin,direction,length,o){let lo=0,hi=length;for(const [k
 function tickGameplayCamera(dt){$('dumpsterExit49').style.display=phase==='inside'&&!photo.active?'block':'none';const active=['scavenge','explore','house','inside'].includes(phase)&&rat&&!photo.active&&!(sc&&sc.talk);$('cameraTools').style.display=active?'flex':'none';$('cameraTools').style.bottom=wallPanel&&wallPanel.style.display==='flex'?'335px':'181px';if(!active)return;if(gameCam.phase!==phase){gameCam.phase=phase;cameraReset();}
  const h=rat.scale.x*1.4,target=new THREE.Vector3(rat.position.x,rat.position.y+h,rat.position.z),v=new THREE.Vector3(Math.sin(gameCam.yaw)*Math.cos(gameCam.pitch),Math.sin(gameCam.pitch),Math.cos(gameCam.yaw)*Math.cos(gameCam.pitch));let dist=gameCam.distance;
  let solids=wallSolids();if(phase==='scavenge')solids.push({x:0,z:-7,hx:6,hz:.2,h:5.7});if(phase==='house')solids=[{x:0,z:-HD/2,hx:HW/2,hz:.1,h:4},{x:HW/2,z:0,hx:.1,hz:HD/2,h:4},{x:-HW/2,z:0,hx:.1,hz:HD/2,h:4}];if(phase==='inside')solids=[{x:-IW/2,z:0,hx:.1,hz:ID/2,h:4},{x:IW/2,z:0,hx:.1,hz:ID/2,h:4},{x:0,z:-ID/2,hx:IW/2,hz:.1,h:4}];
- for(const o of solids){const hit=cameraBoxHit(target,v,dist,o);if(hit!==null)dist=Math.min(dist,Math.max(.45,hit-.25));}const goal=target.clone().addScaledVector(v,dist);goal.y=Math.max(.18,goal.y);if(!gameCam.ready||phase==='house'||phase==='inside'){gameCam.pos.copy(goal);gameCam.ready=true;}else gameCam.pos.lerp(goal,dist<gameCam.distance-.2?1:1-Math.exp(-dt*12));camera.position.copy(gameCam.pos);camera.lookAt(target);}
+ for(const o of solids){const hit=cameraBoxHit(target,v,dist,o);if(hit!==null)dist=Math.min(dist,Math.max(.85,hit-.25));}const goal=target.clone().addScaledVector(v,dist);goal.y=Math.max(.18,goal.y);if(!gameCam.ready||phase==='house'||phase==='inside'){gameCam.pos.copy(goal);gameCam.ready=true;}else gameCam.pos.lerp(goal,dist<gameCam.distance-.2?1:1-Math.exp(-dt*12));camera.position.copy(gameCam.pos);camera.lookAt(target);}
 
 // Slow, active-play survival; no offline depletion or inventory-loss death.
 function ensureLife(){if(!home.life)home.life={hunger:100,thirst:100,stamina:100,clock:0,water:2,dewClock:0};for(const k of ['hunger','thirst','stamina'])home.life[k]=THREE.MathUtils.clamp(Number.isFinite(home.life[k])?home.life[k]:100,0,100);home.pantry=home.pantry||{};home.collectibles=home.collectibles||{};home.life.clock=home.life.clock||0;home.life.dewClock=home.life.dewClock||0;home.life.water=home.life.water||0;return home.life;}
@@ -1414,10 +1413,10 @@ let crowAsset=null,crowPromise=null,gardenCrow=null,raccoon=null;
 function loadGardenCrow(){if(crowPromise)return crowPromise;crowPromise=new Promise(resolve=>new THREE.GLTFLoader().load('crow-build37.glb',a=>{a.scene.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.frustumCulled=false;o.userData.noInk=true;o.userData.keepGeometry=true;}});a.animations.forEach(c=>c.tracks.forEach(t=>{if(t.name==='CROW__01.position'){for(let i=3;i<t.values.length;i+=3){t.values[i]=t.values[0];t.values[i+1]=t.values[1];t.values[i+2]=t.values[2];}}}));crowAsset=a;resolve(a);},undefined,e=>{console.warn('Crow download',e);resolve(null);}));return crowPromise;}
 function posedBounds(model){model.updateMatrixWorld(true);const b=new THREE.Box3(),v=new THREE.Vector3();model.traverse(o=>{if(!o.isMesh||!o.visible)return;if(o.isSkinnedMesh)o.skeleton.update();for(let i=0;i<o.geometry.attributes.position.count;i+=3){if(o.isSkinnedMesh)o.boneTransform(i,v);else v.fromBufferAttribute(o.geometry.attributes.position,i);o.localToWorld(v);model.worldToLocal(v);b.expandByPoint(v);}});return b;}
 function seedAnimals(){gardenCrow=null;raccoon=null;if(!['scavenge','explore'].includes(phase))return;
- const owner=root;if(crowAsset){const holder=new THREE.Group(),model=clonePipScene(crowAsset.scene);holder.add(model);const mixer=new THREE.AnimationMixer(model),clip=crowAsset.animations[0],action=clip&&mixer.clipAction(clip);if(action){action.play();action.paused=true;action.time=0;mixer.update(0);}const b=posedBounds(model),k=.4/Math.max(.01,b.max.y-b.min.y);model.scale.multiplyScalar(k);model.position.y=-b.min.y*k;holder.position.set(phase==='scavenge'?3.1:4,1.2,phase==='scavenge'?28.8:-2);const perch=cyl(.22,.28,1.2,tin,12);perch.position.set(holder.position.x,.6,holder.position.z);perch.castShadow=false;perch.userData.noInk=true;root.add(perch,holder);gardenCrow={g:holder,model,mixer,action,base:holder.position.clone(),clock:0,mode:'perch',owner,reveal:0};const shiny=ITEMS.coin.build();shiny.scale.setScalar(.18);shiny.visible=false;holder.add(shiny);gardenCrow.shiny=shiny;}
+ const owner=root;if(crowAsset){const holder=new THREE.Group(),model=new THREE.Group();model.add(clonePipScene(crowAsset.scene));holder.add(model);const mixer=new THREE.AnimationMixer(model),clip=crowAsset.animations[0],action=clip&&mixer.clipAction(clip);if(action){action.play();action.paused=true;action.time=0;mixer.update(0);}const b=posedBounds(model),k=.4/Math.max(.01,b.max.y-b.min.y);model.scale.multiplyScalar(k);model.position.y=-b.min.y*k;holder.position.set(phase==='scavenge'?3.1:4,1.2,phase==='scavenge'?28.8:-2);const perch=cyl(.22,.28,1.2,tin,12);perch.position.set(holder.position.x,.6,holder.position.z);perch.castShadow=false;perch.userData.noInk=true;root.add(perch,holder);gardenCrow={g:holder,model,mixer,action,base:holder.position.clone(),clock:0,mode:'perch',owner,reveal:0};const shiny=ITEMS.coin.build();shiny.scale.setScalar(.18);shiny.visible=false;holder.add(shiny);gardenCrow.shiny=shiny;seatCrow59(gardenCrow);}
 }
 function tickAnimals37(dt){if(!['scavenge','explore'].includes(phase)||!rat||phase==='explore'&&area.id==='hideout')return;const l=ensureLife(),day=l.clock%600,dusk=day>=360;sun.intensity=.55+.35*Math.max(0,Math.cos((day-180)/600*Math.PI*2));sun.color.setHex(dusk?0xffc492:0xffeed6);
- if(gardenCrow&&gardenCrow.owner===root){const c=gardenCrow;c.clock+=dt;if(c.clock>12&&c.mode==='perch'&&!c.sheltering){c.mode='flight';c.clock=0;chooseCrowPerch(c);crowCall();}if(c.mode==='flight'){const q=Math.min(1,c.clock/10.52);c.g.position.lerpVectors(c.flightFrom||c.base,c.flightTo||c.base,q);c.g.position.y+=Math.sin(q*Math.PI)*1.6;const dest=c.flightTo||c.base,from=c.flightFrom||c.base;c.g.rotation.y=Math.atan2(dest.x-from.x,dest.z-from.z);if(c.action){c.action.time=q*c.action.getClip().duration;c.mixer.update(0);}if(q===1){c.mode='perch';c.clock=0;if(c.flightTo)c.base.copy(c.flightTo);c.g.position.copy(c.base);if(c.action){c.action.time=0;c.mixer.update(0);}if(l.clock-(home.collectibles.crowGift||-100)>100){const id='coin',m=ITEMS.coin.build();m.scale.setScalar(.22);m.position.set(c.base.x+.5,.05,c.base.z+.5);root.add(m);(phase==='scavenge'?sc.items:area.items).push({id,m,taken:false});home.collectibles.crowGift=l.clock;save();sayToast('The crow uncovered something shiny nearby.');}}}else{c.g.rotation.y=Math.sin(c.clock*.7)*.2;}}
+ if(gardenCrow&&gardenCrow.owner===root){const c=gardenCrow;c.clock+=dt;if(c.clock>12&&c.mode==='perch'&&!c.sheltering){c.mode='flight';c.clock=0;chooseCrowPerch(c);crowCall();}if(c.mode==='flight'){const q=Math.min(1,c.clock/10.52);c.g.position.lerpVectors(c.flightFrom||c.base,c.flightTo||c.base,q);c.g.position.y+=Math.sin(q*Math.PI)*1.6;const dest=c.flightTo||c.base,from=c.flightFrom||c.base;c.g.rotation.y=Math.atan2(dest.x-from.x,dest.z-from.z);if(c.action){c.action.time=q*c.action.getClip().duration;c.mixer.update(0);}if(q===1){c.mode='perch';c.clock=0;if(c.flightTo)c.base.copy(c.flightTo);c.g.position.copy(c.base);if(c.action){c.action.time=0;c.mixer.update(0);}seatCrow59(c);if(l.clock-(home.collectibles.crowGift||-100)>100){const id='coin',m=ITEMS.coin.build();m.scale.setScalar(.22);m.position.set(c.base.x+.5,.05,c.base.z+.5);root.add(m);(phase==='scavenge'?sc.items:area.items).push({id,m,taken:false});home.collectibles.crowGift=l.clock;save();sayToast('The crow uncovered something shiny nearby.');}}}else{c.g.rotation.y=Math.sin(c.clock*.7)*.2;}}
 }
 
 // 100 named salvage objects. Every one can be collected, displayed or reclaimed.
@@ -1481,7 +1480,7 @@ function decorateWorld(){if(['scavenge','explore'].includes(phase)&&!(phase==='e
  if(garden){const sign=markerText('RAIN DRAIN ↓');sign.position.set(0,1.8,-8.2);root.add(sign);const clothPicnic=box(1.8,.025,1.4,cloth);clothPicnic.position.set(-3,.035,6);root.add(clothPicnic);const toy=salvageModel('toy',1,0xb6624f);toy.scale.setScalar(2);toy.position.set(3,.15,6);root.add(toy);const cup=ITEMS.teacup.build();cup.scale.setScalar(1.7);cup.rotation.z=Math.PI/2;cup.position.set(-3,.4,-4);root.add(cup);const id=NEW_ITEMS[68],m=ITEMS[id].build();m.position.set(-3,.03,-3.5);root.add(m);area.items.push({id,m,taken:false});}}
 function tickWorld38(dt){worldNear=null;if(phase==='explore'&&area.id==='drain'&&rat.position.z<-7.7&&Math.abs(rat.position.x)<2){ui.prompt.style.display='block';ui.prompt.textContent='E · shortcut home';$('padE').textContent='Home';}if(!rat)return;const routes=gateSave(),l=ensureLife(),out=['scavenge','explore'].includes(phase)&&!(phase==='explore'&&['drain','hideout'].includes(area.id)),rain=out&&weather42().rain>.15;home.wet=THREE.MathUtils.clamp((home.wet||0)+dt*(rain?.8:phase==='house'?-2:-.12),0,100);if(rain&&placed('dewcollector')){l.dewClock+=dt*1.5;}if(weatherDrops){weatherDrops.visible=rain;weatherDrops.position.set(rat.position.x,0,rat.position.z);if(rain){const a=weatherDrops.geometry.attributes.position;for(let i=0;i<a.count;i++){a.array[i*3+1]-=dt*6;if(a.array[i*3+1]<0)a.array[i*3+1]=8;}a.needsUpdate=true;}}rainGround.forEach(m=>{m.scale.setScalar(rain?1.5:.65);m.material.opacity=rain?.48:.18;});$('weatherBadge').textContent=phase==='explore'&&area.id==='drain'?'Under the garden':rain?'Rain · finding shelter':home.wet>10?'Drying off':'Clear skies';$('weatherBadge').style.display=['scavenge','explore','inside','house'].includes(phase)?'block':'none';
  if(gardenCrow&&gardenCrow.shiny){const c=gardenCrow;c.shiny.visible=c.mode==='flight';if(c.shiny.visible){c.g.updateMatrixWorld(true);let head; c.model.traverse(o=>{if(/Head_05/.test(o.name))head=o;});if(head)c.shiny.position.copy(c.g.worldToLocal(head.getWorldPosition(new THREE.Vector3()))).add(new THREE.Vector3(0,-.045,.035));}}
- if(gardenCrow&&rain&&phase==='scavenge'&&!gardenCrow.sheltering){const c=gardenCrow;c.sheltering=true;c.flightFrom=c.g.position.clone();c.flightTo=new THREE.Vector3(9.3,1.88,31);c.mode='flight';c.clock=0;}if(gardenCrow&&!rain)gardenCrow.sheltering=false;
+ if(gardenCrow&&rain&&phase==='scavenge'&&!gardenCrow.sheltering){const c=gardenCrow;c.sheltering=true;c.flightFrom=c.g.position.clone();c.flightTo=new THREE.Vector3(9.3,.04,31);c.mode='flight';c.clock=0;}if(gardenCrow&&!rain)gardenCrow.sheltering=false;
  if(zaytona&&out){const c=zaytona;if(!c.path.length&&c.clip==='Idle'&&c.dwell>2&&!rain){const head=c.g.getObjectByName('Head');if(head)head.rotation.x+=Math.sin(l.clock*1.1)*.035;}else c.g.rotation.z=0;if(rain&&phase==='scavenge'&&!c.sheltering){c.sheltering=true;c.path=c.grid.path(c.g.position,{x:10,z:31});c.dwell=30;}if(!rain)c.sheltering=false;}
  for(const prop of worldProps){if(prop.owner!==root)continue;if(prop.type!=='drain'&&routes[prop.key]){prop.g.visible=false;continue;}const dist=Math.hypot(prop.g.position.x-rat.position.x,prop.g.position.z-rat.position.z);if(dist<1.35&&!rat.userData.wallState){worldNear=prop;ui.prompt.style.display='block';ui.prompt.textContent=prop.type==='discovery'?'E · Search '+prop.label:prop.type==='drain'?'E · '+(routes.drain?'Enter the rain drain':'Pry open the drain'):'E · '+(prop.type==='stems'?'Clear tangled stems':prop.type==='cloth'?'Cut loose cloth':'Pry open the tin');$('padE').textContent=prop.type==='drain'&&routes.drain?'Enter':'Use tool';}}
 }
@@ -1565,7 +1564,7 @@ function addGroundCharacter(kind){if(kind==='yard')return;
 
 // The uploaded crow travels to a nearby perch using its take-off animation.
 function chooseCrowPerch(c){
- const options=phase==='scavenge'?[[3.1,1.2,28.8],[10,1.88,31],[-8,0.04,21],[3,0.04,19],[12,0.04,4],[-6,0.04,-10],[19,0.04,7]]:[[4,1.2,-2],[-4,.04,5],[4,.04,6],[-4,.04,-6]];
+ const options=phase==='scavenge'?[[3.1,1.2,28.8],[-8,0.04,21],[3,0.04,19],[12,0.04,4],[-6,0.04,-10],[19,0.04,7]]:[[4,1.2,-2],[-4,.04,5],[4,.04,6],[-4,.04,-6]];
  const next=options.map(p=>({p,d:Math.hypot(p[0]-rat.position.x,p[2]-rat.position.z)})).filter(v=>Math.hypot(v.p[0]-c.base.x,v.p[2]-c.base.z)>1).sort((a,b)=>a.d-b.d)[0];
  c.flightFrom=c.g.position.clone();c.flightTo=next?new THREE.Vector3(...next.p):c.base.clone();
 }
@@ -1749,7 +1748,7 @@ function seedModels44(){actors44=[];nearAnimal44=null;treeSolids44=[];if(phase!=
  gymStage52=makeGymPlatform52();
  const gymSign=markerText('NEIGHBOURHOOD GYM');gymSign.position.set(0,4.05,1.6);gymSign.rotation.y=0;gymSign.scale.setScalar(.65);root.add(gymSign);
 
- jobs.push(addModel44(owner,'dumpster',[22,0,0],2.6).then(a=>{if(!a)return;if(zaytona&&zaytona.owner===owner){zaytona.grid=makeZayGrid([-20.7,30.7,-13.7,37.7],[...YARD_DATA.obstacles,...YARD_DATA.platforms,...modelSolids46(),{x:0,z:-4,hx:6.5,hz:2.99},{x:0,z:1.59,hx:2.8,hz:3},{x:5,z:24.8,hx:.9,hz:.9},{x:8.2,z:-1.2,hx:.6,hz:.3}]);zaytona.path=[];}const g=new THREE.Group();g.position.set(22,0,2.6);root.add(g);const key='yard-dented-dumpster',hinge=new THREE.Group(),contents=new THREE.Group();g.add(contents);home.containers=home.containers||{};if(!home.containers[key])home.containers[key]={nail:6,foil:5,cloth:3,string:4,can:3,find_001:2,find_014:1,find_030:1};const c={key,g,hinge,contents,label:'Dented steel dumpster',owner,opened:false};containers41.push(c);refreshContainer41(c);save();return a;}));
+ jobs.push(addModel44(owner,'dumpster',[22,0,0],2.6).then(a=>{if(!a)return;if(zaytona&&zaytona.owner===owner){zaytona.grid=makeZayGrid([-20.7,30.7,-13.7,37.7],[...YARD_DATA.obstacles,...YARD_DATA.platforms,...modelSolids46(),{x:0,z:-4,hx:6.5,hz:2.99},{x:0,z:1.59,hx:2.8,hz:3},{x:3.2,z:29.2,hx:1.1,hz:1.1},{x:8.2,z:-1.2,hx:.6,hz:.3}]);zaytona.path=[];}const g=new THREE.Group();g.position.set(22,0,2.6);root.add(g);const key='yard-dented-dumpster',hinge=new THREE.Group(),contents=new THREE.Group();g.add(contents);home.containers=home.containers||{};if(!home.containers[key])home.containers[key]={nail:6,foil:5,cloth:3,string:4,can:3,find_001:2,find_014:1,find_030:1};const c={key,g,hinge,contents,label:'Dented steel dumpster',owner,opened:false};containers41.push(c);refreshContainer41(c);save();return a;}));
  jobs.push(addModel44(owner,'bird',[3,4.5,21],3.5,'fly'));
  for(const [x,z]of [[-20,23],[-18,24],[-12,25],[-10,23],[-8,25],[16,25],[20,25],[29,21],[30,16],[30,3],[-20,3],[-20,-7],[-7,-13],[16,-13],[22,-13],[28,-12]])jobs.push(addModel44(owner,'grass',[x,0,z],.28+(Math.abs(x+z)%3)*.08,'still',x));
 
@@ -1866,6 +1865,9 @@ if(sound58.dog<=0){sound58.dog=14+Math.random()*14;const dog=actors44.find(a=>a.
 }
 function scheduleBeethoven58(){if(!piano.enabled||!voiceOn||document.hidden||radio.on||!['scavenge','explore','house','inside'].includes(phase))return;const ac=audio();if(!ac)return;if(!piano.gain){piano.gain=ac.createGain();piano.gain.gain.value=.28;piano.gain.connect(ac.destination);}if(piano.next<ac.currentTime)piano.next=ac.currentTime+.06;const beat=60/92;while(piano.next<ac.currentTime+.5){const [n,d]=ode58[piano.step%ode58.length];if(n){pianoNote(ac,n+12,piano.next,beat*d*.92,.24);const bass=n===62||n===67?43:48;pianoNote(ac,bass,piano.next,beat*d,.13);pianoNote(ac,bass+7,piano.next+.02,beat*d*.8,.06);}piano.next+=beat*d;piano.step++;}}
 
+
+function seatCrow59(c){c.model.updateWorldMatrix(true,true);const b=posedBounds(c.model);c.model.position.y=-b.min.y*c.model.scale.y;}
+function seedRods59(){const points=[[-7,8],[-9,12],[9,13],[12,19],[25,21],[-15,20],[-13,-7],[8,3]];for(const [i,p] of points.entries()){const g=new THREE.Group();g.name='Collectible steel rod';const bar=cyl(.035,.035,.9,MT(0x969b96,'steel'),10);bar.rotation.z=Math.PI/2;bar.position.y=.04;g.add(bar);g.position.set(p[0],.015,p[1]);g.rotation.y=i*1.3;root.add(g);sc.items.push({id:'nail',m:g,taken:false,label59:'Steel rod'});}}
 </script>
 </body>
 </html>
