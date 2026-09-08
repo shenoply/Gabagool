@@ -222,3 +222,7 @@ These five models carry CC-BY 4.0 metadata in their supplied files; original sou
 `cherry-build44.glb` is adapted from the owner's supplied `jersey_lowpoly_cherry_trees.glb`; `songbirds-build44.glb` is adapted from the owner's supplied Meshy cartoon-bird model. No third-party licence is asserted for these two files.
 
 Validation: rendered individual optimised models in Blender; checked normalisation and bird heading. All seven GLBs parse in Three.js r128; scene-specific loading, finite motion, interactions and cleanup pass alongside existing regression checks. Full game GPU/mobile visual performance remains unverified because the cloud browser has no WebGL context.
+
+## Build 45 — Everyone in the main backyard
+
+All seven supplied models now appear together in the main backyard: Sakura inside the front fence, cherry trees along the rear boundary, the hound and perched cartoon birds on the right, squirrel beside the Sakura, kingfisher over the front clearing and osprey overhead. These additions no longer require visiting the garden or courtyard. Existing animal interactions and mobile asset optimisations are retained.
