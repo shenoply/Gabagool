@@ -266,3 +266,24 @@ Validation: actual grass, flock and scrap-corner meshes inspected through Blende
 The re-supplied `low_poly_grass.glb` is represented by the existing credited grass asset. The separate `grass.glb` lists Sketchfab Standard licensing and is not included under this project's CC0/CC-BY-only rule. Raccoons and doghouse are original code-created models.
 
 Validation: new vegetation inspected through actual Blender renders; all 13 optional asset types parse with Three.js r128. Checked grass/tree/animal counts and finite animation, indoor input across four camera headings, furniture/wall bounds, stop-to-idle, batch crafting, saved favourites, inventory categories and closing, existing dumpster pickups, scene cleanup and reload. Full-game GPU/mobile appearance remains unverified: this environment's browser cannot create a WebGL context.
+
+## Build 48 — Beyond the garden fence
+
+- Fixed imported dirt/paving visibility checks to recognize GLTFLoader's underscore-normalized node names. Removed the overlapping cloud-shadow plane, primitive backyard stem bundle and sponge billboard. Shorter, darker curved grass replaces the oversized pale spikes.
+- Moved the kennel to a clear area and separated the hound and water bowl from its doorway.
+- Used the supplied cinematic Pip artwork on the title/opening display. The supplied rat photo now has a wood frame and cream mount with its original aspect ratio. First home entry installs it once; existing placed portraits and later decoration choices are preserved. New-game resets this migration.
+- Added the city set beyond the front boundary. Added the supplied MMA animation on a raised neighbouring gym platform beyond the right fence, with the tracksuit tabby as a spectator. These props are outside the playable bounds. MMA retains its original rig and clip; the supplied tabby is static with subtle procedural breathing.
+- Replaced wood and steel finishes with 1024px photographic texture maps, including imported timber, drums, craft materials and the kennel. Optional models retain cached loading and no heavy-mesh shadows. Optimized tabby: about 18,000 triangles / 0.57 MB; city: about 31,000 triangles / 2.25 MB; MMA: 3.16 MB with its original animation.
+
+Additional credits:
+
+| Asset | Creator / source | Licence / adaptation |
+|---|---|---|
+| `city-build48.glb` | [CCity Building Set 1 — Neberkenezer](https://sketchfab.com/3d-models/ccity-building-set-1-a2d5c7bfcc2148fb8994864c43dfcc97) | CC-BY 4.0; normalized and textures compressed |
+| `mma-build48.glb` | [MMA Ground and Pound — mortaleiros](https://sketchfab.com/3d-models/mma-ground-and-pound-25a4f48cc84a41078aa41109f02fe3a2) | CC-BY 4.0; textures compressed, rig and animation retained |
+| `tabby-build48.glb` | Owner-supplied Meshy tracksuit tabby | Mesh simplified, normalized and textures compressed |
+| `wood_planks-build48.jpg` | [Wood Planks — Amal Kumar / Poly Haven](https://polyhaven.com/a/wood_planks) | CC0; resized to 1024px |
+| `rusty_metal_sheet-build48.jpg` | [Rusty Metal Sheet — Amal Kumar / Poly Haven](https://polyhaven.com/a/rusty_metal_sheet) | CC0; resized to 1024px |
+| `opening-build48.png`, `rat-picture-build48.jpg` | Images supplied by the owner for this game | Used as supplied |
+
+Validation: actual optimized city/tabby meshes inspected in Blender. Three.js r128 parses all 16 optional asset types; checked MMA animation advancement, city/MMA bounds, dog/kennel separation, hidden original paving/dirt, one-time photo installation, indoor movement at four camera headings, inventory, batch crafting, save persistence, dumpster pickups and scene reload. JavaScript syntax passes. Full-game GPU/mobile appearance remains unverified because this environment's browser cannot create a WebGL context; the flicker fix is verified structurally, not by a GPU rendering test.
