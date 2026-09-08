@@ -177,3 +177,13 @@ Validation: JS syntax; real Three r128 assets/geometry with a renderer stub and 
 - Beds and seats offer Rest here / Sit here. Stand up or movement returns Pip to his previous position. Rest restores energy; bed rest also dries him. Sitting uses a basic procedural leg pose over the supplied rig, not a new seated animation asset.
 - Zaytona favours nearby resting locations and takes longer pauses using the existing Idle, LookBack and Gesture clips; existing walking variants and crow routines remain.
 - Verified persistent container contents, surface placement, undo inventory safety, furniture use/exit and the existing game regression harness. Full GPU/mobile appearance remains unverified in this browser environment.
+
+## Build 42 — weather and playful discoveries
+- Added a gradient sky, moving cloud sprites, day/evening colour shifts, distant building and branch silhouettes; no external art assets.
+- Natural clear/windy/rain cycle plus a Weather menu for choosing Clear, Wind, Rain, Evening or Automatic. Animated collectible paper, swaying cloth and vegetation share the weather wind intensity.
+- Rain streaks, roof-edge drips, puddle rings and footstep ripples; ground darkening and metal specular highlights. Puddle shaders approximate sky reflections and glints; they do not reflect actual scene geometry. Rain audio softens beneath the existing gate shelter.
+- Low quality reduces streaks, cloud and ripple counts and disables evening moths. Weather resources are disposed on area changes; no reflection render targets are used.
+- Pushable spools/cans with damped motion and static-obstacle checks. Occasional paper gust / small-find events during active outdoor play.
+- Crow exchange: offer one carried coin or foil, explore for 90 seconds, then collect a saved gift. Bag capacity is checked before consuming the gift.
+- Enter the old boot near (-5,19) for a decorated refuge with a one-time collectible; leave by the marked front exit.
+- Verified game regression checks, weather/shelter transitions, reflection materials, pushing, saved crow trades and hideout entry/exit/gift persistence using the Three.js logic harness. Weather shaders and full mobile appearance remain unverified because the browser has no WebGL context.
