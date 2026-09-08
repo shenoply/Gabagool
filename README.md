@@ -346,3 +346,11 @@ Validation: H.264 video/stereo AAC confirmed and the complete MP4 decodes withou
 ## Build 54 — Rooftop rumble
 
 Moved the gameplay fight onto a raised timber platform directly above the dumpster. Fighters are 40% larger; the location hint points up. Platform supports sit outside the dumpster footprint. Collapsing boards disappear before obstructing the scavenging space. The event still waits for visibility, keeps player control and plays once each session.
+
+
+## Build 55 — A clearer view
+
+- Excluded the MMA asset's oversized static floor from rendering and character normalization. The actual pair now spans 4.6 world units, faces side-on and sits on a lower platform at the front of the dumpster. Extra HUD panels hide while the nearby fight is in view; movement and camera remain available.
+- Bundled the existing MIT-licensed Three.js r128 locally, disabled expensive startup antialiasing, added WebGL1 recovery and explicit graphics/load error messages. Core downloads have a 45-second deadline; optional animal downloads no longer gate Start. Failed downloads expose Retry instead of leaving a permanent loading message.
+
+Validation: actual skinned fighter bounds verified at 3.82 units tall and 4.6 units across the pair; gameplay/collapse/session-reset checks pass. Stalled optional downloads no longer gate Start, and core-download deadlines pass. Full GPU visual verification remains unavailable because the test browser cannot create a WebGL context.
