@@ -366,3 +366,12 @@ Reduced the fighters from 4.6 to 3 world units across (35% smaller). Removed pro
 Ramp collision uses the visible plank angle, thickness and scale. Grounded feet snap to support surfaces. Sponge and imported tyre meshes provide downward landing contacts; spring impulses follow a brief sponge compression or rubber landing, capped for high falls. Zaytona and spectator cat are 25% smaller. The doghouse-side gap has an opening timber gate. The spectator platform has posts. Added landing squash/knee bend, surface sounds and a compact radio panel which closes when walking away.
 
 Validation: real Three.js raycasts verify ramp surface agreement, sponge support/launch and imported tyre high-speed landings with capped bounce. Gate latch and radio walk-away checks pass. GPU/mobile visual verification remains unavailable.
+
+
+## Build 58 — Backyard sounds
+
+Added synthesized wind/foliage ambience, spaced bird calls, nearby dog barks and clip-time fight thuds. Effects attenuate with distance and pan across the camera; mute/hidden-tab/scene changes stop them. A newly synthesized piano arrangement of Beethoven's 1824 Ode to Joy theme plays during gameplay, independently toggleable with Music. No third-party sound recording is used.
+
+Pip orientation is now measured in model-local coordinates, independent of the spawn heading; this corrects the house/backyard mismatch. House stride follows actual movement, with no walking animation from furniture pushout while idle or footsteps in midair.
+
+Validation: real rig head direction checked against all four spawn headings, indoor movement checked, and Web Audio scheduling/mute logic checked with an instrumented audio context. Audible balance and full mobile rendering remain unverified.
