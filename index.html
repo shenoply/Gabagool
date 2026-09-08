@@ -94,6 +94,8 @@
 #modal section{display:flex;flex-direction:column;max-height:92vh;overflow:hidden;padding:22px;border:1px solid #e8dfcb}#modal h2{flex-shrink:0}#modalBody{overflow:auto;min-height:0;max-height:65vh}#modalActions{flex-shrink:0;padding-top:12px;border-top:1px solid #d9cfba}#modalActions .btn{font-family:system-ui,sans-serif;font-size:13px;padding:11px 15px}#modalClose{position:absolute;top:9px;right:12px;z-index:5;min-width:42px;min-height:42px;background:#ddd4c3;color:#263e36}.craft-open section{width:min(850px,96vw);background:#f5f0e5;color:#273d35;font-family:system-ui,sans-serif;box-shadow:0 24px 90px #0007}.craft-open h2{font-size:24px;letter-spacing:-.7px;margin-bottom:15px}.craft-toolbar{display:flex;gap:12px;align-items:center}.craft-toolbar input{width:65%;border:1px solid #d5d1c2;background:#fffdf6;border-radius:12px;font:inherit;font-size:14px;padding:12px}.craft-toolbar>span{font-size:11px;color:#60756a}.craft-tabs{display:flex;gap:5px;flex-wrap:wrap;margin:14px 0}.craft-tabs button,.grid-toggle{border:0;border-radius:8px;padding:8px 10px;background:#e5e7dc;color:#436052;font-size:12px;cursor:pointer}.craft-tabs button.active{background:#315645;color:#fff}.craft-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.recipe-list{overflow:auto;max-height:43vh;display:flex;flex-direction:column;gap:7px}.recipe-card{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid #dedfd1;background:#fffdf7;border-radius:12px;padding:12px;color:#344b3f;cursor:pointer}.recipe-card.selected{border-color:#62816b;background:#e7eddf;box-shadow:inset 3px 0 #63866e}.recipe-card b{font-size:13px}.recipe-card small{display:block;margin-top:4px;font-size:10px;color:#7b8171}.recipe-symbol{font-size:23px;color:#809b80}.ready-dot{width:7px;height:7px;background:#789766;border-radius:50%;margin-left:auto;flex-shrink:0}.recipe-detail{background:#e8e6d8;border-radius:16px;padding:18px;overflow:auto;max-height:43vh}.recipe-detail .eyebrow{font-size:9px;letter-spacing:2px;color:#7a8571}.recipe-detail h3{font-size:21px;letter-spacing:-.5px;margin:5px 0 10px}.recipe-detail p{font-size:12px;line-height:1.45!important}.recipe-image{width:108px;height:108px;float:right;border-radius:14px;margin:0 0 12px 12px}.need-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #d6d8c8;font-size:12px;clear:both}.need-row .enough{color:#417056}.need-row .missing{color:#a15b41}.grid-toggle{margin-top:12px;font-size:11px}.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px}.mini-grid span{border-radius:5px;background:#d6d9c8;min-height:30px;font-size:8px;padding:4px}.empty-recipes{padding:20px;color:#7c8270}.craft-open #modalActions .btn:first-child{background:#315645;color:#fff}.craft-open #modalActions .btn:disabled{opacity:.4}.craft-open #modalActions .btn:last-child{margin-left:auto;background:#ddd9c9}@media(max-width:600px){.craft-open section{padding:17px;max-height:94vh}.craft-open h2{font-size:20px}.craft-columns{grid-template-columns:1fr;gap:10px}.recipe-detail{grid-row:1;max-height:29vh;padding:13px}.recipe-list{max-height:23vh;display:grid;grid-template-columns:1fr 1fr}.recipe-card{padding:9px;gap:6px}.recipe-card b{font-size:11px}.recipe-card small{font-size:9px}.recipe-symbol{font-size:18px}.recipe-image{width:82px;height:82px}.recipe-detail h3{font-size:18px}.craft-tabs button{font-size:10px;padding:7px}.craft-open #modalActions{gap:5px}.craft-open #modalActions .btn{font-size:11px;padding:10px 12px}.craft-toolbar input{font-size:12px}.craft-toolbar span{font-size:10px}}
 
 #weatherBadge{position:absolute;left:12px;top:142px;font:10px system-ui;color:#e4e3d2;background:#29433bd9;padding:5px 8px;border-radius:9px;display:none}#settings{flex-wrap:wrap;max-width:95vw}#pianoToggle{font-size:10px!important;padding:8px!important}@media(max-width:600px){#weatherBadge{top:175px}#settings{top:45px!important;max-width:96vw;gap:3px!important}#settings .btn{font-size:9px!important;padding:6px 7px!important}}
+
+#modal.craft-open section{width:min(850px,96vw);background:#f5f0e5}#modal.craft-open #modalActions .btn:last-child{color:#263e36;background:#d7decd}#homePanelClose{align-self:flex-end;background:#e6dcc7;color:#243d34;padding:9px 16px}#hb{background:#243d35ed;border-radius:0 0 18px 18px}body.photo #homePanelToggle{display:none!important}
 </style>
 </head>
 <body>
@@ -111,12 +113,12 @@
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
     <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
     <p style="font-size:10px;opacity:.65">Crow: Alexei Ostapenko · CC-BY 4.0. Framed picture supplied by the owner.</p><p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 38 · Pip comes home</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 39 · Pip comes home</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
   <div id="bars"></div><div id="sub" aria-live="polite"></div>
-  <div id="survival"><button class="btn" id="supplies">Supplies</button><span id="lifeFood"></span><span id="lifeWater"></span><span id="lifeEnergy"></span></div><div id="cameraTools"><button class="btn" id="camIn" aria-label="Zoom in">＋</button><button class="btn" id="camOut" aria-label="Zoom out">−</button><button class="btn" id="camReset">Reset view</button></div><div id="weatherBadge"></div><div id="settings"><button class="btn" id="pianoToggle">Piano: off</button><button class="btn" id="craftBook">Craft</button><button class="btn" id="map">Areas</button><button class="btn" id="quality">Quality: cosy</button><button class="btn" id="photo">Photo mode</button></div>
+  <div id="survival"><button class="btn" id="supplies">Supplies</button><span id="lifeFood"></span><span id="lifeWater"></span><span id="lifeEnergy"></span></div><div id="cameraTools"><button class="btn" id="camIn" aria-label="Zoom in">＋</button><button class="btn" id="camOut" aria-label="Zoom out">−</button><button class="btn" id="camReset">Reset view</button></div><div id="weatherBadge"></div><div id="settings"><button class="btn" id="pianoToggle">Piano: off</button><button class="btn" id="homePanelToggle" style="display:none" aria-expanded="false">Decorate home</button><button class="btn" id="craftBook">Craft</button><button class="btn" id="map">Areas</button><button class="btn" id="quality">Quality: cosy</button><button class="btn" id="photo">Photo mode</button></div>
   <div id="photoTools"><small>Pause a little. Look around.</small><button class="btn" id="photoLeft" aria-label="Orbit left">↶</button><button class="btn" id="photoRight" aria-label="Orbit right">↷</button><button class="btn" id="photoZoom">Zoom</button><button class="btn" id="photoSave">Save photo</button><button class="btn" id="photoExit">Back</button></div>
   <div id="hud"><span id="phase"></span><span id="bag"></span></div>
   <button class="btn" id="mute" style="position:absolute;top:56px;right:14px;font-size:13px;padding:6px 12px;background:rgba(43,29,20,.7);color:var(--paper)">Sound: on</button>
@@ -127,7 +129,7 @@
     <div id="stick"><div id="knob"></div></div>
     <div id="acts"><button class="s" id="padB">Bite</button><button class="s" id="padR">Roll</button><button class="s" id="padJ">Jump</button><button class="g" id="padE">Grab</button></div>
   </div>
-  <div id="hb">
+  <div id="hb"><button class="tab" id="homePanelClose" aria-label="Hide home crafting and decoration menu">Hide menu ×</button>
     <div id="htabs"></div>
     <div id="craftfilters"></div><div id="hlist"></div>
     <div id="hplace"><span id="hsel"></span><button class="btn" id="hrot">Rotate</button><button class="btn" id="snap">Grid: on</button><button class="btn" id="hplacebtn">Place</button><button class="btn" id="hcancel" style="background:rgba(233,220,195,.25);color:var(--paper)">Cancel</button></div>
@@ -552,6 +554,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem('ww-save'));if(d&&d.
 const $=id=>document.getElementById(id);bindRadio();
 const ui={title:$('title'),sub:$('sub'),phase:$('phase'),bag:$('bag'),prompt:$('prompt'),skip:$('skip'),go:$('go'),hb:$('hb'),end:$('end'),pad:$('pad')};
 function clear(){
+ closeModal();$("homePanelToggle").style.display="none";
  worldProps=[];worldNear=null;weatherDrops=null;rainGround=[];
  if(gardenCrow){gardenCrow.mixer.stopAllAction();gardenCrow.mixer.uncacheRoot(gardenCrow.model);}gardenCrow=null;raccoon=null;portraitPickup=null;extraFood=[];extraNear=null;gameCam.ready=false;gameCam.phase=null;
  natureNodes=[];natureNear=null;
@@ -561,7 +564,7 @@ function clear(){
   root=new THREE.Group();scene.add(root);
 }
 function bag(){ensureLife();rememberMaterials();shoppingList();const n=invCount();ui.bag.textContent=n?`Bag: ${n} part${n>1?'s':''}`:'Bag: empty';}
-addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(phase==='cutscene'&&e.key===' ')endCutscene();if(e.key.toLowerCase()==='e')grab();if(e.key===' '&&phase==='scavenge'&&sc&&sc.talk)advanceTalk();if(e.key.toLowerCase()==='r')rotateSel();if(e.key==='Enter'&&phase==='scavenge'&&!sc.talk&&!photo.active)startHouse();if(e.key==='Escape'&&phase==='house')cancelPlace();if(e.key==='Escape')closeModal();});
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(phase==='cutscene'&&e.key===' ')endCutscene();if(e.key.toLowerCase()==='e')grab();if(e.key===' '&&phase==='scavenge'&&sc&&sc.talk)advanceTalk();if(e.key.toLowerCase()==='r')rotateSel();if(e.key==='Enter'&&phase==='scavenge'&&!sc.talk&&!photo.active)startHouse();if(e.key==='Escape'&&phase==='house')setHomePanel(false);if(e.key==='Escape')closeModal();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 const stick=$('stick'),knob=$('knob');let joy={x:0,z:0},joyId=null;
 function joyMove(e){const r=stick.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const halfKnob=knob.getBoundingClientRect().width/2,center=r.width/2-halfKnob-2,max=r.width/2-halfKnob;const l=Math.hypot(dx,dy);if(l>max){dx*=max/l;dy*=max/l;}knob.style.left=(center+dx)+'px';knob.style.top=(center+dy)+'px';joy.x=dx/max;joy.z=dy/max;}
@@ -814,7 +817,7 @@ function tickScavenge(dt){
   rat.animate(dt,speed,false);steps(dt,speed,rat.position.y>1?'steel':'cobble');
   if(speed>0.05){const inP=[[-9,4,4],[18,9,3],[-28,-2,2.5],[34,-4,3.5]].some(([px,pz,r])=>Math.hypot(rat.position.x-px,rat.position.z-pz)<r);if(inP&&!sc.wet){sfx.splash();}sc.wet=inP;}
   sc.near=null;let best=.9;
-  sc.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
+  sc.items.forEach(it=>{if(it.taken)return;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;sc.near=it;}});
   sc.nearHome=Math.hypot(rat.position.x-12,rat.position.z-34.4)<1.1;
   sc.nearClimb=Math.hypot(rat.position.x-6.89,rat.position.z+2.05)<1.7&&rat.position.y<.5;
   sc.nearNb=rat.position.distanceTo(new THREE.Vector3(NB.x,rat.position.y,NB.z))<1.6;
@@ -916,7 +919,7 @@ function startInside(){
 function tickInside(dt){
   const speed=control(dt,{walk:4.5,bounds:[-IW/2+1.2,IW/2-1.2,-ID/2+1.3,ID/2-0.9]});
   rat.animate(dt,speed,false);steps(dt,speed,'steel');
-  ins.near=null;let best=1.8;ins.items.forEach(it=>{if(it.taken)return;it.m.rotation.y+=dt*0.4;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;ins.near=it;}});
+  ins.near=null;let best=1.8;ins.items.forEach(it=>{if(it.taken)return;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;ins.near=it;}});
   ins.nearHole=rat.position.distanceTo(new THREE.Vector3(-3.2,0,ID/2-0.5))<1.5;
   if(ins.near){ui.prompt.style.display='block';ui.prompt.textContent=`E · grab ${ITEMS[ins.near.id].name}`;$('padE').textContent='Grab';}
   else if(ins.nearHole){ui.prompt.style.display='block';ui.prompt.textContent='E · climb out';$('padE').textContent='Out';}
@@ -941,7 +944,7 @@ function startHouse(){
   home.placed.forEach(p=>spawnPlaced(p));
   rat=makeRat();rat.scale.setScalar(0.62);rat.position.set(-HW/2+1.6,0,DOORZ);rat.rotation.y=Math.PI/2;root.add(rat);outline(rat);
   camera.position.set(rat.position.x,10,rat.position.z+10);camera.lookAt(rat.position);
-  ui.hb.style.display='flex';renderPanel();save();
+  renderPanel();$('homePanelToggle').style.display='inline-block';setHomePanel(home.panelOpen===true);save();
 }
 function rebuildHouse(){if(hs.house)root.remove(hs.house);hs.house=makeHouse(home);root.add(hs.house);outline(hs.house);}
 function spawnPlaced(p){const def=defOf(p.id);const m=def.build();outline(m);
@@ -1143,7 +1146,7 @@ function renderPanel(){
   $('hplace').style.display=hs.sel?'flex':'none';$('hlist').style.display=hs.sel?'none':'flex';$('htabs').style.display=hs.sel?'none':'flex';$('snap').textContent=hs.snap?'Grid: on':'Grid: off';
 }
 function legacyCraft(id){const c=CRAFT[id];if(!c||!has(c.needs))return;spend(c.needs);sfx.craft();if(c.special==='door'){home.door=true;rebuildHouse();ui.phase.textContent='Home';sayToast('A proper front door. Welcome home.')}else{home.storage[id]=(home.storage[id]||0)+1;hs.tab='storage';sayToast(c.name+' is ready in Furniture.')}save();bag();renderPanel();}
-function beginPlace(id,source){cancelPlace();const def=defOf(id);if(!def)return;hs.source=source||(CRAFT[id]?'storage':'part');hs.sel=id;hs.rot=0;hs.anchor=null;const g=def.build();g.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.55;}});hs.ghost=g;root.add(g);$('hsel').textContent=def.name+' · tap the floor to position';renderPanel();}
+function beginPlace(id,source){cancelPlace();setHomePanel(true);const def=defOf(id);if(!def)return;hs.source=source||(CRAFT[id]?'storage':'part');hs.sel=id;hs.rot=0;hs.anchor=null;const g=def.build();g.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.55;}});hs.ghost=g;root.add(g);$('hsel').textContent=def.name+' · tap the floor to position';renderPanel();}
 function cancelPlace(){if(!hs)return;if(hs.ghost){root.remove(hs.ghost);hs.ghost=null;}if(hs.moving)hs.moving.m.visible=true;hs.moving=null;hs.sel=null;hs.anchor=null;hs.source=null;renderPanel();}
 function moveFurniture(entry){closeModal();beginPlace(entry.p.id,'move');hs.moving=entry;hs.moveStyle={scale:entry.p.scale||1,elevation:entry.p.elevation||0,tint:entry.p.tint};hs.ghost.scale.setScalar(entry.p.scale||1);entry.m.visible=false;hs.anchor={x:entry.p.x,z:entry.p.z};hs.rot=0;hs.baseRot=entry.p.rot;sayToast('Tap a new spot, rotate, then place.');}
 function furnitureMenu(entry){selectedFurniture=entry;const id=entry.p.id;modal(defOf(id).name,'<p>Keep the finished piece or recover its parts.</p>',[['Style / stack',()=>styleFurniture(entry)],['Move',()=>moveFurniture(entry)],['Store',()=>{closeModal();storeFurniture(entry)}],['Recycle',()=>{closeModal();recycleFurniture(entry)}]]);}
@@ -1311,14 +1314,14 @@ function consumeMaterials(needs){if(!Object.entries(needs).every(([k,n])=>materi
 function totalBag(){return Object.values(inv).reduce((a,n)=>a+Math.max(0,n),0);}
 function bagCapacity(){return home.tools&&home.tools.backpack?120:60;}
 function addToBag(id,n=1){if(totalBag()+n>bagCapacity()){sayToast('Bag full — eat, craft or store supplies at home.');return false;}inv[id]=(inv[id]||0)+n;return true;}
-function consumeFood(id){const f=FOODS[id],l=ensureLife();if(!f||materialCount(id)<1)return false;if((!f.hunger||l.hunger>=100)&&(!f.thirst||l.thirst>=100)){sayToast('Pip is already full and refreshed.');return false;}if(!consumeMaterials({[id]:1}))return false;l.hunger=Math.min(100,l.hunger+(f.hunger||0));l.thirst=Math.min(100,l.thirst+(f.thirst||0));l.stamina=Math.min(100,l.stamina+12);save();bag();sayToast((f.hunger?'A little meal':'A refreshing drink')+' for Pip.');return true;}
+function consumeFood(id){const f=FOODS[id],l=ensureLife();if(!f||materialCount(id)<1)return false;if((!f.hunger||l.hunger>=100)&&(!f.thirst||l.thirst>=100)){sayToast('Pip is already full and refreshed.');return false;}if(!consumeMaterials({[id]:1}))return false;l.hunger=Math.min(100,l.hunger+(f.hunger||0));l.thirst=Math.min(100,l.thirst+(f.thirst||0));l.stamina=Math.min(100,l.stamina+12);if(id==='lunch'||id==='meal')l.fedUntil=l.clock+180;save();bag();sayToast((f.hunger?'A little meal':'A refreshing drink')+' for Pip.');return true;}
 function restAtHome(){if(phase!=='house'||!home.placed.some(p=>['bed','leafbed','sofa'].includes(p.id)))return;const l=ensureLife();l.stamina=100;rat.userData.sleeping=true;setTimeout(()=>{if(rat)rat.userData.sleeping=false;},1800);save();sayToast('Rested and ready to explore.');}
 function openSupplies(){if(!gameplayActive())return;const l=ensureLife();const food=Object.entries(FOODS).filter(([id])=>materialCount(id)>0);const actions=food.map(([id,f])=>[`${f.hunger?'Eat':'Drink'} ${ITEMS[id].name} (${materialCount(id)})`,()=>{consumeFood(id);openSuppliesRefresh();}]);if(phase==='house'){if(home.placed.some(p=>['bed','leafbed','sofa'].includes(p.id)))actions.push(['Rest',()=>{restAtHome();closeModal();}]);if(placed('dewcollector'))actions.push([`Collect water (${Math.floor(l.water)}/6)`,()=>{if(l.water>=1&&addToBag('water',1)){l.water--;save();bag();}openSuppliesRefresh();},l.water<1]);if(placed('pantry'))actions.push(['Open pantry',openPantry]);}modal('Pip’s supplies',`<p>Food ${Math.ceil(l.hunger)}% · Water ${Math.ceil(l.thirst)}% · Energy ${Math.ceil(l.stamina)}%</p><p>Bag ${totalBag()} / ${bagCapacity()} parts. Needs pause while decorating and in menus. Low supplies reduce running; you keep your belongings.</p>${food.length?'':'<p>Find crumbs, seeds, fruit and dew near the junkyard gate and in the garden.</p>'}${home.tools&&home.tools.pebbleaxe?'<p>Equipped: pebble axe</p>':''}`,actions);}
 function openSuppliesRefresh(){closeModal();openSupplies();}
 function openPantry(){ensureLife();if(!pantryReady())return;const ids=Object.keys(ITEMS).filter(k=>(inv[k]||0)>0||(home.pantry[k]||0)>0);modal('Pantry & materials',`<p>Stored materials are used automatically when crafting at home.</p><div class="cg-book">${ids.map(k=>`<div class="cg-recipe"><b>${ITEMS[k].name}</b><small>Bag ${inv[k]||0} · Stored ${home.pantry[k]||0}</small><button class="tab" data-store="${k}" ${(inv[k]||0)?'':'disabled'}>Store all</button><button class="tab" data-take="${k}" ${(home.pantry[k]||0)?'':'disabled'}>Take one</button></div>`).join('')}</div>`,[['Store all supplies',()=>{for(const [k,n]of Object.entries(inv)){home.pantry[k]=(home.pantry[k]||0)+n;delete inv[k];}save();bag();openPantry();}],['Back',openSuppliesRefresh]]);$('modalBody').querySelectorAll('[data-store]').forEach(b=>b.onclick=()=>{const k=b.dataset.store;home.pantry[k]=(home.pantry[k]||0)+(inv[k]||0);delete inv[k];save();bag();openPantry();});$('modalBody').querySelectorAll('[data-take]').forEach(b=>b.onclick=()=>{const k=b.dataset.take;if(home.pantry[k]>0&&addToBag(k,1)){home.pantry[k]--;save();bag();}openPantry();});}
 let lifeSaveClock=0,lifeWarning=false;
-function tickLife(dt){const l=ensureLife(),active=['scavenge','explore','inside'].includes(phase)&&!(sc&&sc.talk);$('survival').style.display=['scavenge','explore','inside','house'].includes(phase)?'flex':'none';if(!active)return;l.clock+=dt;l.hunger=Math.max(0,l.hunger-dt*.035);l.thirst=Math.max(0,l.thirst-dt*.055);const exert=rat.userData.wallState?.8:rat.userData.run&&rat.userData.vel>.2?1:0;l.stamina=THREE.MathUtils.clamp(l.stamina+dt*(exert?-7*exert:9),0,100);if(placed('dewcollector')){l.dewClock+=dt;while(l.dewClock>=90){l.dewClock-=90;l.water=Math.min(6,l.water+1);}}const low=l.hunger<20||l.thirst<20;if(low&&!lifeWarning){sayToast('Pip needs a snack or a drink — open Supplies.');lifeWarning=true;}if(!low)lifeWarning=false;lifeSaveClock+=dt;if(lifeSaveClock>=20){lifeSaveClock=0;save();}}
-function drawLife(){const l=ensureLife();$('lifeFood').textContent='Food '+Math.ceil(l.hunger)+'%';$('lifeWater').textContent='Water '+Math.ceil(l.thirst)+'%';$('lifeEnergy').textContent='Energy '+Math.ceil(l.stamina)+'%';}
+function tickLife(dt){const l=ensureLife(),active=['scavenge','explore','inside'].includes(phase)&&!(sc&&sc.talk);$('survival').style.display=['scavenge','explore','inside','house'].includes(phase)?'flex':'none';if(!active)return;l.clock+=dt;l.hunger=Math.max(0,l.hunger-dt*.035);l.thirst=Math.max(0,l.thirst-dt*.055);const exert=rat.userData.wallState?.8:rat.userData.run&&rat.userData.vel>.2?1:0;l.stamina=THREE.MathUtils.clamp(l.stamina+dt*(exert?-7*exert*(l.fedUntil>l.clock?.65:1):9),0,100);if(placed('dewcollector')){l.dewClock+=dt;while(l.dewClock>=90){l.dewClock-=90;l.water=Math.min(6,l.water+1);}}const low=l.hunger<20||l.thirst<20;if(low&&!lifeWarning){sayToast('Pip needs a snack or a drink — open Supplies.');lifeWarning=true;}if(!low)lifeWarning=false;lifeSaveClock+=dt;if(lifeSaveClock>=20){lifeSaveClock=0;save();}}
+function drawLife(){const l=ensureLife();$('lifeFood').textContent='Food '+Math.ceil(l.hunger)+'%';$('lifeWater').textContent='Water '+Math.ceil(l.thirst)+'%';$('lifeEnergy').textContent='Energy '+Math.ceil(l.stamina)+'%'+(l.fedUntil>l.clock?' · Well fed':'');}
 $('supplies').onclick=openSupplies;
 
 Object.assign(CRAFT,{
@@ -1360,7 +1363,7 @@ function seedAnimals(){gardenCrow=null;raccoon=null;if(!['scavenge','explore'].i
  const owner=root;if(crowAsset){const holder=new THREE.Group(),model=clonePipScene(crowAsset.scene);holder.add(model);const mixer=new THREE.AnimationMixer(model),clip=crowAsset.animations[0],action=clip&&mixer.clipAction(clip);if(action){action.play();action.paused=true;action.time=0;mixer.update(0);}const b=posedBounds(model),k=.55/Math.max(.01,b.max.y-b.min.y);model.scale.multiplyScalar(k);model.position.y=-b.min.y*k;holder.position.set(phase==='scavenge'?3.1:4,1.2,phase==='scavenge'?28.8:-2);const perch=cyl(.22,.28,1.2,tin,12);perch.position.set(holder.position.x,.6,holder.position.z);perch.castShadow=false;perch.userData.noInk=true;root.add(perch,holder);gardenCrow={g:holder,model,mixer,action,base:holder.position.clone(),clock:0,mode:'perch',owner,reveal:0};const shiny=ITEMS.coin.build();shiny.scale.setScalar(.18);shiny.visible=false;holder.add(shiny);gardenCrow.shiny=shiny;}
 }
 function tickAnimals37(dt){if(!['scavenge','explore'].includes(phase)||!rat)return;const l=ensureLife(),day=l.clock%600,dusk=day>=360;sun.intensity=.55+.35*Math.max(0,Math.cos((day-180)/600*Math.PI*2));sun.color.setHex(dusk?0xffc492:0xffeed6);
- if(gardenCrow&&gardenCrow.owner===root){const c=gardenCrow;c.clock+=dt;if(c.clock>12&&c.mode==='perch'){c.mode='flight';c.clock=0;crowCall();}if(c.mode==='flight'){const q=Math.min(1,c.clock/10.52);c.g.position.copy(c.base);c.g.position.x+=Math.sin(q*Math.PI*2)*2;c.g.position.y+=Math.sin(q*Math.PI)*1.6;c.g.position.z+=Math.sin(q*Math.PI)*2;if(c.action){c.action.time=q*c.action.getClip().duration;c.mixer.update(0);}if(q===1){c.mode='perch';c.clock=0;c.g.position.copy(c.base);if(c.action){c.action.time=0;c.mixer.update(0);}if(l.clock-(home.collectibles.crowGift||-100)>100){const id='coin',m=ITEMS.coin.build();m.scale.setScalar(.22);m.position.set(phase==='scavenge'?3:2,.05,phase==='scavenge'?29:1);root.add(m);(phase==='scavenge'?sc.items:area.items).push({id,m,taken:false});home.collectibles.crowGift=l.clock;save();sayToast('The crow uncovered something shiny nearby.');}}}else{c.g.rotation.y=Math.sin(c.clock*.7)*.2;}}
+ if(gardenCrow&&gardenCrow.owner===root){const c=gardenCrow;c.clock+=dt;if(c.clock>12&&c.mode==='perch'&&!c.sheltering){c.mode='flight';c.clock=0;chooseCrowPerch(c);crowCall();}if(c.mode==='flight'){const q=Math.min(1,c.clock/10.52);c.g.position.lerpVectors(c.flightFrom||c.base,c.flightTo||c.base,q);c.g.position.y+=Math.sin(q*Math.PI)*1.6;const dest=c.flightTo||c.base,from=c.flightFrom||c.base;c.g.rotation.y=Math.atan2(dest.x-from.x,dest.z-from.z);if(c.action){c.action.time=q*c.action.getClip().duration;c.mixer.update(0);}if(q===1){c.mode='perch';c.clock=0;if(c.flightTo)c.base.copy(c.flightTo);c.g.position.copy(c.base);if(c.action){c.action.time=0;c.mixer.update(0);}if(l.clock-(home.collectibles.crowGift||-100)>100){const id='coin',m=ITEMS.coin.build();m.scale.setScalar(.22);m.position.set(c.base.x+.5,.05,c.base.z+.5);root.add(m);(phase==='scavenge'?sc.items:area.items).push({id,m,taken:false});home.collectibles.crowGift=l.clock;save();sayToast('The crow uncovered something shiny nearby.');}}}else{c.g.rotation.y=Math.sin(c.clock*.7)*.2;}}
 }
 
 // 100 named salvage objects. Every one can be collected, displayed or reclaimed.
@@ -1389,7 +1392,7 @@ function salvageModel(family,index,color){const g=new THREE.Group(),mat=M(color)
  g.add(a);g.traverse(o=>{if(o.isMesh){o.castShadow=false;o.userData.noInk=true;}});return g;}
 for(let f=0;f<salvageFamilies.length;f++){const [family,salvage,color,names]=salvageFamilies[f];names.forEach((name,i)=>{const id='find_'+String(f*10+i+1).padStart(3,'0');NEW_ITEMS.push(id);ITEMS[id]={name,r:.35,salvage,group:family,build:()=>salvageModel(family,i,color)};});}
 function reclaimPart(id){const d=ITEMS[id];if(!d||!d.salvage||(inv[id]||0)<1)return false;inv[id]--;if(!inv[id])delete inv[id];inv[d.salvage]=(inv[d.salvage]||0)+1;rememberMaterials();save();bag();sayToast(d.name+' reclaimed as '+ITEMS[d.salvage].name);return true;}
-function stockDumpster(){const ids=[...NEW_ITEMS,...['stick','string','nail','cloth','can','matchbox','sponge','cap','foil','bulb','crumbs','dew']];ids.forEach((id,i)=>{const m=ITEMS[id].build();m.scale.setScalar(.7);const col=i%14,row=Math.floor(i/14);m.position.set(-8.2+col*1.25,.015,-4.6+row*1.23);m.rotation.y=(i*2.399)%6.28;root.add(m);ins.items.push({id,m,taken:false});});}
+function stockDumpster38(){const ids=[...NEW_ITEMS,...['stick','string','nail','cloth','can','matchbox','sponge','cap','foil','bulb','crumbs','dew']];ids.forEach((id,i)=>{const m=ITEMS[id].build();m.scale.setScalar(.7);const col=i%14,row=Math.floor(i/14);m.position.set(-8.2+col*1.25,.015,-4.6+row*1.23);m.rotation.y=(i*2.399)%6.28;root.add(m);ins.items.push({id,m,taken:false});});}
 
 let craftQuery='',craftView='recipes',craftSelection='workbench',showRecipeGrid=false;
 function closeCrafting(){closeModal();$('modal').classList.remove('craft-open');}
@@ -1414,8 +1417,8 @@ let worldProps=[],worldNear=null,weatherDrops=null,rainGround=[],wetClock=0;
 function gateSave(){home.routes=home.routes||{};return home.routes;}
 function markerText(text){return decal(2,.6,(x,w,h)=>{x.fillStyle='#e2d8b9';x.fillRect(0,0,w,h);x.fillStyle='#345446';x.font='bold 37px sans-serif';x.textAlign='center';x.fillText(text,w/2,h*.62);});}
 function addWorldProp(type,x,z,tool){const g=new THREE.Group();if(type==='drain'){const rim=cyl(.8,.8,.12,tin,20);rim.rotation.x=Math.PI/2;rim.position.y=.65;g.add(rim);for(let i=-2;i<=2;i++){const bar=box(.045,1.2,.09,wood);bar.position.set(i*.22,.65,.08);g.add(bar);}}else if(type==='cloth'){for(let i=0;i<3;i++){const rag=box(.45,.8,.035,[cloth,blue,red][i]);rag.position.set(i*.38-.38,.6,0);g.add(rag);}}else if(type==='stems'){for(let i=0;i<5;i++){const stem=cyl(.045,.06,1.2,green,7);stem.position.set(i*.14-.3,.6,0);stem.rotation.z=(i-2)*.23;g.add(stem);}}else{const m=ITEMS.can.build();m.scale.setScalar(1.3);g.add(m);}g.position.set(x,0,z);root.add(g);worldProps.push({type,g,tool,key:phase+'-'+(phase==='scavenge'?'yard':area.id)+'-'+type,owner:root});}
-function decorateWorld(){worldProps=[];worldNear=null;weatherDrops=null;rainGround=[];gateSave();if(!['scavenge','explore'].includes(phase))return;if(area&&area.id==='drain'&&phase==='explore')return;
- const garden=phase==='explore'&&area.id==='garden';if(phase==='scavenge'){addWorldProp('tin',5,24,'crowbar');addWorldProp('cloth',-4,26,'scissors');addWorldProp('stems',5.2,19,'pebbleaxe');}if(garden){addWorldProp('drain',0,-7.8,'crowbar');addWorldProp('stems',-3,0,'pebbleaxe');addWorldProp('cloth',3,3,'scissors');}
+function decorateWorld(){if(['scavenge','explore'].includes(phase)&&!(phase==='explore'&&area.id==='drain'))addGroundCharacter(phase==='scavenge'?'yard':area.id);worldProps=[];worldNear=null;weatherDrops=null;rainGround=[];gateSave();if(!['scavenge','explore'].includes(phase))return;if(area&&area.id==='drain'&&phase==='explore')return;
+ addDiscoveries39();const garden=phase==='explore'&&area.id==='garden';if(phase==='scavenge'){addWorldProp('tin',5,24,'crowbar');addWorldProp('cloth',-4,26,'scissors');addWorldProp('stems',5.2,19,'pebbleaxe');}if(garden){addWorldProp('drain',0,-7.8,'crowbar');addWorldProp('stems',-3,0,'pebbleaxe');addWorldProp('cloth',3,3,'scissors');}
  if(phase==='scavenge'){const awning=box(3,.08,2,MT(0xc6ac7d,'cloth'));awning.position.set(10,1.85,31);awning.userData.noInk=true;root.add(awning);for(const x of [8.6,11.4]){const post=cyl(.04,.05,1.8,wood,7);post.position.set(x,.9,31.8);root.add(post);}}
  const rows=phase==='scavenge'?[[-19,25],[-18,14],[25,24],[29,5],[9,30],[-9,29]]:[[-9,-4],[9,3],[-8,8],[8,-8]];
  rows.forEach(([x,z],j)=>{const g=new THREE.Group(),pot=cyl(.32,.25,.4,M(0xb8795d),12);pot.position.y=.2;g.add(pot);for(let i=0;i<4;i++){const stem=cyl(.014,.025,.7,green,6);stem.position.set(Math.sin(i)*.16,.7,Math.cos(i)*.16);const flower=sph(.13,M([0xe6bd6e,0xa995bc,0xd98e81][j%3]),10,8);flower.scale.y=.35;flower.position.copy(stem.position);flower.position.y=1.07;g.add(stem,flower);}g.position.set(x,0,z);root.add(g);const id=NEW_ITEMS[(j*13+(garden?40:0))%100],m=ITEMS[id].build();m.scale.setScalar(.7);m.position.set(x+.6,.02,z+.25);root.add(m);(phase==='scavenge'?sc.items:area.items).push({id,m,taken:false});});
@@ -1424,11 +1427,11 @@ function decorateWorld(){worldProps=[];worldNear=null;weatherDrops=null;rainGrou
  if(garden){const sign=markerText('RAIN DRAIN ↓');sign.position.set(0,1.8,-8.2);root.add(sign);const clothPicnic=box(1.8,.025,1.4,cloth);clothPicnic.position.set(-3,.035,6);root.add(clothPicnic);const toy=salvageModel('toy',1,0xb6624f);toy.scale.setScalar(2);toy.position.set(3,.15,6);root.add(toy);const cup=ITEMS.teacup.build();cup.scale.setScalar(1.7);cup.rotation.z=Math.PI/2;cup.position.set(-3,.4,-4);root.add(cup);const id=NEW_ITEMS[68],m=ITEMS[id].build();m.position.set(-3,.03,-3.5);root.add(m);area.items.push({id,m,taken:false});}}
 function tickWorld38(dt){worldNear=null;if(phase==='explore'&&area.id==='drain'&&rat.position.z<-7.7&&Math.abs(rat.position.x)<2){ui.prompt.style.display='block';ui.prompt.textContent='E · shortcut home';$('padE').textContent='Home';}if(!rat)return;const routes=gateSave(),l=ensureLife(),out=['scavenge','explore'].includes(phase)&&!(phase==='explore'&&area.id==='drain'),rain=out&&l.clock%420>280;home.wet=THREE.MathUtils.clamp((home.wet||0)+dt*(rain?.8:phase==='house'?-2:-.12),0,100);if(rain&&placed('dewcollector')){l.dewClock+=dt*1.5;}if(weatherDrops){weatherDrops.visible=rain;weatherDrops.position.set(rat.position.x,0,rat.position.z);if(rain){const a=weatherDrops.geometry.attributes.position;for(let i=0;i<a.count;i++){a.array[i*3+1]-=dt*6;if(a.array[i*3+1]<0)a.array[i*3+1]=8;}a.needsUpdate=true;}}rainGround.forEach(m=>{m.scale.setScalar(rain?1.5:.65);m.material.opacity=rain?.48:.18;});$('weatherBadge').textContent=phase==='explore'&&area.id==='drain'?'Under the garden':rain?'Rain · finding shelter':home.wet>10?'Drying off':'Clear skies';$('weatherBadge').style.display=['scavenge','explore','inside','house'].includes(phase)?'block':'none';
  if(gardenCrow&&gardenCrow.shiny){const c=gardenCrow;c.shiny.visible=c.mode==='flight';if(c.shiny.visible){c.g.updateMatrixWorld(true);let head; c.model.traverse(o=>{if(/Head_05/.test(o.name))head=o;});if(head)c.shiny.position.copy(c.g.worldToLocal(head.getWorldPosition(new THREE.Vector3()))).add(new THREE.Vector3(0,-.045,.035));}}
- if(gardenCrow&&rain&&phase==='scavenge'){gardenCrow.mode='perch';gardenCrow.clock=0;gardenCrow.g.position.set(9.3,.04,31);if(gardenCrow.action){gardenCrow.action.time=0;gardenCrow.mixer.update(0);}}
- if(zaytona&&out){const c=zaytona;if(!c.path.length&&c.clip==='Idle'&&c.dwell>2&&!rain){const head=c.g.getObjectByName('Head');if(head)head.rotation.x+=.14;}else c.g.rotation.z=0;if(rain&&phase==='scavenge'&&!c.sheltering){c.sheltering=true;c.path=c.grid.path(c.g.position,{x:10,z:31});c.dwell=30;}if(!rain)c.sheltering=false;}
- for(const prop of worldProps){if(prop.owner!==root)continue;if(prop.type!=='drain'&&routes[prop.key]){prop.g.visible=false;continue;}const dist=Math.hypot(prop.g.position.x-rat.position.x,prop.g.position.z-rat.position.z);if(dist<1.35&&!rat.userData.wallState){worldNear=prop;ui.prompt.style.display='block';ui.prompt.textContent=prop.type==='drain'?'E · '+(routes.drain?'Enter the rain drain':'Pry open the drain'):'E · '+(prop.type==='stems'?'Clear tangled stems':prop.type==='cloth'?'Cut loose cloth':'Pry open the tin');$('padE').textContent=prop.type==='drain'&&routes.drain?'Enter':'Use tool';}}
+ if(gardenCrow&&rain&&phase==='scavenge'&&!gardenCrow.sheltering){const c=gardenCrow;c.sheltering=true;c.flightFrom=c.g.position.clone();c.flightTo=new THREE.Vector3(9.3,1.88,31);c.mode='flight';c.clock=0;}if(gardenCrow&&!rain)gardenCrow.sheltering=false;
+ if(zaytona&&out){const c=zaytona;if(!c.path.length&&c.clip==='Idle'&&c.dwell>2&&!rain){const head=c.g.getObjectByName('Head');if(head)head.rotation.x+=Math.sin(l.clock*1.1)*.035;}else c.g.rotation.z=0;if(rain&&phase==='scavenge'&&!c.sheltering){c.sheltering=true;c.path=c.grid.path(c.g.position,{x:10,z:31});c.dwell=30;}if(!rain)c.sheltering=false;}
+ for(const prop of worldProps){if(prop.owner!==root)continue;if(prop.type!=='drain'&&routes[prop.key]){prop.g.visible=false;continue;}const dist=Math.hypot(prop.g.position.x-rat.position.x,prop.g.position.z-rat.position.z);if(dist<1.35&&!rat.userData.wallState){worldNear=prop;ui.prompt.style.display='block';ui.prompt.textContent=prop.type==='discovery'?'E · Search '+prop.label:prop.type==='drain'?'E · '+(routes.drain?'Enter the rain drain':'Pry open the drain'):'E · '+(prop.type==='stems'?'Clear tangled stems':prop.type==='cloth'?'Cut loose cloth':'Pry open the tin');$('padE').textContent=prop.type==='drain'&&routes.drain?'Enter':'Use tool';}}
 }
-function useWorldProp(){const p=worldNear;if(!p||p.owner!==root)return false;const routes=gateSave();if(p.type==='drain'&&routes.drain){startDrain();return true;}if(!(home.tools&&home.tools[p.tool])){sayToast('Craft '+CRAFT[p.tool].name+' first.');return true;}if(p.type==='drain'){routes.drain=true;save();startDrain();return true;}const id=p.type==='stems'?'fiber':p.type==='cloth'?'cloth':'coin',qty=p.type==='stems'?5:3;if(!addToBag(id,qty))return true;routes[p.key]=true;p.g.visible=false;save();bag();sfx.craft();sayToast('Route cleared · '+qty+' '+ITEMS[id].name);return true;}
+function useWorldProp(){const p=worldNear;if(!p||p.owner!==root)return false;const routes=gateSave();if(p.type==='discovery'){if(!addToBag(p.reward,1))return true;routes[p.key]=true;p.g.visible=false;save();bag();sfx.pickup();sayToast(p.label+' · '+ITEMS[p.reward].name);return true;}if(p.type==='drain'&&routes.drain){startDrain();return true;}if(!(home.tools&&home.tools[p.tool])){sayToast('Craft '+CRAFT[p.tool].name+' first.');return true;}if(p.type==='drain'){routes.drain=true;save();startDrain();return true;}const id=p.type==='stems'?'fiber':p.type==='cloth'?'cloth':'coin',qty=p.type==='stems'?5:3;if(!addToBag(id,qty))return true;routes[p.key]=true;p.g.visible=false;save();bag();sfx.craft();sayToast('Route cleared · '+qty+' '+ITEMS[id].name);return true;}
 function startDrain(){exitPhoto();closeModal();phase='explore';clear();area={id:'drain',items:[],near:null,obstacles:[]};scene.background.set(0x324b4b);scene.fog=new THREE.Fog(0x324b4b,14,35);ui.hb.style.display='none';ui.go.style.display='none';ui.phase.textContent='Rain drain · beneath the garden';ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';const floor=box(22,.15,20,MT(0x80998f,'cobble',6,6));floor.position.y=-.1;root.add(floor);for(const x of [-10.8,10.8]){const wall=box(.25,3,20,MT(0x778e7e,'brick',2,5));wall.position.set(x,1.5,0);root.add(wall);area.obstacles.push({x,z:0,hx:.2,hz:10,h:3});}for(let i=0;i<5;i++){const rib=new THREE.Mesh(new THREE.TorusGeometry(3,.12,8,32,Math.PI),tin);rib.position.set(0,0,-8+i*4);root.add(rib);const glow=new THREE.PointLight(0xe5bb77,.35,6);glow.position.set(i%2?3:-3,1.4,-8+i*4);root.add(glow);}const water=box(1,.035,18,M(0x4c929b,{transparent:true,opacity:.65}));water.position.y=.015;root.add(water);
  for(let i=0;i<25;i++){const id=NEW_ITEMS[(i*7+32)%100],m=ITEMS[id].build();m.position.set((i%2?1:-1)*(2+(i%3)*1.5),.04,-7+Math.floor(i/3)*1.7);root.add(m);area.items.push({id,m,taken:false});}const nest=new THREE.Group();for(let i=0;i<12;i++){const twig=box(.55,.05,.04,wood);twig.position.set(Math.sin(i)*.38,.08,Math.cos(i)*.38);twig.rotation.y=i;nest.add(twig);}nest.position.set(4,.04,-7);root.add(nest);const sign=markerText('HOME SHORTCUT ↑');sign.position.set(0,1.5,-8.7);root.add(sign);const exit=markerText('GARDEN EXIT ↓');exit.position.set(0,1.5,9);root.add(exit);rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,0,7.5);root.add(rat);gameCam.ready=false;cameraReset();bag();sayToast('Hidden finds ahead. Far end leads straight home.');}
 function drainShortcut(){if(phase!=='explore'||area.id!=='drain')return false;if(rat.position.z<-7.7&&Math.abs(rat.position.x)<2){gateSave().shortcut=true;save();startHouse();return true;}return false;}
@@ -1452,6 +1455,77 @@ $('pianoToggle').onclick=togglePiano;document.addEventListener('visibilitychange
 
 startTitle();
 requestAnimationFrame(loop);
+
+// Build 39: a quiet home UI and grounded, discoverable salvage.
+function setHomePanel(open){
+ if(phase!=='house'||!hs)return;
+ if(!open){cancelPlace();closeModal();}
+ home.panelOpen=!!open;ui.hb.style.display=open?'flex':'none';
+ $('homePanelToggle').textContent=open?'Hide home menu':'Decorate home';
+ $('homePanelToggle').setAttribute('aria-expanded',String(!!open));save();
+}
+$('homePanelToggle').onclick=()=>setHomePanel(ui.hb.style.display!=='flex');
+$('homePanelClose').onclick=()=>setHomePanel(false);
+
+function stockDumpster(){
+ const ids=[...NEW_ITEMS,...['stick','string','nail','cloth','can','matchbox','sponge','cap','foil','bulb','crumbs','dew']];
+ // Seven loose heaps around open walkways. Large pieces frame small treasures.
+ const heaps=[[-6.8,-4.6],[-2.7,-4.8],[2.1,-4.6],[6.6,-3.9],[-6.5,.1],[5.9,1.5],[.9,3.6]];
+ ids.forEach((id,i)=>{const m=ITEMS[id].build(),h=heaps[i%heaps.length],j=Math.floor(i/heaps.length),a=j*2.399+i*.31,r=.26+Math.sqrt(j/16)*1.48;
+ const scale=.52+(i%5)*.095;m.scale.setScalar(scale);m.rotation.set((i%3-1)*.12,a,(i%5-2)*.075);
+ m.position.set(h[0]+Math.cos(a)*r,0,h[1]+Math.sin(a)*r*.78);
+ // Align actual mesh bounds to the floor after the tilt; nothing floats or spins.
+ m.updateMatrixWorld(true);m.position.y=.018-new THREE.Box3().setFromObject(m).min.y;
+ m.userData.noInk=true;m.traverse(o=>{o.castShadow=false;o.userData.noInk=true;});root.add(m);ins.items.push({id,m,taken:false});
+ });
+ heaps.forEach(([x,z],i)=>{const g=new THREE.Group(),liner=box(2.8,.035,2.1,MT(0xc0a077,'plaster'));liner.rotation.y=i*.7;liner.userData.noInk=true;g.add(liner);g.position.set(x,.022,z);root.add(g);ins.items.push({id:'paper',m:g,taken:false});const can=ITEMS.can.build();can.scale.setScalar(1.15);can.rotation.set(0,i*.8,Math.PI/2);can.updateMatrixWorld(true);can.position.set(x+1.1,.025-new THREE.Box3().setFromObject(can).min.y,z+.55);can.traverse(o=>{o.castShadow=false;o.userData.noInk=true;});root.add(can);ins.items.push({id:'can',m:can,taken:false});});
+ addGroundCharacter('dumpster');
+}
+
+function groundTexture39(kind){
+ const key='ground39-'+kind;if(TEX[key])return TEX[key];
+ const c=document.createElement('canvas');c.width=c.height=1024;const x=c.getContext('2d');let seed=kind==='yard'?713:kind==='garden'?414:981;
+ const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+ const inside=kind==='dumpster',garden=kind==='garden';
+ x.fillStyle=inside?'#52635c':garden?'#655d43':'#827b67';x.fillRect(0,0,1024,1024);
+ for(let i=0;i<360;i++){const px=rnd()*1024,py=rnd()*1024,r=20+rnd()*150,g=x.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,i%3?'rgba(43,53,33,.22)':'rgba(210,180,124,.20)');g.addColorStop(1,'rgba(70,65,43,0)');x.fillStyle=g;x.fillRect(px-r,py-r,r*2,r*2);}
+ if(!inside){
+ // Broad, irregular worn walking routes, with broken paving left at their edges.
+ x.strokeStyle='rgba(188,163,116,.25)';x.lineWidth=65;x.lineCap='round';x.beginPath();x.moveTo(490,1030);x.bezierCurveTo(550,700,375,430,410,30);x.stroke();
+ for(let i=0;i<430;i++){const px=rnd()*1024,py=rnd()*1024,w=7+rnd()*14,h=5+rnd()*9;if(garden&&rnd()<.8)continue;x.save();x.translate(px,py);x.rotate((rnd()-.5)*.9);x.fillStyle=['#aaa28a','#918f79','#b2a78c','#797e6b'][i%4];x.strokeStyle='rgba(45,53,39,.45)';x.lineWidth=1;x.beginPath();x.moveTo(-w/2+2,-h/2);x.lineTo(w/2,-h/2+1);x.lineTo(w/2-1,h/2);x.lineTo(-w/2,h/2-1);x.closePath();x.fill();x.stroke();x.restore();}
+ // A pair of faded wheel ruts travels toward the old scrap stacks.
+ if(!garden){x.strokeStyle='rgba(47,51,40,.18)';x.lineWidth=11;for(const off of [-15,15]){x.beginPath();x.moveTo(690+off,1024);x.bezierCurveTo(730+off,780,660+off,450,830+off,90);x.stroke();}}
+ }
+ for(let i=0;i<200;i++){let px=rnd()*1024,py=rnd()*1024;x.strokeStyle=inside?'rgba(163,88,46,.30)':'rgba(40,47,33,.3)';x.lineWidth=.6+rnd();x.beginPath();x.moveTo(px,py);for(let k=0;k<4;k++){px+=(rnd()-.4)*11;py+=rnd()*10;x.lineTo(px,py);}x.stroke();}
+ for(let i=0;i<10000;i++){x.fillStyle=i%2?'rgba(229,211,174,.15)':'rgba(31,40,28,.16)';x.fillRect(rnd()*1024,rnd()*1024,1+rnd()*2,1+rnd()*2);}
+ const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;TEX[key]=t;return t;
+}
+function addGroundCharacter(kind){
+ const yard=kind==='yard',inside=kind==='dumpster',w=yard?54:inside?IW:26,d=yard?54:inside?ID:24;
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshLambertMaterial({map:groundTexture39(kind),polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));
+ floor.rotation.x=-Math.PI/2;floor.position.set(yard?5:0,inside?.005:.012,yard?12:0);floor.receiveShadow=true;floor.userData.noInk=true;floor.name='Hand-painted '+kind+' ground';root.add(floor);
+ // Instanced small leaves and grit keep this surface cheap on phones.
+ const g=new THREE.CircleGeometry(1,5),mat=M(inside?0x8a7655:0x9b865d),leaves=new THREE.InstancedMesh(g,mat,inside?45:120),o=new THREE.Object3D();leaves.userData.noInk=true;
+ for(let i=0;i<leaves.count;i++){const a=i*2.399,edge=i%4,px=yard?5:0,pz=yard?12:0;let xx=Math.sin(a)*w*.45,zz=Math.cos(a*1.7)*d*.45;if(edge===0)xx=-w*.46+Math.sin(a);if(edge===1)xx=w*.46+Math.sin(a);o.position.set(px+xx,.029,pz+zz);o.rotation.set(-Math.PI/2,0,a);o.scale.set(.045+(i%4)*.025,.035+(i%3)*.015,1);o.updateMatrix();leaves.setMatrixAt(i,o.matrix);}root.add(leaves);
+}
+
+// The uploaded crow travels to a nearby perch using its take-off animation.
+function chooseCrowPerch(c){
+ const options=phase==='scavenge'?[[3.1,1.2,28.8],[10,1.88,31],[-8,0.04,21],[3,0.04,19],[12,0.04,4],[-6,0.04,-10],[19,0.04,7]]:[[4,1.2,-2],[-4,.04,5],[4,.04,6],[-4,.04,-6]];
+ const next=options.map(p=>({p,d:Math.hypot(p[0]-rat.position.x,p[2]-rat.position.z)})).filter(v=>Math.hypot(v.p[0]-c.base.x,v.p[2]-c.base.z)>1).sort((a,b)=>a.d-b.d)[0];
+ c.flightFrom=c.g.position.clone();c.flightTo=next?new THREE.Vector3(...next.p):c.base.clone();
+}
+function addDiscoveries39(){
+ if(!['scavenge','explore'].includes(phase))return;
+ const garden=phase==='explore'&&area.id==='garden';if(phase==='explore'&&!garden)return;
+ const sites=garden?[['picnic',-3,6,'fruit','Forgotten picnic'],['nest',5,-5,'find_014','Old crow nest']]:[['nest',-6,22,'find_001','Nest among the scraps']];
+ for(const [type,x,z,reward,label]of sites){const key='discovery39-'+phase+'-'+type;if(gateSave()[key])continue;const g=new THREE.Group();
+ if(type==='nest'){for(let i=0;i<18;i++){const twig=box(.4,.03,.035,wood);twig.position.set(Math.sin(i*2.4)*.35,.07+(i%3)*.025,Math.cos(i*2.4)*.35);twig.rotation.y=i*2.4;twig.castShadow=false;g.add(twig);}const prize=ITEMS[reward].build();prize.scale.setScalar(.28);prize.position.y=.13;g.add(prize);}
+ else{const food=ITEMS.fruit.build();food.position.y=.06;g.add(food);const napkin=box(.7,.025,.6,paper);napkin.position.y=.02;g.add(napkin);}
+ g.position.set(x,0,z);root.add(g);worldProps.push({type:'discovery',g,key,owner:root,reward,label});
+ }
+}
+
 </script>
 </body>
 </html>
