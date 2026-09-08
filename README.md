@@ -196,3 +196,29 @@ Validation: JS syntax; real Three r128 assets/geometry with a renderer stub and 
 - Instanced drifting leaves and quiet synthesised rustling, plus wind chimes near shelter that sway and ring when nearby in wind.
 - Regression harness verifies rainwater/save, cache persistence, bounce launch, footprints and cleanup. Rain cups use an original hollow lathe mesh, so the rising water is visible rather than hidden inside a solid cup.
 - GPU/mobile visual quality still needs an in-game check; no new third-party art or music added.
+
+## Build 44 — supplied blossom trees and wildlife
+
+Seven supplied GLBs are integrated as mobile adaptations (approximately 13.2 MB combined, versus 364 MB supplied). All are static meshes: the files contain no animation clips or skin rigs. Flying models follow gliding routes with banking; stationary animals have subtle whole-model breathing/sway and optional treat interactions. These are not new skeletal walking, flapping or eating animations.
+
+- Junkyard: Sakura near the lane, a cherry-tree row beyond the fence, golden-eared hound outside the yard and an osprey overhead.
+- Rain garden: Sakura, curious squirrel and a kingfisher on a small flying route.
+- Laundry courtyard: cherry trees and the supplied cartoon bird group on a perch.
+- Wind-responsive blossom petals; models load by area with at most two simultaneous downloads. Heavy model shadows are disabled; low quality hides the overhead osprey.
+- Models were simplified and normalised in Blender; textures reduced to at most 768 px and compressed. Identical secondary UV sets were remapped to UV0 for Three.js r128 compatibility. Source base colours and supported material maps retained.
+
+### New asset credits
+
+These five models carry CC-BY 4.0 metadata in their supplied files; original source attribution is retained inside the adapted GLBs. [CC-BY 4.0 licence](https://creativecommons.org/licenses/by/4.0/).
+
+| Adapted file | Original work | Creator |
+|---|---|---|
+| `sakura-build44.glb` | [Sakura Tree 01 – Low Poly Model](https://sketchfab.com/3d-models/sakura-tree-01-low-poly-model-147ae7d0d332456a99ec6195e9b0cd4f) | Jogoss |
+| `kingfisher-build44.glb` | [Common Kingfisher – Flying 3D Bird](https://sketchfab.com/3d-models/common-kingfisher-flying-3d-bird-44ef45b642164284af3fe15837f0b7c6) | Pigcraft |
+| `osprey-build44.glb` | [Osprey – Flying Raptor Rigged Bird](https://sketchfab.com/3d-models/osprey-flying-raptor-rigged-bird-9e65ce0542a24ea388e81e3e6e9c9054) | Pigcraft |
+| `hound-build44.glb` | [Golden-Eared Hound Dog](https://sketchfab.com/3d-models/golden-eared-hound-dog-3d-model-free-8269f0b38a04400cad281b48696674ab) | iRahulRajput |
+| `squirrel-build44.glb` | [Curious Squirrel](https://sketchfab.com/3d-models/curious-squirrel-0b5e2372910c4bd18e5c2fe2f1ee0b4c) | iRahulRajput |
+
+`cherry-build44.glb` is adapted from the owner's supplied `jersey_lowpoly_cherry_trees.glb`; `songbirds-build44.glb` is adapted from the owner's supplied Meshy cartoon-bird model. No third-party licence is asserted for these two files.
+
+Validation: rendered individual optimised models in Blender; checked normalisation and bird heading. All seven GLBs parse in Three.js r128; scene-specific loading, finite motion, interactions and cleanup pass alongside existing regression checks. Full game GPU/mobile visual performance remains unverified because the cloud browser has no WebGL context.
