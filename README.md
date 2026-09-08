@@ -226,3 +226,21 @@ Validation: rendered individual optimised models in Blender; checked normalisati
 ## Build 45 — Everyone in the main backyard
 
 All seven supplied models now appear together in the main backyard: Sakura inside the front fence, cherry trees along the rear boundary, the hound and perched cartoon birds on the right, squirrel beside the Sakura, kingfisher over the front clearing and osprey overhead. These additions no longer require visiting the garden or courtyard. Existing animal interactions and mobile asset optimisations are retained.
+
+## Build 46 — Animal proportions and backyard additions
+
+- Rescaled Zaytona, the fence cat, crow, hound, squirrel, kingfisher, osprey and cartoon bird group against Pip's outdoor height (about 0.5 world units). These are consistent stylised gameplay proportions, not biological measurements.
+- Added the supplied animated five-bird flock, retaining its original skeletal animation, plus 16 grass patches around fence edges and scrap piles. All additions are in the main backyard.
+- Added the supplied Meshy scrap-corner scene at the right of the yard: dumpster, bags, stairs, railings and hydrant. Search near its front for supplies; remaining contents persist in the save. Conservative collision bounds also keep Zaytona's route clear. The original enterable dumpster remains available.
+- The re-supplied osprey is represented by the existing optimised osprey asset, now at a smaller span; it has no animation clips in the supplied source.
+- Reduced the 120 MB scrap-corner source to an 18,000-triangle model of about 0.8 MB with compressed textures. Shared grass geometry, two concurrent model downloads, and no heavy-mesh shadows retain mobile limits.
+
+Additional credits (source metadata retained in adapted files):
+
+| File | Creator / source | Licence |
+|---|---|---|
+| `bird-build46.glb` | [Bird — Blender Artist](https://sketchfab.com/3d-models/bird-e93a906eb38343c4a14458a637136329) | CC-BY 4.0 |
+| `grass-build46.glb` | [Low Poly Grass — Natural_Disbuster](https://sketchfab.com/3d-models/low-poly-grass-c7b3cadd101245d899ca49fa587b2745) | CC-BY 4.0 |
+| `dumpster-build46.glb` | Owner-supplied Meshy steel-dumpster scene | Owner supplied |
+
+Validation: actual grass, flock and scrap-corner meshes inspected through Blender renders; all ten optional asset types parse with Three.js r128. Checked animation advancement, scale settings, grass count, searchable contents, collision registration and scene cleanup alongside the existing gameplay regression checks. Full-game GPU/mobile visual performance remains unverified in this environment.
