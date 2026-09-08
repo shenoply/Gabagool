@@ -244,3 +244,25 @@ Additional credits (source metadata retained in adapted files):
 | `dumpster-build46.glb` | Owner-supplied Meshy steel-dumpster scene | Owner supplied |
 
 Validation: actual grass, flock and scrap-corner meshes inspected through Blender renders; all ten optional asset types parse with Three.js r128. Checked animation advancement, scale settings, grass count, searchable contents, collision registration and scene cleanup alongside the existing gameplay regression checks. Full-game GPU/mobile visual performance remains unverified in this environment.
+
+## Build 47 — The planted backyard
+
+### Environment
+- Replaced the old dirt/paving appearance with a continuous, non-repeating grass-and-earth surface. Thousands of instanced grass blades cover the yard, with worn paths around the gate and scavenging routes. Removed the older yard ground overlays and paving layer; softened procedural wood and steel finishes.
+- Added eight leafy trees and daisy clusters extracted from the supplied vegetation collection; five squirrels now sit by trees. New tree meshes share cached geometry and have no shadows; grass density drops on low quality.
+- Added an original wooden doghouse and water bowl beside the hound. Moved the supplied perched cartoon-bird group onto a power pole with crossarms and suspended cables.
+- Added two original procedural raccoons beside the main dumpster, with head, tail and leg motion. The previously supplied game-ripped raccoon is not used.
+- Added wind sway to new trees and grass, drifting pollen in dry weather and animated cloud shadows over the lawn. Existing rain, wind, sky and wet-weather effects are retained.
+
+### Movement and menus
+- Movement uses the camera orientation currently on screen. Indoor movement is slower, re-clamps after furniture collisions and drives walking/idle animation from actual displacement. Removed the competing house camera update; arrow keys can also leave a seat or bed.
+- Larger menu typography, readable ingredient counts, larger buttons and sticky action controls.
+- Inventory now has visual item rows, search, categories, pagination, a capacity meter and separate furniture/tool views. Item details offer eating/drinking, placement and reclaiming. At home, materials can be moved to the pantry while food stays in the satchel.
+- Crafting adds batch quantities, maximum craftable amount, scaled ingredient requirements and saved favourite recipes. Ingredient-to-output growth is capacity-limited when no pantry is available. Search fields no longer trigger gameplay keyboard shortcuts.
+
+### Additional assets
+[Low poly trees, flowers and grass](https://sketchfab.com/3d-models/low-poly-trees-flowers-and-grass-442904f26b87407d98871b50b49c4169) by **Márcio Meireles**, CC-BY 4.0: selected trees and daisies, base-centred and normalised, with textures reduced to 512 px and compressed. Adapted files: `broadleaf-build47.glb`, `slender-build47.glb`, `flowers-build47.glb`. Original source credit is retained inside each GLB.
+
+The re-supplied `low_poly_grass.glb` is represented by the existing credited grass asset. The separate `grass.glb` lists Sketchfab Standard licensing and is not included under this project's CC0/CC-BY-only rule. Raccoons and doghouse are original code-created models.
+
+Validation: new vegetation inspected through actual Blender renders; all 13 optional asset types parse with Three.js r128. Checked grass/tree/animal counts and finite animation, indoor input across four camera headings, furniture/wall bounds, stop-to-idle, batch crafting, saved favourites, inventory categories and closing, existing dumpster pickups, scene cleanup and reload. Full-game GPU/mobile appearance remains unverified: this environment's browser cannot create a WebGL context.
