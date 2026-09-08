@@ -303,3 +303,12 @@ Additional credit: [Low-poly City Buildings](https://sketchfab.com/3d-models/low
 The supplied City Props Collection volume 1 by TampaJoey lists Sketchfab Standard licensing. It is not published under the project's CC0/CC-BY-only rule.
 
 Validation: Three.js r128 runtime checks confirm shed geometry/collision removal, low resource bounds, rear-city bounds, all 17 optional asset types, four joystick directions at four camera headings in both interiors, exit priority and no immediate dumpster re-entry, existing house movement/bounds, inventory, batch crafting, save persistence and scene reload. JavaScript syntax passes. Full-game GPU/mobile visuals remain unverified.
+
+## Build 50 — A moment next door
+
+- Moved the neighbouring gym closer to the right fence, with its platform at 3.7 units and fighters at 3.8, above the 3.5-unit fence. The entire platform remains outside the playable bounds.
+- MMA is a one-time neighbourhood event per save. The original clip waits until Pip is nearby and its focal point is within the camera view and clear of gameplay collision boxes. It pauses offscreen, resumes when watched, plays with `LoopOnce`, holds the final pose for a second, then fades out. The save records it when started, so leaving/reloading does not restart it. New Game resets it. No forced camera movement or player lock.
+- Raised both city backdrops vertically by 60% while preserving their footprints and out-of-bounds locations.
+- Removed the pink cherry-tree row outside the rear fence. The sakura inside the backyard is retained.
+
+Validation: runtime tests cover waiting until visible, starting and saving once, offscreen pause, clip completion/fade, no replay on backyard revisit, taller city transforms, removal of the outside cherry row, and existing movement, inventory, dumpster exit and scene-reload checks. JavaScript syntax passes. Full-game mobile/GPU visuals remain unverified.
