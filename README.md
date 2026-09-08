@@ -375,3 +375,10 @@ Added synthesized wind/foliage ambience, spaced bird calls, nearby dog barks and
 Pip orientation is now measured in model-local coordinates, independent of the spawn heading; this corrects the house/backyard mismatch. House stride follows actual movement, with no walking animation from furniture pushout while idle or footsteps in midair.
 
 Validation: real rig head direction checked against all four spawn headings, indoor movement checked, and Web Audio scheduling/mute logic checked with an instrumented audio context. Audible balance and full mobile rendering remain unverified.
+
+
+## Build 59 — Steady steps
+
+Removed competing legacy backyard camera updates, reduced the camera near plane and increased its minimum collision distance. Mobile running activates at 72% joystick deflection, runs at 2.05x walk speed, and uses a consistent Run clip. Backyard walking increased to 3.15 units/second.
+
+Big Rat is 1.85 units high at the main entrance, with posed geometry used for grounding and source root-motion animation removed. Crow destinations no longer include a floating shelf coordinate; landing recalculates the resting model's base. Added eight collectible steel rods to salvage piles, recovered as metal/nail crafting parts.
