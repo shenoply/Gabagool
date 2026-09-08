@@ -287,3 +287,19 @@ Additional credits:
 | `opening-build48.png`, `rat-picture-build48.jpg` | Images supplied by the owner for this game | Used as supplied |
 
 Validation: actual optimized city/tabby meshes inspected in Blender. Three.js r128 parses all 16 optional asset types; checked MMA animation advancement, city/MMA bounds, dog/kennel separation, hidden original paving/dirt, one-time photo installation, indoor movement at four camera headings, inventory, batch crafting, save persistence, dumpster pickups and scene reload. JavaScript syntax passes. Full-game GPU/mobile appearance remains unverified because this environment's browser cannot create a WebGL context; the flicker fix is verified structurally, not by a GPU rendering test.
+
+## Build 49 — Room to breathe
+
+- Removed the small shed's triangles from the merged yard geometry and removed its collision box. Kept the home interior and Home control. Removed the obsolete block skyline and roof-drip effect attached to the shed.
+- Replaced towering primitive resource plants and large coloured food blobs with low, rat-sized collectible leaves, cut fibres, pebbles, seed/crumb clusters, acorns and small water caps. Gathering and survival supplies remain available.
+- Added a permanent **Climb out** button inside the dumpster. Exit takes priority over nearby loot, including when the bag is full. Pip now emerges on clear ground beside the dumpster rather than inside its re-entry trigger.
+- Removed the dumpster's competing fixed-camera updates. House and dumpster controls use the orbit heading; their cameras follow without positional lag that can cross over Pip and flip the apparent input direction. Both interior cameras initialize before movement.
+- Big Rat is 1.35 units tall (previously 0.8), near the entrance at (5, 24.8), with a small identifying sign. Model, dialogue and collision positions are updated together. The existing recorded dialogue is retained.
+- Moved the supplied perched bird group to a low bracket on the entrance fence, where it is closer to eye level. The existing kingfisher and osprey assets represent the re-supplied files; neither source has animation clips.
+- Added the supplied low-poly city collection behind the opposite/rear fence, retaining the previous front-side city. The new collection has about 7,150 triangles and is normalized, base-centered and compressed to about 1 MB. It stays outside the playable area.
+
+Additional credit: [Low-poly City Buildings](https://sketchfab.com/3d-models/low-poly-city-buildings-e0209ac5bb684d2d85e5ade96c92d2ff) by **smooth998**, CC-BY 4.0. Adaptation: normalized origin/scale, 512px compressed textures, unsupported secondary-UV metallic/roughness texture replaced with scalar roughness for Three.js r128. File: `cityrear-build49.glb`; original credit retained in metadata.
+
+The supplied City Props Collection volume 1 by TampaJoey lists Sketchfab Standard licensing. It is not published under the project's CC0/CC-BY-only rule.
+
+Validation: Three.js r128 runtime checks confirm shed geometry/collision removal, low resource bounds, rear-city bounds, all 17 optional asset types, four joystick directions at four camera headings in both interiors, exit priority and no immediate dumpster re-entry, existing house movement/bounds, inventory, batch crafting, save persistence and scene reload. JavaScript syntax passes. Full-game GPU/mobile visuals remain unverified.
