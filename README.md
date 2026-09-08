@@ -312,3 +312,23 @@ Validation: Three.js r128 runtime checks confirm shed geometry/collision removal
 - Removed the pink cherry-tree row outside the rear fence. The sakura inside the backyard is retained.
 
 Validation: runtime tests cover waiting until visible, starting and saving once, offscreen pause, clip completion/fade, no replay on backyard revisit, taller city transforms, removal of the outside cherry row, and existing movement, inventory, dumpster exit and scene-reload checks. JavaScript syntax passes. Full-game mobile/GPU visuals remain unverified.
+
+## Build 51 — Opening film
+
+- Added the owner's supplied five-second PixVerse MP4 as the opening film when starting or continuing a game. The 640×360 H.264 video has no audio track. Its original video stream is retained; the MP4 metadata is moved to the front for progressive playback.
+- Plays inline on phones, keeps the full image visible, and provides a permanent Skip intro control. A Play opening button appears if the browser rejects playback without another gesture.
+- Completion or skipping enters gameplay. Continue preserves the loaded save; New Game follows the existing fresh-game reset. Gameplay simulation pauses while the film is shown.
+- Video failure falls back to the original generated opening for new games, or directly to the saved house for Continue.
+- Asset: `opening-build51.mp4`, owner-supplied `pixverse-v6-image (1).mp4`.
+
+Validation: ffprobe confirms H.264 format and 5.04-second duration; full ffmpeg decode completes without errors. JavaScript syntax and runtime checks cover completion, skip/idempotence, save preservation, new-game reset, simulation pause, playback rejection UI and media-error fallbacks. Existing regression checks pass. Actual mobile browser video playback and GPU game rendering remain unverified.
+
+## Build 52 — Trouble next door
+
+- Replaced the once-per-save ambient MMA event with an automatically framed opening sequence after the supplied MP4. It plays on every Start/Continue, irrespective of the old `gymSeen50` save flag.
+- Waits for the actual MMA model and clip before playback, gives the camera a short settling interval, frames the stage for portrait and landscape, hides the HUD and locks gameplay input. The game-loop visibility guard pauses the scene in a hidden tab. Skip scene/Escape remains available; missing-asset errors offer Skip to avoid trapping the player.
+- Rebuilt the platform using timber posts, beams and ten individual planks. Near the clip's end, boards shake with a synthesized creak. They collapse after the clip, and the fighters drop behind the fence and disappear amid dust and a synthesized crash.
+- The broken platform remains for the current play session. Starting again restores the platform and replays the scene. The supplied clip itself plays once per sequence, without looping.
+- Continue returns to the saved house without resetting inventory; New Game returns to the backyard. The opening MP4 from build 51 is included in this release.
+
+Validation: runtime tests check portrait/landscape framing, load/warmup delay, hidden-tab pause, completed animation, plank collapse, fighter removal, preserved inventory, broken-platform revisit, replay on another Start, Skip, new-game reset and dumpster exit. JavaScript syntax passes. Full-game mobile/GPU visual rendering remains unverified.
