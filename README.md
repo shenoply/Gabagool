@@ -359,3 +359,10 @@ Validation: actual skinned fighter bounds verified at 3.82 units tall and 4.6 un
 ## Build 56 — Keep swinging
 
 Reduced the fighters from 4.6 to 3 world units across (35% smaller). Removed proximity and camera-visibility playback gates: the fight starts during backyard gameplay as soon as the asset is ready and runs through to the platform collapse, even when Pip turns or walks away. Standard game pauses remain. The fight still runs once per session.
+
+
+## Build 57 — Solid footing
+
+Ramp collision uses the visible plank angle, thickness and scale. Grounded feet snap to support surfaces. Sponge and imported tyre meshes provide downward landing contacts; spring impulses follow a brief sponge compression or rubber landing, capped for high falls. Zaytona and spectator cat are 25% smaller. The doghouse-side gap has an opening timber gate. The spectator platform has posts. Added landing squash/knee bend, surface sounds and a compact radio panel which closes when walking away.
+
+Validation: real Three.js raycasts verify ramp surface agreement, sponge support/launch and imported tyre high-speed landings with capped bounce. Gate latch and radio walk-away checks pass. GPU/mobile visual verification remains unavailable.
