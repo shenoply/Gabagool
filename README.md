@@ -354,3 +354,8 @@ Moved the gameplay fight onto a raised timber platform directly above the dumpst
 - Bundled the existing MIT-licensed Three.js r128 locally, disabled expensive startup antialiasing, added WebGL1 recovery and explicit graphics/load error messages. Core downloads have a 45-second deadline; optional animal downloads no longer gate Start. Failed downloads expose Retry instead of leaving a permanent loading message.
 
 Validation: actual skinned fighter bounds verified at 3.82 units tall and 4.6 units across the pair; gameplay/collapse/session-reset checks pass. Stalled optional downloads no longer gate Start, and core-download deadlines pass. Full GPU visual verification remains unavailable because the test browser cannot create a WebGL context.
+
+
+## Build 56 — Keep swinging
+
+Reduced the fighters from 4.6 to 3 world units across (35% smaller). Removed proximity and camera-visibility playback gates: the fight starts during backyard gameplay as soon as the asset is ready and runs through to the platform collapse, even when Pip turns or walks away. Standard game pauses remain. The fight still runs once per session.
