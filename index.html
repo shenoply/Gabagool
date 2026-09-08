@@ -115,7 +115,7 @@
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
     <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
     <p style="font-size:10px;opacity:.65">Crow: Alexei Ostapenko · CC-BY 4.0. Framed picture supplied by the owner.</p><p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 42 · Pip comes home</p>
+    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 43 · Pip comes home</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -148,6 +148,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="GLTFLoader.js" onerror="console.warn('GLTFLoader unavailable')"></script>
 <script>
+let play43=null;
 let life42=null;
 let containers41=[],nearContainer41=null,homeUse41=null,undo41=[];
 // ---------- setup ----------
@@ -559,6 +560,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem('ww-save'));if(d&&d.
 const $=id=>document.getElementById(id);bindRadio();
 const ui={title:$('title'),sub:$('sub'),phase:$('phase'),bag:$('bag'),prompt:$('prompt'),skip:$('skip'),go:$('go'),hb:$('hb'),end:$('end'),pad:$('pad')};
 function clear(){
+clearPlay43();
 clearLife42();
  endHomeUse41();containers41=[];nearContainer41=null;undo41=[];
  closeModal();$("homePanelToggle").style.display="none";
@@ -781,7 +783,7 @@ function startScavenge(){
   shuffled.forEach(([x,y,z])=>{const id=bagIds[Math.floor(Math.random()*bagIds.length)];const m=ITEMS[id].build();m.scale.setScalar(.22);m.position.set(y===2?x*1.3:x,y===2?2.6:y,y===2?-4+(z+4)*1.3:z);m.rotation.y=Math.random()*6;outline(m);root.add(m);sc.items.push({id,m,taken:false});});
   rat=makeRat();rat.scale.setScalar(.25);rat.position.set(1,0,29);rat.rotation.y=Math.PI;root.add(rat);outline(root);
   fatMixer=null;try{addNeighbour();}catch(e){console.warn(e);}
-  addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();ui.go.style.display='block';ui.go.textContent='Home';
+  addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();ui.go.style.display='block';ui.go.textContent='Home';
   camera.position.set(1,3,33);
 }
 function spawnCat(){const c=makeCat();c.scale.setScalar(.32);const side=Math.random()<0.5?-1:1;c.position.set(30,0,19);c.rotation.y=side>0?-Math.PI/2:Math.PI/2;outline(c);root.add(c);
@@ -876,6 +878,7 @@ function advanceTalk(){if(!sc||!sc.talk||sc.talk.pending)return;if(sc.talk.audio
 ui.talk=$('talk');ui.talk.addEventListener('pointerdown',e=>{e.stopPropagation();advanceTalk();});
 function grab(){
   if(photo.active||$('modal').style.display==='flex'||rat&&rat.userData.interaction)return;
+  if(rat&&!rat.userData.wallState&&interact43())return;
   if(rat&&!rat.userData.wallState&&interact42())return;
   if(nearContainer41&&nearContainer41.owner===root&&!rat.userData.wallState){openContainer41(nearContainer41);return;}
   if(!(sc&&sc.talk)&&(drainShortcut()||useWorldProp()||grabExtras()||gatherNature()))return;
@@ -1194,7 +1197,7 @@ function startArea(id){if(id==='drain'){if(gateSave().drain)startDrain();else sa
   }
   for(let i=0;i<16;i++){const itemId=z.pool[i%z.pool.length],m=ITEMS[itemId].build();m.position.set(-9+(i%4)*6+(i%2)*.5,0,-6+Math.floor(i/4)*4);m.rotation.y=i*1.7;outline(m);root.add(m);area.items.push({id:itemId,m,taken:false});}
   const exit=decal(3.8,1,(x,w,h)=>{x.fillStyle='#eadbb8';x.fillRect(0,0,w,h);x.fillStyle='#354744';x.textAlign='center';x.font='42px Georgia';x.fillText('← BACK TO THE ALLEY',w/2,150)});exit.position.set(0,1.8,10);exit.rotation.y=Math.PI;root.add(exit);
-  rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,0,7.5);rat.rotation.y=Math.PI;root.add(rat);outline(rat);addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();camera.position.set(0,9,17);addMotes(root,35,22,5,20,0xf6e4b5);}
+  rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,0,7.5);rat.rotation.y=Math.PI;root.add(rat);outline(rat);addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();camera.position.set(0,9,17);addMotes(root,35,22,5,20,0xf6e4b5);}
 function tickArea(dt){tickZaytona(dt);const speed=control(dt,{walk:2.7,bounds:[-11,11,-8.5,10],ground:(x,z)=>{let h=0;for(const o of wallSolids())if(Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz&&rat.position.y>=o.h-.1)h=Math.max(h,o.h);return h;}});for(const o of area.obstacles){if(rat.userData.wallState||rat.position.y>=(o.h||(area.id==='garden'?.44:1.32))-.05)continue;const dx=rat.position.x-o.x,dz=rat.position.z-o.z,ox=o.hx+.3-Math.abs(dx),oz=o.hz+.3-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz)rat.position.x+=(dx<0?-1:1)*ox;else rat.position.z+=(dz<0?-1:1)*oz;}}rat.animate(dt,speed,false);steps(dt,speed,area.id==='garden'?'soft':'cobble');area.near=null;let d=1.8;area.items.forEach(it=>{if(it.taken)return;const dist=it.m.position.distanceTo(rat.position);if(dist<d){d=dist;area.near=it}});area.exit=rat.position.z>8.8&&Math.abs(rat.position.x)<3;if(area.id==='drain'&&rat.position.z<-7.7&&Math.abs(rat.position.x)<2){ui.prompt.style.display='block';ui.prompt.textContent='E · shortcut home';$('padE').textContent='Home';}
   ui.prompt.style.display=area.near||area.exit?'block':'none';ui.prompt.textContent=area.near?'E · grab '+ITEMS[area.near.id].name:(area.id==='drain'?'E · return to the garden':'E · return to the junkyard');$('padE').textContent=area.exit&&!area.near?'Out':'Grab';
   const portrait=innerHeight>innerWidth;camera.position.lerp(new THREE.Vector3(rat.position.x,rat.position.y+(portrait?2.5:2.8),rat.position.z+(portrait?3.8:4.2)),Math.min(1,dt*3));camera.lookAt(rat.position.x,rat.position.y+.3,rat.position.z-.3);}
@@ -1250,7 +1253,7 @@ function loop(now){requestAnimationFrame(loop);let frame=Math.min(0.1,(now-last)
   try{
   while(acc>=STEP&&n<4){const dt=STEP;acc-=dt;n++;if(photo.active||document.hidden)continue;t+=dt;
     if($('modal').style.display==='flex')continue;tickWildlife(dt);tickAtmosphere(dt);
-    if(phase==='title')tickTitle(dt);else if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='inside')tickInside(dt);else if(phase==='explore')tickArea(dt);else if(phase==='caught'){rat.animate(dt,1,true);if(sc.cat)sc.cat.m.animate(dt,0);}tickNature(dt);tickExtras(dt);tickLife(dt);drawLife();tickAnimals37(dt);tickWorld38(dt);tickFeatures41(dt);tickLife42(dt);tickGameplayCamera(dt);}
+    if(phase==='title')tickTitle(dt);else if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='inside')tickInside(dt);else if(phase==='explore')tickArea(dt);else if(phase==='caught'){rat.animate(dt,1,true);if(sc.cat)sc.cat.m.animate(dt,0);}tickNature(dt);tickExtras(dt);tickLife(dt);drawLife();tickAnimals37(dt);tickWorld38(dt);tickFeatures41(dt);tickLife42(dt);tickPlay43(dt);tickGameplayCamera(dt);}
   if(n===4||document.hidden)acc=0;
   if(photo.active)tickPhoto();
   renderer.render(scene,camera);
@@ -1662,6 +1665,37 @@ function clearLife42(){if(!life42)return;const w=life42,materials=new Set();for(
 function openWeather42(){if(!gameplayActive())return;modal('Sky & weather','<p>Let the weather change naturally, or choose the atmosphere you want.</p>',[['Natural cycle',()=>setWeather42('auto')],['Clear sky',()=>setWeather42('clear')],['Wind & drifting paper',()=>setWeather42('wind')],['Rain & puddles',()=>setWeather42('rain')],['Evening glow',()=>setWeather42('evening')],['Close',closeModal]]);}
 function setWeather42(mode){home.weather42=mode;save();closeModal();sayToast(mode==='auto'?'Natural weather cycle':mode==='rain'?'Rain moving in':mode==='wind'?'Wind across the yard':mode==='evening'?'A warm evening':'Clear skies');}
 $('weather42').onclick=openWeather42;
+
+
+function seedPlay43(){
+ if(!outdoors42()||!life42)return;const yard=phase==='scavenge';play43={owner:root,age:0,near:null,last:rat.position.clone(),prints:[],stamp:0,chimeClock:0,bounceCooldown:0};const w=play43;
+ const paw=texture42('pawprint43',x=>{x.fillStyle='#ffffff';x.beginPath();x.ellipse(128,158,43,58,0,0,7);x.fill();for(const [px,py]of [[70,73],[109,54],[150,55],[188,80]]){x.beginPath();x.ellipse(px,py,15,24,0,0,7);x.fill();}});
+ w.footprints=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:paw,color:0x34443a,transparent:true,opacity:.34,depthWrite:false}),40);w.footprints.userData.noInk=true;w.footprints.frustumCulled=false;const zero=new THREE.Matrix4().makeScale(0,0,0);for(let i=0;i<40;i++)w.footprints.setMatrixAt(i,zero);root.add(w.footprints);
+ const cupPos=yard?[-1,30]:[-4,6],cup=new THREE.Group();const profile=[[0,0],[.3,0],[.38,.5],[.33,.5],[.25,.06],[0,.06]].map(p=>new THREE.Vector2(...p));const shell=new THREE.Mesh(new THREE.LatheGeometry(profile,24),new THREE.MeshLambertMaterial({color:0xdfd9c5,side:THREE.DoubleSide}));shell.receiveShadow=true;cup.add(shell);const handle=new THREE.Mesh(new THREE.TorusGeometry(.16,.035,8,16),shell.material);handle.position.set(.42,.28,0);cup.add(handle);cup.scale.setScalar(1.6);cup.position.set(cupPos[0],0,cupPos[1]);root.add(cup);w.cup=cup;w.cupKey=yard?'yard':area.id;home.rainCups43=home.rainCups43||{};if(!Number.isFinite(home.rainCups43[w.cupKey]))home.rainCups43[w.cupKey]=0;
+ const water=new THREE.Mesh(new THREE.CircleGeometry(1,24),new THREE.MeshPhongMaterial({color:0x86b6be,transparent:true,opacity:.7,shininess:65}));water.rotation.x=-Math.PI/2;water.position.set(cupPos[0],.14,cupPos[1]);water.userData.noInk=true;water.visible=false;water.scale.setScalar(.4);root.add(water);w.water=water;
+ const sponge=softBox(1.3,.22,.95,MT(0xd1b569,'plaster'),.12);sponge.position.set(yard?4:-3,.11,yard?20:1);root.add(sponge);w.sponge=sponge;
+ const plaque=markerText('SPRINGY SPONGE');plaque.scale.setScalar(.42);plaque.position.copy(sponge.position).add(new THREE.Vector3(0,.55,-.6));root.add(plaque);
+ // A concealed cache stays hidden until the nearby spool rolls away.
+ if(life42.props.length){const p=life42.props[0];w.cacheOrigin=p.g.position.clone();w.cacheProp=p;w.cacheKey=(yard?'yard':area.id)+'-spool';home.caches43=home.caches43||{};if(!home.caches43[w.cacheKey]){const g=new THREE.Group(),paper=ITEMS.paper.build(),prize=ITEMS.find_030.build();paper.scale.setScalar(.4);prize.scale.setScalar(.3);prize.position.y=.035;g.add(paper,prize);g.position.set(p.g.position.x,.025,p.g.position.z);g.visible=false;root.add(g);w.cache=g;}}
+ const chime=new THREE.Group();for(let i=0;i<5;i++){const tube=cyl(.025,.025,.24+i*.05,M(0xb2c1b4),7);tube.position.set((i-2)*.09,-i*.015,0);chime.add(tube);const thread=box(.007,.25,.007,M(0xa69a75));thread.position.set((i-2)*.09,.21,0);chime.add(thread);}chime.position.set(yard?10:7,1.65,yard?31:6);root.add(chime);w.chime=chime;
+ const leafShape=new THREE.Shape();leafShape.moveTo(0,-.1);leafShape.quadraticCurveTo(-.15,.02,0,.2);leafShape.quadraticCurveTo(.13,.02,0,-.1);const geo=new THREE.ShapeGeometry(leafShape,3),leaves=new THREE.InstancedMesh(geo,new THREE.MeshLambertMaterial({color:0xb79958,side:THREE.DoubleSide}),24);leaves.userData.noInk=true;leaves.frustumCulled=false;root.add(leaves);w.leaves=leaves;
+}
+function tickPlay43(dt){const w=play43;if(!w||w.owner!==root||!outdoors42()||!rat)return;const wx=weather42();w.age+=dt;w.bounceCooldown=Math.max(0,w.bounceCooldown-dt);w.near=null;
+ const onGround=!rat.userData.air&&!rat.userData.wallState&&rat.position.y<.15,moved=rat.position.distanceTo(w.last),wet=wx.rain>.1||(home.wet||0)>12;
+ if(onGround&&moved>.22&&wet){const side=w.stamp%2?1:-1,angle=rat.rotation.y;w.prints[w.stamp%40]={x:rat.position.x+Math.cos(angle)*.085*side,z:rat.position.z-Math.sin(angle)*.085*side,rot:angle,at:w.age};w.stamp++;w.last.copy(rat.position);if(voiceOn&&wx.rain>.2&&w.stamp%3===0){const ac=sfxCtx();if(ac)burst(ac,{f:650,q:.3,dur:.055,vol:.008,type:'lowpass'});}}else if(!onGround||!wet)w.last.copy(rat.position);
+ const o=new THREE.Object3D();for(let i=0;i<40;i++){const p=w.prints[i],age=p?w.age-p.at:99;const visible=age<18&&(!lowQuality||i%2===0);o.position.set(p?p.x:0,.038,p?p.z:0);o.rotation.set(-Math.PI/2,0,p?-p.rot:0);const fade=visible?Math.min(1,(18-age)/4):0;o.scale.set(.075*fade,.12*fade,1);o.updateMatrix();w.footprints.setMatrixAt(i,o.matrix);}w.footprints.instanceMatrix.needsUpdate=true;
+ const key=w.cupKey;home.rainCups43[key]=Math.min(3,home.rainCups43[key]+dt*wx.rain/35);const amount=home.rainCups43[key];w.water.visible=amount>.06;w.water.position.y=.13+amount*.18;w.water.scale.setScalar((.25+(w.water.position.y/1.6-.06)/.44*.08)*1.6-.02);w.water.material.opacity=.55+Math.sin(t*2)*.06;
+ const cupDist=Math.hypot(rat.position.x-w.cup.position.x,rat.position.z-w.cup.position.z);if(cupDist<1.2&&onGround)w.near='cup';
+ if(w.cache){const exposed=w.cacheProp.g.position.distanceTo(w.cacheOrigin)>.8;w.cache.visible=exposed&&!home.caches43[w.cacheKey];if(w.cache.visible&&rat.position.distanceTo(w.cache.position)<1.2)w.near='cache';}
+ const sponge=w.sponge,sd=Math.hypot(rat.position.x-sponge.position.x,rat.position.z-sponge.position.z);sponge.scale.y=1+Math.sin(Math.max(0,.5-w.bounceCooldown)*22)*Math.max(0,w.bounceCooldown)*.15;
+ if(sd<.65&&onGround&&w.bounceCooldown<=0&&!rat.userData.interaction&&!rat.userData.pick){rat.userData.air=true;rat.userData.vy=5.2;w.bounceCooldown=1.1;sfx.step('soft');sayToast('Boing!');}
+ w.chime.rotation.z=Math.sin(t*2)*wx.wind*.18;w.chimeClock+=dt;const hearing=rat.position.distanceTo(w.chime.position)<7;if(w.chimeClock>4.5&&wx.wind>.35&&hearing&&voiceOn){w.chimeClock=0;const ac=sfxCtx();if(ac){const n=Math.floor(w.age/4.5)%5;tone(ac,{f:[523,659,784,880,1046][n],dur:.75,vol:.007,type:'sine'});}}
+ if(Math.floor(w.age/9)!==w.leafSound){w.leafSound=Math.floor(w.age/9);if(wx.wind>.5&&voiceOn){const ac=sfxCtx();if(ac)burst(ac,{f:1900,q:.4,dur:.25,vol:.004,type:'highpass'});}}
+ const center=phase==='scavenge'?{x:1,z:25}:{x:0,z:4};for(let i=0;i<24;i++){const q=t*(.08+wx.wind*.4)+i*2.4;o.position.set(center.x+Math.sin(q)*3,.035+Math.max(0,Math.sin(q*2+i))*wx.wind*.65,center.z+Math.cos(q*.7+i)*2);o.rotation.set(-Math.PI/2+Math.sin(q*3)*wx.wind,.1,q);o.scale.setScalar(lowQuality&&i>11?0:.4+(i%3)*.15);o.updateMatrix();w.leaves.setMatrixAt(i,o.matrix);}w.leaves.instanceMatrix.needsUpdate=true;
+ if(w.near&&!rat.userData.wallState){ui.prompt.style.display='block';ui.prompt.textContent=w.near==='cache'?'E · Uncovered spool treasure':amount>=1?'E · Collect rainwater ('+Math.floor(amount)+')':'Rain cup · '+Math.floor(amount*100)+'% of one drink';$('padE').textContent=w.near==='cache'?'Take':'Water';}
+}
+function interact43(){const w=play43;if(!w||w.owner!==root||!w.near||rat.userData.air||rat.userData.wallState)return false;if(w.near==='cup'){const amount=home.rainCups43[w.cupKey];if(amount<1){sayToast('This cup fills in the rain.');return true;}if(addToBag('water',1)){home.rainCups43[w.cupKey]-=1;bag();save();sfx.pickup();sayToast('One rainwater drink collected.');}return true;}if(w.near==='cache'&&w.cache&&w.cache.visible&&!home.caches43[w.cacheKey]){if(addToBag('find_030',1)){home.caches43[w.cacheKey]=true;w.cache.visible=false;bag();save();sfx.pickup();sayToast('A tiny treasure was tucked under the spool.');}return true;}return false;}
+function clearPlay43(){if(!play43)return;for(const m of [play43.footprints,play43.water,play43.leaves])if(m)m.material.dispose();play43=null;}
 
 </script>
 </body>
