@@ -169,3 +169,11 @@ Validation: JS syntax; real Three r128 assets/geometry with a renderer stub and 
 - Found objects remain accessible in Supplies → Found treasures for placement or reclaiming materials.
 - Added instanced swaying foliage, coloured flowers, collectible forage among vegetation, irregular stone footpaths, warmer ground pigments and three bottle lanterns at the junkyard gate. Existing animals, audio, save format and gameplay retained.
 - Verified with the real Three.js/canvas logic harness, including browse/detail/craft/success and prior regression checks. GPU rendering is unavailable in the test browser, so mobile visual quality still requires an in-game check.
+
+## Build 41 — searchable containers and usable furniture
+- Search a lunchbox near the starting gate, a sewing tin, an old toolbox and garden supply boxes. Open lids expose miniature contents; take individual items, leave the rest, and retain container contents across saves. No automatic replenishment or rummaging animation is claimed.
+- Small decorations snap to the tops of nearby tables, workbenches, stools and shelves when grid snapping is enabled. Overlapping decorations at the same height are rejected.
+- Undo up to ten placements in the current scene. Inventory changes after a placement invalidate undo to prevent item duplication. Other scene transitions reset undo.
+- Beds and seats offer Rest here / Sit here. Stand up or movement returns Pip to his previous position. Rest restores energy; bed rest also dries him. Sitting uses a basic procedural leg pose over the supplied rig, not a new seated animation asset.
+- Zaytona favours nearby resting locations and takes longer pauses using the existing Idle, LookBack and Gesture clips; existing walking variants and crow routines remain.
+- Verified persistent container contents, surface placement, undo inventory safety, furniture use/exit and the existing game regression harness. Full GPU/mobile appearance remains unverified in this browser environment.
