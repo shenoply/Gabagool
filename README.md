@@ -153,3 +153,12 @@ Earlier ideas now implemented in this release: additional planters/flowers and f
 **Little Whiskers Waltz** is a new original classical-style piano composition/performance synthesised in Web Audio. Toggle it with Piano at the top. It has bounded voices, pauses scheduling/cleans up while hidden or muted and yields to the radio. No third-party music recording is included: a public-domain composition does not automatically make every recording free to redistribute.
 
 Validation: JS syntax; real Three r128 assets/geometry with a renderer stub and Canvas2D texture generation; full-game startup and save flow; 100 unique IDs; all 112 unique dumpster pickups; menu closing; reclaiming; tool-gated drain and home shortcut; wet/dry weather; furniture stack/scale; enlarged ramp ascent; camera gestures/collision; survival and station crafting regressions. A separate simulated audio-clock test checked one minute of piano scheduling, a peak of 33 simultaneous oscillators and cleanup on hide/off. The cloud browser's WebGL failure still prevents a rendered phone playtest; visual layout and feel need checking on a supported device.
+
+## Build 39 — quiet home, lived-in salvage
+- Home crafting/decoration panel has Hide menu and a persistent Decorate home toggle; it starts closed. Starting placement reopens the controls. Escape closes it and cancels placement safely.
+- Dumpster pickups no longer rotate. 126 collectible pieces sit on the floor in seven irregular groups, including collectible cardboard liners and tipped cans, with walking gaps.
+- Original canvas-painted, non-repeating ground for the junkyard, garden, courtyard and dumpster: dirt washes, worn paths, wheel ruts, cracks, broken paving and instanced leaf litter.
+- Existing owner-supplied Pip and Zaytona models retained. Licensed crow flies between nearby perches using its native animation, lands before leaving shiny loot, and flies to rain shelter instead of teleporting.
+- Discoverable picnic supplies and nests persist as searched in the save. Cooked meals and packed lunches reduce stamina use for three minutes of active exploration.
+- Raccoon remains removed. Earlier tool interactions, rain drain, home shortcut, rain collector, home styling and original piano soundtrack retained.
+- Validation: full Three.js/canvas logic harness including home hide/reopen and save, grounded non-spinning pickups, discoveries, meal benefit and crow travel. The browser environment has no WebGL context, so this is not a completed GPU/mobile visual playtest.
