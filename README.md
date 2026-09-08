@@ -162,3 +162,10 @@ Validation: JS syntax; real Three r128 assets/geometry with a renderer stub and 
 - Discoverable picnic supplies and nests persist as searched in the save. Cooked meals and packed lunches reduce stamina use for three minutes of active exploration.
 - Raccoon remains removed. Earlier tool interactions, rain drain, home shortcut, rain collector, home styling and original piano soundtrack retained.
 - Validation: full Three.js/canvas logic harness including home hide/reopen and save, grounded non-spinning pickups, discoveries, meal benefit and crow travel. The browser environment has no WebGL context, so this is not a completed GPU/mobile visual playtest.
+
+## Build 40 — picture-led workshop and planted map
+- Crafting now has three clear screens: eight illustrated recipe cards per page; an ingredient detail screen with explicit Have/Need/Find more labels and gathering hints; then a success screen with Place it now for furniture made at home.
+- One Make action, category/search/ready filters, a required-station link, recipe Back and Close controls. Removed the confusing 3×3 blueprint and the competing home recipe strip; the home panel now opens the same workshop.
+- Found objects remain accessible in Supplies → Found treasures for placement or reclaiming materials.
+- Added instanced swaying foliage, coloured flowers, collectible forage among vegetation, irregular stone footpaths, warmer ground pigments and three bottle lanterns at the junkyard gate. Existing animals, audio, save format and gameplay retained.
+- Verified with the real Three.js/canvas logic harness, including browse/detail/craft/success and prior regression checks. GPU rendering is unavailable in the test browser, so mobile visual quality still requires an in-game check.
