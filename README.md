@@ -332,3 +332,12 @@ Validation: ffprobe confirms H.264 format and 5.04-second duration; full ffmpeg 
 - Continue returns to the saved house without resetting inventory; New Game returns to the backyard. The opening MP4 from build 51 is included in this release.
 
 Validation: runtime tests check portrait/landscape framing, load/warmup delay, hidden-tab pause, completed animation, plank collapse, fighter removal, preserved inventory, broken-platform revisit, replay on another Start, Skip, new-game reset and dumpster exit. JavaScript syntax passes. Full-game mobile/GPU visual rendering remains unverified.
+
+## Build 53 — Sounds of home
+
+- Added an original synthesized felt-key melody, soft window rain, a water swell and quiet wooden creaks to the supplied opening video. Audio is embedded as stereo AAC in `opening-build53.mp4` alongside the unchanged H.264 video stream, keeping playback/Skip synchronized. No commercial recording or third-party music is used. The game's Sound setting controls video muting.
+- Removed the automatically framed MMA opening cutscene. Opening-video completion now enters ordinary gameplay directly, preserving Continue saves.
+- The fight is a backyard event: it waits until Pip is nearby and the platform is in view, gives a short location hint, and pauses offscreen. Player movement and camera control remain available; the event never takes over the camera.
+- Retained the creaking, collapsing timber platform, dust, crash and disappearing fighters. It plays once during that play session and resets on the next Start/Continue. The collapsed platform remains on backyard revisits.
+
+Validation: H.264 video/stereo AAC confirmed and the complete MP4 decodes without errors. Runtime checks cover save/new-game transitions, video mute, no forced cutscene, proximity/view gating, unchanged camera/player control, offscreen pause, completed collapse, session replay reset and dumpster exit. JavaScript syntax passes. Actual mobile playback and full-game GPU visuals remain unverified.
