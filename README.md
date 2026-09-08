@@ -187,3 +187,12 @@ Validation: JS syntax; real Three r128 assets/geometry with a renderer stub and 
 - Crow exchange: offer one carried coin or foil, explore for 90 seconds, then collect a saved gift. Bag capacity is checked before consuming the gift.
 - Enter the old boot near (-5,19) for a decorated refuge with a one-time collectible; leave by the marked front exit.
 - Verified game regression checks, weather/shelter transitions, reflection materials, pushing, saved crow trades and hideout entry/exit/gift persistence using the Three.js logic harness. Weather shaders and full mobile appearance remain unverified because the browser has no WebGL context.
+
+## Build 43 — rainwater, footprints and playful scavenging
+- Hollow modelled rain cups near the junkyard entrance and in outdoor areas visibly fill during rain. Collect one drink at a time; remaining water persists in the save. Capacity is three drinks; rain fills one in 35 seconds of active outdoor play.
+- Instanced wet pawprints trail behind Pip on wet ground and fade; soft splash sounds accompany rain footsteps. Low quality reduces the displayed footprints.
+- A rolling spool conceals a one-time collectible cache in each outdoor area; moving it aside reveals the object. Collected caches remain cleared after loading.
+- Springy sponge pads bounce Pip using the existing jump motion and normal air controls.
+- Instanced drifting leaves and quiet synthesised rustling, plus wind chimes near shelter that sway and ring when nearby in wind.
+- Regression harness verifies rainwater/save, cache persistence, bounce launch, footprints and cleanup. Rain cups use an original hollow lathe mesh, so the rising water is visible rather than hidden inside a solid cup.
+- GPU/mobile visual quality still needs an in-game check; no new third-party art or music added.
