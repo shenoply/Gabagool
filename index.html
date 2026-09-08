@@ -115,7 +115,7 @@
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
     <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
     <p style="font-size:10px;opacity:.65">Crow: Alexei Ostapenko · CC-BY 4.0. Framed picture supplied by the owner.</p><p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 43 · Pip comes home</p>
+    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Cherry row & Meshy birds supplied by owner. Mobile adaptations.</p><p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 44 · Pip comes home</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -148,6 +148,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="GLTFLoader.js" onerror="console.warn('GLTFLoader unavailable')"></script>
 <script>
+let actors44=[],nearAnimal44=null,petals44=null,treeSolids44=[],modelLoads44=0;const modelCache44={},modelPromises44={},modelQueue44=[];
 let play43=null;
 let life42=null;
 let containers41=[],nearContainer41=null,homeUse41=null,undo41=[];
@@ -560,6 +561,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem('ww-save'));if(d&&d.
 const $=id=>document.getElementById(id);bindRadio();
 const ui={title:$('title'),sub:$('sub'),phase:$('phase'),bag:$('bag'),prompt:$('prompt'),skip:$('skip'),go:$('go'),hb:$('hb'),end:$('end'),pad:$('pad')};
 function clear(){
+clearModels44();
 clearPlay43();
 clearLife42();
  endHomeUse41();containers41=[];nearContainer41=null;undo41=[];
@@ -783,7 +785,7 @@ function startScavenge(){
   shuffled.forEach(([x,y,z])=>{const id=bagIds[Math.floor(Math.random()*bagIds.length)];const m=ITEMS[id].build();m.scale.setScalar(.22);m.position.set(y===2?x*1.3:x,y===2?2.6:y,y===2?-4+(z+4)*1.3:z);m.rotation.y=Math.random()*6;outline(m);root.add(m);sc.items.push({id,m,taken:false});});
   rat=makeRat();rat.scale.setScalar(.25);rat.position.set(1,0,29);rat.rotation.y=Math.PI;root.add(rat);outline(root);
   fatMixer=null;try{addNeighbour();}catch(e){console.warn(e);}
-  addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();ui.go.style.display='block';ui.go.textContent='Home';
+  addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();seedModels44();ui.go.style.display='block';ui.go.textContent='Home';
   camera.position.set(1,3,33);
 }
 function spawnCat(){const c=makeCat();c.scale.setScalar(.32);const side=Math.random()<0.5?-1:1;c.position.set(30,0,19);c.rotation.y=side>0?-Math.PI/2:Math.PI/2;outline(c);root.add(c);
@@ -878,6 +880,7 @@ function advanceTalk(){if(!sc||!sc.talk||sc.talk.pending)return;if(sc.talk.audio
 ui.talk=$('talk');ui.talk.addEventListener('pointerdown',e=>{e.stopPropagation();advanceTalk();});
 function grab(){
   if(photo.active||$('modal').style.display==='flex'||rat&&rat.userData.interaction)return;
+  if(rat&&visitAnimal44())return;
   if(rat&&!rat.userData.wallState&&interact43())return;
   if(rat&&!rat.userData.wallState&&interact42())return;
   if(nearContainer41&&nearContainer41.owner===root&&!rat.userData.wallState){openContainer41(nearContainer41);return;}
@@ -1197,7 +1200,7 @@ function startArea(id){if(id==='drain'){if(gateSave().drain)startDrain();else sa
   }
   for(let i=0;i<16;i++){const itemId=z.pool[i%z.pool.length],m=ITEMS[itemId].build();m.position.set(-9+(i%4)*6+(i%2)*.5,0,-6+Math.floor(i/4)*4);m.rotation.y=i*1.7;outline(m);root.add(m);area.items.push({id:itemId,m,taken:false});}
   const exit=decal(3.8,1,(x,w,h)=>{x.fillStyle='#eadbb8';x.fillRect(0,0,w,h);x.fillStyle='#354744';x.textAlign='center';x.font='42px Georgia';x.fillText('← BACK TO THE ALLEY',w/2,150)});exit.position.set(0,1.8,10);exit.rotation.y=Math.PI;root.add(exit);
-  rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,0,7.5);rat.rotation.y=Math.PI;root.add(rat);outline(rat);addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();camera.position.set(0,9,17);addMotes(root,35,22,5,20,0xf6e4b5);}
+  rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,0,7.5);rat.rotation.y=Math.PI;root.add(rat);outline(rat);addZaytona();seedNature();seedExtras();seedAnimals();decorateWorld();seedLife42();seedPlay43();seedModels44();camera.position.set(0,9,17);addMotes(root,35,22,5,20,0xf6e4b5);}
 function tickArea(dt){tickZaytona(dt);const speed=control(dt,{walk:2.7,bounds:[-11,11,-8.5,10],ground:(x,z)=>{let h=0;for(const o of wallSolids())if(Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz&&rat.position.y>=o.h-.1)h=Math.max(h,o.h);return h;}});for(const o of area.obstacles){if(rat.userData.wallState||rat.position.y>=(o.h||(area.id==='garden'?.44:1.32))-.05)continue;const dx=rat.position.x-o.x,dz=rat.position.z-o.z,ox=o.hx+.3-Math.abs(dx),oz=o.hz+.3-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz)rat.position.x+=(dx<0?-1:1)*ox;else rat.position.z+=(dz<0?-1:1)*oz;}}rat.animate(dt,speed,false);steps(dt,speed,area.id==='garden'?'soft':'cobble');area.near=null;let d=1.8;area.items.forEach(it=>{if(it.taken)return;const dist=it.m.position.distanceTo(rat.position);if(dist<d){d=dist;area.near=it}});area.exit=rat.position.z>8.8&&Math.abs(rat.position.x)<3;if(area.id==='drain'&&rat.position.z<-7.7&&Math.abs(rat.position.x)<2){ui.prompt.style.display='block';ui.prompt.textContent='E · shortcut home';$('padE').textContent='Home';}
   ui.prompt.style.display=area.near||area.exit?'block':'none';ui.prompt.textContent=area.near?'E · grab '+ITEMS[area.near.id].name:(area.id==='drain'?'E · return to the garden':'E · return to the junkyard');$('padE').textContent=area.exit&&!area.near?'Out':'Grab';
   const portrait=innerHeight>innerWidth;camera.position.lerp(new THREE.Vector3(rat.position.x,rat.position.y+(portrait?2.5:2.8),rat.position.z+(portrait?3.8:4.2)),Math.min(1,dt*3));camera.lookAt(rat.position.x,rat.position.y+.3,rat.position.z-.3);}
@@ -1253,7 +1256,7 @@ function loop(now){requestAnimationFrame(loop);let frame=Math.min(0.1,(now-last)
   try{
   while(acc>=STEP&&n<4){const dt=STEP;acc-=dt;n++;if(photo.active||document.hidden)continue;t+=dt;
     if($('modal').style.display==='flex')continue;tickWildlife(dt);tickAtmosphere(dt);
-    if(phase==='title')tickTitle(dt);else if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='inside')tickInside(dt);else if(phase==='explore')tickArea(dt);else if(phase==='caught'){rat.animate(dt,1,true);if(sc.cat)sc.cat.m.animate(dt,0);}tickNature(dt);tickExtras(dt);tickLife(dt);drawLife();tickAnimals37(dt);tickWorld38(dt);tickFeatures41(dt);tickLife42(dt);tickPlay43(dt);tickGameplayCamera(dt);}
+    if(phase==='title')tickTitle(dt);else if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='inside')tickInside(dt);else if(phase==='explore')tickArea(dt);else if(phase==='caught'){rat.animate(dt,1,true);if(sc.cat)sc.cat.m.animate(dt,0);}tickNature(dt);tickExtras(dt);tickLife(dt);drawLife();tickAnimals37(dt);tickWorld38(dt);tickFeatures41(dt);tickLife42(dt);tickPlay43(dt);tickModels44(dt);tickGameplayCamera(dt);}
   if(n===4||document.hidden)acc=0;
   if(photo.active)tickPhoto();
   renderer.render(scene,camera);
@@ -1696,6 +1699,27 @@ function tickPlay43(dt){const w=play43;if(!w||w.owner!==root||!outdoors42()||!ra
 }
 function interact43(){const w=play43;if(!w||w.owner!==root||!w.near||rat.userData.air||rat.userData.wallState)return false;if(w.near==='cup'){const amount=home.rainCups43[w.cupKey];if(amount<1){sayToast('This cup fills in the rain.');return true;}if(addToBag('water',1)){home.rainCups43[w.cupKey]-=1;bag();save();sfx.pickup();sayToast('One rainwater drink collected.');}return true;}if(w.near==='cache'&&w.cache&&w.cache.visible&&!home.caches43[w.cacheKey]){if(addToBag('find_030',1)){home.caches43[w.cacheKey]=true;w.cache.visible=false;bag();save();sfx.pickup();sayToast('A tiny treasure was tucked under the spool.');}return true;}return false;}
 function clearPlay43(){if(!play43)return;for(const m of [play43.footprints,play43.water,play43.leaves])if(m)m.material.dispose();play43=null;}
+
+
+// Owner-supplied models, simplified offline. Source credits are in README and title.
+function model44(id){if(modelCache44[id])return Promise.resolve(modelCache44[id]);if(modelPromises44[id])return modelPromises44[id];modelPromises44[id]=new Promise(resolve=>{modelQueue44.push({id,resolve});pumpModels44();});return modelPromises44[id];}
+function pumpModels44(){while(modelLoads44<2&&modelQueue44.length){const job=modelQueue44.shift();modelLoads44++;new THREE.GLTFLoader().load(job.id+'-build44.glb',a=>{a.scene.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.userData.keepGeometry=true;o.userData.noInk=true;}});modelCache44[job.id]=a.scene;job.resolve(a.scene);modelLoads44--;pumpModels44();},undefined,e=>{console.warn('Optional scenery model failed:',job.id,e);job.resolve(null);delete modelPromises44[job.id];modelLoads44--;pumpModels44();});}}
+function addModel44(owner,id,pos,size,kind='still',yaw=0){return model44(id).then(asset=>{if(!asset||root!==owner)return null;const holder=new THREE.Group(),visual=asset.clone(true);holder.add(visual);if(id==='osprey')visual.rotation.y=-Math.PI/2;holder.position.set(...pos);holder.rotation.y=yaw;holder.scale.setScalar(size);holder.name='Supplied '+id;root.add(holder);const actor={id,g:holder,visual,base:new THREE.Vector3(...pos),kind,owner,phase:actors44.length*1.9,near:false};actors44.push(actor);return actor;});}
+function seedModels44(){actors44=[];nearAnimal44=null;treeSolids44=[];if(!outdoors42())return;const owner=root,yard=phase==='scavenge';const jobs=[];
+ if(yard){jobs.push(addModel44(owner,'sakura',[-9,0,32],7.5));jobs.push(addModel44(owner,'cherry',[5,0,-19],9));jobs.push(addModel44(owner,'hound',[16,0,34.5],1.6,'rest',-.9));jobs.push(addModel44(owner,'osprey',[7,13,7],3.6,'glide'));treeSolids44.push({x:-9,z:32,hx:.4,hz:.4,h:3});}
+ else if(area.id==='garden'){jobs.push(addModel44(owner,'sakura',[-7,0,-5],7));jobs.push(addModel44(owner,'squirrel',[-5,0,3],.65,'rest',.6));jobs.push(addModel44(owner,'kingfisher',[2,3.5,0],.9,'fly'));treeSolids44.push({x:-7,z:-5,hx:.4,hz:.4,h:3});}
+ else{jobs.push(addModel44(owner,'cherry',[0,0,-13],6));jobs.push(addModel44(owner,'songbirds',[6,.4,4],1.3,'rest',.3));const perch=box(2,.12,1,MT(0xa99169,'wood'));perch.position.set(6,.79,4);root.add(perch);}
+ // Falling blossom petals are instanced and follow the same wind as the rest of the yard.
+ const p=new THREE.InstancedMesh(new THREE.CircleGeometry(.07,5),new THREE.MeshLambertMaterial({color:0xe9b7c5,side:THREE.DoubleSide}),32);p.userData.noInk=true;p.name='Falling cherry petals';p.frustumCulled=false;root.add(p);petals44={m:p,owner,center:yard?new THREE.Vector3(-9,0,32):area.id==='garden'?new THREE.Vector3(-7,0,-5):new THREE.Vector3(0,0,-10)};
+ return Promise.all(jobs);
+}
+function tickModels44(dt){nearAnimal44=null;if(!outdoors42()||!rat)return;const wx=weather42();for(const a of actors44){if(a.owner!==root)continue;const q=t+a.phase;if(a.kind==='glide'||a.kind==='fly'){const r=a.kind==='glide'?10:3.5,speed=a.kind==='glide'?.13:.35,angle=q*speed;a.g.position.set(a.base.x+Math.cos(angle)*r,a.base.y+Math.sin(angle*2)*.55,a.base.z+Math.sin(angle)*r*.7);a.g.rotation.y=Math.atan2(-Math.sin(angle),.7*Math.cos(angle));a.g.rotation.z=Math.sin(angle)*.09;a.g.visible=!lowQuality||a.kind!=='glide';}else if(a.kind==='rest'){a.visual.scale.y=1+Math.sin(q*1.5)*.008;a.visual.rotation.z=Math.sin(q*.6)*.012;const d=Math.hypot(a.g.position.x-rat.position.x,a.g.position.z-rat.position.z);if(d<1.6)nearAnimal44=a;}}
+ if(nearAnimal44&&!rat.userData.air&&!rat.userData.wallState&&!nearContainer41&&!(play43&&play43.near)&&!(life42&&life42.near)){ui.prompt.style.display='block';ui.prompt.textContent='E · '+(nearAnimal44.id==='hound'?'Greet the garden hound':nearAnimal44.id==='squirrel'?'Visit the curious squirrel':'Watch the little birds');$('padE').textContent='Visit';}
+ for(const o of treeSolids44){if(rat.position.y>3||rat.userData.wallState)continue;const dx=rat.position.x-o.x,dz=rat.position.z-o.z,d=Math.hypot(dx,dz);if(d<.65&&d>.001){rat.position.x=o.x+dx/d*.65;rat.position.z=o.z+dz/d*.65;}}
+ if(petals44&&petals44.owner===root){const o=new THREE.Object3D(),c=petals44.center;for(let i=0;i<32;i++){o.position.set(c.x+Math.sin(i*2.4+t*.15)*(2+wx.wind),.05+(5-(t*.3+i*.31)%5),c.z+Math.cos(i*1.7+t*.1)*2);o.rotation.set(t*.5+i,i*2.4,t*.4);o.scale.setScalar(lowQuality&&i>11?0:1);o.updateMatrix();petals44.m.setMatrixAt(i,o.matrix);}petals44.m.instanceMatrix.needsUpdate=true;}
+}
+function visitAnimal44(){const a=nearAnimal44;if(!a||a.owner!==root||rat.userData.air||rat.userData.wallState||nearContainer41||play43&&play43.near||life42&&life42.near)return false;const id=a.id,name=id==='hound'?'The golden-eared hound':id==='squirrel'?'The curious squirrel':'The little birds';const food=id==='hound'?'crumbs':'seeds';home.animalVisits44=home.animalVisits44||{};const fed=home.animalVisits44[id]!==undefined&&ensureLife().clock-home.animalVisits44[id]<120;modal(name,`<p>${id==='hound'?'A quiet neighbour resting outside the junkyard.':id==='squirrel'?'A watchful squirrel has claimed this corner of the garden.':'A little gathering among the cherry trees.'}</p><p>${fed?'You have already left a treat.':'You can leave a small treat nearby.'}</p>`,[[fed?'Treat already left':'Leave '+ITEMS[food].name,()=>{if(fed||!(inv[food]>0))return;inv[food]--;home.animalVisits44[id]=ensureLife().clock;bag();save();closeModal();sayToast('A small kindness for your neighbour.');},fed||!(inv[food]>0)],['Close',closeModal]]);return true;}
+function clearModels44(){if(petals44)petals44.m.material.dispose();actors44=[];petals44=null;nearAnimal44=null;treeSolids44=[];}
 
 </script>
 </body>
