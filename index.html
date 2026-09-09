@@ -2132,6 +2132,7 @@ storeFurniture=function(entry){undo41=[];const id=entry.p.id;removePlaced(entry)
 recycleFurniture=function(entry){undo41=[];const id=entry.p.id;if(CRAFT[id]?.collectible){storeFurniture(entry);return;}removePlaced(entry);returnParts65(CRAFT[id]?CRAFT[id].needs:{[id]:1});save();bag();renderPanel();sayToast('Materials recovered. Anything beyond bag capacity is in your chest.');};
 
 function tracked65(){if(!pinnedRecipe||!CRAFT[pinnedRecipe])return '';const c=CRAFT[pinnedRecipe];return '<div class="track65"><strong>Tracking: '+craftEscape40(c.name)+'</strong><p>'+Object.entries(c.needs).map(([k,n])=>craftEscape40(ITEMS[k].name)+' '+materialCount(k)+' / '+n).join(' · ')+'</p></div>';}
+const cancelBase65=cancelPlace;cancelPlace=function(){cancelBase65();if(phase==='house'&&hs&&!hs.sel){ui.hb.style.display='none';home.panelOpen=false;}};
 
 </script></body>
 </html>
