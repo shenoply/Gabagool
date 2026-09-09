@@ -391,3 +391,10 @@ Wider Big Rat dialogue framing and restored cat sizes. Added a permanent home st
 Five unique finds persist once per save: a damaged turntable, three Beethoven-theme records with distinct synthesized arrangements, and a brass star. The player must uncover and collect them along tyre, sponge, fence and dumpster climbing routes. Added crates, narrow beams, hidden box/drawer/loose-board reveals, a lowered shortcut, ledge recovery, higher capped spring jumps and pickup cards. Unique items are stored safely as furniture, never consumed by ordinary crafting.
 
 Validation: runtime checks cover reveal-before-reward, unique reward idempotence and persistence across scenes, chest material consumption, home props, workshop/repair/record menus, preview rendering calls, dumpster route creation and ledge recovery. JavaScript syntax passes. Mobile/GPU visuals and full route playthrough remain unverified.
+
+
+## Build 61 — Scrap Workbench
+
+Implements the selected workbench concept: warm illustrated workshop backdrop, large rotatable previews of actual game models, illustrated ingredient counts, missing-material hints, one Craft action, and related recipes. Backpack/chest consumption, batch crafting, station requirements, save data and placement retain the existing game logic. Clear close control and scrollable mobile layout. The original AI-generated workshop backdrop is compressed and embedded in the HTML; no new external asset dependency. The mockup is art direction, not a promise of photorealistic world graphics.
+
+Validation: JavaScript syntax and runtime checks passed for available/missing materials, backpack plus chest consumption, rotating previews, craft success, recipe browsing, closing, and backpack-only crafting outdoors. Runtime harness uses real Three.js math with a stub renderer. Browser preview was blocked by ERR_BLOCKED_BY_CLIENT for the local preview address, so actual GPU rendering and mobile visual fidelity remain unverified.
