@@ -207,7 +207,7 @@ body.cinema #settings,body.photo #settings{visibility:hidden}
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
     <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
     <p style="font-size:10px;opacity:.65">Crow: Alexei Ostapenko · CC-BY 4.0. Framed picture supplied by the owner.</p><p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Bird flock: Blender Artist · Grass: Natural_Disbuster · CC-BY 4.0. Cherry row, Meshy birds & dumpster supplied by owner. Trees & daisies: Márcio Meireles · CC-BY 4.0. Original raccoons and doghouse. Cities: Neberkenezer & smooth998 · MMA: mortaleiros · CC-BY 4.0. Textures: Poly Haven · CC0. Owner-supplied tabby. Mobile adaptations. Music: Beethoven, Ode to Joy (1824); original synthesized performance. Nature and animal effects synthesized for this game.</p><p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 67 · Treasures worth finding</p>
+    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Bird flock: Blender Artist · Grass: Natural_Disbuster · CC-BY 4.0. Cherry row, Meshy birds & dumpster supplied by owner. Trees & daisies: Márcio Meireles · CC-BY 4.0. Original raccoons and doghouse. Cities: Neberkenezer & smooth998 · MMA: mortaleiros · CC-BY 4.0. Textures: Poly Haven · CC0. Owner-supplied tabby. Mobile adaptations. Music: Beethoven, Ode to Joy (1824); original synthesized performance. Nature and animal effects synthesized for this game.</p><p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 68 · Treasures worth finding</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -238,7 +238,8 @@ body.cinema #settings,body.photo #settings{visibility:hidden}
 </div>
 
 <script>
-function startupFailure55(message){const status=document.getElementById('pipLoading'),retry=document.getElementById('pipRetry');if(status)status.textContent=message;if(retry){retry.textContent='Retry loading';retry.style.display='block';}}
+let startupFailureShown68=false;
+function startupFailure55(message){if(startupFailureShown68)return;startupFailureShown68=true;const status=document.getElementById('pipLoading'),retry=document.getElementById('pipRetry');if(status)status.textContent=message;if(retry){retry.textContent='Retry loading';retry.style.display='block';}}
 window.addEventListener('error',e=>{if(document.getElementById('start')?.disabled)startupFailure55('The game could not start. '+(e.message||'A required file failed to load.')+' Tap Retry loading.');});
 </script>
 <script src="three-r128-build55.js" onerror="startupFailure55('The game engine did not download. Tap Retry loading.')"></script>
@@ -1591,8 +1592,7 @@ function stopPianoNodes(){for(const n of piano.nodes)try{n.stop();}catch{}piano.
 function togglePiano(){piano.enabled=!piano.enabled;$('pianoToggle').textContent=piano.enabled?'Music: Beethoven':'Music: off';if(piano.enabled){audio();schedulePiano();if(!piano.timer)piano.timer=setInterval(schedulePiano,150);}else{stopPianoNodes();clearInterval(piano.timer);piano.timer=null;}}
 $('pianoToggle').onclick=togglePiano;piano.timer=setInterval(schedulePiano,150);document.addEventListener('visibilitychange',()=>{if(document.hidden){stopPianoNodes();stopWorld58();}else if(piano.enabled)schedulePiano();});$('mute').addEventListener('click',()=>{if(!voiceOn){stopPianoNodes();stopWorld58();}else if(piano.enabled)schedulePiano();});
 
-startTitle();
-requestAnimationFrame(loop);
+// Startup runs after every game extension has initialized.
 
 // Build 39: a quiet home UI and grounded, discoverable salvage.
 function setHomePanel(open){
@@ -2268,5 +2268,9 @@ addEventListener('keydown',e=>{if(e.repeat||/^(INPUT|TEXTAREA|SELECT)$/.test(e.t
 
 const soundEffect67=effect58;effect58=function(kind,pos){soundEffect67(kind,pos);if(kind==='dog'&&rat&&pos&&rat.position.distanceTo(pos)<3&&!rat.userData.alertCD67&&!input67()&&!rat.userData.air&&!rat.userData.rope66&&!rat.userData.swim66&&!rat.userData.pick){rat.userData.alertCD67=25;sequence67(rat,['Danger_Freeze','Danger_Lower','Tail_Alert_Flick']);}};
 
+
+// All declarations and extension state are ready before constructing the title.
+startTitle();
+requestAnimationFrame(loop);
 </script></body>
 </html>
