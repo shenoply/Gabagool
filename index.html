@@ -162,7 +162,7 @@ body.fight-view55 #settings,body.fight-view55 #survival,body.fight-view55 #weath
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
     <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
     <p style="font-size:10px;opacity:.65">Crow: Alexei Ostapenko · CC-BY 4.0. Framed picture supplied by the owner.</p><p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Bird flock: Blender Artist · Grass: Natural_Disbuster · CC-BY 4.0. Cherry row, Meshy birds & dumpster supplied by owner. Trees & daisies: Márcio Meireles · CC-BY 4.0. Original raccoons and doghouse. Cities: Neberkenezer & smooth998 · MMA: mortaleiros · CC-BY 4.0. Textures: Poly Haven · CC0. Owner-supplied tabby. Mobile adaptations. Music: Beethoven, Ode to Joy (1824); original synthesized performance. Nature and animal effects synthesized for this game.</p><p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 63 · Treasures worth finding</p>
+    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Bird flock: Blender Artist · Grass: Natural_Disbuster · CC-BY 4.0. Cherry row, Meshy birds & dumpster supplied by owner. Trees & daisies: Márcio Meireles · CC-BY 4.0. Original raccoons and doghouse. Cities: Neberkenezer & smooth998 · MMA: mortaleiros · CC-BY 4.0. Textures: Poly Haven · CC0. Owner-supplied tabby. Mobile adaptations. Music: Beethoven, Ode to Joy (1824); original synthesized performance. Nature and animal effects synthesized for this game.</p><p style="font-size:11px;opacity:.45">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Original cat models · build 64 · Treasures worth finding</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -891,7 +891,7 @@ function tickScavenge(dt){
   const before=rat.position.clone();
   const speed=control(dt,{walk:3.15,bounds:[-21,31,-14,38],ground:(x,z)=>Math.max(groundAlley(x,z),yardGround(x,z,rat.position.y)),locked:!!sc.talk});
   if(gate57&&!gate57.open&&rat.position.x>30.25&&Math.abs(rat.position.z-19)<2.8)rat.position.x=Math.min(before.x,30.25);
-  if(!rat.userData.wallState)yardResolve(rat.position,before);
+  // Shared control already resolves this movement against scenery and route decks.
   rat.userData.pushing=!rat.userData.wallState&&!rat.userData.air&&speed>.1&&rat.position.distanceTo(before)<.002;
   if(!rat.userData.wallState&&!rat.userData.climb&&Math.abs(rat.position.x)<6.11&&rat.position.z>-6.86&&rat.position.z<-1.14&&before.y<1.9&&!(Math.abs(before.x)<2.73&&before.z>=-1.59)){rat.position.x=before.x;rat.position.z=before.z;}
   {const nb=new THREE.Vector3(NB.x,rat.position.y,NB.z);const dn=rat.position.distanceTo(nb);if(dn<1.05){const d=rat.position.clone().sub(nb);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.setLength(1.05);rat.position.x=nb.x+d.x;rat.position.z=nb.z+d.z;}}
@@ -1989,7 +1989,7 @@ $('craftBook').onclick=()=>{craftMade40=null;craftDetail40=true;craftBatch47=1;i
 </script>
 <script>
 // Collision geometry follows visible scenery; cosmetic materials never create walls.
-function registerSolid62(group){group.updateWorldMatrix(true,true);group.traverse(m=>{if(!m.isMesh||!m.visible||!m.geometry||/dirt|paving|grass|flower|leaf|foliage/i.test(m.name))return;if(!surfaces57.some(s=>s.mesh===m))surfaces57.push({mesh:m,kind:/rubber/i.test(m.name)?'tyre':'solid',solid62:true});else{const s=surfaces57.find(s=>s.mesh===m);s.solid62=true;}});}
+function registerSolid62(group){group.updateWorldMatrix(true,true);group.traverse(m=>{if(!m.isMesh||!m.visible||!m.geometry||/dirt|paving|grass|flower|leaf|foliage/i.test(m.name))return;accelerate64(m);if(!surfaces57.some(s=>s.mesh===m))surfaces57.push({mesh:m,kind:/rubber/i.test(m.name)?'tyre':'solid',solid62:true});else{const s=surfaces57.find(s=>s.mesh===m);s.solid62=true;}});}
 function visible62(m){for(let o=m;o;o=o.parent){if(!o.visible)return false;if(o===root)return true;}return false;}
 function solidMeshes62(){return surfaces57.filter(s=>s.solid62&&visible62(s.mesh)).map(s=>s.mesh);}
 function resolveGeometry62(pos,before){
@@ -2009,11 +2009,27 @@ function routesResolve62(pos,before){if(!world60||world60.owner!==root)return;fo
 function hasTop62(p){const meshes=solidMeshes62();const stamp=surfaces57.length;const cache=root.userData.collisionCache62||(root.userData.collisionCache62=new Map());const key=[p.x,p.z,p.h,stamp].join(':');if(cache.has(key))return cache.get(key);if(!meshes.length)return false;const ray=new THREE.Raycaster(new THREE.Vector3(p.x,p.h+.12,p.z),new THREE.Vector3(0,-1,0),0,.3);const ok=ray.intersectObjects(meshes,false).some(h=>h.face&&h.face.normal.clone().transformDirection(h.object.matrixWorld).y>.5);cache.set(key,ok);return ok;}
 
 </script>
-<script>function frameNeighbour63(){const g=root.children.find(o=>o.name==='Big Rat');if(!g)return;g.updateWorldMatrix(true,true);const b=posedBounds(g),size=b.getSize(new THREE.Vector3()),center=b.getCenter(new THREE.Vector3());const v=THREE.MathUtils.degToRad(camera.fov/2),h=Math.atan(Math.tan(v)*camera.aspect);const distance=Math.max(size.y/(2*Math.tan(v)),Math.max(size.x,size.z)/(2*Math.tan(h)))*1.5+Math.max(size.x,size.z)*.7;camera.position.copy(center).add(new THREE.Vector3(.65,.2,1).normalize().multiplyScalar(distance));camera.lookAt(center);}
+<script>function frameNeighbour63(){const g=root.children.find(o=>o.name==='Big Rat');if(!g)return;g.updateWorldMatrix(true,true);const b=g.userData.cameraBounds64||(g.userData.cameraBounds64=posedBounds(g)),size=b.getSize(new THREE.Vector3()),center=b.getCenter(new THREE.Vector3());const v=THREE.MathUtils.degToRad(camera.fov/2),h=Math.atan(Math.tan(v)*camera.aspect);const distance=Math.max(size.y/(2*Math.tan(v)),Math.max(size.x,size.z)/(2*Math.tan(h)))*1.5+Math.max(size.x,size.z)*.7;camera.position.copy(center).add(new THREE.Vector3(.65,.2,1).normalize().multiplyScalar(distance));camera.lookAt(center);}
 function threshold63(){const pivot=new THREE.Group(),leaf=brownDoor60();leaf.rotation.z=0;leaf.position.x=.59;pivot.add(leaf);pivot.rotation.y=Math.PI/2;pivot.position.set(-HW/2+.12,0,DOORZ+.59);pivot.userData.closed63=Math.PI/2;root.add(pivot);return pivot;}
 function outskirts63(){const land=box(240,.2,240,MT(0x647256,'plaster',30,30));land.position.set(4,-.18,12);land.name='Continuous neighborhood ground';root.add(land);for(const z of [-20,45]){const road=box(180,.05,9,M(0x51565a));road.position.set(4,-.05,z);root.add(road);const curb=box(180,.16,.35,M(0x98988b));curb.position.set(4,-.03,z+(z>0?-4.6:4.6));root.add(curb);}for(const [x,z,w]of [[-12,38,18],[19,38,24]]){const fence=box(w,3,.13,MT(0x526f66,'wood',w/3,1));fence.position.set(x,1.5,z);root.add(fence);} }
 function trimTables63(g){g.updateMatrixWorld(true);g.traverse(o=>{if(!o.isMesh||!o.geometry.attributes.position)return;const old=o.geometry,p=old.attributes.position,idx=old.index,keep=[],v=new THREE.Vector3();let removed=0;for(let i=0;i<(idx?idx.count:p.count);i+=3){let x=0,y=0,z=0;const ids=[];for(let j=0;j<3;j++){const k=idx?idx.getX(i+j):i+j;ids.push(k);v.fromBufferAttribute(p,k).applyMatrix4(o.matrixWorld);x+=v.x/3;y+=v.y/3;z+=v.z/3;}if(x>3.8&&x<10.2&&z>10.8&&z<17.9&&y>.05&&y<1.5)removed++;else keep.push(...ids);}if(removed){o.geometry=old.clone();o.geometry.setIndex(keep);o.geometry.computeBoundingBox();o.geometry.computeBoundingSphere();}});}
 function homeMenu63(){if(phase!=='house')return;ui.hb.style.display='none';home.panelOpen=false;modal('Your home','<p>Choose what you want to change.</p>',[['Place furniture',()=>chest60('furniture')],['Floor & walls',()=>{closeModal();hs.tab='floor';renderPanel();ui.hb.style.display='flex';}],['Storage chest',()=>chest60()],['Close',closeModal]]);}
 $('homePanelToggle').onclick=homeMenu63;
+</script><script>// Static scenery raycasts use spatial triangle buckets, leaving rendered meshes intact.
+function accelerate64(mesh){
+ if(mesh.userData.raycast64||!mesh.geometry.index||Array.isArray(mesh.material))return;
+ mesh.updateWorldMatrix(true,false);
+ const original=mesh.raycast,geometry=mesh.geometry,pos=geometry.attributes.position,idx=geometry.index,cell=4,buckets=new Map(),v=new THREE.Vector3();
+ const add=(key,a,b,c)=>{let list=buckets.get(key);if(!list)buckets.set(key,list=[]);list.push(a,b,c);};
+ for(let i=0;i<idx.count;i+=3){const ids=[idx.getX(i),idx.getX(i+1),idx.getX(i+2)];let x0=Infinity,z0=Infinity,x1=-Infinity,z1=-Infinity;for(const k of ids){v.fromBufferAttribute(pos,k).applyMatrix4(mesh.matrixWorld);x0=Math.min(x0,v.x);x1=Math.max(x1,v.x);z0=Math.min(z0,v.z);z1=Math.max(z1,v.z);}const a=Math.floor(x0/cell),b=Math.floor(x1/cell),c=Math.floor(z0/cell),d=Math.floor(z1/cell);if((b-a+1)*(d-c+1)>256){add('wide',...ids);continue;}for(let x=a;x<=b;x++)for(let z=c;z<=d;z++)add(x+','+z,...ids);}
+ const chunks=new Map();for(const [key,indices]of buckets){const g=new THREE.BufferGeometry();g.setAttribute('position',pos);if(geometry.attributes.uv)g.setAttribute('uv',geometry.attributes.uv);g.setIndex(indices);g.computeBoundingSphere();g.computeBoundingBox();const proxy=new THREE.Mesh(g,mesh.material);proxy.matrixAutoUpdate=false;proxy.matrixWorld.copy(mesh.matrixWorld);chunks.set(key,proxy);}
+ const matrix=mesh.matrixWorld.clone();mesh.userData.raycast64={chunks};
+ mesh.raycast=function(raycaster,hits){if(this.geometry!==geometry||!this.matrixWorld.equals(matrix)||!Number.isFinite(raycaster.far)){original.call(this,raycaster,hits);return;}
+ const ray=raycaster.ray,end=ray.at(raycaster.far,new THREE.Vector3()),a=Math.floor(Math.min(ray.origin.x,end.x)/cell),b=Math.floor(Math.max(ray.origin.x,end.x)/cell),c=Math.floor(Math.min(ray.origin.z,end.z)/cell),d=Math.floor(Math.max(ray.origin.z,end.z)/cell);
+ if((b-a+1)*(d-c+1)>256){original.call(this,raycaster,hits);return;}
+ const start=hits.length;const wide=chunks.get('wide');if(wide){wide.material=this.material;wide.raycast(raycaster,hits);}for(let x=a;x<=b;x++)for(let z=c;z<=d;z++){const proxy=chunks.get(x+','+z);if(proxy){proxy.material=this.material;proxy.raycast(raycaster,hits);}}
+ for(let i=start;i<hits.length;i++)hits[i].object=this;
+ };
+}
 </script></body>
 </html>
