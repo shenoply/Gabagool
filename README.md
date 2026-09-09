@@ -1,6 +1,6 @@
-# Wet Whiskers — Build 65: Clear controls and a working home
+# Wet Whiskers — Build 66: Climbing, swimming and backyard voices
 
-Play at https://shenoply.github.io/Gabagool/index.html?build=65
+Play at https://shenoply.github.io/Gabagool/index.html?build=66
 
 Single-file Three.js r128 game, with no build step. Serve `index.html` with `GLTFLoader.js`, `fat-rat.glb`, `bigrat.mp3`, and `opening-scene.webp` alongside it.
 
@@ -427,3 +427,15 @@ Static scenery collision triangles are indexed into nearby spatial cells without
 - Crafting takes material counts from the bag and home chest. Recipe success can lead directly into furniture placement.
 
 Validation: Node syntax check and real Three.js runtime checks for mesh collision, cup landing/exit, splash lifetime, bag capacity and overflow, crafting station gates, recipe consumption/output, fireplace effects, modal navigation, placement and door hinge. Existing collision/falling/portrait-camera regressions also pass. The runtime harness does not render GPU pixels; mobile appearance and device frame rate are not verified by these checks.
+
+
+## Build 66 — Contextual motion and neighbourhood audio
+
+- Two new procedural skeletal clips on the existing Pip rig: rope climbing and swimming. The original 14 imported clips remain. Rope paw contact uses a small iterative arm solver while the legs alternate.
+- A knotted rope beside the final crate on the tyre route: Grab to attach, joystick up/down to climb, Jump or Grab to release. Reaching the top transfers Pip onto the actual crate surface.
+- Deep water in the rain cup triggers buoyancy and paddling. Jump leaves the water; existing splash/ripple effects remain.
+- Original synthesized distant traffic and occasional horns; hound barks on approaching within five world units, with cooldowns. Zaytona has three meow contours and occasional expressive device-voice chatter.
+- The perched songbird trio discuss fictional backyard politics. Nearby speech uses available English device voices and subtitles, with cooldowns and no overlapping ambient speakers. Leaving hearing range, muting, menus, dialogue, scene changes and backgrounding stop ambient speech/audio.
+- Removed the stale part count from the Home button and the large gust-description toast. Moving paper remains visible.
+
+Validation: syntax and real Three.js runtime checks for clip attachment, rope ascent/pause/descent/release/top transfer, swimming/jump exit, muted rope prompts, bark cooldowns and subtitle fallback. A Web Audio/speech API mock checks audio graph creation/teardown and single-speaker scheduling. Prior falling, collision and dialogue-camera regressions pass. Animation appearance and audio timbre have not been verified on a physical phone; speech voices differ between browsers/devices.
