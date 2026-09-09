@@ -1,6 +1,6 @@
-# Wet Whiskers — Build 30: Pip comes home
+# Wet Whiskers — Build 65: Clear controls and a working home
 
-Play at https://shenoply.github.io/Gabagool/?build=30
+Play at https://shenoply.github.io/Gabagool/index.html?build=65
 
 Single-file Three.js r128 game, with no build step. Serve `index.html` with `GLTFLoader.js`, `fat-rat.glb`, `bigrat.mp3`, and `opening-scene.webp` alongside it.
 
@@ -415,3 +415,15 @@ Validation: actual Big Rat posed bounds fit the portrait camera projection (maxi
 
 ## Build 64 — Collision performance fix
 Static scenery collision triangles are indexed into nearby spatial cells without changing rendered meshes or collision shape. Removes duplicate player collision resolution and caches the static Big Rat posed bounds for dialogue. Existing collision and UI regression checks pass. A matched CPU query benchmark (180 ground/body queries, same imported yard, warmed once) improved from 1957 ms to 52 ms, about 38 times faster for this workload. This measures collision CPU time, not phone FPS; GPU performance and full phone rendering are not verified.
+
+
+## Build 65 — Clear controls, physical water and home crafting
+
+- Compact Bag / Craft / Menu controls, readable recipe sheets, and settings moved off the main view. Bag shows used / capacity (60 parts; 120 with the backpack upgrade). Tracked ingredients are shown in the bag.
+- Cup shell and interior floor use the visible mesh for collision. Landing in its water produces a pooled ripple, droplets and an original synthesized splash. The rat can jump back above the rim.
+- Home furniture, chest and display shelf use mesh collisions; removed the old circular furniture barriers. Returning or recycling decorations sends any bag overflow to the chest.
+- Crafting table unlocks a functional oven, fueled fireplace and homemade vinyl player. Oven recipes produce food. A lit fireplace dries nearby Pip and restores stamina. Vinyl player uses existing original synthesized Beethoven performances and collected records.
+- Three craftable window shapes, two craftable door shapes with the edge hinge preserved, and direct wall-paint / floor-finish controls. Crafting a door installs it; owned styles can be refitted without another recipe.
+- Crafting takes material counts from the bag and home chest. Recipe success can lead directly into furniture placement.
+
+Validation: Node syntax check and real Three.js runtime checks for mesh collision, cup landing/exit, splash lifetime, bag capacity and overflow, crafting station gates, recipe consumption/output, fireplace effects, modal navigation, placement and door hinge. Existing collision/falling/portrait-camera regressions also pass. The runtime harness does not render GPU pixels; mobile appearance and device frame rate are not verified by these checks.
