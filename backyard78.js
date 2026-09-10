@@ -1,0 +1,76 @@
+// Backyard integration: optional assets never gate startup. Original mission coordinates remain stable.
+let yard78=null;
+const assetCache78=new Map();
+function loadAsset78(file){if(!assetCache78.has(file))assetCache78.set(file,new Promise((resolve,reject)=>new THREE.GLTFLoader().load(file,resolve,undefined,reject)).catch(e=>{assetCache78.delete(file);throw e;}));return assetCache78.get(file);}
+function fitAsset78(scene,pos,dimensions,yaw=0){
+ const g=new THREE.Group(),visual=new THREE.Group();visual.add(scene);g.add(visual);visual.updateMatrixWorld(true);let b=new THREE.Box3().setFromObject(visual),s=b.getSize(new THREE.Vector3());const k=dimensions.uniform||1;
+ visual.scale.set(dimensions.w?dimensions.w/Math.max(s.x,.001):k,dimensions.h?dimensions.h/Math.max(s.y,.001):k,dimensions.d?dimensions.d/Math.max(s.z,.001):k);visual.updateMatrixWorld(true);b=new THREE.Box3().setFromObject(visual);visual.position.sub(new THREE.Vector3((b.min.x+b.max.x)/2,b.min.y,(b.min.z+b.max.z)/2));g.position.set(...pos);g.rotation.y=yaw;g.traverse(m=>{if(m.isMesh){m.userData.noInk=true;m.userData.keepGeometry=true;m.castShadow=false;m.receiveShadow=true;}});return g;
+}
+function removeSolid78(g){const set=new Set();g.traverse(m=>set.add(m));surfaces57=surfaces57.filter(s=>!set.has(s.mesh));root.userData.collisionCache62?.clear();}
+function solid78(g){root.add(g);g.updateWorldMatrix(true,true);registerSolid62(g);return g;}
+function state78(){return home.backyard78||(home.backyard78={});}
+function addFind78(id,label,item,count,pos,requirement=null){
+ const y=yard78,m=ITEMS[item].build();m.scale.setScalar(.35);m.position.set(...pos);m.name=label;m.visible=!state78()[id];root.add(m);y.finds.push({id,label,item,count,m,requirement});
+}
+function near78(){const u=rat?.userData,y=yard78;if(!y||y.owner!==root||phase!=='scavenge'||!u||u.drive77||u.air||u.bird71||u.rope66||u.wallState||u.climb||u.job67?.lock)return null;
+ const f=y.finds.find(f=>f.m.visible&&f.m.position.distanceTo(rat.position)<.85);if(f)return {type:'find',f};if(y.logs&&rat.position.distanceTo(y.logs.position)<1.5&&!state78().logWood)return {type:'wood'};if(y.rail&&rat.position.distanceTo(y.rail.start)<1.3)return {type:'rail'};return null;
+}
+function collectFind78(f){if(state78()[f.id])return;if(f.requirement&&!f.requirement()){sayToast('The spider is watching. Hide or distract it first.');return;}if(totalBag()+f.count>bagCapacity()){sayToast('Your bag is full. Store something first.');return;}
+ const actor=rat,owner=root;sequence67(rat,['Inspect_Find','Pocket_Find'],{lock:true,done:()=>{if(root!==owner||rat!==actor||state78()[f.id])return;if(totalBag()+f.count>bagCapacity()){sayToast('Make room in your bag.');return;}state78()[f.id]=true;inv[f.item]=(inv[f.item]||0)+f.count;f.m.visible=false;save();bag();sfx.pickup();sayToast(f.label+' added to your bag');}});
+}
+function ivy78(x,z,dx,dz,width,height=3){
+ const y=yard78,count=140,leafGeo=new THREE.BufferGeometry(),v=[0,.03,0,-.16,0,0,-.07,0,-.09,0,0,-.045,.045,0,-.13,.09,0,-.05,.19,0,0,.09,0,.05,.045,0,.13,0,0,.045,-.07,0,.09],idx=[];for(let i=1;i<=10;i++)idx.push(0,i,i===10?1:i+1);leafGeo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));leafGeo.setIndex(idx);leafGeo.computeVertexNormals();
+ const mat=new THREE.MeshStandardMaterial({color:0x647742,roughness:1,side:THREE.DoubleSide}),mesh=new THREE.InstancedMesh(leafGeo,mat,count),o=new THREE.Object3D();mesh.name='Solid folded ivy leaves';mesh.userData.noInk=true;
+ for(let i=0;i<count;i++){const row=i%14,t=Math.floor(i/14)/9,side=(i%2?1:-1),j=.18*Math.sin(i*2.4);o.position.set(x+dx*(t*width+j)-dz*.08,.15+row/13*height,z+dz*(t*width+j)+dx*.08);o.rotation.set(Math.PI/2+side*.3,0,Math.atan2(dz,dx)+i*.7);o.scale.setScalar(.8+(i%5)*.13);o.updateMatrix();mesh.setMatrixAt(i,o.matrix);}root.add(mesh);y.decor.push(mesh);
+}
+function recolor78(){root.traverse(m=>{if(!m.isMesh)return;const name=m.userData.sourceMaterial78||'';if(/Peeling teal fence/.test(name)||/Backyard perimeter fence/.test(m.name)){m.material=MT(0x78909a,'wood');m.material.roughness=1;}});}
+function hangRail78(){const y=yard78;if(!y?.rail)return;const u=rat.userData;u.rail78={t:0};u.air=false;u.vy=0;u.job67=null;u.act=null;sayToast('Move sideways along the rail · Jump to drop');}
+function dropRail78(){const u=rat?.userData;if(!u?.rail78)return false;u.rail78=null;u.air=true;u.vy=-.3;u.drop62=.5;return true;}
+function spiderClip78(sp,name){if(sp.clip===name)return;const a=sp.actions[name];if(!a)return;sp.actions[sp.clip]?.fadeOut(.12);a.reset().setLoop(THREE.LoopRepeat,Infinity).fadeIn(.12).play();sp.clip=name;}
+function spiderTick78(dt){const y=yard78,sp=y?.spider;if(!sp)return;sp.cool=Math.max(0,sp.cool-dt);sp.scared=Math.max(0,sp.scared-dt);const p=rat.position,dist=sp.g.position.distanceTo(p);const hidden=rat.userData.cover67||rat.userData.act?.type==='roll'||!!rat.userData.drive77;
+ sp.aware=!hidden&&dist<2.8&&sp.scared===0;const target=sp.scared>0?sp.home.clone().add(new THREE.Vector3(-1.5,0,-.5)):sp.aware?p.clone():sp.home.clone().add(new THREE.Vector3(Math.sin(y.time*.4)*.55,0,Math.cos(y.time*.4)*.35));target.y=sp.home.y;
+ if(target.distanceTo(sp.home)>2.8)target.copy(sp.home);const delta=target.sub(sp.g.position),speed=sp.scared>0?1.2:sp.aware?.6:.2;
+ if(delta.length()>.12){sp.g.rotation.y=Math.atan2(delta.x,delta.z);const step=Math.min(speed*dt,delta.length());sp.g.position.addScaledVector(delta.normalize(),step);spiderClip78(sp,sp.scared>0?'run_ani_vor':'walk_ani_vor');}else spiderClip78(sp,'warte_pose');
+ if(sp.aware&&dist<.7&&sp.cool===0){sp.cool=3;spiderClip78(sp,'Attack');const away=p.clone().sub(sp.g.position);away.y=0;if(away.lengthSq()>.001){const before=p.clone();p.addScaledVector(away.normalize(),.25);resolveGeometry62(p,before);}sayToast('Too close! Roll away or use your tail.');}
+ sp.mixer.update(dt);if(dist>18)sp.g.visible=false;else sp.g.visible=true;
+}
+async function seed78(){
+ const owner=root,y=yard78={owner,finds:[],decor:[],time:0,loaded:[],errors:[],ready:false,spider:null};state78();ui.phase.textContent='Backyard · Pip’s lane';recolor78();
+ ivy78(-20.8,19,0,1,6);ivy78(-20.8,30,0,1,6);ivy78(31.3,27,0,1,7);ivy78(14,37.6,1,0,7);
+ const jobs=[
+ ['picnic78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[14,0,26],{w:4,h:1.75,d:3.8});g.name='Backyard picnic table';solid78(g);y.table=g;addFind78('tableCrumbs','Picnic crumbs','crumbs',2,[14,1.83,26]);
+  // A short rope gives a readable way onto the tabletop; benches remain jumpable.
+  rope76(12.35,26,1.75,12.9,26);}],
+ ['logs78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[-18,0,21],{w:3.8,h:1.05,d:1.9});g.name='Climbable firewood stack';solid78(g);y.logs=g;addFind78('logToken','Hidden brass token','coin',1,[-18,1.13,21]);}],
+ ['gnomes78.glb',a=>{for(const [x,z]of [[11.8,34.8],[27.4,22.8]]){const g=fitAsset78(a.scene.clone(true),[x,0,z],{h:1.1,uniform:2.5});g.name='Garden gnome landmark';solid78(g);}addFind78('gnomeButton','Gnome’s lost button','button',1,[27.6,.13,23.3]);}],
+ ['gate78.glb',a=>{if(!gate57||gate57.owner!==owner)return;const g=fitAsset78(a.scene.clone(true),[0,0,0],{w:5.4,h:2.95,d:.2},-Math.PI/2);g.position.z=2.7;g.name='Hinged supplied metal gate';removeSolid78(gate57.leaf);gate57.leaf.clear();gate57.leaf.add(g);gate57.leaf.updateWorldMatrix(true,true);registerSolid62(gate57.leaf);}],
+ ['pool78.glb',a=>{if(!bilginPool||bilginPool.owner!==owner)return;const g=fitAsset78(a.scene.clone(true),[-15,0,33],{w:6.2,h:1.02,d:6.2});g.name='Supplied worn inflatable pool';removeSolid78(bilginPool.g);bilginPool.g.parent.remove(bilginPool.g);solid78(g);bilginPool.g=g;y.pool=g;}],
+ ['path78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[5,-.015,29],{w:16,h:.035,d:11});g.name='Branching garden stepping stones';root.add(g);y.path=g;}],
+ ['railing78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[-9.65,1.3,13],{w:.12,h:1.1,d:4.5});g.name='Traversable salvage railing';solid78(g);y.rail={g,start:new THREE.Vector3(-9.3,1.83,10.9),end:new THREE.Vector3(-9.3,1.83,15.1)};addFind78('railWasher','Rail-end washer','nail',2,[-9,1.4,15.25]);}],
+ ['spider78.glb',a=>{const visual=clonePipScene(a.scene),g=fitAsset78(visual,[-18.6,.025,23.4],{uniform:.025});root.add(g);g.name='Log-corner spider';const mixer=new THREE.AnimationMixer(visual),actions={};for(const clip of a.animations){const c=clip.clone();for(const tr of c.tracks){if(tr.name.endsWith('.position')&&tr.values.length>3){for(let i=3;i<tr.values.length;i+=3){tr.values[i]=tr.values[0];tr.values[i+2]=tr.values[2];}}}actions[c.name]=mixer.clipAction(c);}y.spider={g,mixer,actions,home:g.position.clone(),scared:0,cool:0,aware:false,clip:null};spiderClip78(y.spider,'warte_pose');addFind78('spiderTreasure','Spider’s shiny stash','coin',1,[-19,.13,23.9],()=>!y.spider.aware||y.spider.scared>0);}],
+ ['backyard-design78.glb',a=>{for(const [name,pos,size]of [['Garden tools',[26,0,33],{w:2.4,h:1,d:1.8}],['Herb bed',[27,0,29],{w:2.5,h:.7,d:3.4}],['Pot tunnel',[18,0,29],{w:1.4,h:1.4,d:2.5}]]){const part=a.scene.getObjectByName(name)||a.scene.getObjectByName(name.replace(/ /g,'_'));if(!part)throw Error('Missing design group '+name);const g=fitAsset78(part.clone(true),pos,size);g.name=name+' from approved backyard';solid78(g);}
+  // The bed's leaves are opaque geometry, never a solid collision wall.
+  const herbMat=M(0x748349);for(let i=0;i<12;i++){const stem=cyl(.025,.04,.38,herbMat,5);stem.position.set(26.25+(i%3)*.65,.89,28+Math.floor(i/3)*.62);root.add(stem);for(let side of [-1,1]){const leaf=sph(.17,herbMat,5,3);leaf.scale.set(.65,.2,1);leaf.position.copy(stem.position).add(new THREE.Vector3(side*.09,.1,0));root.add(leaf);}}
+ }]
+ ];
+ // Two concurrent downloads at most; failed decorations leave base gameplay intact.
+ let cursor=0;async function worker(){while(cursor<jobs.length){const [file,apply]=jobs[cursor++];try{const a=await loadAsset78(file);if(root!==owner)return;apply(a);y.loaded.push(file);}catch(e){y.errors.push(file);console.warn('Backyard asset unavailable:',file,e.message);}}}
+ await Promise.all([worker(),worker()]);if(root!==owner)return;y.ready=true;root.updateMatrixWorld(true);root.userData.collisionCache62?.clear();save();
+}
+const startBefore78=startScavenge;startScavenge=function(){startBefore78();seed78();};
+const grabBefore78=grab;grab=function(){if(!gameplayActive())return grabBefore78();if(rat.userData.rail78)return dropRail78();const n=near78();if(!n)return grabBefore78();if(n.type==='find')return collectFind78(n.f);if(n.type==='rail')return hangRail78();if(n.type==='wood'){if(totalBag()+3>bagCapacity()){sayToast('Make room for three sticks.');return;}const owner=root;sequence67(rat,['Inspect_Find','Pocket_Find'],{lock:true,done:()=>{if(root!==owner||state78().logWood||totalBag()+3>bagCapacity())return;inv.stick=(inv.stick||0)+3;state78().logWood=true;save();bag();sfx.pickup();sayToast('Three dry sticks collected');}});}};
+const hintBefore78=ropeHints66;ropeHints66=function(){hintBefore78();if(!gameplayActive())return;if(rat.userData.rail78){ui.prompt.style.display='block';ui.prompt.textContent='Hanging · move sideways · Jump to drop';$('padE').textContent='Let go';return;}const n=near78();if(n){ui.prompt.style.display='block';ui.prompt.textContent=n.type==='find'?n.f.label:n.type==='wood'?'Collect dry firewood':'Hang on the railing';$('padE').textContent=n.type==='rail'?'Hang on':'Collect';}};
+const controlBefore78=control;control=function(dt,options){const u=rat.userData;if(!u.rail78)return controlBefore78(dt,options);if(!gameplayActive()||document.hidden)return 0;const r=yard78?.rail;if(!r||yard78.owner!==root){dropRail78();return 0;}const dir=THREE.MathUtils.clamp(joy.x+(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),-1,1);u.rail78.t=THREE.MathUtils.clamp(u.rail78.t+dir*dt*.23,0,1);rat.position.lerpVectors(r.start,r.end,u.rail78.t);rat.rotation.y=-Math.PI/2;u.air=false;u.vy=0;u.vel=0;return 0;};
+const motionBefore78=motion67;motion67=function(g,dt,speed,base,act){if(g.userData.rail78)return 'Ledge_Hang_Loop';return motionBefore78(g,dt,speed,base,act);};
+const jumpBefore78=doJump;doJump=function(){if(dropRail78())return;return jumpBefore78();};
+const hitBefore78=tailHit67;tailHit67=function(g){hitBefore78(g);const sp=yard78?.spider;if(sp&&sp.g.position.distanceTo(g.position)<1.7){sp.scared=7;sp.aware=false;spiderClip78(sp,'run_ani_back');sayToast('The spider retreats—grab the stash!');}if(car77&&!car77.riding&&car77.g.position.distanceTo(g.position)<2){const before=car77.g.position.clone(),dir=before.clone().sub(g.position);dir.y=0;const next=before.clone().addScaledVector(dir.normalize(),.55);if(!blockedCar77(next)){car77.g.position.copy(next);car77.g.updateWorldMatrix(true,true);root.userData.collisionCache62?.clear();}}};
+const honkBefore78=honk77;honk77=function(){honkBefore78();const sp=yard78?.spider;if(car77?.riding&&sp&&car77.g.position.distanceTo(sp.g.position)<7){sp.scared=8;sp.aware=false;}};
+const tickBefore78=tickWorld38;tickWorld38=function(dt){tickBefore78(dt);if(yard78?.owner!==root||phase!=='scavenge'||!gameplayActive()||document.hidden)return;yard78.time+=dt;spiderTick78(dt);};
+// Drive contacts follow the actual steering wheel, using the existing rat rig.
+const makeRatBefore78=makeRat;makeRat=function(){const g=makeRatBefore78(),animate=g.animate;g.animate=function(dt,...args){animate(dt,...args);const u=g.userData;if(!u.drive77||!car77?.wheel||!u.pipBones)return;car77.g.updateWorldMatrix(true,true);g.updateWorldMatrix(true,true);
+ for(const side of ['Left','Right']){const arm=u.pipBones[side+'Arm'],fore=u.pipBones[side+'ForeArm'],hand=u.pipBones[side+'Hand'];if(!arm||!fore||!hand)continue;const target=car77.wheel.localToWorld(new THREE.Vector3(side==='Left'?-.15:.15,car77.horn>0&&side==='Right'?0:.07,0));for(let i=0;i<3;i++)for(const bone of [fore,arm]){const origin=bone.getWorldPosition(new THREE.Vector3()),from=hand.getWorldPosition(new THREE.Vector3()).sub(origin),to=target.clone().sub(origin);if(from.lengthSq()<1e-8||to.lengthSq()<1e-8)continue;const delta=new THREE.Quaternion().setFromUnitVectors(from.normalize(),to.normalize()),world=bone.getWorldQuaternion(new THREE.Quaternion());bone.quaternion.copy(bone.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(delta.multiply(world)));bone.updateWorldMatrix(false,true);}}
+ };return g;};
+// Route button dispatch through the current horn handler, including wildlife reaction.
+carPanel77.children[0].onpointerdown=e=>{e.preventDefault();e.stopPropagation();honk77();};
+// Feet span narrow gaps between picnic-table boards; do not fall through a plank seam.
+const floorBefore78=groundSurface57;groundSurface57=function(x,z,h){let best=floorBefore78(x,z,h);if(yard78?.owner===root&&yard78.table&&Math.abs(x-14)<2.1&&Math.abs(z-26)<2){for(const offset of [-.08,.08]){const hit=floorBefore78(x,z+offset,h);if(hit&&(!best||hit.h>best.h))best=hit;}}return best;};

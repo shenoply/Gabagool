@@ -1,0 +1,74 @@
+{
+  "interactionChecks": {
+    "tableBox": [
+      4,
+      1.7499999999999998,
+      3.799999999999997
+    ],
+    "tableHits": [
+      {
+        "y": 0.9450026457009912,
+        "n": 0.9999999999999999
+      }
+    ],
+    "tableFloor": 1.749999999999999,
+    "tableSamples": [
+      1.7499999999999991,
+      1.749999999999999,
+      1.749999999999999,
+      1.749999999999999,
+      1.749999999999999
+    ],
+    "poolFloor": 0.09291494016906295,
+    "railTravel": 0.11499999999999994,
+    "railDrop": true,
+    "carEntered": true,
+    "carTravel": 0.8020726831078377,
+    "carExited": true,
+    "oneTime": true,
+    "spiderRetreat": true,
+    "gateAngle": 1.4486777711499463
+  },
+  "assets": [
+    "picnic78.glb",
+    "logs78.glb",
+    "gnomes78.glb",
+    "gate78.glb",
+    "path78.glb",
+    "pool78.glb",
+    "railing78.glb",
+    "spider78.glb",
+    "backyard-design78.glb"
+  ],
+  "errors": [],
+  "finds": [
+    "tableCrumbs",
+    "logToken",
+    "gnomeButton",
+    "railWasher",
+    "spiderTreasure"
+  ],
+  "spiderAnimations": [
+    "warte_pose",
+    "walk_ani_vor",
+    "walk_left",
+    "run_ani_vor",
+    "walk_ani_back",
+    "run_ani_back",
+    "run_right",
+    "Attack",
+    "fall",
+    "run_left",
+    "die",
+    "Jump",
+    "walk_right",
+    "die 2"
+  ],
+  "ratAnimations": [
+    "Drive_Idle",
+    "Drive_Steer_Left",
+    "Drive_Steer_Right",
+    "Drive_Honk"
+  ],
+  "meshCount": 128
+}

@@ -1,0 +1,71 @@
+[
+  {
+    "file": "picnic78.glb",
+    "triangles": 224,
+    "bytes": 434512,
+    "animations": []
+  },
+  {
+    "file": "logs78.glb",
+    "triangles": 3858,
+    "bytes": 1066032,
+    "animations": []
+  },
+  {
+    "file": "gnomes78.glb",
+    "triangles": 4518,
+    "bytes": 535024,
+    "animations": []
+  },
+  {
+    "file": "gate78.glb",
+    "triangles": 1110,
+    "bytes": 469608,
+    "animations": []
+  },
+  {
+    "file": "pool78.glb",
+    "triangles": 20914,
+    "bytes": 2518768,
+    "animations": []
+  },
+  {
+    "file": "path78.glb",
+    "triangles": 1920,
+    "bytes": 120924,
+    "animations": []
+  },
+  {
+    "file": "spider78.glb",
+    "triangles": 2892,
+    "bytes": 913016,
+    "animations": [
+      "warte_pose",
+      "walk_ani_vor",
+      "walk_left",
+      "run_ani_vor",
+      "walk_ani_back",
+      "run_ani_back",
+      "run_right",
+      "Attack",
+      "fall",
+      "run_left",
+      "die",
+      "Jump",
+      "walk_right",
+      "die 2"
+    ]
+  },
+  {
+    "file": "railing78.glb",
+    "triangles": 1152,
+    "bytes": 487888,
+    "animations": []
+  },
+  {
+    "file": "toy-car77.glb",
+    "triangles": 18739,
+    "bytes": 1915312,
+    "animations": []
+  }
+]
