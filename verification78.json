@@ -19,21 +19,21 @@
       1.4499999999999993,
       1.4499999999999993
     ],
-    "poolFloor": 0.07105338533139242,
+    "poolFloor": 0.025,
     "railTravel": 0.11499999999999994,
     "railDrop": true,
     "carEntered": true,
     "carBox": [
-      0.8101161367127645,
-      0.7447265535303189,
-      1.8499999999999979
+      1.1081038679776407,
+      0.5957812428242553,
+      1.6094323283612972
     ],
-    "carTravel": 0.8020726831078377,
-    "driverScale": 0.205,
-    "driverHeight": 0.3725742146239467,
+    "carTravel": 4.162796121793213,
+    "driverScale": 0.175,
+    "driverHeight": 0.22948124741673184,
     "handGaps": [
-      0.14013040460891196,
-      0.13371347946109818
+      0.1252474447120986,
+      0.12028348983994523
     ],
     "carExited": true,
     "oneTime": true,
@@ -46,10 +46,9 @@
     "gnomes78.glb",
     "gate78.glb",
     "path78.glb",
-    "pool78.glb",
     "railing78.glb",
-    "spider78.glb",
-    "backyard-design78.glb"
+    "backyard-design78.glb",
+    "spider78.glb"
   ],
   "errors": [],
   "finds": [
@@ -81,5 +80,5 @@
     "Drive_Steer_Right",
     "Drive_Honk"
   ],
-  "meshCount": 125
+  "meshCount": 292
 }
