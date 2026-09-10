@@ -1,0 +1,49 @@
+// Toy car driving. Source is embedded into index.html by tools/embed_driving77.py.
+let car77=null;
+function drivingClips77(u){
+ if(u.pipActions.Drive_Idle)return;
+ const idle=u.pipActions.Idle?.getClip();if(!idle)return;
+ for(const [name,steer,horn]of [['Drive_Idle',0,0],['Drive_Steer_Left',-1,0],['Drive_Steer_Right',1,0],['Drive_Honk',0,1]]){
+  const clip=idle.clone();clip.name=name;clip.duration=1.2;
+  // Hold the idle root still: vehicle physics exclusively owns translation.
+  clip.tracks=clip.tracks.map(t=>{const q=t.clone(),n=t.getValueSize();q.times=new Float32Array([0,1.2]);q.values=new Float32Array([...t.values.slice(0,n),...t.values.slice(0,n)]);return q;});
+  const pose={LeftUpLeg:[-1.35,0,0],RightUpLeg:[-1.35,0,0],LeftLeg:[1.4,0,0],RightLeg:[1.4,0,0],Spine:[.13,0,-steer*.06],Head:[0,steer*.18,0],LeftArm:[-.55,0,-.6],RightArm:[-.55,0,.6],LeftForeArm:[-.9,0,0],RightForeArm:[-.9,0,0]};
+  for(const [bone,angles]of Object.entries(pose)){
+   if(!u.pipBones[bone])continue;const old=idle.tracks.find(t=>t.name===bone+'.quaternion');const base=old?new THREE.Quaternion().fromArray(old.values):u.pipRest[bone].clone();const times=[0,.3,.6,.9,1.2],values=[];
+   for(const t of times){const a=angles.slice();if(bone==='RightForeArm')a[0]-=horn*Math.sin(t/1.2*Math.PI)*.35;if(bone.includes('Arm'))a[1]+=steer*.12;if(bone==='Spine')a[0]+=Math.sin(t/1.2*Math.PI*2)*.015;values.push(...base.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(...a))).toArray());}
+   clip.tracks=clip.tracks.filter(t=>t.name!==bone+'.quaternion');clip.tracks.push(new THREE.QuaternionKeyframeTrack(bone+'.quaternion',times,values));
+  }
+  u.pipActions[name]=u.pipMixer.clipAction(clip);
+ }
+}
+function stopEngine77(){if(!car77?.audio)return;const a=car77.audio;try{a.osc.stop();}catch(e){}a.osc.disconnect();a.filter.disconnect();a.gain.disconnect();car77.audio=null;}
+function engine77(){if(!voiceOn||!car77?.riding)return;const ac=sfxCtx();if(!ac)return;ac.resume().catch(()=>{});if(car77.audio)return;const osc=ac.createOscillator(),filter=ac.createBiquadFilter(),gain=ac.createGain();osc.type='sawtooth';filter.type='lowpass';filter.frequency.value=350;gain.gain.value=.018;osc.connect(filter).connect(gain).connect(ac.destination);osc.frequency.value=48;osc.start();car77.audio={osc,filter,gain};}
+function honk77(){if(!car77?.riding||!gameplayActive()||car77.horn>0)return;car77.horn=1.2;if(voiceOn){const ac=sfxCtx();if(ac){ac.resume().catch(()=>{});tone(ac,{f:390,f2:370,dur:.25,vol:.045,type:'square'});tone(ac,{f:490,f2:470,dur:.25,vol:.025,type:'triangle'});}}}
+function nearCar77(){return car77?.owner===root&&!car77.riding&&car77.g.position.distanceTo(rat.position)<2.4&&!rat.userData.air&&!rat.userData.pick&&!rat.userData.bird71&&!rat.userData.rope66&&!rat.userData.swim66&&!rat.userData.wallState&&!rat.userData.job67?.lock;}
+function blockedCar77(p,radius=.85){return wallSolids().some(o=>o.h>.12&&Math.abs(p.x-o.x)<o.hx+radius&&Math.abs(p.z-o.z)<o.hz+radius)||p.x<-19||p.x>29||p.z<0||p.z>36;}
+function enterCar77(){if(!nearCar77())return false;const c=car77,u=rat.userData;drivingClips77(u);if(!u.pipActions.Drive_Idle){sayToast('Pip is still loading. Try again.');return true;}c.riding=true;c.speed=0;u.drive77=true;u.job67=null;u.act=null;u.air=false;u.vy=0;u.vel=0;u.motionX=u.motionZ=0;c.originalScale=rat.scale.clone();rat.scale.multiplyScalar(.72);engine77();sayToast('Joystick: steer and drive · pull back to reverse');return true;}
+function exitCar77(){const c=car77;if(!c?.riding)return false;if(Math.abs(c.speed)>.4){c.speed=0;sayToast('Stopped. Tap Exit again.');return true;}let dest=null;for(const [x,z]of [[1.7,0],[-1.7,0],[0,-2.4],[0,2.4]]){const p=new THREE.Vector3(x,0,z).applyAxisAngle(new THREE.Vector3(0,1,0),c.g.rotation.y).add(c.g.position);p.y=0;if(!blockedCar77(p,.25)){dest=p;break;}}if(!dest){sayToast('Move to an open space to get out.');return true;}c.riding=false;rat.userData.drive77=false;rat.scale.copy(c.originalScale);rat.position.copy(dest);rat.userData.air=false;rat.userData.vel=0;rat.userData.job67=null;stopEngine77();return true;}
+function disposeCar77(){if(!car77)return;stopEngine77();if(car77.riding&&rat){rat.userData.drive77=false;if(car77.originalScale)rat.scale.copy(car77.originalScale);}car77=null;carPanel77.style.display='none';}
+function addCar77(){disposeCar77();const owner=root;new THREE.GLTFLoader().load('toy-car77.glb',asset=>{if(root!==owner||phase!=='scavenge')return;const visual=asset.scene,holder=new THREE.Group();holder.add(visual);let b=new THREE.Box3().setFromObject(visual),size=b.getSize(new THREE.Vector3());const k=3.0/Math.max(size.x,size.z);visual.scale.multiplyScalar(k);b=new THREE.Box3().setFromObject(visual);visual.position.sub(new THREE.Vector3((b.min.x+b.max.x)/2,b.min.y,(b.min.z+b.max.z)/2));visual.traverse(o=>{if(o.isMesh){o.userData.noInk=true;o.userData.keepGeometry=true;o.castShadow=false;}});holder.name='Drivable toy car';holder.position.set(4,0,26);root.add(holder);
+ car77={g:holder,visual,owner,riding:false,speed:0,steer:0,horn:0,audio:null};
+ // Keep the supplied car intact; an exposed little driver's perch makes Pip readable.
+ const seat=new THREE.Mesh(new THREE.BoxGeometry(.7,.12,.65),new THREE.MeshStandardMaterial({color:0x684633}));b=new THREE.Box3().setFromObject(visual);const roof=b.max.y;seat.position.set(0,roof+.06,-.2);holder.add(seat);car77.seat=new THREE.Vector3(0,roof-.1,-.2);
+ const wheel=new THREE.Mesh(new THREE.TorusGeometry(.22,.025,6,16),new THREE.MeshStandardMaterial({color:0x34332d}));wheel.position.set(0,roof+.42,.4);wheel.rotation.x=-.6;holder.add(wheel);car77.wheel=wheel;
+ },undefined,e=>console.warn('Optional toy car could not load',e));}
+function controlCar77(dt,options){const c=car77;if(!c?.riding)return null;if(c.owner!==root||phase!=='scavenge'){disposeCar77();return null;}dt=Math.min(.033,Math.max(0,dt));const active=gameplayActive()&&!document.hidden&&!options.locked;if(!active){c.speed=0;stopEngine77();return 0;}
+ const throttle=THREE.MathUtils.clamp((keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.z,-1,1),steer=THREE.MathUtils.clamp((keys.a||keys.arrowleft?1:0)-(keys.d||keys.arrowright?1:0)-joy.x,-1,1);c.steer=steer;c.horn=Math.max(0,c.horn-dt);c.speed=THREE.MathUtils.damp(c.speed,throttle*(throttle<0?2.5:6.5),throttle?2.5:5,dt);
+ const yaw=c.g.rotation.y+steer*c.speed*.36*dt,from=c.g.position.clone(),to=from.clone().add(new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw)).multiplyScalar(c.speed*dt));
+ if(!blockedCar77(to)){let blocked=false;for(const offset of [-.7,0,.7]){const a=from.clone().add(new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw)).multiplyScalar(offset)),p=to.clone().add(new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw)).multiplyScalar(offset));const target=p.clone();resolveGeometry62(p,a);if(p.distanceTo(target)>.01)blocked=true;}if(!blocked){c.g.position.copy(to);c.g.rotation.y=yaw;}else c.speed=0;}else c.speed=0;
+ rat.position.copy(c.seat).applyAxisAngle(new THREE.Vector3(0,1,0),c.g.rotation.y).add(c.g.position);rat.rotation.y=c.g.rotation.y;rat.userData.air=false;rat.userData.vy=0;rat.userData.vel=0;c.wheel.rotation.z=-steer*.4;
+ if(voiceOn){engine77();if(c.audio){const a=c.audio,ac=a.osc.context;a.osc.frequency.setTargetAtTime(48+Math.abs(c.speed)*14,ac.currentTime,.1);a.gain.gain.setTargetAtTime(.018+Math.abs(c.speed)*.003,ac.currentTime,.1);}}else stopEngine77();return 0;}
+const carPanel77=document.createElement('div');carPanel77.style.cssText='position:fixed;right:18px;bottom:180px;z-index:60;display:none;gap:8px';for(const [label,fn]of [['Horn',honk77],['Exit',exitCar77]]){const b=document.createElement('button');b.className='btn';b.textContent=label;b.onpointerdown=e=>{e.preventDefault();e.stopPropagation();fn();};carPanel77.appendChild(b);}document.body.appendChild(carPanel77);
+const motionBefore77=motion67;motion67=function(g,dt,speed,base,act){if(g.userData.drive77){drivingClips77(g.userData);return car77.horn>0?'Drive_Honk':car77.steer>.1?'Drive_Steer_Left':car77.steer<-.1?'Drive_Steer_Right':'Drive_Idle';}return motionBefore77(g,dt,speed,base,act);};
+const controlBefore77=control;control=function(dt,options){const result=controlCar77(dt,options);return result===null?controlBefore77(dt,options):result;};
+const grabBefore77=grab;grab=function(){if(car77?.riding)return exitCar77();if(gameplayActive()&&nearCar77())return enterCar77();return grabBefore77();};
+const hintsBefore77=ropeHints66;ropeHints66=function(){hintsBefore77();if(!rat)return;const driving=!!car77?.riding&&car77.owner===root;carPanel77.style.display=driving&&gameplayActive()?'flex':'none';if(driving){if(wallPanel)wallPanel.style.display='none';tailButton67.style.display='none';ui.prompt.style.display='none';$('padE').textContent='Exit';}else if(nearCar77()&&gameplayActive()){ui.prompt.style.display='block';ui.prompt.textContent='Drive toy car';$('padE').textContent='Drive';}};
+const startBefore77=startScavenge;startScavenge=function(){disposeCar77();startBefore77();addCar77();};
+for(const name of ['doJump','doBite','doRoll','whip67']){const fn=({doJump,doBite,doRoll,whip67})[name];const guarded=function(...args){if(car77?.riding)return;return fn(...args);};if(name==='doJump')doJump=guarded;if(name==='doBite')doBite=guarded;if(name==='doRoll')doRoll=guarded;if(name==='whip67')whip67=guarded;}
+addEventListener('keydown',e=>{if(!e.repeat&&e.key.toLowerCase()==='h')honk77();});
+addEventListener('visibilitychange',()=>{if(document.hidden){stopEngine77();if(car77)car77.speed=0;}});
+const tickBefore77=tickWorld38;tickWorld38=function(dt){if(car77&&car77.owner!==root)disposeCar77();tickBefore77(dt);if(car77?.riding&&(!gameplayActive()||!voiceOn))stopEngine77();};
+const onceBefore77=once67;once67=function(name){return name?.startsWith('Drive_')?false:onceBefore77(name);};
