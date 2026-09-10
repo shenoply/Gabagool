@@ -13,20 +13,20 @@
   },
   {
     "file": "gnomes78.glb",
-    "triangles": 4518,
-    "bytes": 535024,
+    "triangles": 28872,
+    "bytes": 1534212,
     "animations": []
   },
   {
     "file": "gate78.glb",
-    "triangles": 1110,
-    "bytes": 469608,
+    "triangles": 1530,
+    "bytes": 126860,
     "animations": []
   },
   {
     "file": "pool78.glb",
-    "triangles": 20914,
-    "bytes": 2518768,
+    "triangles": 25516,
+    "bytes": 2668140,
     "animations": []
   },
   {
@@ -64,8 +64,8 @@
   },
   {
     "file": "toy-car77.glb",
-    "triangles": 18739,
-    "bytes": 1915312,
+    "triangles": 24172,
+    "bytes": 1065536,
     "animations": []
   }
 ]
