@@ -2732,6 +2732,8 @@ const inventoryBefore85=inventoryRows47;inventoryRows47=function(){return invent
 const suppliesBefore85=openSupplies;openSupplies=function(){if(inventory47.tab==='furniture')inventory47.tab='all';suppliesBefore85();const b=$('modalBody').querySelector('[data-invtab47="furniture"]');if(b){b.textContent='My Closet ↗';b.onclick=()=>openCloset85();}};
 const homeMenuBefore85=homeMenu63;homeMenu63=function(){homeMenuBefore85();for(const b of $('modalActions').children)if(b.textContent==='Place furniture'){b.textContent='My Closet · arrange furniture';b.onclick=()=>openCloset85();}};
 $('homePanelToggle').onclick=homeMenu63;
+// Installed doors are single upgrades, never a batch that consumes extra supplies.
+const limitBefore85=craftLimit;craftLimit=function(id){const limit=limitBefore85(id);return CRAFT[id]?.doorStyle65?Math.min(1,limit):limit;};
 // Station availability and actual craft permission now use the same distance rule.
 const stationBefore85=stationMessage;stationMessage=function(c){const reason=stationBefore85(c);if(reason||!c.bench&&!c.station)return reason;const yard=courtyardReady76()&&(!c.station||c.station==='workbench');const near=yard?Math.hypot(rat.position.x-8.5,rat.position.z-35)<=2.8:phase==='house'&&hs?.placed.some(e=>(e.p.id===(c.station||'workbench')||c.station==='cookstove'&&e.p.id==='oven65')&&Math.hypot(rat.position.x-e.p.x,rat.position.z-e.p.z)<=2.8);return near?'':'Stand beside your '+(c.station?'cooking station':'crafting table')+'.';};
 // An overview stays fixed while editing; tapping places the preview, never the rat.
