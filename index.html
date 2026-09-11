@@ -2764,7 +2764,7 @@ const whipBefore86=whip67;whip67=function(){if(decor85)return;return whipBefore8
 function talkHint86(){if(canTalk86()&&!sc.talk){ui.prompt.style.display='block';ui.prompt.textContent='E · Talk to Big Rat';$('padE').textContent='Talk';}}
 
 // Build 87: compact placement controls and actual wall contact.
-function nearbyWall(){const w=nearbyWallLegacy87();if(!w)return null;const ray=new THREE.Raycaster(new THREE.Vector3(rat.position.x,rat.position.y+.42,rat.position.z),new THREE.Vector3(-w.nx,0,-w.nz),0,.65);return ray.intersectObjects(solidMeshes62(),false).length?w:null;}
+function nearbyWall(){const w=nearbyWallLegacy87();if(!w||phase!=='scavenge')return w;const ray=new THREE.Raycaster(new THREE.Vector3(rat.position.x,rat.position.y+.42,rat.position.z),new THREE.Vector3(-w.nx,0,-w.nz),0,.65);return ray.intersectObjects(solidMeshes62(),false).length?w:null;}
 const more87=document.createElement('button');more87.id='placeMore87';more87.className='btn';more87.textContent='More';more87.onclick=()=>{document.body.classList.toggle('place-more87');more87.textContent=document.body.classList.contains('place-more87')?'Less':'More';};$('hplace').appendChild(more87);
 const beginBefore87=beginPlace;beginPlace=function(...args){document.body.classList.remove('place-more87');more87.textContent='More';beginBefore87(...args);};
 
