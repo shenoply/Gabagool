@@ -33,6 +33,14 @@ function cleanPoolZone78(){
  const remove=/Walkable escape plank|Salvage route deck|Deck support|Floating biscuit tin lid/i;
  for(const node of [...root.children]){if(!remove.test(node.name||''))continue;const p=node.position;if(p.x<-16.25&&p.z>30){removeSolid78(node);root.remove(node);}}
 }
+function clearLegacyWood81(){
+ const remove=/^(Batched backyard structures|Salvage route deck|Deck support|Walkable escape plank|Hinged shortcut plank|Small prize shelf|Loose shelf brace|Bird-route salvage shelf|Climbing rope to salvage platform|Legacy wooden platform|Legacy wooden platform support|Backyard picnic table|Garden stepping stone|Climbable garden rock)$/i,dead=[];
+ root.traverse(o=>{if(remove.test(o.name||''))dead.push(o);});
+ for(const o of dead){removeSolid78(o);o.parent?.remove(o);}
+ if(world60?.owner===root){for(const f of world60.finds||[]){f.cover?.parent?.remove(f.cover);f.tag?.parent?.remove(f.tag);f.opened=true;f.g.visible=!home.discoveries60[f.id];f.g.position.y=.1;}world60.platforms=[];world60.ropes71=[];world60.shortcuts=[];}
+ YARD_DATA.obstacles.length=0;YARD_DATA.platforms.length=0;
+ root.updateMatrixWorld(true);root.userData.collisionCache62?.clear();
+}
 function simplePool78(){
  const g=new THREE.Group();g.position.set(-12.5,0,30.7);g.name='Clean striped inflatable kids pool';
  const colors=[0xe9a46f,0xf2d986,0x79aeb1],mats=colors.map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.88,metalness:0}));
@@ -53,15 +61,11 @@ function spiderTick78(dt){const y=yard78,sp=y?.spider;if(!sp)return;sp.cool=Math
 }
 async function seed78(){
  const owner=root,y=yard78={owner,finds:[],decor:[],time:0,loaded:[],errors:[],ready:false,spider:null};state78();ui.phase.textContent='Backyard · Pip’s lane';recolor78();
- yardFence78();ivy78(-20.7,8,0,1,9,2.1);ivy78(31.2,25,0,1,7,2.1);ivy78(-7,37.6,1,0,10,2.1);cleanPoolZone78();
+ clearLegacyWood81();yardFence78();ivy78(-20.7,8,0,1,9,2.1);ivy78(31.2,25,0,1,7,2.1);ivy78(-7,37.6,1,0,10,2.1);cleanPoolZone78();
  const jobs=[
- ['picnic78.glb',a=>{const g=fitAsset78(cleanSupplied78(a.scene.clone(true),'picnic'),[19.6,0,3.1],{w:3.6,h:1.45,d:3.25});g.name='Backyard picnic table';solid78(g);y.table=g;addFind78('tableCrumbs','Picnic crumbs','crumbs',2,[19.6,1.53,3.1]);
-  // A short rope gives a readable way onto the tabletop; benches remain jumpable.
-  rope76(18.1,3.1,1.45,18.6,3.1);}],
  ['logs78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[-15.2,0,17.4],{w:3.8,h:1.05,d:1.9},12*Math.PI/180);g.name='Climbable firewood stack';solid78(g);y.logs=g;addFind78('logToken','Hidden brass token','coin',1,[-15.2,1.13,17.4]);}],
  ['gnomes78.glb',a=>{for(const [x,z]of [[11.8,34.8],[25.9,19.3]]){const g=fitAsset78(cleanSupplied78(a.scene.clone(true),'gnome'),[x,0,z],{h:.82,uniform:1});g.name='Garden gnome landmark';solid78(g);}addFind78('gnomeButton','Gnome’s lost button','button',1,[26.1,.13,19.8]);}],
  ['gate78.glb',a=>{if(!gate57||gate57.owner!==owner)return;const g=fitAsset78(cleanSupplied78(a.scene.clone(true),'gate'),[0,0,0],{w:5.35,h:2.8,d:.16},-Math.PI/2);g.position.z=2.8;g.name='Single hinged garden gate';removeSolid78(gate57.leaf);gate57.leaf.clear();gate57.leaf.add(g);gate57.leaf.updateWorldMatrix(true,true);registerSolid62(gate57.leaf);}],
- ['path78.glb',a=>{const stones=[[-4,28,1.1,.16,.8],[0,28.6,1.2,.14,.8],[4,29,1.1,.12,.75],[8,28.5,1.3,.14,.85],[19,31,1.35,.38,1.05],[-7,34,1.1,.13,.8]];for(const [x,z,w,h,d]of stones){const g=fitAsset78(a.scene.clone(true),[x,-.01,z],{w,h,d},(x+z)*.17);g.name=h>.2?'Climbable garden rock':'Garden stepping stone';if(h>.2)solid78(g);else root.add(g);y.decor.push(g);}y.path=true;}],
  ['railing78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[-7.5,1.3,4.7],{w:.12,h:1.1,d:4.5});g.name='Traversable salvage railing';solid78(g);y.rail={g,start:new THREE.Vector3(-7.15,1.83,2.6),end:new THREE.Vector3(-7.15,1.83,6.8)};addFind78('railWasher','Rail-end washer','nail',2,[-6.85,1.4,6.95]);}],
  ['spider78.glb',a=>{const visual=clonePipScene(a.scene),g=fitAsset78(visual,[-18.6,.025,23.4],{uniform:.025});root.add(g);g.name='Log-corner spider';const mixer=new THREE.AnimationMixer(visual),actions={};for(const clip of a.animations){const c=clip.clone();for(const tr of c.tracks){if(tr.name.endsWith('.position')&&tr.values.length>3){for(let i=3;i<tr.values.length;i+=3){tr.values[i]=tr.values[0];tr.values[i+2]=tr.values[2];}}}actions[c.name]=mixer.clipAction(c);}y.spider={g,mixer,actions,home:g.position.clone(),scared:0,cool:0,aware:false,clip:null};spiderClip78(y.spider,'warte_pose');addFind78('spiderTreasure','Spider’s shiny stash','coin',1,[-19,.13,23.9],()=>!y.spider.aware||y.spider.scared>0);}],
  ['backyard-design78.glb',a=>{for(const [name,pos,size,yaw]of [['Garden tools',[27.8,0,32.3],{w:2.4,h:1,d:1.8},0],['Herb bed',[28.2,0,24.3],{w:2.5,h:.7,d:3.4},0],['Pot tunnel',[17.6,0,17.8],{w:1.4,h:1.4,d:2.5},Math.PI/2]]){const part=a.scene.getObjectByName(name)||a.scene.getObjectByName(name.replace(/ /g,'_'));if(!part)throw Error('Missing design group '+name);const g=fitAsset78(part.clone(true),pos,size,yaw);g.name=name+' from approved backyard';solid78(g);}
@@ -89,4 +93,3 @@ const makeRatBefore78=makeRat;makeRat=function(){const g=makeRatBefore78(),anima
 // Route button dispatch through the current horn handler, including wildlife reaction.
 carPanel77.children[0].onpointerdown=e=>{e.preventDefault();e.stopPropagation();honk77();};
 // Feet span narrow gaps between picnic-table boards; do not fall through a plank seam.
-const floorBefore78=groundSurface57;groundSurface57=function(x,z,h){let best=floorBefore78(x,z,h);if(yard78?.owner===root&&yard78.table&&Math.abs(x-19.6)<2.1&&Math.abs(z-3.1)<2){for(const offset of [-.08,.08]){const hit=floorBefore78(x,z+offset,h);if(hit&&(!best||hit.h>best.h))best=hit;}}return best;};
