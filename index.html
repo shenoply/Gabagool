@@ -877,8 +877,8 @@ function tickZaytona(dt){const c=zaytona;if(!c||c.owner!==root||!rat)return;if(p
 let sc;
 function startScavenge(){
   exitPhoto();
-  phase='scavenge';clear();bag();ui.hb.style.display='none';radioStop();$('radioui').style.display='none';scene.background=new THREE.Color(0x7d918f);sun.intensity=.95;hemi.intensity=.95;rim.intensity=.45;sfx.rain(true);ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Junkyard · Pip’s lane';
-  scene.fog=new THREE.Fog(0x7d918f,36,100);
+  phase='scavenge';clear();bag();ui.hb.style.display='none';radioStop();$('radioui').style.display='none';scene.background=new THREE.Color(0x929b94);sun.intensity=.95;hemi.intensity=.95;rim.intensity=.45;sfx.rain(true);ui.pad.style.display=matchMedia('(pointer:coarse)').matches?'flex':'none';ui.phase.textContent='Backyard · Pip’s lane';
+  scene.fog=new THREE.Fog(0x929b94,24,68);
   attachJunkyard(root);
   // the dumpster
   const dump=new THREE.Group();dump.position.set(0,0,-4);root.add(dump);dump.scale.setScalar(1.3);
@@ -1836,7 +1836,7 @@ function seedModels44(){actors44=[];nearAnimal44=null;treeSolids44=[];if(phase!=
  jobs.push(addModel44(owner,'squirrel',[-7,0,24],.28,'rest',.6));
  jobs.push(addModel44(owner,'songbirds',[4.2,1.5,27.4],1.05,'perched',0));
  jobs.push(addModel44(owner,'kingfisher',[-3,3.5,18],.45,'fly'));
- jobs.push(addModel44(owner,'osprey',[7,9,7],2.3,'glide'));
+ jobs.push(addModel44(owner,'osprey',[7,8,7],1.35,'glide'));
  treeSolids44.push({x:-6.7,z:19.5,hx:.4,hz:.4,h:3});
  
  // Falling blossom petals follow the backyard wind.
@@ -2434,7 +2434,7 @@ function seed76(){if(phase!=='scavenge')return;const s=progress76();yard76={owne
 }
 for(const [id,name]of [['vinyl','Lost violet-label vinyl'],['pool','Small silver pool key'],['prize','Brass spool charm'],['rain','Rain-washed copper token'],['cat','Zaytona’s coat button']])CRAFT[id+'76']={name,collectible:true,needs:{},r:.25,flat:true,build:()=>collectible76(id)};
 YARD_DATA.platforms=YARD_DATA.platforms.filter(p=>!(p.x===-12&&p.z>=0&&p.z<7));
-NB.set(27.8,0,25);
+NB.set(-2.8,0,28.7);
 const startBefore76=startScavenge;startScavenge=function(){startBefore76();seed76();batch76();};
 function near76(){const y=yard76,u=rat?.userData;if(!y||y.owner!==root||phase!=='scavenge'||!u||u.bird71||u.board75||u.rope66||u.wallState||u.climb||u.job67?.lock||u.air)return null;const p=rat.position,near=m=>p.distanceTo(m.position)<1.15;
  if(near(y.chest))return {kind:'chest',label:'Open storage chest'};if(near(y.bench))return {kind:'bench',label:'Use courtyard workbench'};if(near(y.record))return {kind:'record',label:'Play records'};
@@ -2489,6 +2489,9 @@ function batch76(){const fixed=/^(Salvage route deck|Deck support|Walkable escap
 
 
 
+
+
+
 // BEGIN DRIVING77
 // Toy car driving. Source is embedded into index.html by tools/embed_driving77.py.
 let car77=null;
@@ -2518,7 +2521,7 @@ function blockedCar77(p,radius=.55){return wallSolids().some(o=>o.h>.12&&Math.ab
 function enterCar77(){if(!nearCar77())return false;const c=car77,u=rat.userData;u.driveClipVersion79=false;drivingClips77(u);if(!u.pipActions.Drive_Idle){sayToast('Pip is still loading. Try again.');return true;}c.riding=true;c.speed=0;u.drive77=true;u.job67=null;u.act=null;u.air=false;u.vy=0;u.vel=0;u.motionX=u.motionZ=0;c.originalScale=rat.scale.clone();rat.scale.multiplyScalar(.70);removeSolid78(c.g);engine77();sayToast('Joystick: steer and drive · pull back to reverse');return true;}
 function exitCar77(){const c=car77;if(!c?.riding)return false;if(Math.abs(c.speed)>.4){c.speed=0;sayToast('Stopped. Tap Exit again.');return true;}let dest=null;for(const [x,z]of [[1.7,0],[-1.7,0],[0,-2.4],[0,2.4]]){const p=new THREE.Vector3(x,0,z).applyAxisAngle(new THREE.Vector3(0,1,0),c.g.rotation.y).add(c.g.position);p.y=0;if(!blockedCar77(p,.25)){dest=p;break;}}if(!dest){sayToast('Move to an open space to get out.');return true;}c.riding=false;registerSolid62(c.g);rat.userData.drive77=false;rat.scale.copy(c.originalScale);rat.position.copy(dest);rat.userData.air=false;rat.userData.vel=0;rat.userData.job67=null;stopEngine77();return true;}
 function disposeCar77(){if(!car77)return;stopEngine77();if(car77.riding&&rat){rat.userData.drive77=false;if(car77.originalScale)rat.scale.copy(car77.originalScale);}car77=null;carPanel77.style.display='none';}
-function addCar77(){disposeCar77();const owner=root;new THREE.GLTFLoader().load('toy-car77.glb',asset=>{if(root!==owner||phase!=='scavenge')return;const visual=asset.scene;visual.rotation.y=Math.PI;const holder=new THREE.Group();holder.add(visual);let b=new THREE.Box3().setFromObject(visual),size=b.getSize(new THREE.Vector3());const k=1.48/Math.max(size.x,size.z);visual.scale.multiplyScalar(k);b=new THREE.Box3().setFromObject(visual);visual.position.sub(new THREE.Vector3((b.min.x+b.max.x)/2,b.min.y,(b.min.z+b.max.z)/2));visual.traverse(o=>{if(!o.isMesh)return;o.userData.noInk=true;o.userData.keepGeometry=true;o.castShadow=false;o.receiveShadow=true;const old=o.material,n=(old?.name||o.name||'').toLowerCase();if(old?.map){old.map.encoding=THREE.sRGBEncoding;old.map.anisotropy=2;old.needsUpdate=true;}if(/glass/.test(n)){o.material=old.clone();o.material.transparent=true;o.material.opacity=.55;o.material.depthWrite=false;}else if(!old?.map){o.material=old.clone();o.material.roughness=/wheel|small.parts/.test(n)?.82:.68;o.material.metalness=/wheel|small.parts/.test(n)?.18:.05;}o.material.needsUpdate=true;});holder.name='Drivable toy car';holder.position.set(5.4,0,17.6);holder.rotation.y=-12*Math.PI/180;root.add(holder);
+function addCar77(){disposeCar77();const owner=root;new THREE.GLTFLoader().load('toy-car77.glb',asset=>{if(root!==owner||phase!=='scavenge')return;const visual=asset.scene;visual.rotation.y=Math.PI;const holder=new THREE.Group();holder.add(visual);let b=new THREE.Box3().setFromObject(visual),size=b.getSize(new THREE.Vector3());const k=1.32/Math.max(size.x,size.z);visual.scale.multiplyScalar(k);b=new THREE.Box3().setFromObject(visual);visual.position.sub(new THREE.Vector3((b.min.x+b.max.x)/2,b.min.y,(b.min.z+b.max.z)/2));visual.traverse(o=>{if(!o.isMesh)return;o.userData.noInk=true;o.userData.keepGeometry=true;o.castShadow=false;o.receiveShadow=true;const n=((o.material?.name||'')+' '+(o.name||'')).toLowerCase();let material;if(/glass/.test(n))material=new THREE.MeshStandardMaterial({color:0x78929a,roughness:.2,metalness:.05,transparent:true,opacity:.42,depthWrite:false});else if(/wheel|small.parts/.test(n))material=new THREE.MeshStandardMaterial({color:0x252421,roughness:.86,metalness:.16});else if(/plastic/.test(n))material=new THREE.MeshStandardMaterial({color:0xd8c7a6,roughness:.72,metalness:0});else material=new THREE.MeshStandardMaterial({color:0xa83b32,roughness:.58,metalness:.08});o.material=material;});holder.name='Drivable toy car';holder.position.set(5.4,0,17.6);holder.rotation.y=-12*Math.PI/180;root.add(holder);
  car77={g:holder,visual,owner,riding:false,speed:0,steer:0,horn:0,audio:null};
  // Seat Pip in the toy car's open cockpit; the wheel is a separate animated prop.
     const seat=new THREE.Mesh(new THREE.BoxGeometry(.34,.055,.32),new THREE.MeshStandardMaterial({color:0x60463b,roughness:.9}));b=new THREE.Box3().setFromObject(visual);const roof=b.max.y;seat.position.set(0,roof*.36,-.11);holder.add(seat);car77.seat=new THREE.Vector3(0,roof*.36+.015,-.11);
@@ -2570,9 +2573,10 @@ function ivy78(x,z,dx,dz,width,height=3){
  const mat=new THREE.MeshStandardMaterial({color:0x3f633f,roughness:1,side:THREE.DoubleSide}),mesh=new THREE.InstancedMesh(leafGeo,mat,count),o=new THREE.Object3D();mesh.name='Consistent fence ivy';mesh.userData.noInk=true;
  for(let i=0;i<count;i++){const t=(i+.5)/count,cluster=Math.pow(Math.max(0,Math.sin(t*Math.PI*3)),2),side=(i%2?1:-1),j=.08*Math.sin(i*4.1);o.position.set(x+dx*(t*width+j)-dz*.07,.22+(i%6)/5*height*(.25+.75*cluster),z+dz*(t*width+j)+dx*.07);o.rotation.set(Math.PI/2+side*.22,0,Math.atan2(dz,dx)+i*.47);o.scale.setScalar(cluster>.22?.65+(i%3)*.1:0);o.updateMatrix();mesh.setMatrixAt(i,o.matrix);}root.add(mesh);y.decor.push(mesh);
 }
-function yardFence78(){const y=yard78,mat=new THREE.MeshStandardMaterial({color:0x7c6a50,roughness:.98}),postMat=new THREE.MeshStandardMaterial({color:0x5d4d3b,roughness:1});
- const runs=[[-20.82,19,0,1,37.5],[31.32,7.7,0,1,15.4],[31.32,30,0,1,15.3],[-18,37.72,1,0,46]];
- for(const [x,z,dx,dz,len]of runs){const boards=Math.ceil(len/.72);for(let i=0;i<boards;i++){const along=-len/2+(i+.5)*len/boards,b=box(dx?.62:.14,2.75,dz?.62:.14,mat);b.position.set(x+dx*along,1.375,z+dz*along);b.name='Weathered backyard fence board';solid78(b);y.decor.push(b);}for(let p=-len/2;p<=len/2+.1;p+=4.8){const post=box(.22,3.15,.22,postMat);post.position.set(x+dx*p,1.575,z+dz*p);post.name='Backyard fence post';solid78(post);y.decor.push(post);}}
+function yardFence78(){const y=yard78,mat=new THREE.MeshStandardMaterial({color:0x765238,roughness:.98}),postMat=new THREE.MeshStandardMaterial({color:0x563923,roughness:1});
+ // One continuous timber perimeter. Only the east-side garden gate has an opening.
+ const runs=[[-20.82,11.6,0,1,52.2],[31.32,.45,0,1,29.9],[31.32,30.05,0,1,15.3],[5.25,37.72,1,0,52.15],[5.25,-14.48,1,0,52.15]];
+ for(const [x,z,dx,dz,len]of runs){const boards=Math.ceil(len/.72);for(let i=0;i<boards;i++){const along=-len/2+(i+.5)*len/boards,b=box(dx?.62:.14,2.75,dz?.62:.14,mat);b.position.set(x+dx*along,1.375,z+dz*along);b.name='Weathered backyard fence board';root.add(b);y.decor.push(b);}for(let p=-len/2;p<=len/2+.1;p+=4.8){const post=box(.22,3.15,.22,postMat);post.position.set(x+dx*p,1.575,z+dz*p);post.name='Backyard fence post';root.add(post);y.decor.push(post);}const collider=box(dx?len:.18,2.75,dz?len:.18,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));collider.position.set(x,1.375,z);collider.name='Backyard perimeter collider';solid78(collider);y.decor.push(collider);}
 }
 function cleanPoolZone78(){
  // Build 76 supplied several access decks around the temporary pool. Keep the mission objects,
@@ -2581,8 +2585,8 @@ function cleanPoolZone78(){
  for(const node of [...root.children]){if(!remove.test(node.name||''))continue;const p=node.position;if(p.x<-16.25&&p.z>30){removeSolid78(node);root.remove(node);}}
 }
 function clearLegacyWood81(){
- const remove=/^(Batched backyard structures|Salvage route deck|Deck support|Walkable escape plank|Hinged shortcut plank|Small prize shelf|Loose shelf brace|Bird-route salvage shelf|Climbing rope to salvage platform|Legacy wooden platform|Legacy wooden platform support|Backyard picnic table|Garden stepping stone|Climbable garden rock)$/i,dead=[];
- root.traverse(o=>{if(remove.test(o.name||''))dead.push(o);});
+ const remove=/^(Batched backyard structures|Salvage route deck|Deck support|Walkable escape plank|Hinged shortcut plank|Small prize shelf|Loose shelf brace|Bird-route salvage shelf|Climbing rope to salvage platform|Knotted route rope|Legacy wooden platform|Legacy wooden platform support|Backyard picnic table|Garden stepping stone|Climbable garden rock|Cream[ _]enamel|Rusty[ _]drums|Blue[ _]galvanized[ _]steel)$/i,dead=[];
+ root.traverse(o=>{const source=(o.userData?.sourceMaterial78||'').trim();if(remove.test(o.name||'')||remove.test(source))dead.push(o);});
  for(const o of dead){removeSolid78(o);o.parent?.remove(o);}
  if(world60?.owner===root){for(const f of world60.finds||[]){f.cover?.parent?.remove(f.cover);f.tag?.parent?.remove(f.tag);f.opened=true;f.g.visible=!home.discoveries60[f.id];f.g.position.y=.1;}world60.platforms=[];world60.ropes71=[];world60.shortcuts=[];}
  YARD_DATA.obstacles.length=0;YARD_DATA.platforms.length=0;
@@ -2594,7 +2598,7 @@ function simplePool78(){
  for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(2.65-i*.07,.16,8,40),mats[i]);ring.rotation.x=Math.PI/2;ring.position.y=.17+i*.24;ring.name='Inflatable pool ring';g.add(ring);}
  const liner=new THREE.Mesh(new THREE.CircleGeometry(2.48,40),new THREE.MeshStandardMaterial({color:0x82b8b8,roughness:.72}));liner.rotation.x=-Math.PI/2;liner.position.y=.025;liner.name='Pool liner';g.add(liner);solid78(g);return g;
 }
-function recolor78(){root.traverse(m=>{if(!m.isMesh)return;const name=(m.userData.sourceMaterial78||'')+' '+m.name;if(/Peeling teal fence|Backyard perimeter fence/i.test(name)){m.material=new THREE.MeshStandardMaterial({color:0x617b79,roughness:.96});}});}
+function recolor78(){root.traverse(m=>{if(!m.isMesh)return;const name=(m.userData.sourceMaterial78||'')+' '+m.name;if(/Peeling teal fence|Backyard perimeter fence/i.test(name)){m.material=new THREE.MeshStandardMaterial({color:0x765238,roughness:.98});}});}
 function cleanSupplied78(g,type){let i=0;g.traverse(m=>{if(!m.isMesh)return;const old=m.material,n=(old?.name||m.name||'').toLowerCase();if(old?.map){old.map.encoding=THREE.sRGBEncoding;old.map.anisotropy=2;old.needsUpdate=true;}if(type==='pool'){const colors=[0x6f9da0,0xd6b767,0xb47a75,0xd8d0aa];m.material=new THREE.MeshStandardMaterial({color:colors[i++%colors.length],roughness:.82,metalness:0});}else if(type==='gate')m.material=new THREE.MeshStandardMaterial({color:0x455654,roughness:.86,metalness:.18});else if(type==='picnic')m.material=new THREE.MeshStandardMaterial({color:0x76553d,roughness:.92});else if(type==='gnome'){m.material=old.clone();m.material.color.set(0xffffff);m.material.roughness=.9;m.material.metalness=0;m.material.needsUpdate=true;}});return g;}
 function hangRail78(){const y=yard78;if(!y?.rail)return;const u=rat.userData;u.rail78={t:0};u.air=false;u.vy=0;u.job67=null;u.act=null;sayToast('Move sideways along the rail · Jump to drop');}
 function dropRail78(){const u=rat?.userData;if(!u?.rail78)return false;u.rail78=null;u.air=true;u.vy=-.3;u.drop62=.5;return true;}
@@ -2613,7 +2617,7 @@ async function seed78(){
  ['logs78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[-15.2,0,17.4],{w:3.8,h:1.05,d:1.9},12*Math.PI/180);g.name='Climbable firewood stack';solid78(g);y.logs=g;addFind78('logToken','Hidden brass token','coin',1,[-15.2,1.13,17.4]);}],
  ['gnomes78.glb',a=>{for(const [x,z]of [[11.8,34.8],[25.9,19.3]]){const g=fitAsset78(cleanSupplied78(a.scene.clone(true),'gnome'),[x,0,z],{h:.82,uniform:1});g.name='Garden gnome landmark';solid78(g);}addFind78('gnomeButton','Gnome’s lost button','button',1,[26.1,.13,19.8]);}],
  ['gate78.glb',a=>{if(!gate57||gate57.owner!==owner)return;const g=fitAsset78(cleanSupplied78(a.scene.clone(true),'gate'),[0,0,0],{w:5.35,h:2.8,d:.16},-Math.PI/2);g.position.z=2.8;g.name='Single hinged garden gate';removeSolid78(gate57.leaf);gate57.leaf.clear();gate57.leaf.add(g);gate57.leaf.updateWorldMatrix(true,true);registerSolid62(gate57.leaf);}],
- ['railing78.glb',a=>{const g=fitAsset78(a.scene.clone(true),[-7.5,1.3,4.7],{w:.12,h:1.1,d:4.5});g.name='Traversable salvage railing';solid78(g);y.rail={g,start:new THREE.Vector3(-7.15,1.83,2.6),end:new THREE.Vector3(-7.15,1.83,6.8)};addFind78('railWasher','Rail-end washer','nail',2,[-6.85,1.4,6.95]);}],
+ ['railing78.glb',a=>{const panel=(pos,yaw=0)=>{const g=fitAsset78(cleanSupplied78(a.scene.clone(true),'gate'),pos,{w:.12,h:1.1,d:4.5},yaw);g.name='Grounded iron herb-garden railing';solid78(g);return g;};const left=panel([25.35,0,24.55]),right=panel([30.25,0,24.55]),back=panel([27.8,0,26.78],Math.PI/2);y.rail={g:left,start:new THREE.Vector3(25.35,1.03,22.45),end:new THREE.Vector3(25.35,1.03,26.62),parts:[left,right,back]};addFind78('railWasher','Rail-end washer','nail',2,[25.65,.13,22.25]);}],
  ['spider78.glb',a=>{const visual=clonePipScene(a.scene),g=fitAsset78(visual,[-18.6,.025,23.4],{uniform:.025});root.add(g);g.name='Log-corner spider';const mixer=new THREE.AnimationMixer(visual),actions={};for(const clip of a.animations){const c=clip.clone();for(const tr of c.tracks){if(tr.name.endsWith('.position')&&tr.values.length>3){for(let i=3;i<tr.values.length;i+=3){tr.values[i]=tr.values[0];tr.values[i+2]=tr.values[2];}}}actions[c.name]=mixer.clipAction(c);}y.spider={g,mixer,actions,home:g.position.clone(),scared:0,cool:0,aware:false,clip:null};spiderClip78(y.spider,'warte_pose');addFind78('spiderTreasure','Spider’s shiny stash','coin',1,[-19,.13,23.9],()=>!y.spider.aware||y.spider.scared>0);}],
  ['backyard-design78.glb',a=>{for(const [name,pos,size,yaw]of [['Garden tools',[27.8,0,32.3],{w:2.4,h:1,d:1.8},0],['Herb bed',[28.2,0,24.3],{w:2.5,h:.7,d:3.4},0],['Pot tunnel',[17.6,0,17.8],{w:1.4,h:1.4,d:2.5},Math.PI/2]]){const part=a.scene.getObjectByName(name)||a.scene.getObjectByName(name.replace(/ /g,'_'));if(!part)throw Error('Missing design group '+name);const g=fitAsset78(part.clone(true),pos,size,yaw);g.name=name+' from approved backyard';solid78(g);}
   // The bed's leaves are opaque geometry, never a solid collision wall.
