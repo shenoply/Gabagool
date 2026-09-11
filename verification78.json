@@ -20,7 +20,11 @@
     "carExited": true,
     "oneTime": true,
     "spiderRetreat": true,
-    "gateAngle": 1.4486777711499463
+    "gateAngle": 1.4486777711499463,
+    "wireReached": true,
+    "wireTravel": 0.09000000000000007,
+    "wireFinite": true,
+    "wireDrop": true
   },
   "assets": [
     "logs78.glb",
@@ -59,5 +63,5 @@
     "Drive_Steer_Right",
     "Drive_Honk"
   ],
-  "meshCount": 100
+  "meshCount": 102
 }
