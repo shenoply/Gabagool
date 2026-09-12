@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-  <div id="label">GECKO SOURCE RIG · PREVIEW 7</div>
+  <div id="label">GECKO SOURCE RIG · PREVIEW 8</div>
   <div id="note">Hidden 54-keyframe animation · head, limbs, body and tail</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
@@ -81,7 +81,11 @@
         const model=asset.scene;model.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
         const scale=3.4/Math.max(size.y,.001);model.scale.multiplyScalar(scale);
         model.position.sub(new THREE.Vector3((box.min.x+box.max.x)/2,box.min.y,(box.min.z+box.max.z)/2).multiplyScalar(scale));
-        actor=new THREE.Group();actor.rotation.set(Math.PI/2,-.98,0);actor.add(model);scene.add(actor);
+        // Keep ground-facing yaw and the asset's lay-flat correction on separate
+        // parents. Combining them in one XYZ Euler made the animal stand tilted.
+        actor=new THREE.Group();actor.rotation.y=-.98;
+        const layFlat=new THREE.Group();layFlat.rotation.x=Math.PI/2;layFlat.add(model);
+        actor.add(layFlat);scene.add(actor);
         actor.updateMatrixWorld(true);
         const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
         actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y;actor.position.y=actorBaseY;
