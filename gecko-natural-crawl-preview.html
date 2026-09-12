@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="label">GECKO STRAIGHT SPINE · PREVIEW 10</div>
-  <div id="note">Level upper body · original limb and tail animation</div>
+  <div id="label">GROUNDED GECKO GAIT · PREVIEW 11</div>
+  <div id="note">Low belly · level spine · diagonal planted feet</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
   <script>
@@ -56,6 +56,44 @@
         qWorld.premultiply(delta);joint.quaternion.copy(invParent.multiply(qWorld)).normalize();
       }
     }
+    function levelSpine(t){
+      for(const name of ['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04']){
+        const bone=bones[name];if(!bone)continue;
+        if(rest[name])bone.quaternion.copy(rest[name]);
+        if(restPos[name])bone.position.copy(restPos[name]);
+      }
+      // Remove the authored upward neck curve, then angle the whole upper chain
+      // slightly downward so the visible mesh follows the pelvis line.
+      bones['Bone.001_02']?.quaternion.identity();
+      bones['Bone.002_03']?.quaternion.identity();
+      bones['Bone_01']?.rotateZ(.075);
+      bones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.035);
+    }
+    function plantFeet(t){
+      if(!actor)return;
+      actor.position.y=actorBaseY;
+      actor.updateMatrixWorld(true);
+      if(!Object.keys(footRest).length){
+        for(const [key,chain] of Object.entries(chains)){
+          const foot=bones[chain.e],p=new THREE.Vector3();
+          if(foot){foot.getWorldPosition(p);p.y=.028;footRest[key]=p;}
+        }
+        const head=new THREE.Vector3(),tail=new THREE.Vector3();
+        bones['Bone.002_end_04']?.getWorldPosition(head);
+        (bones['Bone.018_end_023']||bones['Bone.018_022'])?.getWorldPosition(tail);
+        travelDir.copy(head.sub(tail)).setY(0).normalize();
+      }
+      const lateral=new THREE.Vector3(-travelDir.z,0,travelDir.x),p=t*5.4;
+      for(const [key,chain] of Object.entries(chains)){
+        if(!footRest[key])continue;
+        const wave=Math.sin(p+chain.phase),lift=Math.max(0,wave);
+        const target=footRest[key].clone()
+          .addScaledVector(travelDir,wave*.20)
+          .addScaledVector(lateral,(key.endsWith('l')?1:-1)*.13);
+        target.y=.028+lift*.16;
+        solveFoot(chain,target);
+      }
+    }
     function pose(t){
       if(!ready)return;reset();const p=t*4.6;
       actor.position.y=actorBaseY;
@@ -70,19 +108,8 @@
     }
     function renderAt(t){
       if(mixer&&sourceClip)mixer.setTime(t%sourceClip.duration);
-      // The source clip folds its shoulder/neck chain upward. Preserve the
-      // bind-pose spine so the upper body stays aligned with the lower torso,
-      // while the independently keyed legs and tail keep their full motion.
-      for(const name of ['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04']){
-        const bone=bones[name];if(!bone)continue;
-        if(rest[name])bone.quaternion.copy(rest[name]);
-        if(restPos[name])bone.position.copy(restPos[name]);
-      }
-      // These two bind-pose rotations are the remaining upward bend visible in
-      // Preview 9. Neutralising them makes the chest, neck and head continue
-      // along the exact same line as the lower torso.
-      if(bones['Bone.001_02'])bones['Bone.001_02'].quaternion.identity();
-      if(bones['Bone.002_03'])bones['Bone.002_03'].quaternion.identity();
+      levelSpine(t);
+      plantFeet(t);
       if(actor)actor.updateMatrixWorld(true);
       renderer.render(scene,camera);
     }
@@ -102,7 +129,7 @@
         actor.add(layFlat);scene.add(actor);
         actor.updateMatrixWorld(true);
         const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
-        actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y;actor.position.y=actorBaseY;
+        actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y-.10;actor.position.y=actorBaseY;
         model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
         sourceClip=asset.animations[2];
         mixer=new THREE.AnimationMixer(model);
