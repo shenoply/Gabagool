@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="label">GROUNDED GECKO GAIT · PREVIEW 11</div>
-  <div id="note">Low belly · level spine · diagonal planted feet</div>
+  <div id="label">LOW-BODY GECKO · PREVIEW 12</div>
+  <div id="note">Belly-height anchor · flatter chest · wider planted stance</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
   <script>
@@ -66,17 +66,21 @@
       // slightly downward so the visible mesh follows the pelvis line.
       bones['Bone.001_02']?.quaternion.identity();
       bones['Bone.002_03']?.quaternion.identity();
-      bones['Bone_01']?.rotateZ(.075);
+      bones['Bone_01']?.rotateZ(.16);
       bones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.035);
     }
     function plantFeet(t){
       if(!actor)return;
       actor.position.y=actorBaseY;
       actor.updateMatrixWorld(true);
+      const belly=new THREE.Vector3();
+      (bones['Bone_01']||bones['Bone.012_017'])?.getWorldPosition(belly);
+      actor.position.y+=.18-belly.y;
+      actor.updateMatrixWorld(true);
       if(!Object.keys(footRest).length){
         for(const [key,chain] of Object.entries(chains)){
           const foot=bones[chain.e],p=new THREE.Vector3();
-          if(foot){foot.getWorldPosition(p);p.y=.028;footRest[key]=p;}
+          if(foot){foot.getWorldPosition(p);p.y=-.015;footRest[key]=p;}
         }
         const head=new THREE.Vector3(),tail=new THREE.Vector3();
         bones['Bone.002_end_04']?.getWorldPosition(head);
@@ -89,8 +93,8 @@
         const wave=Math.sin(p+chain.phase),lift=Math.max(0,wave);
         const target=footRest[key].clone()
           .addScaledVector(travelDir,wave*.20)
-          .addScaledVector(lateral,(key.endsWith('l')?1:-1)*.13);
-        target.y=.028+lift*.16;
+          .addScaledVector(lateral,(key.endsWith('l')?1:-1)*.23);
+        target.y=-.015+lift*.13;
         solveFoot(chain,target);
       }
     }
