@@ -1,5 +1,5 @@
 (() => {
-  function geckoRun98(actor) {
+  function geckoRun98(actor, amount = 1) {
     const r = actor.cineRig96;
     if (!r) return;
     const names = ['ArmF.L_05','ArmF2.L_06','ArmF.R_010','ArmF2.R_011','Bone.019_024','Bone.020_025','Bone.023_029','Bone.024_030','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020'];
@@ -7,22 +7,22 @@
     const b = r.bones;
     const stride = Math.sin(actor.clock * 13);
     const lift = Math.cos(actor.clock * 13);
-    b['ArmF.L_05']?.rotateZ(stride * .82);
-    b['ArmF.L_05']?.rotateX(lift * .24);
-    b['ArmF.R_010']?.rotateZ(-stride * .82);
-    b['ArmF.R_010']?.rotateX(-lift * .24);
-    b['Bone.019_024']?.rotateZ(-stride * .74);
-    b['Bone.019_024']?.rotateX(-lift * .22);
-    b['Bone.023_029']?.rotateZ(stride * .74);
-    b['Bone.023_029']?.rotateX(lift * .22);
-    b['ArmF2.L_06']?.rotateX(.18 + Math.max(0, lift) * .68);
-    b['ArmF2.R_011']?.rotateX(.18 + Math.max(0, -lift) * .68);
-    b['Bone.020_025']?.rotateX(.16 + Math.max(0, -lift) * .61);
-    b['Bone.024_030']?.rotateX(.16 + Math.max(0, lift) * .61);
-    b['Bone.013_018']?.rotateY(stride * .12);
-    b['Bone.014_00']?.rotateY(-stride * .22);
-    b['Bone.015_019']?.rotateY(-stride * .17);
-    b['Bone.016_020']?.rotateY(-stride * .12);
+    b['ArmF.L_05']?.rotateZ(stride * .82 * amount);
+    b['ArmF.L_05']?.rotateX(lift * .24 * amount);
+    b['ArmF.R_010']?.rotateZ(-stride * .82 * amount);
+    b['ArmF.R_010']?.rotateX(-lift * .24 * amount);
+    b['Bone.019_024']?.rotateZ(-stride * .74 * amount);
+    b['Bone.019_024']?.rotateX(-lift * .22 * amount);
+    b['Bone.023_029']?.rotateZ(stride * .74 * amount);
+    b['Bone.023_029']?.rotateX(lift * .22 * amount);
+    b['ArmF2.L_06']?.rotateX((.18 + Math.max(0, lift) * .68) * amount);
+    b['ArmF2.R_011']?.rotateX((.18 + Math.max(0, -lift) * .68) * amount);
+    b['Bone.020_025']?.rotateX((.16 + Math.max(0, -lift) * .61) * amount);
+    b['Bone.024_030']?.rotateX((.16 + Math.max(0, lift) * .61) * amount);
+    b['Bone.013_018']?.rotateY(stride * .12 * amount);
+    b['Bone.014_00']?.rotateY(-stride * .22 * amount);
+    b['Bone.015_019']?.rotateY(-stride * .17 * amount);
+    b['Bone.016_020']?.rotateY(-stride * .12 * amount);
   }
 
   function seatedPip98() {
@@ -32,15 +32,15 @@
 
     // Keep Pip visibly on the saddle: normal standing height is .90.
     // The enlarged gecko's back is well above Pip's normal ground pose.
-    u.pipPivot.position.set(0, 2.15, .04);
-    u.pipPivot.rotation.set(-.30, 0, 0);
+    u.pipPivot.position.set(0, 1.68, .04);
+    u.pipPivot.rotation.set(-.22, 0, 0);
     u.pipPivot.scale.setScalar(1);
 
     const pose = {
       LeftUpLeg: [-1.12, 0, -.46], RightUpLeg: [-1.12, 0, .46],
       LeftLeg: [1.30, 0, 0], RightLeg: [1.30, 0, 0],
-      LeftArm: [-1.08, 0, -.34], RightArm: [-1.08, 0, .34],
-      LeftForeArm: [-.22, 0, 0], RightForeArm: [-.22, 0, 0]
+      LeftArm: [.92, 0, -.22], RightArm: [.92, 0, .22],
+      LeftForeArm: [.30, 0, 0], RightForeArm: [.30, 0, 0]
     };
     for (const [name, angles] of Object.entries(pose)) {
       const bone = u.pipBones?.[name];
@@ -70,7 +70,8 @@
 
     // Positive quarter-turn puts the dark back upward and all four feet below the body.
     actor.model.rotation.x = Math.PI / 2;
-    actor.model.rotation.y = actor.riding ? Math.PI : 0;
+    // Keep the same belly-down roll when mounted; the parent group handles heading.
+    actor.model.rotation.y = 0;
     actor.model.rotation.z = 0;
     actor.model.position.y = .25;
 
@@ -85,9 +86,11 @@
       const moving = travelled > .0000005 || input;
       if (!previous) actor.mountPrevious98 = new THREE.Vector3();
       actor.mountPrevious98.copy(p);
+      // Apply the procedural leg cycle after every mixer update. A small breathing
+      // crawl remains at rest; full stride starts immediately with input/travel.
+      actor.mixer.timeScale = moving ? 2.7 : 1;
+      geckoRun98(actor, moving ? 1 : .12);
       if (moving) {
-        actor.mixer.timeScale = 2.7;
-        geckoRun98(actor);
         actor.model.position.y += Math.abs(Math.sin(actor.clock * 13)) * .035;
       }
     } else actor.mountPrevious98 = null;
