@@ -5,16 +5,20 @@
     const names = ['ArmF.L_05','ArmF2.L_06','ArmF.R_010','ArmF2.R_011','Bone.019_024','Bone.020_025','Bone.023_029','Bone.024_030','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020'];
     for (const name of names) if (r.bones[name] && r.rest[name]) r.bones[name].quaternion.copy(r.rest[name]);
     const b = r.bones;
-    const stride = Math.sin(actor.clock * 12);
-    const lift = Math.cos(actor.clock * 12);
-    b['ArmF.L_05']?.rotateZ(stride * .68);
-    b['ArmF.R_010']?.rotateZ(-stride * .68);
-    b['Bone.019_024']?.rotateZ(-stride * .60);
-    b['Bone.023_029']?.rotateZ(stride * .60);
-    b['ArmF2.L_06']?.rotateX(Math.max(0, lift) * .52);
-    b['ArmF2.R_011']?.rotateX(Math.max(0, -lift) * .52);
-    b['Bone.020_025']?.rotateX(Math.max(0, -lift) * .46);
-    b['Bone.024_030']?.rotateX(Math.max(0, lift) * .46);
+    const stride = Math.sin(actor.clock * 13);
+    const lift = Math.cos(actor.clock * 13);
+    b['ArmF.L_05']?.rotateZ(stride * .82);
+    b['ArmF.L_05']?.rotateX(lift * .24);
+    b['ArmF.R_010']?.rotateZ(-stride * .82);
+    b['ArmF.R_010']?.rotateX(-lift * .24);
+    b['Bone.019_024']?.rotateZ(-stride * .74);
+    b['Bone.019_024']?.rotateX(-lift * .22);
+    b['Bone.023_029']?.rotateZ(stride * .74);
+    b['Bone.023_029']?.rotateX(lift * .22);
+    b['ArmF2.L_06']?.rotateX(.18 + Math.max(0, lift) * .68);
+    b['ArmF2.R_011']?.rotateX(.18 + Math.max(0, -lift) * .68);
+    b['Bone.020_025']?.rotateX(.16 + Math.max(0, -lift) * .61);
+    b['Bone.024_030']?.rotateX(.16 + Math.max(0, lift) * .61);
     b['Bone.013_018']?.rotateY(stride * .12);
     b['Bone.014_00']?.rotateY(-stride * .22);
     b['Bone.015_019']?.rotateY(-stride * .17);
@@ -27,22 +31,23 @@
     if (!actor?.riding || !u?.pipPivot) return;
 
     // Keep Pip visibly on the saddle: normal standing height is .90.
-    u.pipPivot.position.set(0, 1.30, -.02);
-    u.pipPivot.rotation.set(-.16, 0, 0);
+    u.pipPivot.position.set(0, 1.28, -.06);
+    u.pipPivot.rotation.set(-.25, 0, 0);
     u.pipPivot.scale.setScalar(1);
 
     const pose = {
       LeftUpLeg: -1.18, RightUpLeg: -1.18,
       LeftLeg: 1.42, RightLeg: 1.42,
-      LeftArm: -.50, RightArm: -.50,
-      LeftForeArm: -.58, RightForeArm: -.58
+      LeftArm: [-.72, 0, -.42], RightArm: [-.72, 0, .42],
+      LeftForeArm: [-.82, 0, 0], RightForeArm: [-.82, 0, 0]
     };
-    for (const [name, angle] of Object.entries(pose)) {
+    for (const [name, angles] of Object.entries(pose)) {
       const bone = u.pipBones?.[name];
       const rest = u.pipRest?.[name];
       if (!bone || !rest) continue;
       bone.quaternion.copy(rest);
-      bone.rotateX(angle);
+      const a = Array.isArray(angles) ? angles : [angles, 0, 0];
+      bone.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(a[0], a[1], a[2])));
     }
 
     // Never allow Pip's walk/run action to show while the gecko carries him.
@@ -58,21 +63,23 @@
     gecko98Base(dt, actor);
 
     if (!actor.mountSize98) {
-      actor.model.scale.multiplyScalar(1.65);
+      actor.model.scale.multiplyScalar(2.35);
       actor.mountSize98 = true;
     }
 
-    actor.model.rotation.x = Math.PI / 2;
+    // The earlier sign exposed the belly. Roll the opposite way so the feet face the ground.
+    actor.model.rotation.x = -Math.PI / 2;
     actor.model.rotation.y = actor.riding ? Math.PI : 0;
     actor.model.rotation.z = 0;
-    actor.model.position.y = .18;
+    actor.model.position.y = .25;
 
     if (actor.riding) {
       actor.g.position.set(rat.position.x, Math.max(0, rat.position.y), rat.position.z);
       actor.g.rotation.y = rat.rotation.y;
       if ((rat.userData.vel || 0) > .05) {
-        actor.mixer.timeScale = 2.4;
+        actor.mixer.timeScale = 2.7;
         geckoRun98(actor);
+        actor.model.position.y += Math.abs(Math.sin(actor.clock * 13)) * .035;
       }
     }
   };
