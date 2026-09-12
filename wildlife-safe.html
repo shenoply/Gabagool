@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Wet Whiskers — Wildlife Test</title>
+  <style>
+    html,body,iframe{width:100%;height:100%;margin:0;border:0;overflow:hidden;background:#090d0b}
+    iframe{display:block}
+    #tag{position:fixed;z-index:9;top:max(8px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:5px 10px;border-radius:999px;background:#173b2bcc;color:#fff;font:700 11px system-ui;letter-spacing:.04em;pointer-events:none}
+  </style>
+</head>
+<body>
+  <div id="tag">ANIMAL TEST 95</div>
+  <iframe id="game" title="Wet Whiskers game" src="index.html?base=346a5ecc"></iframe>
+  <script>
+    document.getElementById('game').addEventListener('load', function () {
+      const script = this.contentDocument.createElement('script');
+      script.src = 'wildlife-safe.js?v=95';
+      this.contentDocument.body.appendChild(script);
+    });
+  </script>
+</body>
+</html>
