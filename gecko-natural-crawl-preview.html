@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="label">LOW GECKO CRAWL · PREVIEW 4</div>
-  <div id="note">Flat torso · diagonal footfalls · lateral tail drag</div>
+  <div id="label">GECKO FOOT-PLANT IK · PREVIEW 5</div>
+  <div id="note">Locked torso · four planted feet · diagonal reptile gait</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
   <script>
@@ -33,31 +33,40 @@
     const path=new THREE.Mesh(new THREE.PlaneGeometry(22,3.5),new THREE.MeshStandardMaterial({color:0xbca77c,roughness:1}));
     path.rotation.x=-Math.PI/2;path.position.y=.006;scene.add(path);
 
-    let actor=null,actorBaseY=.02,bones={},rest={},restPos={},ready=false;
+    let actor=null,actorBaseY=.02,bones={},rest={},restPos={},footRest={},travelDir=new THREE.Vector3(0,0,1),ready=false;
     const names=['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.003_015','Bone.012_017','ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08','ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013','Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027','Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'];
     const rot=(name,axis,value)=>{const b=bones[name];if(b)b['rotate'+axis](value)};
+    const chains={
+      fl:{j:['ArmF4.L_08','ArmF3.L_07','ArmF2.L_06','ArmF.L_05'],e:'ArmF4.L_end_09',phase:0},
+      fr:{j:['ArmF4.R_013','ArmF3.R_012','ArmF2.R_011','ArmF.R_010'],e:'ArmF4.R_end_014',phase:Math.PI},
+      hl:{j:['Bone.022_027','Bone.021_026','Bone.020_025','Bone.019_024'],e:'Bone.022_end_028',phase:Math.PI},
+      hr:{j:['Bone.026_032','Bone.025_031','Bone.024_030','Bone.023_029'],e:'Bone.026_end_033',phase:0}
+    };
     function reset(){for(const name of names){if(bones[name]&&rest[name])bones[name].quaternion.copy(rest[name]);if(bones[name]&&restPos[name])bones[name].position.copy(restPos[name]);}}
-    function leg(root,mid,knee,foot,phase,side,front){
-      const swing=Math.sin(phase),lift=Math.max(0,Math.cos(phase));
-      rot(root,'Z',swing*(front?.46:.42)*side);
-      rot(root,'X',(lift*.12-.035)*side);
-      rot(mid,'X',(.06+lift*.28)*side);
-      rot(knee,'Z',-swing*.18*side);
-      rot(foot,'X',lift*.16*side);
-      const p=bones[root]?.position;if(p&&restPos[root]){p.x+=swing*.055*side;p.z+=lift*.022*side;}
+    function solveFoot(chain,target){
+      const eff=bones[chain.e];if(!eff)return;
+      const jp=new THREE.Vector3(),ep=new THREE.Vector3(),qParent=new THREE.Quaternion(),qWorld=new THREE.Quaternion();
+      const from=new THREE.Vector3(),to=new THREE.Vector3(),delta=new THREE.Quaternion(),invParent=new THREE.Quaternion();
+      for(let pass=0;pass<3;pass++)for(const name of chain.j){
+        const joint=bones[name];if(!joint)continue;
+        actor.updateMatrixWorld(true);joint.getWorldPosition(jp);eff.getWorldPosition(ep);
+        from.copy(ep).sub(jp);to.copy(target).sub(jp);if(from.lengthSq()<1e-8||to.lengthSq()<1e-8)continue;
+        from.normalize();to.normalize();delta.setFromUnitVectors(from,to);
+        joint.getWorldQuaternion(qWorld);joint.parent.getWorldQuaternion(qParent);invParent.copy(qParent).invert();
+        qWorld.premultiply(delta);joint.quaternion.copy(invParent.multiply(qWorld)).normalize();
+      }
     }
     function pose(t){
-      if(!ready)return;reset();const p=t*5.2;
-      leg('ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08',p,1,true);
-      leg('Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032',p,1,false);
-      leg('ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013',p+Math.PI,-1,true);
-      leg('Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027',p+Math.PI,-1,false);
-      const sway=Math.sin(p)*.028;
-      rot('Bone_01','Z',sway);rot('Bone.001_02','Z',-sway*.35);
-      rot('Bone.012_017','Z',-sway*.6);
-      ['Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'].forEach((n,i)=>rot(n,'Y',Math.sin(p-i*.5)*(.105-i*.009)));
+      if(!ready)return;reset();const p=t*4.6;
       actor.position.y=actorBaseY;
       actor.rotation.y=-.48;
+      actor.updateMatrixWorld(true);
+      for(const [key,chain] of Object.entries(chains)){
+        const phase=p+chain.phase,swing=Math.sin(phase),lift=Math.max(0,Math.cos(phase));
+        const target=footRest[key].clone().addScaledVector(travelDir,swing*.34);target.y+=lift*.24;
+        solveFoot(chain,target);
+      }
+      ['Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'].forEach((n,i)=>rot(n,'Y',Math.sin(p-i*.48)*(.07-i*.006)));
     }
     function renderAt(t){pose(t);renderer.render(scene,camera);}
     window.setPreviewTime=t=>renderAt(t);
@@ -74,6 +83,10 @@
         const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
         actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y;actor.position.y=actorBaseY;
         model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
+        actor.updateMatrixWorld(true);
+        for(const [key,chain] of Object.entries(chains))footRest[key]=bones[chain.e].getWorldPosition(new THREE.Vector3());
+        const front=footRest.fl.clone().add(footRest.fr).multiplyScalar(.5),rear=footRest.hl.clone().add(footRest.hr).multiplyScalar(.5);
+        travelDir.copy(front).sub(rear);travelDir.y=0;travelDir.normalize();
         ready=true;window.previewReady=true;renderAt(0);
       });
     });
