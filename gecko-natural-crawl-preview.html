@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-  <div id="label">GECKO SOURCE RIG · PREVIEW 6</div>
+  <div id="label">GECKO SOURCE RIG · PREVIEW 7</div>
   <div id="note">Hidden 54-keyframe animation · head, limbs, body and tail</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
@@ -22,12 +22,12 @@
     scene.background=new THREE.Color(0xb8c59d);
     scene.fog=new THREE.Fog(0xb8c59d,12,28);
     const camera=new THREE.PerspectiveCamera(44,innerWidth/innerHeight,.05,80);
-    camera.position.set(9,5.2,13.5);camera.lookAt(0,.65,0);
+    camera.position.set(11,6.2,16.5);camera.lookAt(0,.65,0);
     const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
     renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;document.body.prepend(renderer.domElement);
-    scene.add(new THREE.HemisphereLight(0xfff3d5,0x526947,2.1));
-    const sun=new THREE.DirectionalLight(0xffe8bf,2.2);sun.position.set(5,9,6);sun.castShadow=true;scene.add(sun);
+    scene.add(new THREE.HemisphereLight(0xfff3d5,0x526947,1.2));
+    const sun=new THREE.DirectionalLight(0xffe8bf,1.35);sun.position.set(5,9,6);sun.castShadow=true;scene.add(sun);
     const ground=new THREE.Mesh(new THREE.PlaneGeometry(40,25),new THREE.MeshStandardMaterial({color:0x78955b,roughness:1}));
     ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
     const path=new THREE.Mesh(new THREE.PlaneGeometry(22,3.5),new THREE.MeshStandardMaterial({color:0xbca77c,roughness:1}));
@@ -79,9 +79,9 @@
       const buffer=await new Response(stream).arrayBuffer();
       new THREE.GLTFLoader().parse(buffer,'',asset=>{
         const model=asset.scene;model.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
-        const scale=5.2/Math.max(size.y,.001);model.scale.multiplyScalar(scale);
+        const scale=3.4/Math.max(size.y,.001);model.scale.multiplyScalar(scale);
         model.position.sub(new THREE.Vector3((box.min.x+box.max.x)/2,box.min.y,(box.min.z+box.max.z)/2).multiplyScalar(scale));
-        actor=new THREE.Group();actor.rotation.x=Math.PI/2;actor.add(model);scene.add(actor);
+        actor=new THREE.Group();actor.rotation.set(Math.PI/2,-.98,0);actor.add(model);scene.add(actor);
         actor.updateMatrixWorld(true);
         const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
         actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y;actor.position.y=actorBaseY;
