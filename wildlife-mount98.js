@@ -28,19 +28,53 @@
     // The older cinematic patch created this rig lazily only after an unmounted
     // walk. Build it here as well so mounting first can never leave a rigid gecko.
     let rig = actor.cineRig96;
+    if (rig && !rig.restPos) {
+      rig.restPos = {};
+      actor.model.traverse(o => {
+        if (o.isBone) rig.restPos[o.name] = o.position.clone();
+      });
+    }
     if (!rig) {
-      const bones = {}, rest = {};
+      const bones = {}, rest = {}, restPos = {};
       actor.model.traverse(o => {
         if (!o.isBone) return;
         bones[o.name] = o;
         rest[o.name] = o.quaternion.clone();
+        restPos[o.name] = o.position.clone();
       });
-      rig = actor.cineRig96 = { bones, rest };
+      rig = actor.cineRig96 = { bones, rest, restPos };
     }
     for (const name of LEG_BONES) {
       if (rig.bones[name] && rig.rest[name]) rig.bones[name].quaternion.copy(rig.rest[name]);
     }
     return rig.bones;
+  }
+
+  function sourceCrawl108(actor, moving, dt) {
+    const clip = actor.clips?.[2];
+    if (!actor.mixer || !clip) return crawl103(actor, moving);
+    restoreGecko103(actor);
+    const rig = actor.cineRig96;
+    if (!actor.sourceRideAction108) {
+      actor.mixer.stopAllAction();
+      actor.sourceRideAction108 = actor.mixer.clipAction(clip).reset()
+        .setLoop(THREE.LoopRepeat, Infinity).play();
+      actor.rideAnimTime108 = 0;
+    }
+    actor.rideAnimTime108 += dt * (moving ? 1.55 : .32);
+    actor.sourceRideAction108.enabled = true;
+    actor.sourceRideAction108.setEffectiveWeight(1);
+    actor.mixer.setTime(actor.rideAnimTime108 % clip.duration);
+
+    const b = rig?.bones || {};
+    for (const name of ['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04']) {
+      if (b[name] && rig.rest[name]) b[name].quaternion.copy(rig.rest[name]);
+      if (b[name] && rig.restPos?.[name]) b[name].position.copy(rig.restPos[name]);
+    }
+    // Same straight-spine correction approved in Preview 10.
+    b['Bone.001_02']?.quaternion.identity();
+    b['Bone.002_03']?.quaternion.identity();
+    actor.g.updateMatrixWorld(true);
   }
 
   function crawl103(actor, moving) {
@@ -150,29 +184,30 @@
 
   const geckoBase103 = tickGecko88;
   tickGecko88 = function (dt, actor) {
-    geckoBase103(dt, actor);
     const carrier = ensureCarrier103(actor);
     actor.model.rotation.set(0, 0, 0);
     actor.model.position.y = 0;
     carrier.rotation.set(Math.PI / 2, 0, 0);
     carrier.position.y = .02;
     if (actor.riding) {
+      actor.clock += dt;
       actor.wasRiding103 = true;
       actor.g.position.set(rat.position.x, Math.max(0, rat.position.y), rat.position.z);
       // The gecko asset's head points opposite its authored forward axis.
       // Flip the mount group so both animals face the actual control direction.
       actor.g.rotation.y = rat.rotation.y + Math.PI;
-      actor.mixer?.stopAllAction();
-      riderInput103(actor);
-      // Keep the living crawl active for the whole ride. The source walk action
-      // contains only a static pose, so the bones must be driven every frame.
-      crawl103(actor, true);
+      const moving = riderInput103(actor);
+      sourceCrawl108(actor, moving, dt);
+      rat.userData.geckoRide88 = true;
+      rat.userData.seated41 = true;
     } else {
       if (actor.wasRiding103) {
         actor.wasRiding103 = false;
+        actor.sourceRideAction108 = null;
+        actor.mixer?.stopAllAction();
         actor.current = null;
-        play88(actor, /idle/i);
       }
+      geckoBase103(dt, actor);
       actor.previousRide103.copy(actor.g.position);
     }
   };
