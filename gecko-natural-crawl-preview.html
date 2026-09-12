@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="label">GECKO FOOT-PLANT IK · PREVIEW 5</div>
-  <div id="note">Locked torso · four planted feet · diagonal reptile gait</div>
+  <div id="label">GECKO SOURCE RIG · PREVIEW 6</div>
+  <div id="note">Hidden 54-keyframe animation · head, limbs, body and tail</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
   <script>
@@ -33,7 +33,7 @@
     const path=new THREE.Mesh(new THREE.PlaneGeometry(22,3.5),new THREE.MeshStandardMaterial({color:0xbca77c,roughness:1}));
     path.rotation.x=-Math.PI/2;path.position.y=.006;scene.add(path);
 
-    let actor=null,actorBaseY=.02,bones={},rest={},restPos={},footRest={},travelDir=new THREE.Vector3(0,0,1),ready=false;
+    let actor=null,actorBaseY=.02,bones={},rest={},restPos={},footRest={},travelDir=new THREE.Vector3(0,0,1),mixer=null,sourceClip=null,ready=false;
     const names=['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.003_015','Bone.012_017','ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08','ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013','Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027','Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'];
     const rot=(name,axis,value)=>{const b=bones[name];if(b)b['rotate'+axis](value)};
     const chains={
@@ -68,7 +68,10 @@
       }
       ['Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'].forEach((n,i)=>rot(n,'Y',Math.sin(p-i*.48)*(.07-i*.006)));
     }
-    function renderAt(t){pose(t);renderer.render(scene,camera);}
+    function renderAt(t){
+      if(mixer&&sourceClip)mixer.setTime(t%sourceClip.duration);
+      renderer.render(scene,camera);
+    }
     window.setPreviewTime=t=>renderAt(t);
     fetch('assets87/gecko.json').then(r=>r.json()).then(async packed=>{
       const raw=atob(packed.data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
@@ -83,10 +86,9 @@
         const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
         actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y;actor.position.y=actorBaseY;
         model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
-        actor.updateMatrixWorld(true);
-        for(const [key,chain] of Object.entries(chains))footRest[key]=bones[chain.e].getWorldPosition(new THREE.Vector3());
-        const front=footRest.fl.clone().add(footRest.fr).multiplyScalar(.5),rear=footRest.hl.clone().add(footRest.hr).multiplyScalar(.5);
-        travelDir.copy(front).sub(rear);travelDir.y=0;travelDir.normalize();
+        sourceClip=asset.animations[2];
+        mixer=new THREE.AnimationMixer(model);
+        mixer.clipAction(sourceClip).reset().setLoop(THREE.LoopRepeat,Infinity).play();
         ready=true;window.previewReady=true;renderAt(0);
       });
     });
