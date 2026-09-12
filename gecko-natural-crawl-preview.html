@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="label">LOW-BODY GECKO · PREVIEW 12</div>
-  <div id="note">Belly-height anchor · flatter chest · wider planted stance</div>
+  <div id="label">SKIN-GROUNDED GECKO · PREVIEW 13</div>
+  <div id="note">Original limbs preserved · rendered lowest toe grounded</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
   <script>
@@ -33,7 +33,7 @@
     const path=new THREE.Mesh(new THREE.PlaneGeometry(22,3.5),new THREE.MeshStandardMaterial({color:0xbca77c,roughness:1}));
     path.rotation.x=-Math.PI/2;path.position.y=.006;scene.add(path);
 
-    let actor=null,actorBaseY=.02,bones={},rest={},restPos={},footRest={},travelDir=new THREE.Vector3(0,0,1),mixer=null,sourceClip=null,ready=false;
+    let actor=null,actorBaseY=.02,bones={},rest={},restPos={},footRest={},travelDir=new THREE.Vector3(0,0,1),skinned=[],mixer=null,sourceClip=null,ready=false;
     const names=['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.003_015','Bone.012_017','ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08','ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013','Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027','Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'];
     const rot=(name,axis,value)=>{const b=bones[name];if(b)b['rotate'+axis](value)};
     const chains={
@@ -98,6 +98,23 @@
         solveFoot(chain,target);
       }
     }
+    function groundRenderedSkin(){
+      if(!actor||!skinned.length)return;
+      actor.position.y=actorBaseY;
+      actor.updateMatrixWorld(true);
+      const v=new THREE.Vector3();let minY=Infinity;
+      for(const mesh of skinned){
+        mesh.skeleton.update();
+        const pos=mesh.geometry.attributes.position;
+        const step=Math.max(1,Math.floor(pos.count/4200));
+        for(let i=0;i<pos.count;i+=step){
+          mesh.boneTransform(i,v);v.applyMatrix4(mesh.matrixWorld);
+          if(v.y<minY)minY=v.y;
+        }
+      }
+      if(Number.isFinite(minY))actor.position.y+=.018-minY;
+      actor.updateMatrixWorld(true);
+    }
     function pose(t){
       if(!ready)return;reset();const p=t*4.6;
       actor.position.y=actorBaseY;
@@ -113,8 +130,7 @@
     function renderAt(t){
       if(mixer&&sourceClip)mixer.setTime(t%sourceClip.duration);
       levelSpine(t);
-      plantFeet(t);
-      if(actor)actor.updateMatrixWorld(true);
+      groundRenderedSkin();
       renderer.render(scene,camera);
     }
     window.setPreviewTime=t=>renderAt(t);
@@ -134,7 +150,7 @@
         actor.updateMatrixWorld(true);
         const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
         actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y-.10;actor.position.y=actorBaseY;
-        model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
+        model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.isSkinnedMesh)skinned.push(o);}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
         sourceClip=asset.animations[2];
         mixer=new THREE.AnimationMixer(model);
         mixer.clipAction(sourceClip).reset().setLoop(THREE.LoopRepeat,Infinity).play();
