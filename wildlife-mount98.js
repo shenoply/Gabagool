@@ -53,8 +53,16 @@
   function sourceCrawl108(actor, moving, dt) {
     const clip = actor.clips?.[2];
     if (!actor.mixer || !clip) return crawl103(actor, moving);
-    restoreGecko103(actor);
-    const rig = actor.cineRig96;
+    if (!actor.sourceRestPos108) {
+      actor.sourceRestPos108 = {};
+      for (const [name, bone] of Object.entries(actor.bones || {})) {
+        actor.sourceRestPos108[name] = bone.position.clone();
+      }
+    }
+    for (const [name, bone] of Object.entries(actor.bones || {})) {
+      if (actor.rest?.[name]) bone.quaternion.copy(actor.rest[name]);
+      if (actor.sourceRestPos108[name]) bone.position.copy(actor.sourceRestPos108[name]);
+    }
     if (!actor.sourceRideAction108) {
       actor.mixer.stopAllAction();
       actor.sourceRideAction108 = actor.mixer.clipAction(clip).reset()
@@ -66,10 +74,10 @@
     actor.sourceRideAction108.setEffectiveWeight(1);
     actor.mixer.setTime(actor.rideAnimTime108 % clip.duration);
 
-    const b = rig?.bones || {};
+    const b = actor.bones || {};
     for (const name of ['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04']) {
-      if (b[name] && rig.rest[name]) b[name].quaternion.copy(rig.rest[name]);
-      if (b[name] && rig.restPos?.[name]) b[name].position.copy(rig.restPos[name]);
+      if (b[name] && actor.rest?.[name]) b[name].quaternion.copy(actor.rest[name]);
+      if (b[name] && actor.sourceRestPos108[name]) b[name].position.copy(actor.sourceRestPos108[name]);
     }
     // Same straight-spine correction approved in Preview 10.
     b['Bone.001_02']?.quaternion.identity();
@@ -201,6 +209,7 @@
       rat.userData.geckoRide88 = true;
       rat.userData.seated41 = true;
     } else {
+      const justDismounted = !!actor.wasRiding103;
       if (actor.wasRiding103) {
         actor.wasRiding103 = false;
         actor.sourceRideAction108 = null;
@@ -208,6 +217,17 @@
         actor.current = null;
       }
       geckoBase103(dt, actor);
+      if (justDismounted) {
+        actor.mixer?.stopAllAction();
+        for (const [name, bone] of Object.entries(actor.bones || {})) {
+          if (actor.rest?.[name]) bone.quaternion.copy(actor.rest[name]);
+          if (actor.sourceRestPos108?.[name]) bone.position.copy(actor.sourceRestPos108[name]);
+        }
+        actor.bones?.['Bone.001_02']?.quaternion.identity();
+        actor.bones?.['Bone.002_03']?.quaternion.identity();
+        actor.current = null;
+        play88(actor, /idle/i);
+      }
       actor.previousRide103.copy(actor.g.position);
     }
   };
