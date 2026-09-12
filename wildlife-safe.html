@@ -11,12 +11,17 @@
   </style>
 </head>
 <body>
-  <div id="tag">ANIMAL TEST 95</div>
+  <div id="tag">GECKO + RAT CINEMATIC 96</div>
   <iframe id="game" title="Wet Whiskers game" src="index.html?base=346a5ecc"></iframe>
   <script>
     document.getElementById('game').addEventListener('load', function () {
       const script = this.contentDocument.createElement('script');
       script.src = 'wildlife-safe.js?v=95';
+      script.addEventListener('load', function () {
+        const cinematic = document.getElementById('game').contentDocument.createElement('script');
+        cinematic.src = 'wildlife-cinematic96.js?v=96';
+        document.getElementById('game').contentDocument.body.appendChild(cinematic);
+      });
       this.contentDocument.body.appendChild(script);
     });
   </script>
