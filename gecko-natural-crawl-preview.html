@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="label">NATURAL GECKO CRAWL · PREVIEW 3</div>
-  <div id="note">Diagonal gait · planted feet · head counter-sway · tail wave</div>
+  <div id="label">LOW GECKO CRAWL · PREVIEW 4</div>
+  <div id="note">Flat torso · diagonal footfalls · lateral tail drag</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
   <script>
@@ -39,25 +39,25 @@
     function reset(){for(const name of names){if(bones[name]&&rest[name])bones[name].quaternion.copy(rest[name]);if(bones[name]&&restPos[name])bones[name].position.copy(restPos[name]);}}
     function leg(root,mid,knee,foot,phase,side,front){
       const swing=Math.sin(phase),lift=Math.max(0,Math.cos(phase));
-      rot(root,'Z',swing*(front?.72:.66)*side);
-      rot(root,'X',(lift*.32-.08)*side);
-      rot(mid,'X',(.12+lift*.62)*side);
-      rot(knee,'Z',-swing*.28*side);
-      rot(foot,'X',lift*.38*side);
-      const p=bones[root]?.position;if(p&&restPos[root]){p.x+=swing*.10*side;p.z+=lift*.075*side;}
+      rot(root,'Z',swing*(front?.46:.42)*side);
+      rot(root,'X',(lift*.12-.035)*side);
+      rot(mid,'X',(.06+lift*.28)*side);
+      rot(knee,'Z',-swing*.18*side);
+      rot(foot,'X',lift*.16*side);
+      const p=bones[root]?.position;if(p&&restPos[root]){p.x+=swing*.055*side;p.z+=lift*.022*side;}
     }
     function pose(t){
-      if(!ready)return;reset();const p=t*7.0;
+      if(!ready)return;reset();const p=t*5.2;
       leg('ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08',p,1,true);
       leg('Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032',p,1,false);
       leg('ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013',p+Math.PI,-1,true);
       leg('Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027',p+Math.PI,-1,false);
-      const sway=Math.sin(p)*.075;
-      rot('Bone_01','Z',sway);rot('Bone.001_02','Z',sway*.55);rot('Bone.002_03','Z',-sway*.7);
-      rot('Bone.012_017','Z',-sway*.45);
-      ['Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'].forEach((n,i)=>rot(n,'Y',Math.sin(p-i*.42)*(.16-i*.014)));
-      actor.position.y=actorBaseY+Math.sin(p*2)*.012;
-      actor.rotation.y=-.48+Math.sin(t*.55)*.10;
+      const sway=Math.sin(p)*.028;
+      rot('Bone_01','Z',sway);rot('Bone.001_02','Z',-sway*.35);
+      rot('Bone.012_017','Z',-sway*.6);
+      ['Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'].forEach((n,i)=>rot(n,'Y',Math.sin(p-i*.5)*(.105-i*.009)));
+      actor.position.y=actorBaseY;
+      actor.rotation.y=-.48;
     }
     function renderAt(t){pose(t);renderer.render(scene,camera);}
     window.setPreviewTime=t=>renderAt(t);
