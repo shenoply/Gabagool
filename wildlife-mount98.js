@@ -1,7 +1,9 @@
 (() => {
   const LEG_BONES = [
-    'ArmF.L_05','ArmF2.L_06','ArmF.R_010','ArmF2.R_011',
-    'Bone.019_024','Bone.020_025','Bone.023_029','Bone.024_030',
+    'ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08',
+    'ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013',
+    'Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027',
+    'Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032',
     'Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020'
   ];
 
@@ -12,7 +14,7 @@
     actor.g.add(carrier);
     carrier.add(actor.model);
     carrier.rotation.set(Math.PI / 2, 0, 0);
-    carrier.position.y = .25;
+    carrier.position.y = .02;
     actor.model.rotation.set(0, 0, 0);
     actor.model.position.y = 0;
     actor.model.scale.multiplyScalar(2.35);
@@ -33,22 +35,30 @@
   function crawl103(actor, moving) {
     const b = restoreGecko103(actor);
     if (!b) return;
-    const phase = actor.clock * (moving ? 12 : 2.2);
+    const phase = actor.clock * (moving ? 7.5 : 2.2);
     const stride = Math.sin(phase);
     const lift = Math.cos(phase);
     const power = moving ? 1 : .035;
-    b['ArmF.L_05']?.rotateZ(stride * .76 * power);
-    b['ArmF.L_05']?.rotateX(lift * .24 * power);
-    b['ArmF.R_010']?.rotateZ(-stride * .76 * power);
-    b['ArmF.R_010']?.rotateX(-lift * .24 * power);
-    b['Bone.019_024']?.rotateZ(-stride * .68 * power);
-    b['Bone.019_024']?.rotateX(-lift * .22 * power);
-    b['Bone.023_029']?.rotateZ(stride * .68 * power);
-    b['Bone.023_029']?.rotateX(lift * .22 * power);
-    b['ArmF2.L_06']?.rotateX((.12 + Math.max(0, lift) * .62) * power);
-    b['ArmF2.R_011']?.rotateX((.12 + Math.max(0, -lift) * .62) * power);
-    b['Bone.020_025']?.rotateX((.10 + Math.max(0, -lift) * .56) * power);
-    b['Bone.024_030']?.rotateX((.10 + Math.max(0, lift) * .56) * power);
+    b['ArmF.L_05']?.rotateZ(stride * .92 * power);
+    b['ArmF.L_05']?.rotateX(lift * .38 * power);
+    b['ArmF.R_010']?.rotateZ(-stride * .92 * power);
+    b['ArmF.R_010']?.rotateX(-lift * .38 * power);
+    b['Bone.019_024']?.rotateZ(-stride * .84 * power);
+    b['Bone.019_024']?.rotateX(-lift * .34 * power);
+    b['Bone.023_029']?.rotateZ(stride * .84 * power);
+    b['Bone.023_029']?.rotateX(lift * .34 * power);
+    b['ArmF2.L_06']?.rotateX((.18 + Math.max(0, lift) * .80) * power);
+    b['ArmF2.R_011']?.rotateX((.18 + Math.max(0, -lift) * .80) * power);
+    b['ArmF3.L_07']?.rotateZ(-stride * .48 * power);
+    b['ArmF3.R_012']?.rotateZ(stride * .48 * power);
+    b['ArmF4.L_08']?.rotateX(Math.max(0, lift) * .58 * power);
+    b['ArmF4.R_013']?.rotateX(Math.max(0, -lift) * .58 * power);
+    b['Bone.020_025']?.rotateX((.16 + Math.max(0, -lift) * .72) * power);
+    b['Bone.024_030']?.rotateX((.16 + Math.max(0, lift) * .72) * power);
+    b['Bone.021_026']?.rotateZ(stride * .44 * power);
+    b['Bone.025_031']?.rotateZ(-stride * .44 * power);
+    b['Bone.022_027']?.rotateX(Math.max(0, -lift) * .52 * power);
+    b['Bone.026_032']?.rotateX(Math.max(0, lift) * .52 * power);
     b['Bone.013_018']?.rotateY(stride * .10 * power);
     b['Bone.014_00']?.rotateY(-stride * .20 * power);
     b['Bone.015_019']?.rotateY(-stride * .15 * power);
@@ -81,7 +91,7 @@
     u.pipMixer?.stopAllAction();
     u.mountLocked103 = true;
     u.pipPivot.position.set(0, 2.15, .05);
-    u.pipPivot.rotation.set(-.18, 0, 0);
+    u.pipPivot.rotation.set(-.18, Math.PI, 0);
     u.pipPivot.scale.setScalar(1);
     const pose = {
       Spine: [-.10, 0, 0],
@@ -111,7 +121,7 @@
     actor.model.rotation.set(0, 0, 0);
     actor.model.position.y = 0;
     carrier.rotation.set(Math.PI / 2, 0, 0);
-    carrier.position.y = .25;
+    carrier.position.y = .02;
     if (actor.riding) {
       actor.wasRiding103 = true;
       actor.g.position.set(rat.position.x, Math.max(0, rat.position.y), rat.position.z);
@@ -119,7 +129,6 @@
       actor.mixer?.stopAllAction();
       const moving = riderInput103(actor);
       crawl103(actor, moving);
-      if (moving) carrier.position.y += Math.abs(Math.sin(actor.clock * 12)) * .025;
     } else {
       if (actor.wasRiding103) {
         actor.wasRiding103 = false;
