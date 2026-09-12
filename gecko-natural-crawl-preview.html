@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-  <div id="label">GECKO LEVEL BODY · PREVIEW 9</div>
+  <div id="label">GECKO STRAIGHT SPINE · PREVIEW 10</div>
   <div id="note">Level upper body · original limb and tail animation</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
@@ -78,6 +78,11 @@
         if(rest[name])bone.quaternion.copy(rest[name]);
         if(restPos[name])bone.position.copy(restPos[name]);
       }
+      // These two bind-pose rotations are the remaining upward bend visible in
+      // Preview 9. Neutralising them makes the chest, neck and head continue
+      // along the exact same line as the lower torso.
+      if(bones['Bone.001_02'])bones['Bone.001_02'].quaternion.identity();
+      if(bones['Bone.002_03'])bones['Bone.002_03'].quaternion.identity();
       if(actor)actor.updateMatrixWorld(true);
       renderer.render(scene,camera);
     }
