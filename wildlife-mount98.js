@@ -1,10 +1,11 @@
 (() => {
   const LEG_BONES = [
+    'Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.003_015',
     'ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08',
     'ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013',
     'Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027',
     'Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032',
-    'Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020'
+    'Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'
   ];
 
   function ensureCarrier103(actor) {
@@ -35,7 +36,7 @@
   function crawl103(actor, moving) {
     const b = restoreGecko103(actor);
     if (!b) return;
-    const phase = actor.clock * (moving ? 8.5 : 2.2);
+    const phase = actor.clock * (moving ? 7.2 : 2.2);
     const stride = Math.sin(phase);
     const lift = Math.cos(phase);
     const power = moving ? 1 : .035;
@@ -49,19 +50,25 @@
     // The supplied walking clip has no changing keyframes. Translate each whole
     // limb slightly as well as bending it, so the mounted crawl is unmistakable.
     if (moving) {
-      b['ArmF.L_05']?.position.add(new THREE.Vector3(stride * .11, lift * .075, 0));
-      b['ArmF.R_010']?.position.add(new THREE.Vector3(-stride * .11, -lift * .075, 0));
-      b['Bone.019_024']?.position.add(new THREE.Vector3(-stride * .10, -lift * .07, 0));
-      b['Bone.023_029']?.position.add(new THREE.Vector3(stride * .10, lift * .07, 0));
+      b['ArmF.L_05']?.position.add(new THREE.Vector3(stride * .18, lift * .12, 0));
+      b['ArmF.R_010']?.position.add(new THREE.Vector3(-stride * .18, -lift * .12, 0));
+      b['Bone.019_024']?.position.add(new THREE.Vector3(-stride * .16, -lift * .11, 0));
+      b['Bone.023_029']?.position.add(new THREE.Vector3(stride * .16, lift * .11, 0));
     }
-    b['ArmF.L_05']?.rotateZ(stride * .92 * power);
-    b['ArmF.L_05']?.rotateX(lift * .38 * power);
-    b['ArmF.R_010']?.rotateZ(-stride * .92 * power);
-    b['ArmF.R_010']?.rotateX(-lift * .38 * power);
-    b['Bone.019_024']?.rotateZ(-stride * .84 * power);
-    b['Bone.019_024']?.rotateX(-lift * .34 * power);
-    b['Bone.023_029']?.rotateZ(stride * .84 * power);
-    b['Bone.023_029']?.rotateX(lift * .34 * power);
+    b['Bone_01']?.rotateZ(stride * .13 * power);
+    b['Bone_01']?.rotateX(lift * .07 * power);
+    b['Bone.001_02']?.rotateZ(-stride * .10 * power);
+    b['Bone.002_03']?.rotateZ(-stride * .075 * power);
+    b['Bone.002_end_04']?.rotateZ(-stride * .045 * power);
+    b['Bone.003_015']?.rotateY(stride * .055 * power);
+    b['ArmF.L_05']?.rotateZ(stride * 1.12 * power);
+    b['ArmF.L_05']?.rotateX(lift * .52 * power);
+    b['ArmF.R_010']?.rotateZ(-stride * 1.12 * power);
+    b['ArmF.R_010']?.rotateX(-lift * .52 * power);
+    b['Bone.019_024']?.rotateZ(-stride * 1.04 * power);
+    b['Bone.019_024']?.rotateX(-lift * .48 * power);
+    b['Bone.023_029']?.rotateZ(stride * 1.04 * power);
+    b['Bone.023_029']?.rotateX(lift * .48 * power);
     b['ArmF2.L_06']?.rotateX((.18 + Math.max(0, lift) * .80) * power);
     b['ArmF2.R_011']?.rotateX((.18 + Math.max(0, -lift) * .80) * power);
     b['ArmF3.L_07']?.rotateZ(-stride * .48 * power);
@@ -78,6 +85,8 @@
     b['Bone.014_00']?.rotateY(-stride * .20 * power);
     b['Bone.015_019']?.rotateY(-stride * .15 * power);
     b['Bone.016_020']?.rotateY(-stride * .11 * power);
+    b['Bone.017_021']?.rotateY(-stride * .085 * power);
+    b['Bone.018_022']?.rotateY(-stride * .06 * power);
   }
 
   function riderInput103(actor) {
@@ -105,7 +114,7 @@
     }
     u.pipMixer?.stopAllAction();
     u.mountLocked103 = true;
-    u.pipPivot.position.set(0, 1.62, .05);
+    u.pipPivot.position.set(0, 1.42, .05);
     u.pipPivot.rotation.set(-.18, 0, 0);
     u.pipPivot.scale.setScalar(1);
     const pose = {
@@ -144,8 +153,10 @@
       // Flip the mount group so both animals face the actual control direction.
       actor.g.rotation.y = rat.rotation.y + Math.PI;
       actor.mixer?.stopAllAction();
-      const moving = riderInput103(actor);
-      crawl103(actor, moving || Math.hypot(rat.userData.motionX || 0, rat.userData.motionZ || 0) > .01);
+      riderInput103(actor);
+      // Keep the living crawl active for the whole ride. The source walk action
+      // contains only a static pose, so the bones must be driven every frame.
+      crawl103(actor, true);
     } else {
       if (actor.wasRiding103) {
         actor.wasRiding103 = false;
