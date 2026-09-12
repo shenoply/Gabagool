@@ -11,7 +11,7 @@
   </style>
 </head>
 <body>
-  <div id="tag">GECKO + RAT CINEMATIC 96</div>
+  <div id="tag">GECKO ALIGNMENT 97</div>
   <iframe id="game" title="Wet Whiskers game" src="index.html?base=346a5ecc"></iframe>
   <script>
     document.getElementById('game').addEventListener('load', function () {
@@ -20,6 +20,11 @@
       script.addEventListener('load', function () {
         const cinematic = document.getElementById('game').contentDocument.createElement('script');
         cinematic.src = 'wildlife-cinematic96.js?v=96';
+        cinematic.addEventListener('load', function () {
+          const alignment = document.getElementById('game').contentDocument.createElement('script');
+          alignment.src = 'wildlife-align97.js?v=97';
+          document.getElementById('game').contentDocument.body.appendChild(alignment);
+        });
         document.getElementById('game').contentDocument.body.appendChild(cinematic);
       });
       this.contentDocument.body.appendChild(script);
