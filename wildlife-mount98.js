@@ -31,15 +31,16 @@
     if (!actor?.riding || !u?.pipPivot) return;
 
     // Keep Pip visibly on the saddle: normal standing height is .90.
-    u.pipPivot.position.set(0, 1.28, -.06);
-    u.pipPivot.rotation.set(-.25, 0, 0);
+    // The enlarged gecko's back is well above Pip's normal ground pose.
+    u.pipPivot.position.set(0, 2.15, .04);
+    u.pipPivot.rotation.set(-.30, 0, 0);
     u.pipPivot.scale.setScalar(1);
 
     const pose = {
-      LeftUpLeg: -1.18, RightUpLeg: -1.18,
-      LeftLeg: 1.42, RightLeg: 1.42,
-      LeftArm: [-.72, 0, -.42], RightArm: [-.72, 0, .42],
-      LeftForeArm: [-.82, 0, 0], RightForeArm: [-.82, 0, 0]
+      LeftUpLeg: [-1.12, 0, -.46], RightUpLeg: [-1.12, 0, .46],
+      LeftLeg: [1.30, 0, 0], RightLeg: [1.30, 0, 0],
+      LeftArm: [-1.08, 0, -.34], RightArm: [-1.08, 0, .34],
+      LeftForeArm: [-.22, 0, 0], RightForeArm: [-.22, 0, 0]
     };
     for (const [name, angles] of Object.entries(pose)) {
       const bone = u.pipBones?.[name];
@@ -67,8 +68,8 @@
       actor.mountSize98 = true;
     }
 
-    // The earlier sign exposed the belly. Roll the opposite way so the feet face the ground.
-    actor.model.rotation.x = -Math.PI / 2;
+    // Positive quarter-turn puts the dark back upward and all four feet below the body.
+    actor.model.rotation.x = Math.PI / 2;
     actor.model.rotation.y = actor.riding ? Math.PI : 0;
     actor.model.rotation.z = 0;
     actor.model.position.y = .25;
@@ -76,12 +77,20 @@
     if (actor.riding) {
       actor.g.position.set(rat.position.x, Math.max(0, rat.position.y), rat.position.z);
       actor.g.rotation.y = rat.rotation.y;
-      if ((rat.userData.vel || 0) > .05) {
+      const p = rat.position;
+      const previous = actor.mountPrevious98;
+      const travelled = previous ? (p.x - previous.x) ** 2 + (p.z - previous.z) ** 2 : 0;
+      const input = Math.hypot(joy?.x || 0, joy?.z || 0) > .10 ||
+        !!(keys.w || keys.a || keys.s || keys.d || keys.arrowup || keys.arrowdown || keys.arrowleft || keys.arrowright);
+      const moving = travelled > .0000005 || input;
+      if (!previous) actor.mountPrevious98 = new THREE.Vector3();
+      actor.mountPrevious98.copy(p);
+      if (moving) {
         actor.mixer.timeScale = 2.7;
         geckoRun98(actor);
         actor.model.position.y += Math.abs(Math.sin(actor.clock * 13)) * .035;
       }
-    }
+    } else actor.mountPrevious98 = null;
   };
 
   const models98Base = tickModels44;
