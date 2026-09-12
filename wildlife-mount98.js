@@ -35,10 +35,25 @@
   function crawl103(actor, moving) {
     const b = restoreGecko103(actor);
     if (!b) return;
-    const phase = actor.clock * (moving ? 7.5 : 2.2);
+    const phase = actor.clock * (moving ? 8.5 : 2.2);
     const stride = Math.sin(phase);
     const lift = Math.cos(phase);
     const power = moving ? 1 : .035;
+    if (!actor.rideLegPositions103) {
+      actor.rideLegPositions103 = {};
+      for (const name of ['ArmF.L_05','ArmF.R_010','Bone.019_024','Bone.023_029']) {
+        if (b[name]) actor.rideLegPositions103[name] = b[name].position.clone();
+      }
+    }
+    for (const [name, rest] of Object.entries(actor.rideLegPositions103)) b[name]?.position.copy(rest);
+    // The supplied walking clip has no changing keyframes. Translate each whole
+    // limb slightly as well as bending it, so the mounted crawl is unmistakable.
+    if (moving) {
+      b['ArmF.L_05']?.position.add(new THREE.Vector3(stride * .11, lift * .075, 0));
+      b['ArmF.R_010']?.position.add(new THREE.Vector3(-stride * .11, -lift * .075, 0));
+      b['Bone.019_024']?.position.add(new THREE.Vector3(-stride * .10, -lift * .07, 0));
+      b['Bone.023_029']?.position.add(new THREE.Vector3(stride * .10, lift * .07, 0));
+    }
     b['ArmF.L_05']?.rotateZ(stride * .92 * power);
     b['ArmF.L_05']?.rotateX(lift * .38 * power);
     b['ArmF.R_010']?.rotateZ(-stride * .92 * power);
@@ -90,8 +105,8 @@
     }
     u.pipMixer?.stopAllAction();
     u.mountLocked103 = true;
-    u.pipPivot.position.set(0, 2.15, .05);
-    u.pipPivot.rotation.set(-.18, Math.PI, 0);
+    u.pipPivot.position.set(0, 1.62, .05);
+    u.pipPivot.rotation.set(-.18, 0, 0);
     u.pipPivot.scale.setScalar(1);
     const pose = {
       Spine: [-.10, 0, 0],
@@ -125,10 +140,12 @@
     if (actor.riding) {
       actor.wasRiding103 = true;
       actor.g.position.set(rat.position.x, Math.max(0, rat.position.y), rat.position.z);
-      actor.g.rotation.y = rat.rotation.y;
+      // The gecko asset's head points opposite its authored forward axis.
+      // Flip the mount group so both animals face the actual control direction.
+      actor.g.rotation.y = rat.rotation.y + Math.PI;
       actor.mixer?.stopAllAction();
       const moving = riderInput103(actor);
-      crawl103(actor, moving);
+      crawl103(actor, moving || Math.hypot(rat.userData.motionX || 0, rat.userData.motionZ || 0) > .01);
     } else {
       if (actor.wasRiding103) {
         actor.wasRiding103 = false;
