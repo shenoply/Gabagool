@@ -25,8 +25,18 @@
   }
 
   function restoreGecko103(actor) {
-    const rig = actor.cineRig96;
-    if (!rig) return null;
+    // The older cinematic patch created this rig lazily only after an unmounted
+    // walk. Build it here as well so mounting first can never leave a rigid gecko.
+    let rig = actor.cineRig96;
+    if (!rig) {
+      const bones = {}, rest = {};
+      actor.model.traverse(o => {
+        if (!o.isBone) return;
+        bones[o.name] = o;
+        rest[o.name] = o.quaternion.clone();
+      });
+      rig = actor.cineRig96 = { bones, rest };
+    }
     for (const name of LEG_BONES) {
       if (rig.bones[name] && rig.rest[name]) rig.bones[name].quaternion.copy(rig.rest[name]);
     }
