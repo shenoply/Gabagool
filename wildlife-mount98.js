@@ -32,7 +32,7 @@
 
     // Keep Pip visibly on the saddle: normal standing height is .90.
     // The enlarged gecko's back is well above Pip's normal ground pose.
-    u.pipPivot.position.set(0, 1.68, .04);
+    u.pipPivot.position.set(0, 2.12, .04);
     u.pipPivot.rotation.set(-.22, 0, 0);
     u.pipPivot.scale.setScalar(1);
 
