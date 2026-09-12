@@ -32,4 +32,10 @@ for (const feature of ['Tameable uploaded gecko', 'Uploaded warning snake', 'Upl
   assert(source.includes(feature), `${feature} must be integrated`);
 }
 
-console.log('PASS: Build 88 script syntax, seven uploaded GLBs, animation clips and wildlife hooks.');
+assert(source.includes("actor88(a,.78"), 'gecko must use the larger Build 89 scale');
+assert(source.includes('u.seated41=true'), 'gecko riding must pose Pip');
+assert(source.includes('function tickRatNpc88'), 'neighbour rat must wander instead of rotating in place');
+assert(source.includes('function styleCat88'), 'cat must replace the broken source material');
+assert(source.includes('c.mixer.timeScale=2.05'), 'cat run animation must be accelerated');
+
+console.log('PASS: Build 89 script syntax, packed assets, cat material/speed, gecko riding and rat wandering.');

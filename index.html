@@ -2793,6 +2793,8 @@ function actor88(asset,height,pos,name){
  return {g,model,mixer,actions,clips:asset.animations,owner:root,clock:Math.random()*9,target:g.position.clone(),cool:0};
 }
 function play88(a,pattern,loop=true){if(!a?.mixer)return;const entry=Object.entries(a.actions).find(([n])=>pattern.test(n));if(!entry)return;const action=entry[1];if(a.current===action)return;for(const other of Object.values(a.actions))other.fadeOut(.18);action.reset().setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce,loop?Infinity:1);action.clampWhenFinished=!loop;action.fadeIn(.18).play();a.current=action;}
+function turn88(g,yaw,dt,rate=5){const d=Math.atan2(Math.sin(yaw-g.rotation.y),Math.cos(yaw-g.rotation.y));g.rotation.y+=d*(1-Math.exp(-dt*rate));}
+function styleCat88(a){a.model.traverse(o=>{if(!o.isMesh)return;const eye=/sphere/i.test(o.name),mat=new THREE.MeshStandardMaterial({color:eye?0x241b16:0x765747,roughness:eye?.38:.88,metalness:0,emissive:eye?0x120b07:0x000000,emissiveIntensity:eye?.14:0,skinning:!!o.isSkinnedMesh});mat.vertexColors=false;o.material=mat;});}
 function pump88(){while(active88<2&&queue88.length){const job=queue88.shift();active88++;fetch('assets87/'+job.file+'.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json();}).then(async packed=>{const raw=atob(packed.data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);if(typeof DecompressionStream==='undefined')throw Error('This browser cannot unpack the optimized model');const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));return new Response(stream).arrayBuffer();}).then(buffer=>new Promise((resolve,reject)=>loader88.parse(buffer,'',resolve,reject))).then(a=>{active88--;if(root===job.owner&&phase==='scavenge')job.done(a);pump88();}).catch(e=>{active88--;console.warn('Optional uploaded asset failed:',job.file,e);pump88();});}}
 function load88(file,done){queue88.push({file,done,owner:root});pump88();}
 function addPlant88(source,name,pos,height,yaw=0){const src=source.getObjectByName(name);if(!src)return;const g=new THREE.Group(),model=fit88(src.clone(true),height);g.add(model);g.position.set(...pos);g.rotation.y=yaw;g.name='Uploaded garden plant';root.add(g);wildlife88.decor.push(g);}
@@ -2800,10 +2802,10 @@ function addProp88(source,name,pos,height,yaw=0){const src=source.getObjectByNam
 function seedWildlife88(){
  if(!root||phase!=='scavenge'||wildlife88.owner===root||wildlife88.loading)return;
  wildlife88={owner:root,loading:true,gecko:null,ratNpc:null,snake:null,cat:null,ant:null,near:null,decor:[]};
- load88('gecko',a=>{const x=actor88(a,.48,[8.1,0,27.1],'Tameable uploaded gecko');x.tamed=!!home.geckoTamed88;x.riding=false;x.wander=0;play88(x,/idle/i);wildlife88.gecko=x;});
- load88('rat',a=>{const x=actor88(a,.72,[10.2,0,28.4],'Uploaded neighbour rat');wildlife88.ratNpc=x;});
+ load88('gecko',a=>{const x=actor88(a,.78,[8.1,0,27.1],'Tameable uploaded gecko');x.tamed=!!home.geckoTamed88;x.riding=false;x.wander=0;play88(x,/idle/i);wildlife88.gecko=x;});
+ load88('rat',a=>{const x=actor88(a,.72,[10.2,0,28.4],'Uploaded neighbour rat');x.home=x.g.position.clone();x.wander=1;x.walking=false;x.modelBaseY=x.model.position.y;wildlife88.ratNpc=x;});
  load88('snake',a=>{const x=actor88(a,.34,[-13.8,0,21.2],'Uploaded warning snake');x.home=x.g.position.clone();x.state='rest';wildlife88.snake=x;});
- load88('cat',a=>{const x=actor88(a,1.05,[23.8,0,14.2],'Uploaded roaming cat');x.home=x.g.position.clone();x.wander=0;play88(x,/walk/i);wildlife88.cat=x;});
+ load88('cat',a=>{const x=actor88(a,1.05,[23.8,0,14.2],'Uploaded roaming cat');styleCat88(x);x.home=x.g.position.clone();x.wander=0;x.mixer.timeScale=1.45;play88(x,/walk/i);wildlife88.cat=x;});
  load88('ant',a=>{const x=actor88(a,.16,[4.3,0,30.8],'Uploaded crumb-carrying ant');play88(x,/walk/i);const crumb=sph(.055,M(0xd7b576),8,6);crumb.scale.set(1.3,.7,1);crumb.position.set(0,.16,-.12);x.g.add(crumb);x.route=0;wildlife88.ant=x;});
  load88('plants',a=>{for(const [name,pos,h,yaw] of [
   ['Bush-01_13',[-18.9,0,29.6],1.15,.2],['Bush-03_15',[-18.8,0,25.9],.9,-.4],['Hedge-01_12',[28.9,0,22.5],1.15,Math.PI/2],
@@ -2817,9 +2819,9 @@ function seedWildlife88(){
 }
 function tickGecko88(dt,g){
  g.clock+=dt;g.mixer?.update(dt);const u=rat.userData;
- if(g.riding){g.g.position.set(rat.position.x,Math.max(0,rat.position.y-.02),rat.position.z);g.g.rotation.y=rat.rotation.y;g.model.rotation.y=Math.PI;u.geckoRide88=true;play88(g,/walk/i);return;}
- u.geckoRide88=false;const d=g.g.position.distanceTo(rat.position);
- if(g.tamed){const desired=rat.position.clone().add(new THREE.Vector3(-Math.sin(rat.rotation.y)*1.2,0,-Math.cos(rat.rotation.y)*1.2)),v=desired.sub(g.g.position);v.y=0;if(v.length()>1.2){v.normalize();g.g.position.addScaledVector(v,dt*1.35);g.g.rotation.y=Math.atan2(v.x,v.z);play88(g,/walk/i);}else play88(g,/idle/i);}
+ if(g.riding){g.g.position.set(rat.position.x,Math.max(0,rat.position.y-.02),rat.position.z);g.g.rotation.y=rat.rotation.y;g.model.rotation.y=Math.PI;u.geckoRide88=true;u.seated41=true;if(u.pipPivot){u.pipPivot.position.y=1.2;u.pipPivot.rotation.x=-.16;}for(const side of ['Left','Right']){rotateBone69(u,side+'Arm',-.35);rotateBone69(u,side+'ForeArm',-.22);}if((u.vel||0)>.08){play88(g,/walk/i);g.mixer.timeScale=1.55;}else{play88(g,/idle/i);g.mixer.timeScale=1;}return;}
+ u.geckoRide88=false;if(u.seated41)u.seated41=false;const d=g.g.position.distanceTo(rat.position);
+ if(g.tamed){const desired=rat.position.clone().add(new THREE.Vector3(-Math.sin(rat.rotation.y)*2.15,0,-Math.cos(rat.rotation.y)*2.15)),v=desired.sub(g.g.position);v.y=0;if(v.length()>1.05){v.normalize();g.g.position.addScaledVector(v,dt*1.7);turn88(g.g,Math.atan2(v.x,v.z),dt,7);play88(g,/walk/i);g.mixer.timeScale=1.4;}else{play88(g,/idle/i);g.mixer.timeScale=1;}}
  else{g.wander-=dt;if(g.wander<=0){g.wander=3+Math.random()*4;g.target.set(8.1+(Math.random()-.5)*3,0,27.1+(Math.random()-.5)*3);}const v=g.target.clone().sub(g.g.position);v.y=0;if(v.length()>.2){v.normalize();g.g.position.addScaledVector(v,dt*.28);g.g.rotation.y=Math.atan2(v.x,v.z);play88(g,/walk/i);}else play88(g,/idle/i);}
 }
 function tickSnake88(dt,s){
@@ -2830,19 +2832,23 @@ function tickSnake88(dt,s){
 }
 function tickCat88(dt,c){
  c.clock+=dt;c.cool=Math.max(0,c.cool-dt);c.mixer?.update(dt);c.wander-=dt;const d=Math.hypot(rat.position.x-c.g.position.x,rat.position.z-c.g.position.z);
- let target,speed=.42;if(d<5.5){target=rat.position.clone();speed=d<2.4?1.2:.8;play88(c,/run/i);}else{if(c.wander<=0){c.wander=4+Math.random()*5;c.target.set(23.5+(Math.random()-.5)*6,0,15+(Math.random()-.5)*9);}target=c.target;play88(c,/walk/i);}
- const v=target.clone().sub(c.g.position);v.y=0;if(v.length()>.35){v.normalize();const next=c.g.position.clone().addScaledVector(v,dt*speed);if(next.x>19&&next.x<29&&next.z>7&&next.z<25)c.g.position.copy(next);c.g.rotation.y=Math.atan2(v.x,v.z);}
+ let target,speed=.68;if(d<5.5){target=rat.position.clone();speed=d<2.4?1.9:1.35;play88(c,/run/i);c.mixer.timeScale=2.05;}else{if(c.wander<=0){c.wander=4+Math.random()*5;c.target.set(23.5+(Math.random()-.5)*6,0,15+(Math.random()-.5)*9);}target=c.target;play88(c,/walk/i);c.mixer.timeScale=1.45;}
+ const v=target.clone().sub(c.g.position);v.y=0;if(v.length()>.35){v.normalize();const next=c.g.position.clone().addScaledVector(v,dt*speed);if(next.x>19&&next.x<29&&next.z>7&&next.z<25)c.g.position.copy(next);turn88(c.g,Math.atan2(v.x,v.z),dt,8);}
  if(d<1.25&&c.cool===0){c.cool=5;ensureLife().stamina=Math.max(0,ensureLife().stamina-15);const away=rat.position.clone().sub(c.g.position).setY(0).normalize();rat.position.addScaledVector(away,1);sfx.yowl();sayToast('The cat pounces — sprint away or use the fence routes!');}
 }
 function tickAnt88(dt,a){a.clock+=dt;a.mixer?.update(dt);const route=[[4.3,30.8],[7.2,31.4],[9.1,29.7],[5.8,28.9]],goal=new THREE.Vector3(route[a.route][0],0,route[a.route][1]),v=goal.sub(a.g.position);if(v.length()<.12)a.route=(a.route+1)%route.length;else{v.normalize();a.g.position.addScaledVector(v,dt*.22);a.g.rotation.y=Math.atan2(v.x,v.z);}}
+function tickRatNpc88(dt,n){n.clock+=dt;n.wander-=dt;const d=Math.hypot(rat.position.x-n.g.position.x,rat.position.z-n.g.position.z);let target=null;
+ if(d<2.25){n.walking=false;turn88(n.g,Math.atan2(rat.position.x-n.g.position.x,rat.position.z-n.g.position.z),dt,4.2);}
+ else{if(n.wander<=0||n.g.position.distanceTo(n.target)<.16){n.wander=2.5+Math.random()*3.5;const a=Math.random()*Math.PI*2,r=.65+Math.random()*1.75;n.target.set(n.home.x+Math.sin(a)*r,0,n.home.z+Math.cos(a)*r);}target=n.target;const v=target.clone().sub(n.g.position);v.y=0;n.walking=v.length()>.15;if(n.walking){v.normalize();n.g.position.addScaledVector(v,dt*.38);turn88(n.g,Math.atan2(v.x,v.z),dt,5.5);}}
+ const bob=n.walking?Math.abs(Math.sin(n.clock*7.5))*.025:Math.sin(n.clock*2)*.006;n.model.position.y=n.modelBaseY+bob;n.model.rotation.z=n.walking?Math.sin(n.clock*7.5)*.025:0;}
 function tickWildlife88(dt){
  if(!rat||phase!=='scavenge')return;seedWildlife88();if(wildlife88.owner!==root)return;wildlife88.near=null;
  const g=wildlife88.gecko;if(g){tickGecko88(dt,g);const d=g.g.position.distanceTo(rat.position);if(d<1.35)wildlife88.near={type:'gecko',obj:g,d};}
- const n=wildlife88.ratNpc;if(n){n.clock+=dt;n.mixer?.update(dt);n.g.rotation.y=Math.atan2(rat.position.x-n.g.position.x,rat.position.z-n.g.position.z);const d=n.g.position.distanceTo(rat.position);if(d<1.55&&(!wildlife88.near||d<wildlife88.near.d))wildlife88.near={type:'rat',obj:n,d};}
+ const n=wildlife88.ratNpc;if(n){n.mixer?.update(dt);tickRatNpc88(dt,n);const d=n.g.position.distanceTo(rat.position);if(d<1.7&&(!wildlife88.near||d<wildlife88.near.d))wildlife88.near={type:'rat',obj:n,d};}
  if(wildlife88.snake)tickSnake88(dt,wildlife88.snake);if(wildlife88.cat)tickCat88(dt,wildlife88.cat);if(wildlife88.ant)tickAnt88(dt,wildlife88.ant);
  if(wildlife88.near&&!(sc&&sc.talk)&&!rat.userData.wallState){const x=wildlife88.near;ui.prompt.style.display='block';ui.prompt.textContent=x.type==='rat'?'E · Talk to neighbour rat':x.obj.riding?'E · Dismount gecko':x.obj.tamed?'E · Ride gecko':'E · Tame gecko';$('padE').textContent=x.type==='rat'?'Talk':x.obj.riding?'Dismount':x.obj.tamed?'Ride':'Tame';}
 }
-function interactWildlife88(){const x=wildlife88.near;if(!x)return false;if(x.type==='rat'){sayToast('Neighbour rat: “Ants found crumbs by the gate. Watch the snake near the timber.”');return true;}const g=x.obj;if(g.riding){g.riding=false;rat.userData.geckoRide88=false;sayToast('Pip hops down from the gecko.');return true;}if(!g.tamed){g.tamed=true;home.geckoTamed88=true;save();sayToast('Gecko tamed! It will follow Pip.');return true;}g.riding=true;rat.userData.geckoRide88=true;sayToast('Riding gecko · tap Dismount to hop off');return true;}
+function interactWildlife88(){const x=wildlife88.near;if(!x)return false;if(x.type==='rat'){sayToast('Neighbour rat: “Ants found crumbs by the gate. Watch the snake near the timber.”');return true;}const g=x.obj;if(g.riding){g.riding=false;rat.userData.geckoRide88=false;rat.userData.seated41=false;sayToast('Pip hops down from the gecko.');return true;}if(!g.tamed){g.tamed=true;home.geckoTamed88=true;save();sayToast('Gecko tamed! It will follow Pip.');return true;}g.riding=true;rat.userData.geckoRide88=true;rat.userData.seated41=true;sayToast('Riding gecko · tap Dismount to hop off');return true;}
 const worldBefore88=tickWorld38;tickWorld38=function(dt){worldBefore88(dt);tickWildlife88(dt);};
 const grabBefore88=grab;grab=function(){if(interactWildlife88())return;return grabBefore88();};
 const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loading:false,gecko:null,ratNpc:null,snake:null,cat:null,ant:null,near:null,decor:[]};return clearBefore88();};
