@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-  <div id="label">NATURAL GECKO CRAWL · PREVIEW</div>
+  <div id="label">NATURAL GECKO CRAWL · PREVIEW 2</div>
   <div id="note">Diagonal gait · planted feet · head counter-sway · tail wave</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
@@ -33,7 +33,7 @@
     const path=new THREE.Mesh(new THREE.PlaneGeometry(22,3.5),new THREE.MeshStandardMaterial({color:0xbca77c,roughness:1}));
     path.rotation.x=-Math.PI/2;path.position.y=.006;scene.add(path);
 
-    let actor=null,bones={},rest={},restPos={},ready=false;
+    let actor=null,actorBaseY=.02,bones={},rest={},restPos={},ready=false;
     const names=['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.003_015','Bone.012_017','ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08','ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013','Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027','Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'];
     const rot=(name,axis,value)=>{const b=bones[name];if(b)b['rotate'+axis](value)};
     function reset(){for(const name of names){if(bones[name]&&rest[name])bones[name].quaternion.copy(rest[name]);if(bones[name]&&restPos[name])bones[name].position.copy(restPos[name]);}}
@@ -56,7 +56,7 @@
       rot('Bone_01','Z',sway);rot('Bone.001_02','Z',sway*.55);rot('Bone.002_03','Z',-sway*.7);
       rot('Bone.012_017','Z',-sway*.45);
       ['Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'].forEach((n,i)=>rot(n,'Y',Math.sin(p-i*.42)*(.16-i*.014)));
-      actor.position.y=.02+Math.sin(p*2)*.012;
+      actor.position.y=actorBaseY+Math.sin(p*2)*.012;
       actor.rotation.y=-.48+Math.sin(t*.55)*.10;
     }
     function renderAt(t){pose(t);renderer.render(scene,camera);}
@@ -67,9 +67,12 @@
       const buffer=await new Response(stream).arrayBuffer();
       new THREE.GLTFLoader().parse(buffer,'',asset=>{
         const model=asset.scene;model.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
-        const scale=2.2/Math.max(size.y,.001);model.scale.multiplyScalar(scale);
+        const scale=5.2/Math.max(size.y,.001);model.scale.multiplyScalar(scale);
         model.position.sub(new THREE.Vector3((box.min.x+box.max.x)/2,box.min.y,(box.min.z+box.max.z)/2).multiplyScalar(scale));
         actor=new THREE.Group();actor.rotation.x=Math.PI/2;actor.add(model);scene.add(actor);
+        actor.updateMatrixWorld(true);
+        const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
+        actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y;actor.position.y=actorBaseY;
         model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
         ready=true;window.previewReady=true;renderAt(0);
       });
