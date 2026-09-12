@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Natural Gecko Crawl Preview</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#b8c59d;font-family:system-ui,sans-serif}
+    canvas{display:block;width:100%;height:100%}
+    #label{position:fixed;left:18px;top:16px;padding:9px 13px;border-radius:999px;background:#18342ddd;color:#f4e6c7;font-weight:800;letter-spacing:.05em}
+    #note{position:fixed;left:18px;bottom:16px;padding:8px 12px;border-radius:10px;background:#efe2c8dd;color:#25342e;font-size:14px}
+  </style>
+</head>
+<body>
+  <div id="label">NATURAL GECKO CRAWL · PREVIEW</div>
+  <div id="note">Diagonal gait · planted feet · head counter-sway · tail wave</div>
+  <script src="three-r128-build55.js"></script>
+  <script src="GLTFLoader.js"></script>
+  <script>
+  (()=>{
+    const scene=new THREE.Scene();
+    scene.background=new THREE.Color(0xb8c59d);
+    scene.fog=new THREE.Fog(0xb8c59d,12,28);
+    const camera=new THREE.PerspectiveCamera(34,innerWidth/innerHeight,.05,80);
+    camera.position.set(7,4.2,9.5);camera.lookAt(0,.65,0);
+    const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+    renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;document.body.prepend(renderer.domElement);
+    scene.add(new THREE.HemisphereLight(0xfff3d5,0x526947,2.1));
+    const sun=new THREE.DirectionalLight(0xffe8bf,2.2);sun.position.set(5,9,6);sun.castShadow=true;scene.add(sun);
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(40,25),new THREE.MeshStandardMaterial({color:0x78955b,roughness:1}));
+    ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+    const path=new THREE.Mesh(new THREE.PlaneGeometry(22,3.5),new THREE.MeshStandardMaterial({color:0xbca77c,roughness:1}));
+    path.rotation.x=-Math.PI/2;path.position.y=.006;scene.add(path);
+
+    let actor=null,bones={},rest={},restPos={},ready=false;
+    const names=['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.003_015','Bone.012_017','ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08','ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013','Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027','Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'];
+    const rot=(name,axis,value)=>{const b=bones[name];if(b)b['rotate'+axis](value)};
+    function reset(){for(const name of names){if(bones[name]&&rest[name])bones[name].quaternion.copy(rest[name]);if(bones[name]&&restPos[name])bones[name].position.copy(restPos[name]);}}
+    function leg(root,mid,knee,foot,phase,side,front){
+      const swing=Math.sin(phase),lift=Math.max(0,Math.cos(phase));
+      rot(root,'Z',swing*(front?.72:.66)*side);
+      rot(root,'X',(lift*.32-.08)*side);
+      rot(mid,'X',(.12+lift*.62)*side);
+      rot(knee,'Z',-swing*.28*side);
+      rot(foot,'X',lift*.38*side);
+      const p=bones[root]?.position;if(p&&restPos[root]){p.x+=swing*.10*side;p.z+=lift*.075*side;}
+    }
+    function pose(t){
+      if(!ready)return;reset();const p=t*7.0;
+      leg('ArmF.L_05','ArmF2.L_06','ArmF3.L_07','ArmF4.L_08',p,1,true);
+      leg('Bone.023_029','Bone.024_030','Bone.025_031','Bone.026_032',p,1,false);
+      leg('ArmF.R_010','ArmF2.R_011','ArmF3.R_012','ArmF4.R_013',p+Math.PI,-1,true);
+      leg('Bone.019_024','Bone.020_025','Bone.021_026','Bone.022_027',p+Math.PI,-1,false);
+      const sway=Math.sin(p)*.075;
+      rot('Bone_01','Z',sway);rot('Bone.001_02','Z',sway*.55);rot('Bone.002_03','Z',-sway*.7);
+      rot('Bone.012_017','Z',-sway*.45);
+      ['Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022'].forEach((n,i)=>rot(n,'Y',Math.sin(p-i*.42)*(.16-i*.014)));
+      actor.position.y=.02+Math.sin(p*2)*.012;
+      actor.rotation.y=-.48+Math.sin(t*.55)*.10;
+    }
+    function renderAt(t){pose(t);renderer.render(scene,camera);}
+    window.setPreviewTime=t=>renderAt(t);
+    fetch('assets87/gecko.json').then(r=>r.json()).then(async packed=>{
+      const raw=atob(packed.data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+      const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+      const buffer=await new Response(stream).arrayBuffer();
+      new THREE.GLTFLoader().parse(buffer,'',asset=>{
+        const model=asset.scene;model.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
+        const scale=2.2/Math.max(size.y,.001);model.scale.multiplyScalar(scale);
+        model.position.sub(new THREE.Vector3((box.min.x+box.max.x)/2,box.min.y,(box.min.z+box.max.z)/2).multiplyScalar(scale));
+        actor=new THREE.Group();actor.rotation.x=Math.PI/2;actor.add(model);scene.add(actor);
+        model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
+        ready=true;window.previewReady=true;renderAt(0);
+      });
+    });
+    let start=performance.now();function loop(now){if(!window.captureMode)renderAt((now-start)/1000);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+    addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+  })();
+  </script>
+</body>
+</html>
