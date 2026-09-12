@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="label">SKIN-GROUNDED GECKO · PREVIEW 13</div>
-  <div id="note">Original limbs preserved · rendered lowest toe grounded</div>
+  <div id="label">LOCKED LEVEL SPINE · PREVIEW 14</div>
+  <div id="note">Tail · pelvis · chest · neck locked to one level axis</div>
   <script src="three-r128-build55.js"></script>
   <script src="GLTFLoader.js"></script>
   <script>
@@ -57,17 +57,19 @@
       }
     }
     function levelSpine(t){
-      for(const name of ['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04']){
+      const axial=[
+        'Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04',
+        'Bone.012_017','Bone.013_018','Bone.014_00','Bone.015_019',
+        'Bone.016_020','Bone.017_021','Bone.018_022','Bone.018_end_023'
+      ];
+      for(const name of axial){
         const bone=bones[name];if(!bone)continue;
         if(rest[name])bone.quaternion.copy(rest[name]);
         if(restPos[name])bone.position.copy(restPos[name]);
       }
-      // Remove the authored upward neck curve, then angle the whole upper chain
-      // slightly downward so the visible mesh follows the pelvis line.
       bones['Bone.001_02']?.quaternion.identity();
       bones['Bone.002_03']?.quaternion.identity();
-      bones['Bone_01']?.rotateZ(.16);
-      bones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.035);
+      bones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.025);
     }
     function plantFeet(t){
       if(!actor)return;
@@ -149,7 +151,7 @@
         actor.add(layFlat);scene.add(actor);
         actor.updateMatrixWorld(true);
         const laidBox=new THREE.Box3().setFromObject(actor),laidCenter=laidBox.getCenter(new THREE.Vector3());
-        actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y-.10;actor.position.y=actorBaseY;
+        actor.position.x=-laidCenter.x;actor.position.z=-laidCenter.z;actorBaseY=.035-laidBox.min.y;actor.position.y=actorBaseY;
         model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.isSkinnedMesh)skinned.push(o);}if(o.isBone){bones[o.name]=o;rest[o.name]=o.quaternion.clone();restPos[o.name]=o.position.clone();}});
         sourceClip=asset.animations[2];
         mixer=new THREE.AnimationMixer(model);
