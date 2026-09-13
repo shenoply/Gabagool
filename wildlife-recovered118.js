@@ -201,14 +201,16 @@
     const saddle = saddlePoint121(g);
     // Lift the rider clear of the textured back; the recovered mesh's visual
     // body sits higher than its geometry bounding box around the shoulders.
-    u.pipPivot.position.set(saddle.x, .9 + backHeight + .38, saddle.z);
+    u.pipPivot.position.set(saddle.x, .9 + backHeight + .55, saddle.z);
     u.pipPivot.rotation.set(-.08, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
       Spine: [-.08, 0, 0], Spine01: [-.05, 0, 0],
-      LeftUpLeg: [-1.12, 0, -.48], RightUpLeg: [-1.12, 0, .48],
-      LeftLeg: [1.35, 0, 0], RightLeg: [1.35, 0, 0],
-      LeftFoot: [-.12, 0, 0], RightFoot: [-.12, 0, 0],
+      // A real riding pose: hips lifted, thighs spread around the lizard's
+      // shoulders, then knees bent down along both sides of its body.
+      LeftUpLeg: [-1.30, 0, -.88], RightUpLeg: [-1.30, 0, .88],
+      LeftLeg: [1.55, 0, 0], RightLeg: [1.55, 0, 0],
+      LeftFoot: [-.26, 0, 0], RightFoot: [-.26, 0, 0],
       LeftArm: [.24, 0, -.18], RightArm: [.24, 0, .18],
       LeftForeArm: [.18, 0, -.06], RightForeArm: [.18, 0, .06]
     };
