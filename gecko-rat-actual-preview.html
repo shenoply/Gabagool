@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Actual Gecko + Pip Riding Preview</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#a9b68f;font-family:system-ui,sans-serif}
+    canvas{display:block;width:100%;height:100%;touch-action:none}
+    #label{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:9px 14px;border-radius:999px;background:#18342de8;color:#f4e6c7;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+    #note{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px 12px;border-radius:10px;background:#efe2c8e8;color:#25342e;white-space:nowrap}
+    #loading{position:fixed;inset:0;display:grid;place-items:center;color:#25342e;font-weight:700}
+    @media(max-width:520px){#label{font-size:13px}#note{font-size:12px}}
+  </style>
+</head>
+<body>
+  <div id="loading">Loading the real gecko and Pip models…</div>
+  <div id="label">REAL MODELS · RIDING GAIT</div>
+  <div id="note">Drag to rotate · Pip seated · gecko limbs animated</div>
+  <script src="three-r128-build55.js"></script>
+  <script src="GLTFLoader.js"></script>
+  <script>
+  (() => {
+    const scene=new THREE.Scene();
+    scene.background=new THREE.Color(0xa9b68f);
+    scene.fog=new THREE.Fog(0xa9b68f,14,31);
+    const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.05,90);
+    const renderer=new THREE.WebGLRenderer({antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(innerWidth,innerHeight);
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.shadowMap.enabled=true;
+    document.body.prepend(renderer.domElement);
+    scene.add(new THREE.HemisphereLight(0xfff2d3,0x526347,1.25));
+    const sun=new THREE.DirectionalLight(0xffe7bd,1.4);
+    sun.position.set(-5,10,7);sun.castShadow=true;scene.add(sun);
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(45,30),new THREE.MeshStandardMaterial({color:0x76945a,roughness:1}));
+    ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+    const path=new THREE.Mesh(new THREE.PlaneGeometry(26,4),new THREE.MeshStandardMaterial({color:0xb9a57b,roughness:1}));
+    path.rotation.x=-Math.PI/2;path.position.y=.008;scene.add(path);
+
+    const loader=new THREE.GLTFLoader();
+    const actor=new THREE.Group();
+    scene.add(actor);
+    let geckoModel,geckoMixer,geckoClip,ratModel,ratBaseY=0,ratBones={},ratRest={},ready=false,time=0;
+    let geckoBones={},geckoRest={},geckoRestPos={},skinned=[];
+    let yaw=.78,pitch=.28,radius=13,target=new THREE.Vector3(0,.9,0);
+
+    function cameraUpdate(){
+      const cp=Math.cos(pitch);
+      camera.position.set(target.x+Math.cos(yaw)*radius*cp,target.y+Math.sin(pitch)*radius,target.z+Math.sin(yaw)*radius*cp);
+      camera.lookAt(target);
+    }
+    cameraUpdate();
+
+    function unpack(file){
+      return fetch(file).then(r=>r.json()).then(async packed=>{
+        const raw=atob(packed.data),bytes=new Uint8Array(raw.length);
+        for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+        const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+        return new Response(stream).arrayBuffer();
+      }).then(buffer=>new Promise((resolve,reject)=>loader.parse(buffer,'',resolve,reject)));
+    }
+    function loadGlb(file){return new Promise((resolve,reject)=>loader.load(file,resolve,undefined,reject));}
+    function posedBox(model){
+      model.updateMatrixWorld(true);
+      const box=new THREE.Box3(),v=new THREE.Vector3();
+      model.traverse(o=>{
+        if(!o.isMesh||!o.geometry?.attributes?.position)return;
+        if(o.isSkinnedMesh)o.skeleton.update();
+        const p=o.geometry.attributes.position,step=Math.max(1,Math.ceil(p.count/6000));
+        for(let i=0;i<p.count;i+=step){
+          v.fromBufferAttribute(p,i);
+          if(o.isSkinnedMesh)o.boneTransform(i,v);
+          o.localToWorld(v);box.expandByPoint(v);
+        }
+      });
+      return box;
+    }
+    function style(model){
+      model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;}});
+    }
+    function setupGecko(asset){
+      geckoModel=asset.scene;style(geckoModel);
+      geckoModel.updateMatrixWorld(true);
+      const rawBox=new THREE.Box3().setFromObject(geckoModel),rawSize=rawBox.getSize(new THREE.Vector3());
+      const k=3.4/Math.max(rawSize.y,.001);
+      geckoModel.scale.multiplyScalar(k);
+      geckoModel.position.sub(new THREE.Vector3((rawBox.min.x+rawBox.max.x)/2,rawBox.min.y,(rawBox.min.z+rawBox.max.z)/2).multiplyScalar(k));
+      const layFlat=new THREE.Group();layFlat.rotation.x=Math.PI/2;layFlat.add(geckoModel);actor.add(layFlat);
+      actor.rotation.y=-.98;actor.updateMatrixWorld(true);
+      const box=new THREE.Box3().setFromObject(actor),center=box.getCenter(new THREE.Vector3());
+      actor.position.set(-center.x,.025-box.min.y,-center.z);
+      geckoModel.traverse(o=>{
+        if(o.isSkinnedMesh)skinned.push(o);
+        if(o.isBone){geckoBones[o.name]=o;geckoRest[o.name]=o.quaternion.clone();geckoRestPos[o.name]=o.position.clone();}
+      });
+      geckoClip=asset.animations[2]||asset.animations[asset.animations.length-1];
+      geckoMixer=new THREE.AnimationMixer(geckoModel);
+      geckoMixer.clipAction(geckoClip).setLoop(THREE.LoopRepeat,Infinity).play();
+    }
+    function setupPip(asset){
+      ratModel=asset.scene;style(ratModel);
+      const mixer=new THREE.AnimationMixer(ratModel);
+      const idle=asset.animations.find(c=>c.name==='Idle_4')||asset.animations[0];
+      mixer.clipAction(idle).play();mixer.update(0);mixer.stopAllAction();
+      let box=posedBox(ratModel),size=box.getSize(new THREE.Vector3());
+      const k=1.62/Math.max(size.y,.001);
+      ratModel.scale.multiplyScalar(k);ratModel.updateMatrixWorld(true);
+      box=posedBox(ratModel);
+      ratModel.position.sub(new THREE.Vector3((box.min.x+box.max.x)/2,box.min.y,(box.min.z+box.max.z)/2));
+      ratModel.traverse(o=>{if(o.isBone){ratBones[o.name]=o;ratRest[o.name]=o.quaternion.clone();}});
+      actor.add(ratModel);
+      actor.updateMatrixWorld(true);
+      const head=geckoBones['Bone.002_end_04'],tail=geckoBones['Bone.018_end_023']||geckoBones['Bone.018_022'];
+      const hp=new THREE.Vector3(),tp=new THREE.Vector3();
+      head?.getWorldPosition(hp);tail?.getWorldPosition(tp);
+      const dir=hp.sub(tp).setY(0).normalize();
+      const seat=tp.clone().addScaledVector(dir,dir.lengthSq()?.57:0);
+      const geckoBox=posedBox(geckoModel);
+      seat.y=geckoBox.max.y+.03;
+      actor.worldToLocal(seat);
+      ratModel.position.set(seat.x,seat.y-.15,seat.z);
+      const localDir=dir.clone().transformDirection(actor.matrixWorld.clone().invert());
+      ratModel.rotation.y=Math.atan2(localDir.x,localDir.z);
+      ratModel.scale.multiplyScalar(1.2);
+      ratBaseY=ratModel.position.y;
+      posePip(0);
+    }
+    function posePip(t){
+      if(!ratModel)return;
+      for(const [name,q] of Object.entries(ratRest))ratBones[name]?.quaternion.copy(q);
+      const pose={
+        Spine:[-.12,0,0],Spine01:[-.06,0,0],
+        LeftUpLeg:[-1.13,0,-.55],RightUpLeg:[-1.13,0,.55],
+        LeftLeg:[1.35,0,0],RightLeg:[1.35,0,0],
+        LeftFoot:[-.18,0,0],RightFoot:[-.18,0,0],
+        LeftArm:[.86,0,-.31],RightArm:[.86,0,.31],
+        LeftForeArm:[.38,0,-.08],RightForeArm:[.38,0,.08],
+        Head:[.04,Math.sin(t*1.8)*.04,0]
+      };
+      for(const [name,a] of Object.entries(pose)){
+        const b=ratBones[name],q=ratRest[name];if(!b||!q)continue;
+        b.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(a[0],a[1],a[2])));
+      }
+      ratModel.position.y=ratBaseY+Math.sin(t*4.4)*.006;
+    }
+    function levelSpine(t){
+      const axial=['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.012_017','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022','Bone.018_end_023'];
+      for(const name of axial){
+        if(geckoBones[name]&&geckoRest[name])geckoBones[name].quaternion.copy(geckoRest[name]);
+        if(geckoBones[name]&&geckoRestPos[name])geckoBones[name].position.copy(geckoRestPos[name]);
+      }
+      geckoBones['Bone.001_02']?.quaternion.identity();
+      geckoBones['Bone.002_03']?.quaternion.identity();
+      geckoBones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.025);
+    }
+    function groundGecko(){
+      actor.position.y=.02;actor.updateMatrixWorld(true);
+      const v=new THREE.Vector3();let minY=Infinity;
+      for(const m of skinned){
+        m.skeleton.update();const p=m.geometry.attributes.position,step=Math.max(1,Math.ceil(p.count/4200));
+        for(let i=0;i<p.count;i+=step){m.boneTransform(i,v);m.localToWorld(v);if(v.y<minY)minY=v.y;}
+      }
+      if(Number.isFinite(minY))actor.position.y+=.018-minY;
+    }
+    Promise.all([unpack('assets87/gecko.json'),loadGlb('rat-animation-pack67.glb')]).then(([g,p])=>{
+      setupGecko(g);setupPip(p);ready=true;document.getElementById('loading').remove();
+    }).catch(e=>{document.getElementById('loading').textContent='Model load failed — refresh once.';console.error(e);});
+
+    let last=performance.now();
+    function loop(now){
+      const dt=Math.min((now-last)/1000,.05);last=now;
+      if(ready){
+        time+=dt;
+        geckoMixer.setTime(time%geckoClip.duration);
+        levelSpine(time);
+        posePip(time);
+        groundGecko();
+      }
+      renderer.render(scene,camera);requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+    let drag=false,lx=0,ly=0;
+    renderer.domElement.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;renderer.domElement.setPointerCapture(e.pointerId);});
+    renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-lx)*.008;pitch=Math.max(-.03,Math.min(1.1,pitch+(e.clientY-ly)*.006));lx=e.clientX;ly=e.clientY;cameraUpdate();});
+    renderer.domElement.addEventListener('pointerup',()=>drag=false);
+    addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  })();
+  </script>
+</body>
+</html>
