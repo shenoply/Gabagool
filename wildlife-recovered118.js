@@ -199,7 +199,9 @@
     // Use the recovered lizard's actual neck point, transformed into Pip's
     // local space. This cannot be reversed by either model's facing axis.
     const saddle = saddlePoint121(g);
-    u.pipPivot.position.set(saddle.x, .9 + backHeight + .08, saddle.z);
+    // Lift the rider clear of the textured back; the recovered mesh's visual
+    // body sits higher than its geometry bounding box around the shoulders.
+    u.pipPivot.position.set(saddle.x, .9 + backHeight + .38, saddle.z);
     u.pipPivot.rotation.set(-.08, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
