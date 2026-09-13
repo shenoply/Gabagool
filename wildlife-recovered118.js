@@ -177,6 +177,11 @@
     const u = rat?.userData;
     if (!u?.pipPivot) return;
     if (!g?.riding) {
+      if (g?.reins128) {
+        g.reins128.parent?.remove(g.reins128);
+        g.reins128.traverse(o => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
+        g.reins128 = null;
+      }
       if (savedPivot116) {
         u.pipPivot.position.copy(savedPivot116.position);
         u.pipPivot.quaternion.copy(savedPivot116.quaternion);
@@ -209,7 +214,7 @@
       Spine: [-.72, 0, 0], Spine01: [-.30, 0, 0],
       // A real riding pose: hips lifted, thighs spread around the lizard's
       // shoulders, then knees bent down along both sides of its body.
-      LeftUpLeg: [-1.48, 0, -.38], RightUpLeg: [-1.48, 0, .38],
+      LeftUpLeg: [-1.48, 0, -.60], RightUpLeg: [-1.48, 0, .60],
       LeftLeg: [1.68, 0, 0], RightLeg: [1.68, 0, 0],
       LeftFoot: [-.08, 0, 0], RightFoot: [-.08, 0, 0],
       // Reach forward as if holding onto the neck/shoulders, rather than
@@ -232,20 +237,28 @@
     const side = new THREE.Vector3(1, 0, 0)
       .transformDirection(g.model.matrixWorld).normalize();
     const gripBase = saddleWorld.addScaledVector(forward, .56).add(new THREE.Vector3(0, .32, 0));
-    armReach73(u, 'Left', gripBase.clone().addScaledVector(side, .19));
-    armReach73(u, 'Right', gripBase.clone().addScaledVector(side, -.19));
-    // Final direct hand placement: imported arm axes vary by animation, but
-    // the hands must visually remain on the neck at every frame.
-    for (const [name, target] of [
-      ['LeftHand', gripBase.clone().addScaledVector(side, .19)],
-      ['RightHand', gripBase.clone().addScaledVector(side, -.19)]
-    ]) {
-      const hand = u.pipBones?.[name];
-      if (!hand?.parent) continue;
-      hand.position.copy(hand.parent.worldToLocal(target));
-      hand.quaternion.identity();
-      hand.updateWorldMatrix(true, false);
+    // Proper leather reins instead of stretching Pip's arms to the neck.
+    if (!g.reins128) {
+      const reins = new THREE.Group();
+      reins.name = 'Gecko leather reins';
+      for (let i = 0; i < 2; i++) {
+        const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+        const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x352018 }));
+        line.renderOrder = 3; reins.add(line);
+      }
+      g.g.add(reins); g.reins128 = reins;
     }
+    const anchors = [
+      gripBase.clone().addScaledVector(side, .19),
+      gripBase.clone().addScaledVector(side, -.19)
+    ];
+    ['LeftHand', 'RightHand'].forEach((name, i) => {
+      const hand = u.pipBones?.[name];
+      if (!hand) return;
+      const from = g.g.worldToLocal(hand.getWorldPosition(new THREE.Vector3()));
+      const to = g.g.worldToLocal(anchors[i]);
+      g.reins128.children[i].geometry.setFromPoints([from, to]);
+    });
   }
 
   const originalModels116 = tickModels44;
