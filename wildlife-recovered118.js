@@ -201,7 +201,7 @@
     const saddle = saddlePoint121(g);
     // Lift the rider clear of the textured back; the recovered mesh's visual
     // body sits higher than its geometry bounding box around the shoulders.
-    u.pipPivot.position.set(saddle.x, .9 + backHeight + .76, saddle.z);
+    u.pipPivot.position.set(saddle.x, .9 + backHeight + 1.02, saddle.z);
     u.pipPivot.rotation.set(-.08, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
@@ -222,6 +222,17 @@
       bone.quaternion.copy(rest).multiply(new THREE.Quaternion().setFromEuler(
         new THREE.Euler(angles[0], angles[1], angles[2])));
     }
+
+    // Use the actual hand bones and world-space targets, rather than relying
+    // on arm Euler angles (whose local axes differ on Pip's imported rig).
+    const saddleWorld = rat.localToWorld(saddle.clone());
+    const forward = new THREE.Vector3(0, 0, 1)
+      .transformDirection(g.model.matrixWorld).normalize();
+    const side = new THREE.Vector3(1, 0, 0)
+      .transformDirection(g.model.matrixWorld).normalize();
+    const gripBase = saddleWorld.addScaledVector(forward, .48).add(new THREE.Vector3(0, .04, 0));
+    armReach73(u, 'Left', gripBase.clone().addScaledVector(side, .19));
+    armReach73(u, 'Right', gripBase.clone().addScaledVector(side, -.19));
   }
 
   const originalModels116 = tickModels44;
