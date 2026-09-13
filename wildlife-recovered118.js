@@ -244,8 +244,8 @@
       reins.name = 'Gecko leather reins';
       for (let i = 0; i < 2; i++) {
         const rein = new THREE.Mesh(
-          new THREE.CylinderGeometry(.028, .028, 1, 7),
-          new THREE.MeshStandardMaterial({ color: 0x2b170b, roughness: .92 })
+          new THREE.CylinderGeometry(.009, .009, 1, 6),
+          new THREE.MeshStandardMaterial({ color: 0x211109, roughness: .86 })
         );
         rein.castShadow = true; rein.renderOrder = 3; reins.add(rein);
       }
