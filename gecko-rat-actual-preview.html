@@ -117,7 +117,7 @@
       const hp=new THREE.Vector3(),tp=new THREE.Vector3();
       head?.getWorldPosition(hp);tail?.getWorldPosition(tp);
       const span=hp.distanceTo(tp),dir=hp.clone().sub(tp).setY(0).normalize();
-      const seat=tp.clone().addScaledVector(dir,span*.55);
+      const seat=tp.clone().addScaledVector(dir,span*.43);
       const geckoBox=posedBox(geckoModel);
       seat.y=geckoBox.max.y-.06;
       actor.worldToLocal(seat);
@@ -131,14 +131,13 @@
         const sourceDir=ratModel.worldToLocal(front.getWorldPosition(new THREE.Vector3())).sub(ratModel.worldToLocal(headBone.getWorldPosition(new THREE.Vector3())));
         ratModel.rotation.y=-Math.atan2(sourceDir.x,sourceDir.z);
       }
-      ratModel.scale.multiplyScalar(1.2);
       ratBaseY=ratModel.position.y;
       posePip(0);
       ratPivot.updateMatrixWorld(true);
       const hips=ratBones.Hips;
       if(hips){
         const hipLocal=ratPivot.worldToLocal(hips.getWorldPosition(new THREE.Vector3()));
-        ratModel.position.y+=.12-hipLocal.y;
+        ratModel.position.y+=.06-hipLocal.y;
         ratBaseY=ratModel.position.y;
         posePip(0);
       }
@@ -148,8 +147,8 @@
       for(const [name,q] of Object.entries(ratRest))ratBones[name]?.quaternion.copy(q);
       const pose={
         Spine:[-.12,0,0],Spine01:[-.06,0,0],
-        LeftUpLeg:[-1.13,0,-.55],RightUpLeg:[-1.13,0,.55],
-        LeftLeg:[1.35,0,0],RightLeg:[1.35,0,0],
+        LeftUpLeg:[-1.08,0,-.27],RightUpLeg:[-1.08,0,.27],
+        LeftLeg:[1.48,0,0],RightLeg:[1.48,0,0],
         LeftFoot:[-.18,0,0],RightFoot:[-.18,0,0],
         LeftArm:[.86,0,-.31],RightArm:[.86,0,.31],
         LeftForeArm:[.38,0,-.08],RightForeArm:[.38,0,.08],
@@ -169,20 +168,28 @@
         if(geckoBones[name]&&geckoRestPos[name])geckoBones[name].position.copy(geckoRestPos[name]);
       }
       geckoBones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.025);
-      actor.updateMatrixWorld(true);
-      const front=geckoBones['Bone_01'],head=geckoBones['Bone.002_end_04'];
-      const rear=geckoBones['Bone.013_018']||geckoBones['Bone.012_017'];
-      if(front&&head&&rear&&front.parent){
-        const joint=front.getWorldPosition(new THREE.Vector3());
-        const end=head.getWorldPosition(new THREE.Vector3());
-        const rearPoint=rear.getWorldPosition(new THREE.Vector3());
-        const targetPoint=end.clone();targetPoint.y=rearPoint.y+.06;
-        const from=end.sub(joint).normalize(),to=targetPoint.sub(joint).normalize();
-        const delta=new THREE.Quaternion().setFromUnitVectors(from,to);
-        const world=front.getWorldQuaternion(new THREE.Quaternion());
-        const parentWorld=front.parent.getWorldQuaternion(new THREE.Quaternion()).invert();
-        front.quaternion.copy(parentWorld.multiply(delta.multiply(world))).normalize();
+    }
+    function constrainLimbs(){
+      const roots=['ArmF.L_05','ArmF.R_010','Bone.019_024','Bone.023_029'];
+      const mids=['ArmF2.L_06','ArmF3.L_07','ArmF2.R_011','ArmF3.R_012','Bone.020_025','Bone.021_026','Bone.024_030','Bone.025_031'];
+      const toes=['ArmF4.L_08','ArmF4.R_013','Bone.022_027','Bone.026_032'];
+      for(const [names,blend] of [[roots,.72],[mids,.8],[toes,.88]])for(const name of names){
+        const bone=geckoBones[name],rest=geckoRest[name],pos=geckoRestPos[name];
+        if(bone&&rest)bone.quaternion.slerp(rest,blend);
+        if(bone&&pos)bone.position.lerp(pos,.82);
       }
+    }
+    function levelWholeGecko(){
+      actor.rotation.set(0,-.98,0);actor.updateMatrixWorld(true);
+      const head=geckoBones['Bone.002_end_04'],tail=geckoBones['Bone.018_end_023']||geckoBones['Bone.018_022'];
+      if(!head||!tail)return;
+      const hp=head.getWorldPosition(new THREE.Vector3()),tp=tail.getWorldPosition(new THREE.Vector3());
+      const direction=hp.sub(tp),horizontal=Math.hypot(direction.x,direction.z);
+      if(horizontal<.001)return;
+      const angle=Math.atan2(direction.y,horizontal);
+      const axis=new THREE.Vector3(direction.z,0,-direction.x).normalize();
+      actor.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(axis,angle));
+      actor.updateMatrixWorld(true);
     }
     function groundGecko(){
       actor.position.y=.02;actor.updateMatrixWorld(true);
@@ -194,7 +201,7 @@
       if(Number.isFinite(minY))actor.position.y+=.018-minY;
     }
     Promise.all([unpack('assets87/gecko.json'),loadGlb('rat-animation-pack67.glb')]).then(([g,p])=>{
-      setupGecko(g);geckoMixer.setTime(0);levelSpine(0);groundGecko();setupPip(p);ready=true;document.getElementById('loading').remove();
+      setupGecko(g);geckoMixer.setTime(0);levelSpine(0);constrainLimbs();levelWholeGecko();groundGecko();setupPip(p);ready=true;document.getElementById('loading').remove();
     }).catch(e=>{document.getElementById('loading').textContent='Model load failed — refresh once.';console.error(e);});
 
     let last=performance.now();
@@ -204,6 +211,8 @@
         time+=dt;
         geckoMixer.setTime(time%geckoClip.duration);
         levelSpine(time);
+        constrainLimbs();
+        levelWholeGecko();
         posePip(time);
         groundGecko();
       }
