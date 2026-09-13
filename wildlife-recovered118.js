@@ -201,16 +201,17 @@
     const saddle = saddlePoint121(g);
     // Lift the rider clear of the textured back; the recovered mesh's visual
     // body sits higher than its geometry bounding box around the shoulders.
-    u.pipPivot.position.set(saddle.x, .9 + backHeight + 1.02, saddle.z);
-    u.pipPivot.rotation.set(-.08, 0, 0);
+    // Sit down into the mount rather than standing upright on it.
+    u.pipPivot.position.set(saddle.x, .9 + backHeight + .70, saddle.z);
+    u.pipPivot.rotation.set(-.42, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
       Spine: [-.08, 0, 0], Spine01: [-.05, 0, 0],
       // A real riding pose: hips lifted, thighs spread around the lizard's
       // shoulders, then knees bent down along both sides of its body.
-      LeftUpLeg: [-1.30, 0, -.88], RightUpLeg: [-1.30, 0, .88],
-      LeftLeg: [1.55, 0, 0], RightLeg: [1.55, 0, 0],
-      LeftFoot: [-.26, 0, 0], RightFoot: [-.26, 0, 0],
+      LeftUpLeg: [-1.48, 0, -.38], RightUpLeg: [-1.48, 0, .38],
+      LeftLeg: [1.68, 0, 0], RightLeg: [1.68, 0, 0],
+      LeftFoot: [-.08, 0, 0], RightFoot: [-.08, 0, 0],
       // Reach forward as if holding onto the neck/shoulders, rather than
       // holding the arms straight out to the sides.
       LeftArm: [.94, 0, -.26], RightArm: [.94, 0, .26],
@@ -230,7 +231,7 @@
       .transformDirection(g.model.matrixWorld).normalize();
     const side = new THREE.Vector3(1, 0, 0)
       .transformDirection(g.model.matrixWorld).normalize();
-    const gripBase = saddleWorld.addScaledVector(forward, .48).add(new THREE.Vector3(0, .04, 0));
+    const gripBase = saddleWorld.addScaledVector(forward, .56).add(new THREE.Vector3(0, .32, 0));
     armReach73(u, 'Left', gripBase.clone().addScaledVector(side, .19));
     armReach73(u, 'Right', gripBase.clone().addScaledVector(side, -.19));
   }
