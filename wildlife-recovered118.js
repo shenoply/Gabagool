@@ -203,10 +203,10 @@
     // body sits higher than its geometry bounding box around the shoulders.
     // Sit down into the mount rather than standing upright on it.
     u.pipPivot.position.set(saddle.x, .9 + backHeight + .70, saddle.z);
-    u.pipPivot.rotation.set(-.42, 0, 0);
+    u.pipPivot.rotation.set(-.08, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
-      Spine: [-.08, 0, 0], Spine01: [-.05, 0, 0],
+      Spine: [-.72, 0, 0], Spine01: [-.30, 0, 0],
       // A real riding pose: hips lifted, thighs spread around the lizard's
       // shoulders, then knees bent down along both sides of its body.
       LeftUpLeg: [-1.48, 0, -.38], RightUpLeg: [-1.48, 0, .38],
@@ -234,6 +234,18 @@
     const gripBase = saddleWorld.addScaledVector(forward, .56).add(new THREE.Vector3(0, .32, 0));
     armReach73(u, 'Left', gripBase.clone().addScaledVector(side, .19));
     armReach73(u, 'Right', gripBase.clone().addScaledVector(side, -.19));
+    // Final direct hand placement: imported arm axes vary by animation, but
+    // the hands must visually remain on the neck at every frame.
+    for (const [name, target] of [
+      ['LeftHand', gripBase.clone().addScaledVector(side, .19)],
+      ['RightHand', gripBase.clone().addScaledVector(side, -.19)]
+    ]) {
+      const hand = u.pipBones?.[name];
+      if (!hand?.parent) continue;
+      hand.position.copy(hand.parent.worldToLocal(target));
+      hand.quaternion.identity();
+      hand.updateWorldMatrix(true, false);
+    }
   }
 
   const originalModels116 = tickModels44;
