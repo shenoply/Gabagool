@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Recovered Lizard Riding Preview</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#a9b68f;font-family:system-ui,sans-serif}
+    canvas{display:block;width:100%;height:100%;touch-action:none}
+    #label{position:fixed;z-index:2;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:9px 14px;border-radius:999px;background:#18342de8;color:#f4e6c7;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+    #note{position:fixed;z-index:2;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px 12px;border-radius:10px;background:#efe2c8e8;color:#25342e;white-space:nowrap}
+    #loading{position:fixed;z-index:3;inset:0;display:grid;place-items:center;color:#25342e;font-weight:750;background:#a9b68f}
+    @media(max-width:520px){#label{font-size:12px}#note{font-size:11px}}
+  </style>
+</head>
+<body>
+  <div id="loading">Recovering the original Maya model…</div>
+  <div id="label">ORIGINAL MAYA LIZARD · RIDE TEST 115</div>
+  <div id="note">Drag to rotate · level spine · diagonal foot gait</div>
+  <script src="three-r128-build55.js"></script>
+  <script src="GLTFLoader.js"></script>
+  <script>
+  (()=>{
+    const scene=new THREE.Scene();
+    scene.background=new THREE.Color(0xa9b68f);
+    scene.fog=new THREE.Fog(0xa9b68f,13,28);
+    const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.05,70);
+    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(innerWidth,innerHeight);
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.shadowMap.enabled=true;
+    document.body.prepend(renderer.domElement);
+    scene.add(new THREE.HemisphereLight(0xfff0cf,0x4d5f45,1.25));
+    const sun=new THREE.DirectionalLight(0xffe1ad,1.45);sun.position.set(-6,10,5);sun.castShadow=true;scene.add(sun);
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(40,30),new THREE.MeshStandardMaterial({color:0x78975d,roughness:1}));
+    ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+    const path=new THREE.Mesh(new THREE.PlaneGeometry(25,4.2),new THREE.MeshStandardMaterial({color:0xb9a47b,roughness:1}));
+    path.rotation.x=-Math.PI/2;path.position.y=.008;scene.add(path);
+
+    const loader=new THREE.GLTFLoader();
+    const actor=new THREE.Group();actor.scale.setScalar(1.28);actor.rotation.y=-.72;scene.add(actor);
+    let lizard,ratPivot,ratModel,ratBones={},ratRest={},ratRestY=0,ready=false,time=0,minLocalY=0;
+    const deformers=[];
+    let yaw=.72,pitch=.27,radius=10.8,target=new THREE.Vector3(0,.85,0);
+
+    function load(file){return new Promise((resolve,reject)=>loader.load(file,resolve,undefined,reject));}
+    function style(root){root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;}});}
+    function posedBox(root){
+      root.updateMatrixWorld(true);const box=new THREE.Box3(),v=new THREE.Vector3();
+      root.traverse(o=>{if(!o.isMesh||!o.geometry?.attributes?.position)return;const p=o.geometry.attributes.position;
+        for(let i=0;i<p.count;i+=Math.max(1,Math.ceil(p.count/5000))){v.fromBufferAttribute(p,i);if(o.isSkinnedMesh)o.boneTransform(i,v);o.localToWorld(v);box.expandByPoint(v);}
+      });return box;
+    }
+    function updateCamera(){
+      const cp=Math.cos(pitch);camera.position.set(target.x+Math.cos(yaw)*radius*cp,target.y+Math.sin(pitch)*radius,target.z+Math.sin(yaw)*radius*cp);camera.lookAt(target);
+    }
+    updateCamera();
+
+    function setupLizard(asset){
+      lizard=asset.scene;style(lizard);actor.add(lizard);
+      lizard.traverse(o=>{
+        if(!o.isMesh||!o.geometry?.attributes?.position)return;
+        const attr=o.geometry.attributes.position;
+        deformers.push({mesh:o,attr,rest:new Float32Array(attr.array),body:/shentiShapeOrig/.test(o.name)});
+      });
+      animateLizard(0);
+    }
+
+    function smoothstep(a,b,x){const q=Math.max(0,Math.min(1,(x-a)/(b-a)));return q*q*(3-2*q);}
+    function animateLizard(t){
+      let lowest=Infinity;
+      for(const d of deformers){
+        const a=d.attr.array,r=d.rest;
+        for(let i=0;i<a.length;i+=3){
+          const x=r[i],y=r[i+1],z=r[i+2];
+          const tail=smoothstep(-1.15,-4.25,z);
+          const head=smoothstep(.55,1.55,z);
+          const spine=Math.sin(t*3.4-z*1.35)*(0.018+tail*.115+head*.015);
+          let nx=x+spine,ny=y,nz=z;
+          if(d.body){
+            const front=Math.exp(-Math.pow((z-.68)/.42,2));
+            const rear=Math.exp(-Math.pow((z+.68)/.46,2));
+            const outside=smoothstep(.18,.47,Math.abs(x));
+            const leg=Math.max(front,rear)*outside;
+            if(leg>.002){
+              const isFront=front>=rear,pz=isFront?.68:-.68,py=.48;
+              const diagonal=((x>0)===isFront)?0:Math.PI;
+              const phase=t*5.25+diagonal;
+              const swing=Math.sin(phase)*.24;
+              const dy=y-py,dz=z-pz,cs=Math.cos(swing),sn=Math.sin(swing);
+              const ry=dy*cs-dz*sn,rz=dy*sn+dz*cs;
+              ny+=(py+ry-y)*leg;nz+=(pz+rz-z)*leg;
+              const distal=smoothstep(.38,.68,Math.abs(x))*leg;
+              ny+=Math.max(0,Math.sin(phase))*distal*.065;
+              nx+=Math.sin(phase+Math.PI*.5)*distal*.025*Math.sign(x);
+            }
+          }
+          a[i]=nx;a[i+1]=ny;a[i+2]=nz;if(ny<lowest)lowest=ny;
+        }
+        d.attr.needsUpdate=true;
+      }
+      minLocalY=lowest;
+      actor.position.y=.015-lowest*actor.scale.y;
+      if(ratPivot){
+        const seatZ=-.04,seatWave=Math.sin(t*3.4-seatZ*1.35)*.018;
+        ratPivot.position.set(seatWave,.79,seatZ);
+        ratPivot.rotation.z=Math.sin(t*3.4)*.018;
+      }
+    }
+
+    function poseRat(t){
+      if(!ratModel)return;
+      for(const [name,q] of Object.entries(ratRest))ratBones[name]?.quaternion.copy(q);
+      const pose={
+        Spine:[-.1,0,0],Spine01:[-.07,0,0],
+        LeftUpLeg:[-1.14,0,-.34],RightUpLeg:[-1.14,0,.34],
+        LeftLeg:[1.42,0,0],RightLeg:[1.42,0,0],
+        LeftFoot:[-.15,0,0],RightFoot:[-.15,0,0],
+        LeftArm:[.28,0,-.22],RightArm:[.28,0,.22],
+        LeftForeArm:[.22,0,-.08],RightForeArm:[.22,0,.08],
+        Head:[.02,Math.sin(t*1.5)*.035,0]
+      };
+      for(const [name,e] of Object.entries(pose)){const b=ratBones[name],q=ratRest[name];if(b&&q)b.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(e[0],e[1],e[2])));}
+      ratModel.position.y=ratRestY;
+    }
+
+    function setupRat(asset){
+      ratModel=asset.scene;style(ratModel);
+      const mixer=new THREE.AnimationMixer(ratModel),idle=asset.animations.find(c=>c.name==='Idle_4')||asset.animations[0];
+      if(idle){mixer.clipAction(idle).play();mixer.update(0);mixer.stopAllAction();}
+      let box=posedBox(ratModel),size=box.getSize(new THREE.Vector3());ratModel.scale.multiplyScalar(.72/Math.max(size.y,.001));
+      ratModel.updateMatrixWorld(true);box=posedBox(ratModel);
+      ratModel.position.sub(new THREE.Vector3((box.min.x+box.max.x)/2,box.min.y,(box.min.z+box.max.z)/2));
+      ratModel.traverse(o=>{if(o.isBone){ratBones[o.name]=o;ratRest[o.name]=o.quaternion.clone();}});
+      const head=ratModel.getObjectByName('Head'),front=ratModel.getObjectByName('headfront');
+      if(head&&front){ratModel.updateWorldMatrix(true,true);const hp=ratModel.worldToLocal(head.getWorldPosition(new THREE.Vector3()));const fp=ratModel.worldToLocal(front.getWorldPosition(new THREE.Vector3()));const dir=fp.sub(hp);ratModel.rotation.y=-Math.atan2(dir.x,dir.z);}
+      ratPivot=new THREE.Group();actor.add(ratPivot);ratPivot.add(ratModel);poseRat(0);ratModel.updateMatrixWorld(true);
+      box=posedBox(ratModel);ratModel.position.y-=box.min.y;ratRestY=ratModel.position.y;
+    }
+
+    Promise.all([load('lizard-recovered115.glb?v=115'),load('rat-animation-pack67.glb')]).then(([g,r])=>{
+      setupLizard(g);setupRat(r);animateLizard(0);poseRat(0);ready=true;document.getElementById('loading').remove();
+    }).catch(err=>{console.error(err);document.getElementById('loading').textContent='Model failed to load — refresh once.';});
+
+    let last=performance.now();
+    function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;if(ready){time+=dt;animateLizard(time);poseRat(time);}renderer.render(scene,camera);requestAnimationFrame(loop);}
+    requestAnimationFrame(loop);
+    let drag=false,lx=0,ly=0;
+    renderer.domElement.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;renderer.domElement.setPointerCapture(e.pointerId);});
+    renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-lx)*.008;pitch=Math.max(-.04,Math.min(1.05,pitch+(e.clientY-ly)*.006));lx=e.clientX;ly=e.clientY;updateCamera();});
+    renderer.domElement.addEventListener('pointerup',()=>drag=false);
+    renderer.domElement.addEventListener('wheel',e=>{radius=Math.max(6,Math.min(17,radius+e.deltaY*.008));updateCamera();},{passive:true});
+    addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  })();
+  </script>
+</body>
+</html>
