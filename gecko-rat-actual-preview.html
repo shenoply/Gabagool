@@ -42,7 +42,7 @@
     const loader=new THREE.GLTFLoader();
     const actor=new THREE.Group();
     scene.add(actor);
-    let geckoModel,geckoMixer,geckoClip,ratModel,ratBaseY=0,ratBones={},ratRest={},ready=false,time=0;
+    let geckoModel,geckoMixer,geckoClip,ratModel,ratPivot,ratBaseY=0,ratBones={},ratRest={},ready=false,time=0;
     let geckoBones={},geckoRest={},geckoRestPos={},skinned=[];
     let yaw=.78,pitch=.28,radius=13,target=new THREE.Vector3(0,.9,0);
 
@@ -110,19 +110,27 @@
       box=posedBox(ratModel);
       ratModel.position.sub(new THREE.Vector3((box.min.x+box.max.x)/2,box.min.y,(box.min.z+box.max.z)/2));
       ratModel.traverse(o=>{if(o.isBone){ratBones[o.name]=o;ratRest[o.name]=o.quaternion.clone();}});
-      actor.add(ratModel);
+      ratPivot=new THREE.Group();
+      actor.add(ratPivot);ratPivot.add(ratModel);
       actor.updateMatrixWorld(true);
       const head=geckoBones['Bone.002_end_04'],tail=geckoBones['Bone.018_end_023']||geckoBones['Bone.018_022'];
       const hp=new THREE.Vector3(),tp=new THREE.Vector3();
       head?.getWorldPosition(hp);tail?.getWorldPosition(tp);
-      const dir=hp.sub(tp).setY(0).normalize();
-      const seat=tp.clone().addScaledVector(dir,dir.lengthSq()?.57:0);
+      const span=hp.distanceTo(tp),dir=hp.clone().sub(tp).setY(0).normalize();
+      const seat=tp.clone().addScaledVector(dir,span*.55);
       const geckoBox=posedBox(geckoModel);
-      seat.y=geckoBox.max.y+.03;
+      seat.y=geckoBox.max.y-.06;
       actor.worldToLocal(seat);
-      ratModel.position.set(seat.x,seat.y-.15,seat.z);
+      ratPivot.position.copy(seat);
+      ratPivot.userData.seatY=seat.y;
       const localDir=dir.clone().transformDirection(actor.matrixWorld.clone().invert());
-      ratModel.rotation.y=Math.atan2(localDir.x,localDir.z);
+      ratPivot.rotation.y=Math.atan2(localDir.x,localDir.z);
+      const headBone=ratModel.getObjectByName('Head'),front=ratModel.getObjectByName('headfront');
+      if(headBone&&front){
+        ratModel.updateWorldMatrix(true,true);
+        const sourceDir=ratModel.worldToLocal(front.getWorldPosition(new THREE.Vector3())).sub(ratModel.worldToLocal(headBone.getWorldPosition(new THREE.Vector3())));
+        ratModel.rotation.y=-Math.atan2(sourceDir.x,sourceDir.z);
+      }
       ratModel.scale.multiplyScalar(1.2);
       ratBaseY=ratModel.position.y;
       posePip(0);
@@ -143,7 +151,8 @@
         const b=ratBones[name],q=ratRest[name];if(!b||!q)continue;
         b.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(a[0],a[1],a[2])));
       }
-      ratModel.position.y=ratBaseY+Math.sin(t*4.4)*.006;
+      ratModel.position.y=ratBaseY;
+      if(ratPivot)ratPivot.position.y=ratPivot.userData.seatY+Math.sin(t*4.4)*.006;
     }
     function levelSpine(t){
       const axial=['Bone_01','Bone.001_02','Bone.002_03','Bone.002_end_04','Bone.012_017','Bone.013_018','Bone.014_00','Bone.015_019','Bone.016_020','Bone.017_021','Bone.018_022','Bone.018_end_023'];
@@ -151,8 +160,6 @@
         if(geckoBones[name]&&geckoRest[name])geckoBones[name].quaternion.copy(geckoRest[name]);
         if(geckoBones[name]&&geckoRestPos[name])geckoBones[name].position.copy(geckoRestPos[name]);
       }
-      geckoBones['Bone.001_02']?.quaternion.identity();
-      geckoBones['Bone.002_03']?.quaternion.identity();
       geckoBones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.025);
     }
     function groundGecko(){
