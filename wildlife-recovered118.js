@@ -154,6 +154,24 @@
   };
 
   let savedPivot116 = null;
+  function saddlePoint121(g) {
+    // Read the actual recovered mesh, whose local axes differ from Pip's.
+    // The neck is 27% back from the head along its real length.
+    let minZ = Infinity, maxZ = -Infinity;
+    for (const d of g.recovered116 || []) {
+      const p = d.rest;
+      for (let i = 2; i < p.length; i += 3) {
+        minZ = Math.min(minZ, p[i]);
+        maxZ = Math.max(maxZ, p[i]);
+      }
+    }
+    if (!Number.isFinite(minZ)) return new THREE.Vector3(0, 0, 0);
+    const neckZ = maxZ - (maxZ - minZ) * .27;
+    const worldNeck = g.model.localToWorld(new THREE.Vector3(0, 0, neckZ));
+    rat.updateWorldMatrix(true, false);
+    return rat.worldToLocal(worldNeck);
+  }
+
   function seatPip116() {
     const g = wildlife88?.gecko;
     const u = rat?.userData;
@@ -178,10 +196,10 @@
     // stays correct at the smaller gameplay scale and prevents belly-clipping.
     const worldBox = new THREE.Box3().setFromObject(g.model);
     const backHeight = Math.max(.18, worldBox.max.y - g.g.position.y);
-    // Pip's root is authored facing the opposite direction to the recovered
-    // lizard. A negative local Z therefore moves him toward its head. Place
-    // him directly behind the neck, well clear of the tail base.
-    u.pipPivot.position.set(0, .9 + backHeight + .08, -.72);
+    // Use the recovered lizard's actual neck point, transformed into Pip's
+    // local space. This cannot be reversed by either model's facing axis.
+    const saddle = saddlePoint121(g);
+    u.pipPivot.position.set(saddle.x, .9 + backHeight + .08, saddle.z);
     u.pipPivot.rotation.set(-.08, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
