@@ -43,7 +43,7 @@
     const actor=new THREE.Group();
     scene.add(actor);
     let geckoModel,geckoMixer,geckoClip,ratModel,ratPivot,ratBaseY=0,ratBones={},ratRest={},ready=false,time=0;
-    let geckoBones={},geckoRest={},geckoRestPos={},skinned=[];
+    let geckoBones={},geckoRest={},geckoRestPos={},skinned=[],bodySamples=[];
     let yaw=.78,pitch=.28,radius=13,target=new THREE.Vector3(0,.9,0);
 
     function cameraUpdate(){
@@ -92,7 +92,18 @@
       const box=new THREE.Box3().setFromObject(actor),center=box.getCenter(new THREE.Vector3());
       actor.position.set(-center.x,.025-box.min.y,-center.z);
       geckoModel.traverse(o=>{
-        if(o.isSkinnedMesh)skinned.push(o);
+        if(o.isSkinnedMesh){
+          skinned.push(o);
+          const si=o.geometry.attributes.skinIndex,sw=o.geometry.attributes.skinWeight;
+          if(si&&sw)for(let i=0;i<si.count;i+=3){
+            let slot=0,best=sw.getX(i);
+            if(sw.getY(i)>best){slot=1;best=sw.getY(i)}if(sw.getZ(i)>best){slot=2;best=sw.getZ(i)}if(sw.getW(i)>best){slot=3;best=sw.getW(i)}
+            const index=slot===0?si.getX(i):slot===1?si.getY(i):slot===2?si.getZ(i):si.getW(i);
+            const name=o.skeleton.bones[index]?.name;
+            if(['Bone_01','Bone.001_02','Bone.002_03'].includes(name))bodySamples.push({mesh:o,index:i,side:'front'});
+            if(['Bone.012_017','Bone.013_018','Bone.014_00'].includes(name))bodySamples.push({mesh:o,index:i,side:'rear'});
+          }
+        }
         if(o.isBone){geckoBones[o.name]=o;geckoRest[o.name]=o.quaternion.clone();geckoRestPos[o.name]=o.position.clone();}
       });
       geckoClip=asset.animations[2]||asset.animations[asset.animations.length-1];
@@ -113,13 +124,12 @@
       ratPivot=new THREE.Group();
       actor.add(ratPivot);ratPivot.add(ratModel);
       actor.updateMatrixWorld(true);
-      const head=geckoBones['Bone.002_end_04'],tail=geckoBones['Bone.018_end_023']||geckoBones['Bone.018_022'];
-      const hp=new THREE.Vector3(),tp=new THREE.Vector3();
-      head?.getWorldPosition(hp);tail?.getWorldPosition(tp);
-      const span=hp.distanceTo(tp),dir=hp.clone().sub(tp).setY(0).normalize();
-      const seat=tp.clone().addScaledVector(dir,span*.43);
-      const geckoBox=posedBox(geckoModel);
-      seat.y=geckoBox.max.y-.06;
+      const centers=visibleBodyCenters();
+      const hp=centers?.front||geckoBones['Bone.002_end_04'].getWorldPosition(new THREE.Vector3());
+      const tp=centers?.rear||(geckoBones['Bone.013_018']||geckoBones['Bone.012_017']).getWorldPosition(new THREE.Vector3());
+      const dir=hp.clone().sub(tp).setY(0).normalize();
+      const seat=tp.clone().lerp(hp,.46);
+      seat.y=(tp.y+hp.y)*.5+.34;
       actor.worldToLocal(seat);
       ratPivot.position.copy(seat);
       ratPivot.userData.seatY=seat.y;
@@ -179,12 +189,20 @@
         if(bone&&pos)bone.position.lerp(pos,.82);
       }
     }
+    function visibleBodyCenters(){
+      if(!bodySamples.length)return null;
+      const front=new THREE.Vector3(),rear=new THREE.Vector3(),v=new THREE.Vector3();let fc=0,rc=0;
+      for(const sample of bodySamples){
+        sample.mesh.boneTransform(sample.index,v);sample.mesh.localToWorld(v);
+        if(sample.side==='front'){front.add(v);fc++}else{rear.add(v);rc++}
+      }
+      if(!fc||!rc)return null;
+      return {front:front.multiplyScalar(1/fc),rear:rear.multiplyScalar(1/rc)};
+    }
     function levelWholeGecko(){
       actor.rotation.set(0,-.98,0);actor.updateMatrixWorld(true);
-      const head=geckoBones['Bone.002_end_04'],tail=geckoBones['Bone.018_end_023']||geckoBones['Bone.018_022'];
-      if(!head||!tail)return;
-      const hp=head.getWorldPosition(new THREE.Vector3()),tp=tail.getWorldPosition(new THREE.Vector3());
-      const direction=hp.sub(tp),horizontal=Math.hypot(direction.x,direction.z);
+      const centers=visibleBodyCenters();if(!centers)return;
+      const direction=centers.front.clone().sub(centers.rear),horizontal=Math.hypot(direction.x,direction.z);
       if(horizontal<.001)return;
       const angle=Math.atan2(direction.y,horizontal);
       const axis=new THREE.Vector3(direction.z,0,-direction.x).normalize();
