@@ -124,7 +124,7 @@
       ratPivot.position.copy(seat);
       ratPivot.userData.seatY=seat.y;
       const localDir=dir.clone().transformDirection(actor.matrixWorld.clone().invert());
-      ratPivot.rotation.y=Math.atan2(localDir.x,localDir.z);
+      ratPivot.rotation.y=Math.atan2(localDir.x,localDir.z)+Math.PI;
       const headBone=ratModel.getObjectByName('Head'),front=ratModel.getObjectByName('headfront');
       if(headBone&&front){
         ratModel.updateWorldMatrix(true,true);
@@ -134,6 +134,14 @@
       ratModel.scale.multiplyScalar(1.2);
       ratBaseY=ratModel.position.y;
       posePip(0);
+      ratPivot.updateMatrixWorld(true);
+      const hips=ratBones.Hips;
+      if(hips){
+        const hipLocal=ratPivot.worldToLocal(hips.getWorldPosition(new THREE.Vector3()));
+        ratModel.position.y+=.12-hipLocal.y;
+        ratBaseY=ratModel.position.y;
+        posePip(0);
+      }
     }
     function posePip(t){
       if(!ratModel)return;
@@ -161,6 +169,20 @@
         if(geckoBones[name]&&geckoRestPos[name])geckoBones[name].position.copy(geckoRestPos[name]);
       }
       geckoBones['Bone.002_03']?.rotateY(Math.sin(t*4.8)*.025);
+      actor.updateMatrixWorld(true);
+      const front=geckoBones['Bone_01'],head=geckoBones['Bone.002_end_04'];
+      const rear=geckoBones['Bone.013_018']||geckoBones['Bone.012_017'];
+      if(front&&head&&rear&&front.parent){
+        const joint=front.getWorldPosition(new THREE.Vector3());
+        const end=head.getWorldPosition(new THREE.Vector3());
+        const rearPoint=rear.getWorldPosition(new THREE.Vector3());
+        const targetPoint=end.clone();targetPoint.y=rearPoint.y+.06;
+        const from=end.sub(joint).normalize(),to=targetPoint.sub(joint).normalize();
+        const delta=new THREE.Quaternion().setFromUnitVectors(from,to);
+        const world=front.getWorldQuaternion(new THREE.Quaternion());
+        const parentWorld=front.parent.getWorldQuaternion(new THREE.Quaternion()).invert();
+        front.quaternion.copy(parentWorld.multiply(delta.multiply(world))).normalize();
+      }
     }
     function groundGecko(){
       actor.position.y=.02;actor.updateMatrixWorld(true);
@@ -172,7 +194,7 @@
       if(Number.isFinite(minY))actor.position.y+=.018-minY;
     }
     Promise.all([unpack('assets87/gecko.json'),loadGlb('rat-animation-pack67.glb')]).then(([g,p])=>{
-      setupGecko(g);setupPip(p);ready=true;document.getElementById('loading').remove();
+      setupGecko(g);geckoMixer.setTime(0);levelSpine(0);groundGecko();setupPip(p);ready=true;document.getElementById('loading').remove();
     }).catch(e=>{document.getElementById('loading').textContent='Model load failed — refresh once.';console.error(e);});
 
     let last=performance.now();
