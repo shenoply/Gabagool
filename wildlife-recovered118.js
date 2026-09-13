@@ -178,7 +178,9 @@
     // stays correct at the smaller gameplay scale and prevents belly-clipping.
     const worldBox = new THREE.Box3().setFromObject(g.model);
     const backHeight = Math.max(.18, worldBox.max.y - g.g.position.y);
-    u.pipPivot.position.set(0, .9 + backHeight + .08, -.10);
+    // The recovered mesh faces +Z (head is forward). Put Pip just behind the
+    // shoulders rather than at the tail base, like a proper riding saddle.
+    u.pipPivot.position.set(0, .9 + backHeight + .08, .56);
     u.pipPivot.rotation.set(-.08, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
