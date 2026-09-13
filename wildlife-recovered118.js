@@ -214,13 +214,14 @@
       Spine: [-.72, 0, 0], Spine01: [-.30, 0, 0],
       // A real riding pose: hips lifted, thighs spread around the lizard's
       // shoulders, then knees bent down along both sides of its body.
-      LeftUpLeg: [-1.48, 0, -.60], RightUpLeg: [-1.48, 0, .60],
-      LeftLeg: [1.68, 0, 0], RightLeg: [1.68, 0, 0],
+      LeftUpLeg: [-1.52, 0, -.72], RightUpLeg: [-1.52, 0, .72],
+      LeftLeg: [1.86, 0, 0], RightLeg: [1.86, 0, 0],
       LeftFoot: [-.08, 0, 0], RightFoot: [-.08, 0, 0],
       // Reach forward as if holding onto the neck/shoulders, rather than
       // holding the arms straight out to the sides.
       LeftArm: [.94, 0, -.26], RightArm: [.94, 0, .26],
-      LeftForeArm: [.52, 0, -.08], RightForeArm: [.52, 0, .08]
+      LeftForeArm: [.52, 0, -.08], RightForeArm: [.52, 0, .08],
+      Head: [.72, 0, 0]
     };
     for (const [name, angles] of Object.entries(pose)) {
       const bone = u.pipBones?.[name], rest = u.pipRest?.[name];
@@ -242,9 +243,11 @@
       const reins = new THREE.Group();
       reins.name = 'Gecko leather reins';
       for (let i = 0; i < 2; i++) {
-        const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-        const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x352018 }));
-        line.renderOrder = 3; reins.add(line);
+        const rein = new THREE.Mesh(
+          new THREE.CylinderGeometry(.028, .028, 1, 7),
+          new THREE.MeshStandardMaterial({ color: 0x2b170b, roughness: .92 })
+        );
+        rein.castShadow = true; rein.renderOrder = 3; reins.add(rein);
       }
       g.g.add(reins); g.reins128 = reins;
     }
@@ -257,7 +260,11 @@
       if (!hand) return;
       const from = g.g.worldToLocal(hand.getWorldPosition(new THREE.Vector3()));
       const to = g.g.worldToLocal(anchors[i]);
-      g.reins128.children[i].geometry.setFromPoints([from, to]);
+      const delta = to.clone().sub(from), length = delta.length();
+      const rein = g.reins128.children[i];
+      rein.position.copy(from).addScaledVector(delta, .5);
+      rein.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
+      rein.scale.set(1, length, 1);
     });
   }
 
