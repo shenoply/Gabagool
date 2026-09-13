@@ -18,7 +18,9 @@
   function prepare116(g) {
     if (g.recovered116) return;
     g.recovered116 = [];
-    g.model.scale.multiplyScalar(1.35);
+    // actor88 already fits this model to the intended wildlife height. Keep it
+    // only slightly enlarged so it reads as a mount without dwarfing Pip.
+    g.model.scale.multiplyScalar(.92);
     g.model.traverse(mesh => {
       const source = mesh.geometry?.attributes?.position;
       if (!mesh.isMesh || !source) return;
@@ -171,7 +173,9 @@
       quaternion: u.pipPivot.quaternion.clone(),
       scale: u.pipPivot.scale.clone()
     };
-    u.pipPivot.position.set(0, .86, -.10);
+    // Pip's normal standing pivot is y=.9. Add the gecko's back height to that
+    // baseline; using the back height alone placed his entire mesh underneath.
+    u.pipPivot.position.set(0, 1.58, -.10);
     u.pipPivot.rotation.set(-.08, 0, 0);
     u.pipPivot.scale.setScalar(.92);
     const pose = {
