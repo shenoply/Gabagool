@@ -345,51 +345,49 @@
     return Math.min(1, rat.userData.vel / 2.38);
   };
 
-  // Rainyard Monitor den — a compact clay-stone hide, made as real game
-  // geometry rather than a flat decoration. The entrance faces the path.
-  function buildGeckoDen152() {
-    const den = new THREE.Group();
-    den.name = 'Rainyard Monitor clay-stone hide';
-    den.position.set(5.95, 0, 29.35);
-    const clay = [0x754735, 0x8c5940, 0x674233, 0x9a654a].map(color =>
-      new THREE.MeshStandardMaterial({ color, roughness: 1, metalness: 0 }));
-    const moss = new THREE.MeshStandardMaterial({ color: 0x526c46, roughness: 1 });
-    const dark = new THREE.MeshStandardMaterial({ color: 0x130f0b, roughness: 1, side: THREE.BackSide });
-    const soil = new THREE.MeshStandardMaterial({ color: 0x34281e, roughness: 1 });
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(1.12, 16), soil);
-    floor.rotation.x = -Math.PI / 2; floor.position.y = .012; den.add(floor);
-    const interior = new THREE.Mesh(new THREE.SphereGeometry(.74, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), dark);
-    interior.scale.set(1.13, .84, .88); interior.position.set(0, .15, .26); den.add(interior);
-    const stone = (x, y, z, scale, colorIndex, turn = 0) => {
-      const m = new THREE.Mesh(new THREE.DodecahedronGeometry(.34, 1), clay[colorIndex % clay.length]);
-      m.position.set(x, y, z); m.scale.copy(scale); m.rotation.set(turn * .25, turn, turn * .18);
-      m.castShadow = true; m.receiveShadow = true; den.add(m); return m;
-    };
-    // Low side walls and a rounded arch: deliberately imperfect hand-laid clay.
-    [[-.67,.18,-.18,.82,.56,.74,0],[-.48,.48,-.16,.84,.66,.70,1],[.67,.18,-.18,.82,.56,.74,2],[.48,.48,-.16,.84,.66,.70,3],
-      [-.40,.78,-.12,.82,.58,.62,1],[0,.87,-.14,.92,.58,.66,2],[.40,.78,-.12,.82,.58,.62,3],
-      [-.72,.17,.42,.90,.58,.72,2],[-.46,.55,.45,.88,.64,.72,0],[0,.69,.49,1.05,.67,.82,1],[.46,.55,.45,.88,.64,.72,3],[.72,.17,.42,.90,.58,.72,1],
-      [-.36,.76,.74,.88,.60,.65,0],[.36,.76,.74,.88,.60,.65,2]].forEach((p, i) => stone(p[0], p[1], p[2], new THREE.Vector3(p[3], p[4], p[5]), i, p[6]));
-    // Wet moss patches grow only along the top and shaded outer stones.
-    [[-.48,.60,.12,.22],[.44,.73,.24,.18],[0,.98,.15,.24],[-.72,.33,.30,.16],[.67,.31,.29,.15]].forEach(([x,y,z,s]) => {
-      const patch = new THREE.Mesh(new THREE.SphereGeometry(s, 8, 5), moss);
-      patch.scale.set(1,.22,.75); patch.position.set(x,y,z); patch.rotation.x=.18; den.add(patch);
-    });
-    for (const [x,z,h] of [[-.94,.42,.31],[-.82,.72,.22],[.92,.45,.28],[.78,.78,.18],[-.18,.95,.22]]) {
-      const weed = new THREE.Mesh(new THREE.ConeGeometry(.025,.18+h,5), moss);
-      weed.position.set(x,.11,z); weed.rotation.z=(x < 0 ? .24 : -.24); den.add(weed);
-    }
-    return den;
-  }
-
-  const seedWildlifeBeforeDen152 = seedWildlife88;
-  seedWildlife88 = function seedWildlifeWithDen152() {
-    const result = seedWildlifeBeforeDen152();
-    if (phase === 'scavenge' && wildlife88?.owner === root && !wildlife88.den152) {
-      wildlife88.den152 = buildGeckoDen152();
-      root.add(wildlife88.den152);
-    }
+  // Rainyard Monitor home: actual exported GLB in a quiet rear-left corner.
+  const DEN_POS_153 = new THREE.Vector3(-20.2, 0, 28.5);
+  const seedWildlifeBeforeDen153 = seedWildlife88;
+  seedWildlife88 = function seedWildlifeWithMonitorHome153() {
+    const result = seedWildlifeBeforeDen153();
+    if (phase !== 'scavenge' || wildlife88?.owner !== root || wildlife88.den153Loading || wildlife88.den153) return result;
+    wildlife88.den153Loading = true;
+    const owner = root;
+    loader88.load('rainyard-monitor-hide.glb?v=153', asset => {
+      if (root !== owner || phase !== 'scavenge' || wildlife88.owner !== owner) return;
+      const den = asset.scene;
+      den.name = 'Rainyard Monitor clay-stone hide';
+      den.position.copy(DEN_POS_153);
+      den.rotation.y = Math.PI; // entrance points into the playable yard
+      den.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      root.add(den); wildlife88.den153 = den;
+      const g = wildlife88.gecko;
+      if (g && !g.tamed) {
+        g.denHome153 = DEN_POS_153.clone().add(new THREE.Vector3(0, 0, .22));
+        g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
+      }
+    }, undefined, error => console.warn('Monitor hide failed to load:', error));
     return result;
+  };
+
+  // Untamed monitor stays tucked inside: head and shoulders poke out. Once
+  // tamed, its normal companion movement resumes immediately.
+  const tickGeckoBeforeDen153 = tickGecko88;
+  tickGecko88 = function tickMonitorAtHome153(dt, g) {
+    if (!g.tamed && wildlife88.den153 && !g.denHome153) {
+      g.denHome153 = DEN_POS_153.clone().add(new THREE.Vector3(0, 0, .22));
+    }
+    if (!g.tamed && !g.riding && g.denHome153) {
+      g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
+      g.target.copy(g.denHome153); g.wander = 999;
+      tickGeckoBeforeDen153(dt, g);
+      if (g.denRestY153 === undefined) g.denRestY153 = g.model.position.y;
+      g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
+      g.model.position.y = g.denRestY153 - .13;
+      return;
+    }
+    if (g.denRestY153 !== undefined) g.model.position.y = g.denRestY153;
+    tickGeckoBeforeDen153(dt, g);
   };
 
 })();
