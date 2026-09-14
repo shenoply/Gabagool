@@ -113,7 +113,10 @@
     if (g.riding) {
       const moving = moving116(g);
       g.g.position.set(rat.position.x, Math.max(0, rat.position.y), rat.position.z);
-      g.g.rotation.y = rat.rotation.y;
+      // Pip's controller can snap its facing direction on touch input. Let
+      // the mount ease toward it at a believable turning rate instead of
+      // copying the snap and spinning like a helicopter.
+      turn88(g.g, rat.rotation.y, dt, 3.15);
       g.model.rotation.set(0, 0, 0);
       crawl116(g, moving);
       u.geckoRide88 = true;
