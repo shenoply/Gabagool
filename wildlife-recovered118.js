@@ -242,12 +242,17 @@
     if (!g.reins128) {
       const reins = new THREE.Group();
       reins.name = 'Gecko leather reins';
-      for (let i = 0; i < 2; i++) {
-        const rein = new THREE.Mesh(
-          new THREE.CylinderGeometry(.009, .009, 1, 6),
-          new THREE.MeshStandardMaterial({ color: 0x211109, roughness: .86 })
-        );
-        rein.castShadow = true; rein.renderOrder = 3; reins.add(rein);
+      reins.userData.strands = [];
+      for (let sideIndex = 0; sideIndex < 2; sideIndex++) {
+        const strand = [];
+        for (let segment = 0; segment < 3; segment++) {
+          const rein = new THREE.Mesh(
+            new THREE.CylinderGeometry(.0055, .0055, 1, 6),
+            new THREE.MeshStandardMaterial({ color: 0x24130a, roughness: .9 })
+          );
+          rein.castShadow = true; strand.push(rein); reins.add(rein);
+        }
+        reins.userData.strands.push(strand);
       }
       g.g.add(reins); g.reins128 = reins;
     }
@@ -260,11 +265,18 @@
       if (!hand) return;
       const from = g.g.worldToLocal(hand.getWorldPosition(new THREE.Vector3()));
       const to = g.g.worldToLocal(anchors[i]);
-      const delta = to.clone().sub(from), length = delta.length();
-      const rein = g.reins128.children[i];
-      rein.position.copy(from).addScaledVector(delta, .5);
-      rein.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
-      rein.scale.set(1, length, 1);
+      // Three short cylinders form a visible but natural sagging leather rein.
+      const middle = from.clone().lerp(to, .5).add(new THREE.Vector3(0, -.16, 0));
+      const points = [from, from.clone().lerp(middle, .58), middle, to];
+      const strand = g.reins128.userData.strands[i];
+      for (let segment = 0; segment < 3; segment++) {
+        const a = points[segment], b = points[segment + 1];
+        const delta = b.clone().sub(a), length = delta.length();
+        const rein = strand[segment];
+        rein.position.copy(a).addScaledVector(delta, .5);
+        rein.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
+        rein.scale.set(1, length, 1);
+      }
     });
   }
 
