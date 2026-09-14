@@ -421,4 +421,27 @@
     return controlBeforeGeckoIntro141(dt, options);
   };
 
+  // Direct review link: enter the playground normally, then the opening
+  // cinematic begins without having to find and press E on the gecko.
+  if (new URLSearchParams(location.search).get('preview') === 'gecko') {
+    let previewStarted141 = false;
+    const startGeckoPreview141 = () => {
+      const g = wildlife88?.gecko;
+      if (previewStarted141 || phase !== 'scavenge' || !rat || !g) {
+        if (!previewStarted141) setTimeout(startGeckoPreview141, 250);
+        return;
+      }
+      previewStarted141 = true;
+      g.tamed = false;
+      g.riding = false;
+      g.battle141 = true;
+      g.hp141 = 100;
+      g.cool141 = 1.1;
+      g.intro141 = 9.4;
+      g.hissed141 = false;
+      gameCam.ready = false;
+    };
+    setTimeout(startGeckoPreview141, 250);
+  }
+
 })();
