@@ -434,4 +434,68 @@
     $('padE').textContent = g.tamed ? 'Ride' : 'Tame';
   };
 
+  // Water dive: Jump becomes Dive while swimming. Pip slips beneath the
+  // surface, uses the real swim loop horizontally and surfaces on the next tap.
+  const floatBeforeDive163 = float66;
+  float66 = function floatWithDive163() {
+    const swimming = floatBeforeDive163();
+    const u = rat?.userData, water = rat && waterVolume66(rat.position);
+    if (!u || !swimming || !water) {
+      if (u) u.diving163 = false;
+      if ($('padJ')) $('padJ').textContent = 'Jump';
+      return swimming;
+    }
+    if (u.diving163) {
+      rat.position.y = water.position.y - .58;
+      u.floor57 = rat.position.y;
+    }
+    if ($('padJ')) $('padJ').textContent = u.diving163 ? 'Surface' : 'Dive';
+    return swimming;
+  };
+
+  const jumpBeforeDive163 = doJump;
+  doJump = function diveOrJump163() {
+    const u = rat?.userData;
+    if (u?.swim66 && waterVolume66(rat.position)) {
+      u.diving163 = !u.diving163;
+      u.air = false; u.vy = 0;
+      sayToast(u.diving163 ? 'Pip dives beneath the surface.' : 'Pip rises for air.');
+      return;
+    }
+    return jumpBeforeDive163();
+  };
+
+  const makeRatBeforeDive163 = makeRat;
+  makeRat = function makeDiveRat163() {
+    const g = makeRatBeforeDive163(), animateBeforeDive163 = g.animate;
+    g.animate = function animateDiveRat163(dt, ...args) {
+      animateBeforeDive163(dt, ...args);
+      const u = g.userData;
+      if (!u.diving163 || !u.pipPivot) return;
+      // A clean horizontal dive pose layered over Swim_Forward_Loop.
+      u.pipPivot.rotation.x = .82;
+      u.pipPivot.position.y = .52;
+      for (const side of ['Left', 'Right']) {
+        rotateBone69(u, side + 'Arm', -.78);
+        rotateBone69(u, side + 'ForeArm', -.34);
+        rotateBone69(u, side + 'UpLeg', .32);
+      }
+    };
+    return g;
+  };
+
+  const worldBeforeDive163 = tickWorld38;
+  tickWorld38 = function tickDiveBubbles163(dt) {
+    worldBeforeDive163(dt);
+    const u = rat?.userData;
+    if (!u?.diving163 || !rat) { if (u?.diveBubbles163) u.diveBubbles163.visible = false; return; }
+    if (!u.diveBubbles163) {
+      const group = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color: 0xd9f7f2, transparent: true, opacity: .72 });
+      for (let i = 0; i < 9; i++) { const bubble = new THREE.Mesh(new THREE.SphereGeometry(.024 + (i % 3) * .012, 6, 5), mat); bubble.userData.offset = i * .47; group.add(bubble); }
+      root.add(group); u.diveBubbles163 = group;
+    }
+    const group = u.diveBubbles163; group.visible = true; group.position.copy(rat.position);
+    group.children.forEach((bubble, i) => { const age = (t * 1.3 + bubble.userData.offset) % 1; bubble.position.set(Math.sin(i * 2.7) * .13, age * .62, Math.cos(i * 3.1) * .13); bubble.scale.setScalar(.35 + age); });
+  };
+
 })();
