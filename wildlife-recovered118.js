@@ -113,10 +113,9 @@
     if (g.riding) {
       const moving = moving116(g);
       g.g.position.set(rat.position.x, Math.max(0, rat.position.y), rat.position.z);
-      // Pip's controller can snap its facing direction on touch input. Let
-      // the mount ease toward it at a believable turning rate instead of
-      // copying the snap and spinning like a helicopter.
-      turn88(g.g, rat.rotation.y, dt, 3.15);
+      // Rider and mount must share one heading; smoothing only the gecko made
+      // Pip appear to glitch away from the saddle.
+      g.g.rotation.y = rat.rotation.y;
       g.model.rotation.set(0, 0, 0);
       crawl116(g, moving);
       u.geckoRide88 = true;
@@ -287,5 +286,20 @@
   tickModels44 = function tickModelsRecovered116(dt) {
     originalModels116(dt);
     seatPip116();
+  };
+
+  // Limit the controller's *actual* yaw while mounted.  This keeps the model
+  // and rider locked together while stopping fast joystick circles from
+  // producing a helicopter-like spin.
+  const controlBeforeRide134 = control;
+  control = function controlledGeckoRide134(dt, options) {
+    const riding = !!rat?.userData?.geckoRide88;
+    const beforeYaw = rat?.rotation?.y || 0;
+    const speed = controlBeforeRide134(dt, options);
+    if (!riding || !rat) return speed;
+    const delta = Math.atan2(Math.sin(rat.rotation.y - beforeYaw), Math.cos(rat.rotation.y - beforeYaw));
+    const maxTurn = 2.15 * dt; // radians/sec; quick but never a spin.
+    rat.rotation.y = beforeYaw + THREE.MathUtils.clamp(delta, -maxTurn, maxTurn);
+    return speed;
   };
 })();
