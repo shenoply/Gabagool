@@ -288,29 +288,16 @@
     seatPip116();
   };
 
-  // Mounted controls behave like a small vehicle: left/right steers, while
-  // forward/back moves along the gecko's facing direction. This prevents
-  // sideways skating and the rapid circular spin from camera-relative input.
+  // Preserve the normal player/camera controller. Only cap its final yaw when
+  // mounted; replacing its input path caused camera and rider desynchronising.
   const controlBeforeRide134 = control;
   control = function controlledGeckoRide134(dt, options) {
-    if (!rat?.userData?.geckoRide88) return controlBeforeRide134(dt, options);
-    const steer = THREE.MathUtils.clamp(
-      (joy.x || 0) + (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0), -1, 1);
-    const throttle = THREE.MathUtils.clamp(
-      -(joy.z || 0) + (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0), -1, 1);
-    rat.rotation.y += steer * 2.15 * dt;
-
-    // Feed the ordinary collision/ground controller a forward-only movement
-    // vector expressed in its camera-relative input coordinates.
-    const worldForward = new THREE.Vector3(Math.sin(rat.rotation.y), 0, Math.cos(rat.rotation.y));
-    const camForward = camera.getWorldDirection(new THREE.Vector3()).setY(0).normalize();
-    const camRight = new THREE.Vector3(-camForward.z, 0, camForward.x);
-    const savedJoyX = joy.x, savedJoyZ = joy.z, savedKeys = keys;
-    const direction = worldForward.multiplyScalar(throttle);
-    joy.x = direction.dot(camRight);
-    joy.z = -direction.dot(camForward);
-    keys = {};
-    try { return controlBeforeRide134(dt, options); }
-    finally { joy.x = savedJoyX; joy.z = savedJoyZ; keys = savedKeys; }
+    const riding = !!rat?.userData?.geckoRide88;
+    const previousYaw = rat?.rotation?.y || 0;
+    const speed = controlBeforeRide134(dt, options);
+    if (!riding || !rat) return speed;
+    const change = Math.atan2(Math.sin(rat.rotation.y - previousYaw), Math.cos(rat.rotation.y - previousYaw));
+    rat.rotation.y = previousYaw + THREE.MathUtils.clamp(change, -2.25 * dt, 2.25 * dt);
+    return speed;
   };
 })();
