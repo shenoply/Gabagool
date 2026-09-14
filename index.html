@@ -2805,7 +2805,7 @@ function seedWildlife88(){
  wildlife88={owner:root,loading:true,gecko:null,ratNpc:null,snake:null,cat:null,ant:null,near:null,decor:[]};
  // A rideable companion, not a dinosaur: keep the recovered lizard just over
  // rat height so Pip can still mount it without filling the whole screen.
- load88('gecko',a=>{const x=actor88(a,.43,[8.1,0,27.1],'Tameable uploaded gecko');x.tamed=!!home.geckoTamed88;x.riding=false;x.wander=0;play88(x,/idle/i);wildlife88.gecko=x;});
+ load88('gecko',a=>{const x=actor88(a,.43,[8.1,0,27.1],'Tameable uploaded gecko');x.tamed=!!home.geckoBattle141Won;x.riding=false;x.wander=0;play88(x,/idle/i);wildlife88.gecko=x;});
  load88('rat',a=>{const x=actor88(a,.72,[10.2,0,28.4],'Uploaded neighbour rat');x.home=x.g.position.clone();x.wander=.2;x.walking=false;x.talking=0;x.modelBaseY=x.model.position.y;wildlife88.ratNpc=x;});
  load88('snake',a=>{const x=actor88(a,.34,[-13.8,0,21.2],'Uploaded warning snake');x.home=x.g.position.clone();x.state='rest';wildlife88.snake=x;});
  load88('cat',a=>{const x=actor88(a,1.05,[23.8,0,14.2],'Uploaded roaming cat');styleCat88(x);x.home=x.g.position.clone();x.wander=0;x.mixer.timeScale=1.8;play88(x,/walk/i);wildlife88.cat=x;});
@@ -2866,6 +2866,6 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=141"></script>
+<script src="wildlife-recovered118.js?v=142"></script>
 </body>
 </html>
