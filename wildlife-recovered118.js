@@ -288,16 +288,4 @@
     seatPip116();
   };
 
-  // Preserve the normal player/camera controller. Only cap its final yaw when
-  // mounted; replacing its input path caused camera and rider desynchronising.
-  const controlBeforeRide134 = control;
-  control = function controlledGeckoRide134(dt, options) {
-    const riding = !!rat?.userData?.geckoRide88;
-    const previousYaw = rat?.rotation?.y || 0;
-    const speed = controlBeforeRide134(dt, options);
-    if (!riding || !rat) return speed;
-    const change = Math.atan2(Math.sin(rat.rotation.y - previousYaw), Math.cos(rat.rotation.y - previousYaw));
-    rat.rotation.y = previousYaw + THREE.MathUtils.clamp(change, -2.25 * dt, 2.25 * dt);
-    return speed;
-  };
 })();
