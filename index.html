@@ -2805,7 +2805,7 @@ function seedWildlife88(){
  wildlife88={owner:root,loading:true,gecko:null,ratNpc:null,snake:null,cat:null,ant:null,near:null,decor:[]};
  // A rideable companion, not a dinosaur: keep the recovered lizard just over
  // rat height so Pip can still mount it without filling the whole screen.
- load88('gecko',a=>{const x=actor88(a,.43,[8.1,0,27.1],'Tameable uploaded gecko');x.tamed=false;x.riding=false;x.wander=0;play88(x,/idle/i);wildlife88.gecko=x;});
+ load88('gecko',a=>{const x=actor88(a,.43,[8.1,0,27.1],'Tameable uploaded gecko');x.tamed=!!home.geckoTamed88;x.name=home.geckoName88||'Gecko';x.riding=false;x.wander=0;play88(x,/idle/i);wildlife88.gecko=x;});
  load88('rat',a=>{const x=actor88(a,.72,[10.2,0,28.4],'Uploaded neighbour rat');x.home=x.g.position.clone();x.wander=.2;x.walking=false;x.talking=0;x.modelBaseY=x.model.position.y;wildlife88.ratNpc=x;});
  load88('snake',a=>{const x=actor88(a,.34,[-13.8,0,21.2],'Uploaded warning snake');x.home=x.g.position.clone();x.state='rest';wildlife88.snake=x;});
  load88('cat',a=>{const x=actor88(a,1.05,[23.8,0,14.2],'Uploaded roaming cat');styleCat88(x);x.home=x.g.position.clone();x.wander=0;x.mixer.timeScale=1.8;play88(x,/walk/i);wildlife88.cat=x;});
@@ -2851,9 +2851,9 @@ function tickWildlife88(dt){
  const g=wildlife88.gecko;if(g){tickGecko88(dt,g);const d=g.g.position.distanceTo(rat.position);if(d<1.35)wildlife88.near={type:'gecko',obj:g,d};}
  const n=wildlife88.ratNpc;if(n){n.mixer?.update(dt);tickRatNpc88(dt,n);const d=n.g.position.distanceTo(rat.position);if(d<1.7&&(!wildlife88.near||d<wildlife88.near.d))wildlife88.near={type:'rat',obj:n,d};}
  if(wildlife88.snake)tickSnake88(dt,wildlife88.snake);if(wildlife88.cat)tickCat88(dt,wildlife88.cat);if(wildlife88.ant)tickAnt88(dt,wildlife88.ant);
- if(wildlife88.near&&!(sc&&sc.talk)&&!rat.userData.wallState){const x=wildlife88.near;ui.prompt.style.display='block';ui.prompt.textContent=x.type==='rat'?'E · Talk to neighbour rat':x.obj.riding?'E · Dismount gecko':x.obj.tamed?'E · Ride gecko':'E · Tame gecko';$('padE').textContent=x.type==='rat'?'Talk':x.obj.riding?'Dismount':x.obj.tamed?'Ride':'Tame';}
+ if(wildlife88.near&&!(sc&&sc.talk)&&!rat.userData.wallState){const x=wildlife88.near,gn=x.obj.name||home.geckoName88||'Gecko';ui.prompt.style.display='block';ui.prompt.textContent=x.type==='rat'?'E · Talk to neighbour rat':x.obj.riding?'E · Dismount '+gn:x.obj.tamed?'E · Ride '+gn:'E · Tame gecko';$('padE').textContent=x.type==='rat'?'Talk':x.obj.riding?'Dismount':x.obj.tamed?'Ride':'Tame';}
 }
-function interactWildlife88(){const x=wildlife88.near;if(!x)return false;if(x.type==='rat'){x.obj.talking=2.4;sayToast('Neighbour rat: “Ants found crumbs by the gate. Watch the snake near the timber.”');return true;}const g=x.obj;if(g.riding){g.riding=false;rat.userData.geckoRide88=false;rat.userData.seated41=false;sayToast('Pip hops down from the gecko.');return true;}if(!g.tamed){g.tamed=true;home.geckoTamed88=true;save();sayToast('Gecko tamed! It will follow Pip — with some space.');return true;}drivingClips77(rat.userData);g.riding=true;rat.userData.geckoRide88=true;rat.userData.seated41=true;sayToast('Riding gecko · tap Dismount to hop off');return true;}
+function interactWildlife88(){const x=wildlife88.near;if(!x)return false;if(x.type==='rat'){x.obj.talking=2.4;sayToast('Neighbour rat: “Ants found crumbs by the gate. Watch the snake near the timber.”');return true;}const g=x.obj,gn=g.name||home.geckoName88||'Gecko';if(g.riding){g.riding=false;rat.userData.geckoRide88=false;rat.userData.seated41=false;sayToast('Pip hops down from '+gn+'.');return true;}if(!g.tamed){g.tamed=true;g.name=home.geckoName88||'Gecko';home.geckoTamed88=true;save();sayToast('Gecko tamed! Name it from Menu.');return true;}drivingClips77(rat.userData);g.riding=true;rat.userData.geckoRide88=true;rat.userData.seated41=true;sayToast('Riding '+gn+' · tap Dismount to hop off');return true;}
 function mountedPose90(){const g=wildlife88.gecko,u=rat?.userData;if(!g?.riding||!u?.pipPivot)return;u.pipPivot.position.y=.68;u.pipPivot.position.z=-.08;u.pipPivot.rotation.x=-.28;for(const side of ['Left','Right']){rotateBone69(u,side+'Arm',-.5);rotateBone69(u,side+'ForeArm',-.45);}}
 const worldBefore88=tickWorld38;tickWorld38=function(dt){worldBefore88(dt);tickWildlife88(dt);};
 const modelsBefore90=tickModels44;tickModels44=function(dt){modelsBefore90(dt);mountedPose90();};
@@ -2866,6 +2866,6 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=149"></script>
+<script src="wildlife-recovered118.js?v=150"></script>
 </body>
 </html>

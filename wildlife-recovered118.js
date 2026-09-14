@@ -288,4 +288,32 @@
     seatPip116();
   };
 
+  function nameGecko150() {
+    if (!home.geckoTamed88) { sayToast('Tame the gecko first.'); return; }
+    const current = home.geckoName88 || 'Gecko';
+    modal('Name your gecko', `<p>Choose a short name for your companion.</p><input id="geckoName150" maxlength="14" value="${current.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="Gecko name">`, [
+      ['Save name', () => {
+        const input = $('geckoName150');
+        const name = (input?.value || '').replace(/[^a-zA-Z0-9 '\-]/g, '').trim().slice(0, 14);
+        if (!name) { sayToast('Give your gecko a name first.'); return; }
+        home.geckoName88 = name;
+        if (wildlife88?.gecko) wildlife88.gecko.name = name;
+        save(); closeModal(); sayToast(`${name} is ready to explore.`);
+      }],
+      ['Cancel', closeModal]
+    ]);
+    setTimeout(() => $('geckoName150')?.focus(), 0);
+  }
+
+  const menuBeforeGeckoName150 = menu65;
+  menu65 = function menuWithGeckoName150() {
+    menuBeforeGeckoName150();
+    if (!home.geckoTamed88) return;
+    const button = document.createElement('button');
+    button.className = 'btn';
+    button.textContent = `Name gecko · ${home.geckoName88 || 'Gecko'}`;
+    button.addEventListener('click', nameGecko150);
+    $('modalActions').appendChild(button);
+  };
+
 })();
