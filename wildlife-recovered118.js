@@ -288,35 +288,46 @@
     seatPip116();
   };
 
-  // Wild-gecko encounter: defeat it before it can be tamed and ridden.
+  // Gecko encounter: a short, readable boss loop. Pip can only earn a hit
+  // during the recovery after a missed lunge; it is not a health sponge.
+  function queueGeckoHit141(kind, delay) {
+    const g = wildlife88?.gecko;
+    if (g?.battle141 && !g.tamed) g.pipHit141 = { kind, t: delay };
+  }
   function strikeGecko141(kind) {
     const g = wildlife88?.gecko;
     if (!g?.battle141 || g.tamed || !rat) return;
+    if (g.state141 !== 'recover') { sayToast('Dodge its lunge — then strike while it recovers.'); return; }
     const offset = g.g.position.clone().sub(rat.position).setY(0);
-    if (offset.length() > 1.6) return;
+    const reach = kind === 'bite' ? 1.12 : 1.72;
+    if (offset.length() > reach) { sayToast('Too far away.'); return; }
     const forward = new THREE.Vector3(Math.sin(rat.rotation.y), 0, Math.cos(rat.rotation.y));
-    if (forward.dot(offset.normalize()) < -.25) return;
-    const damage = kind === 'bite' ? 20 : 14;
-    g.hp141 = Math.max(0, g.hp141 - damage);
-    g.hit141 = .22;
-    if (g.hp141 <= 0) {
+    if (forward.dot(offset.normalize()) < -.18) { sayToast('Face the gecko.'); return; }
+    g.pipHit141 = null;
+    g.hits141 = (g.hits141 || 0) + 1;
+    g.state141 = 'stagger';
+    g.stateT141 = .72;
+    g.flash141 = .25;
+    if (g.hits141 >= 3) {
       g.battle141 = false;
       g.tamed = true;
       save();
-      sayToast('The gecko yields. It is tame now — press E to ride.');
-    } else sayToast(`${kind === 'bite' ? 'Bite' : 'Tail whip'} landed · Gecko ${g.hp141}%`);
+      sayToast('The gecko respects Pip. It is tame now — press E to ride.');
+    } else sayToast(`Good hit · ${g.hits141} / 3 openings earned`);
   }
 
   const biteBeforeGecko141 = doBite;
   doBite = function geckoBite141(...args) {
+    const before = rat?.userData?.act;
     const result = biteBeforeGecko141(...args);
-    strikeGecko141('bite');
+    if (!before && rat?.userData?.act?.type === 'bite') queueGeckoHit141('bite', .25);
     return result;
   };
   const whipBeforeGecko141 = whip67;
   whip67 = function geckoWhip141(...args) {
+    const before = rat?.userData?.job67;
     const result = whipBeforeGecko141(...args);
-    strikeGecko141('whip');
+    if (!before && rat?.userData?.job67?.hit) queueGeckoHit141('whip', .43);
     return result;
   };
 
@@ -340,27 +351,50 @@
         ui.sub.style.opacity = '0';
         ui.sub.textContent = '';
         gameCam.ready = false;
-        sayToast('Battle started — Bite and Tail Whip!');
+        sayToast('Battle started — dodge a lunge, then strike during recovery.');
       }
       return;
     }
-    geckoTickBeforeBattle141(dt, g);
-    if (!g?.battle141 || g.tamed || g.riding || !rat) return;
+    if (!g?.battle141 || g.tamed || g.riding || !rat) {
+      geckoTickBeforeBattle141(dt, g);
+      return;
+    }
+    g.clock += dt;
+    g.mixer?.update(dt);
+    g.state141 = g.state141 || 'stalk';
+    g.stateT141 = Math.max(0, (g.stateT141 || 0) - dt);
     g.cool141 = Math.max(0, (g.cool141 || 0) - dt);
-    g.hit141 = Math.max(0, (g.hit141 || 0) - dt);
+    g.flash141 = Math.max(0, (g.flash141 || 0) - dt);
+    if (g.pipHit141) { g.pipHit141.t -= dt; if (g.pipHit141.t <= 0) strikeGecko141(g.pipHit141.kind); }
     const offset = rat.position.clone().sub(g.g.position).setY(0);
     const distance = offset.length();
-    if (distance > 1.15) {
-      offset.normalize();
-      g.g.position.addScaledVector(offset, dt * .72);
-      turn88(g.g, Math.atan2(offset.x, offset.z), dt, 6);
-    }
-    if (distance < 1.1 && g.cool141 <= 0 && !rat.userData.air) {
-      g.cool141 = 2.4;
-      const push = rat.position.clone().sub(g.g.position).setY(0).normalize();
-      rat.position.addScaledVector(push, .55);
-      ensureLife().stamina = Math.max(0, ensureLife().stamina - 9);
-      sayToast('Gecko snap! Roll away or strike back.');
+    const toward = offset.lengthSq() > .001 ? offset.normalize() : new THREE.Vector3(0, 0, 1);
+    const face = Math.atan2(toward.x, toward.z);
+    if (g.state141 === 'windup') {
+      turn88(g.g, face, dt, 11);
+      if (g.stateT141 <= 0) { g.state141 = 'lunge'; g.stateT141 = .34; g.lungeDir141 = toward.clone(); sayToast('Gecko lunges! Roll sideways now.'); }
+    } else if (g.state141 === 'lunge') {
+      const d = g.lungeDir141 || toward;
+      g.g.position.addScaledVector(d, dt * 5.0);
+      turn88(g.g, Math.atan2(d.x, d.z), dt, 18);
+      if (g.stateT141 <= 0) {
+        const dodging = rat.userData.act?.type === 'roll' && rat.userData.act.t > .06 && rat.userData.act.t < .48;
+        if (g.g.position.distanceTo(rat.position) < 1.02 && !dodging) {
+          const push = rat.position.clone().sub(g.g.position).setY(0).normalize();
+          rat.position.addScaledVector(push, .42);
+          ensureLife().stamina = Math.max(0, ensureLife().stamina - 7);
+          sayToast('Gecko snap! Roll before the lunge lands.');
+        } else sayToast('Missed! Strike it while it recovers.');
+        g.state141 = 'recover'; g.stateT141 = 1.15; g.cool141 = .5;
+      }
+    } else if (g.state141 === 'recover' || g.state141 === 'stagger') {
+      turn88(g.g, face, dt, 4);
+      if (g.stateT141 <= 0) g.state141 = 'stalk';
+    } else {
+      turn88(g.g, face, dt, 7);
+      if (distance > 2.35) g.g.position.addScaledVector(toward, dt * .95);
+      else if (distance < 1.62) g.g.position.addScaledVector(toward, -dt * .7);
+      if (distance < 2.7 && g.cool141 <= 0) { g.state141 = 'windup'; g.stateT141 = .72; g.cool141 = 1.3; sayToast('Gecko crouches — get ready to roll.'); }
     }
   };
 
@@ -371,10 +405,14 @@
       const g = near.obj;
       if (!g.battle141) {
         g.battle141 = true;
-        g.hp141 = 100;
+        g.hits141 = 0;
         g.cool141 = 1.1;
         g.intro141 = 9.4;
         g.hissed141 = false;
+        g.state141 = 'stalk';
+        g.stateT141 = 0;
+        g.pipHit141 = null;
+        g.shot141 = '';
         sayToast('Wild gecko battle!');
       }
       return true;
@@ -388,13 +426,12 @@
     const g = wildlife88?.gecko;
     if (g?.battle141 && !g.tamed) {
       ui.prompt.style.display = 'block';
-      ui.prompt.textContent = `WILD GECKO · ${g.hp141}% · Bite / Tail Whip`;
+      ui.prompt.textContent = `WILD GECKO · ${g.hits141 || 0} / 3 openings · Roll, then strike`;
       $('padE').textContent = 'Battle';
     }
   };
 
-  // Playground cinematic: a true shot/reverse-shot, rather than a single
-  // distant overview. The camera only owns the view while dialogue is playing.
+  // Playground cinematic: fixed hard cuts. No drifting camera calculations.
   const cameraBeforeGeckoIntro141 = tickGameplayCamera;
   tickGameplayCamera = function geckoIntroCamera141(dt) {
     const g = wildlife88?.gecko;
@@ -408,10 +445,11 @@
     // Stand just in front and to the side of whoever is speaking, so their
     // face is visible and the other character stays in the background.
     const side = new THREE.Vector3(-toOther.z, 0, toOther.x);
-    const target = subject.position.clone().add(new THREE.Vector3(0, pipShot ? .58 : .46, 0)).addScaledVector(toOther, .15);
-    const desired = target.clone().addScaledVector(toOther, -2.15).addScaledVector(side, pipShot ? .78 : -.78).add(new THREE.Vector3(0, pipShot ? .52 : .38, 0));
-    camera.position.lerp(desired, 1 - Math.exp(-dt * 8));
-    camera.lookAt(target.clone().lerp(other.position.clone().add(new THREE.Vector3(0, .4, 0)), .12));
+    const target = subject.position.clone().add(new THREE.Vector3(0, pipShot ? .54 : .42, 0));
+    const desired = target.clone().addScaledVector(toOther, -3.45).addScaledVector(side, pipShot ? .9 : -.9).add(new THREE.Vector3(0, 1.15, 0));
+    const shot = pipShot ? 'pip' : 'gecko';
+    if (g.shot141 !== shot) { camera.position.copy(desired); g.shot141 = shot; }
+    camera.lookAt(target);
     $('cameraTools').style.display = 'none';
   };
 
@@ -420,28 +458,5 @@
     if (wildlife88?.gecko?.intro141 > 0) return 0;
     return controlBeforeGeckoIntro141(dt, options);
   };
-
-  // Direct review link: enter the playground normally, then the opening
-  // cinematic begins without having to find and press E on the gecko.
-  if (new URLSearchParams(location.search).get('preview') === 'gecko') {
-    let previewStarted141 = false;
-    const startGeckoPreview141 = () => {
-      const g = wildlife88?.gecko;
-      if (previewStarted141 || phase !== 'scavenge' || !rat || !g) {
-        if (!previewStarted141) setTimeout(startGeckoPreview141, 250);
-        return;
-      }
-      previewStarted141 = true;
-      g.tamed = false;
-      g.riding = false;
-      g.battle141 = true;
-      g.hp141 = 100;
-      g.cool141 = 1.1;
-      g.intro141 = 9.4;
-      g.hissed141 = false;
-      gameCam.ready = false;
-    };
-    setTimeout(startGeckoPreview141, 250);
-  }
 
 })();
