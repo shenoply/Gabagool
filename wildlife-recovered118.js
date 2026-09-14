@@ -326,12 +326,15 @@
       g.intro141 -= dt;
       const face = rat.position.clone().sub(g.g.position).setY(0);
       if (face.lengthSq() > .001) turn88(g.g, Math.atan2(face.x, face.z), dt, 8);
-      if (g.intro141 > 5.6) ui.sub.textContent = 'PIP: Easy now. I’m not your enemy.';
-      else if (g.intro141 > 3.9) {
+      const pipFace = g.g.position.clone().sub(rat.position).setY(0);
+      if (pipFace.lengthSq() > .001) turn88(rat, Math.atan2(pipFace.x, pipFace.z), dt, 8);
+      // Every line gets its own close shot: Pip, Gecko, Pip, then Gecko.
+      if (g.intro141 > 7.1) ui.sub.textContent = 'PIP: Easy now. I’m not your enemy.';
+      else if (g.intro141 > 4.8) {
         ui.sub.textContent = 'GECKO: *A low hiss rattles through the yard.*';
         if (!g.hissed141) { g.hissed141 = true; sfx.hiss(); }
-      } else if (g.intro141 > 1.7) ui.sub.textContent = 'PIP: Then show me what you’ve got.';
-      else ui.sub.textContent = 'WILD GECKO · Fight to earn its trust.';
+      } else if (g.intro141 > 2.4) ui.sub.textContent = 'PIP: Then show me what you’ve got.';
+      else ui.sub.textContent = 'GECKO: *The gecko lowers itself, ready to strike.*';
       ui.sub.style.opacity = '1';
       if (g.intro141 <= 0) {
         ui.sub.style.opacity = '0';
@@ -370,7 +373,7 @@
         g.battle141 = true;
         g.hp141 = 100;
         g.cool141 = 1.1;
-        g.intro141 = 7.2;
+        g.intro141 = 9.4;
         g.hissed141 = false;
         sayToast('Wild gecko battle!');
       }
@@ -390,16 +393,25 @@
     }
   };
 
-  // Brief cinematic framing during the challenge intro; normal camera control
-  // is restored immediately when the fight begins.
+  // Playground cinematic: a true shot/reverse-shot, rather than a single
+  // distant overview. The camera only owns the view while dialogue is playing.
   const cameraBeforeGeckoIntro141 = tickGameplayCamera;
   tickGameplayCamera = function geckoIntroCamera141(dt) {
     const g = wildlife88?.gecko;
     if (!g?.intro141 || !rat) return cameraBeforeGeckoIntro141(dt);
-    const target = rat.position.clone().lerp(g.g.position, g.intro141 > 5.5 ? .28 : g.intro141 > 3.7 ? .76 : .5).add(new THREE.Vector3(0, .55, 0));
-    const offset = (g.intro141 > 5.5 ? new THREE.Vector3(2.6, 1.35, 3.2) : g.intro141 > 3.7 ? new THREE.Vector3(-1.8, 1.05, 2.15) : new THREE.Vector3(3.4, 1.65, 4.1)).applyAxisAngle(new THREE.Vector3(0, 1, 0), g.g.rotation.y);
-    camera.position.lerp(target.clone().add(offset), 1 - Math.exp(-dt * 5));
-    camera.lookAt(target);
+    const pipShot = g.intro141 > 7.1 || (g.intro141 <= 4.8 && g.intro141 > 2.4);
+    const subject = pipShot ? rat : g.g;
+    const other = pipShot ? g.g : rat;
+    const toOther = other.position.clone().sub(subject.position).setY(0);
+    if (toOther.lengthSq() < .001) toOther.set(0, 0, 1);
+    toOther.normalize();
+    // Stand just in front and to the side of whoever is speaking, so their
+    // face is visible and the other character stays in the background.
+    const side = new THREE.Vector3(-toOther.z, 0, toOther.x);
+    const target = subject.position.clone().add(new THREE.Vector3(0, pipShot ? .58 : .46, 0)).addScaledVector(toOther, .15);
+    const desired = target.clone().addScaledVector(toOther, -2.15).addScaledVector(side, pipShot ? .78 : -.78).add(new THREE.Vector3(0, pipShot ? .52 : .38, 0));
+    camera.position.lerp(desired, 1 - Math.exp(-dt * 8));
+    camera.lookAt(target.clone().lerp(other.position.clone().add(new THREE.Vector3(0, .4, 0)), .12));
     $('cameraTools').style.display = 'none';
   };
 
