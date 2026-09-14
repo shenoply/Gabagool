@@ -324,6 +324,21 @@
 
   const geckoTickBeforeBattle141 = tickGecko88;
   tickGecko88 = function tickGeckoBattle141(dt, g) {
+    if (g?.intro141 > 0) {
+      g.intro141 -= dt;
+      const face = rat.position.clone().sub(g.g.position).setY(0);
+      if (face.lengthSq() > .001) turn88(g.g, Math.atan2(face.x, face.z), dt, 8);
+      if (g.intro141 > 2.1) ui.sub.textContent = 'A wild gecko blocks Pip’s path.';
+      else if (g.intro141 > .9) ui.sub.textContent = 'Pip grips his tail. The gecko hisses.';
+      else ui.sub.textContent = 'Fight to earn its trust.';
+      ui.sub.style.opacity = '1';
+      if (g.intro141 <= 0) {
+        ui.sub.style.opacity = '0';
+        ui.sub.textContent = '';
+        sayToast('Battle started — Bite and Tail Whip!');
+      }
+      return;
+    }
     geckoTickBeforeBattle141(dt, g);
     if (!g?.battle141 || g.tamed || g.riding || !rat) return;
     g.cool141 = Math.max(0, (g.cool141 || 0) - dt);
@@ -353,7 +368,8 @@
         g.battle141 = true;
         g.hp141 = 100;
         g.cool141 = 1.1;
-        sayToast('Wild gecko battle! Bite and Tail Whip to tame it.');
+        g.intro141 = 3.2;
+        sayToast('Wild gecko battle!');
       }
       return true;
     }
@@ -369,6 +385,25 @@
       ui.prompt.textContent = `WILD GECKO · ${g.hp141}% · Bite / Tail Whip`;
       $('padE').textContent = 'Battle';
     }
+  };
+
+  // Brief cinematic framing during the challenge intro; normal camera control
+  // is restored immediately when the fight begins.
+  const cameraBeforeGeckoIntro141 = tickGameplayCamera;
+  tickGameplayCamera = function geckoIntroCamera141(dt) {
+    const g = wildlife88?.gecko;
+    if (!g?.intro141 || !rat) return cameraBeforeGeckoIntro141(dt);
+    const target = rat.position.clone().lerp(g.g.position, .5).add(new THREE.Vector3(0, .55, 0));
+    const offset = new THREE.Vector3(2.7, 1.55, 3.4).applyAxisAngle(new THREE.Vector3(0, 1, 0), g.g.rotation.y);
+    camera.position.lerp(target.clone().add(offset), 1 - Math.exp(-dt * 5));
+    camera.lookAt(target);
+    $('cameraTools').style.display = 'none';
+  };
+
+  const controlBeforeGeckoIntro141 = control;
+  control = function geckoIntroControl141(dt, options) {
+    if (wildlife88?.gecko?.intro141 > 0) return 0;
+    return controlBeforeGeckoIntro141(dt, options);
   };
 
 })();
