@@ -2798,8 +2798,8 @@ function turn88(g,yaw,dt,rate=5){const d=Math.atan2(Math.sin(yaw-g.rotation.y),M
 function styleCat88(a){a.model.traverse(o=>{if(!o.isMesh)return;const eye=/sphere/i.test(o.name),mat=new THREE.MeshStandardMaterial({color:eye?0x241b16:0x765747,roughness:eye?.38:.88,metalness:0,emissive:eye?0x120b07:0x000000,emissiveIntensity:eye?.14:0,skinning:!!o.isSkinnedMesh});mat.vertexColors=false;o.material=mat;});}
 function pump88(){while(active88<2&&queue88.length){const job=queue88.shift();active88++;fetch('assets87/'+job.file+'.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json();}).then(async packed=>{const raw=atob(packed.data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);if(typeof DecompressionStream==='undefined')throw Error('This browser cannot unpack the optimized model');const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));return new Response(stream).arrayBuffer();}).then(buffer=>new Promise((resolve,reject)=>loader88.parse(buffer,'',resolve,reject))).then(a=>{active88--;if(root===job.owner&&phase==='scavenge')job.done(a);pump88();}).catch(e=>{active88--;console.warn('Optional uploaded asset failed:',job.file,e);pump88();});}}
 function load88(file,done){queue88.push({file,done,owner:root});pump88();}
-function addPlant88(source,name,pos,height,yaw=0){const src=source.getObjectByName(name);if(!src)return;const g=new THREE.Group(),model=fit88(src.clone(true),height);g.add(model);g.position.set(...pos);g.rotation.y=yaw;g.name='Uploaded garden plant';root.add(g);wildlife88.decor.push(g);}
-function addProp88(source,name,pos,height,yaw=0){const src=source.getObjectByName(name);if(!src)return;const g=new THREE.Group(),model=fit88(src.clone(true),height);g.add(model);g.position.set(...pos);g.rotation.y=yaw;g.name='Uploaded city prop';root.add(g);wildlife88.decor.push(g);}
+function addPlant88(source,name,pos,height,yaw=0){const src=source.getObjectByName(name);if(!src)return;const g=new THREE.Group(),model=fit88(src.clone(true),height);g.add(model);g.position.set(...pos);g.rotation.y=yaw;g.name='Uploaded garden plant';root.add(g);registerSolid62(g);wildlife88.decor.push(g);}
+function addProp88(source,name,pos,height,yaw=0){const src=source.getObjectByName(name);if(!src)return;const g=new THREE.Group(),model=fit88(src.clone(true),height);g.add(model);g.position.set(...pos);g.rotation.y=yaw;g.name='Uploaded city prop';root.add(g);registerSolid62(g);wildlife88.decor.push(g);}
 function seedWildlife88(){
  if(!root||phase!=='scavenge'||wildlife88.owner===root||wildlife88.loading)return;
  wildlife88={owner:root,loading:true,gecko:null,ratNpc:null,snake:null,cat:null,ant:null,near:null,decor:[]};
@@ -2866,6 +2866,6 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=153"></script>
+<script src="wildlife-recovered118.js?v=154"></script>
 </body>
 </html>

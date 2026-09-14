@@ -346,7 +346,7 @@
   };
 
   // Rainyard Monitor home: actual exported GLB in a quiet rear-left corner.
-  const DEN_POS_153 = new THREE.Vector3(-20.2, 0, 28.5);
+  const DEN_POS_154 = new THREE.Vector3(-20.2, 0, 28.5);
   const seedWildlifeBeforeDen153 = seedWildlife88;
   seedWildlife88 = function seedWildlifeWithMonitorHome153() {
     const result = seedWildlifeBeforeDen153();
@@ -357,37 +357,61 @@
       if (root !== owner || phase !== 'scavenge' || wildlife88.owner !== owner) return;
       const den = asset.scene;
       den.name = 'Rainyard Monitor clay-stone hide';
-      den.position.copy(DEN_POS_153);
+      den.position.copy(DEN_POS_154);
       den.rotation.y = Math.PI; // entrance points into the playable yard
+      den.scale.setScalar(1.55);
       den.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-      root.add(den); wildlife88.den153 = den;
+      root.add(den); registerSolid62(den); wildlife88.den153 = den;
       const g = wildlife88.gecko;
-      if (g && !g.tamed) {
-        g.denHome153 = DEN_POS_153.clone().add(new THREE.Vector3(0, 0, .22));
-        g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
+      if (g) {
+        g.denHome153 = DEN_POS_154.clone().add(new THREE.Vector3(0, 0, -.55));
+        g.g.position.copy(g.denHome153); g.g.rotation.y = 0;
       }
     }, undefined, error => console.warn('Monitor hide failed to load:', error));
     return result;
   };
 
-  // Untamed monitor stays tucked inside: head and shoulders poke out. Once
-  // tamed, its normal companion movement resumes immediately.
+  // The monitor rests in its solid den whenever it is not being ridden. The
+  // lowered body stays hidden behind the front stones, leaving its head out.
   const tickGeckoBeforeDen153 = tickGecko88;
   tickGecko88 = function tickMonitorAtHome153(dt, g) {
-    if (!g.tamed && wildlife88.den153 && !g.denHome153) {
-      g.denHome153 = DEN_POS_153.clone().add(new THREE.Vector3(0, 0, .22));
+    if (wildlife88.den153 && !g.denHome153) {
+      g.denHome153 = DEN_POS_154.clone().add(new THREE.Vector3(0, 0, -.55));
     }
-    if (!g.tamed && !g.riding && g.denHome153) {
-      g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
+    if (!g.riding && g.denHome153) {
+      g.g.position.copy(g.denHome153); g.g.rotation.y = 0;
       g.target.copy(g.denHome153); g.wander = 999;
       tickGeckoBeforeDen153(dt, g);
       if (g.denRestY153 === undefined) g.denRestY153 = g.model.position.y;
-      g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
-      g.model.position.y = g.denRestY153 - .13;
+      g.g.position.copy(g.denHome153); g.g.rotation.y = 0;
+      g.model.position.y = g.denRestY153 - .20;
       return;
     }
     if (g.denRestY153 !== undefined) g.model.position.y = g.denRestY153;
     tickGeckoBeforeDen153(dt, g);
+  };
+
+  // Final movement pass: scenery is already triangle-solid, but smoothing a
+  // mounted turn happens after the base controller. Re-run that collision and
+  // give the two animal bodies a reliable physical radius as well.
+  const controlBeforeWorldSolid154 = control;
+  function pushAnimal154(p, body, radius) {
+    if (!body || p.y > .7) return;
+    const dx = p.x - body.position.x, dz = p.z - body.position.z;
+    const d = Math.hypot(dx, dz), min = radius + .18;
+    if (d >= min) return;
+    const nx = d > .001 ? dx / d : 1, nz = d > .001 ? dz / d : 0;
+    p.x = body.position.x + nx * min; p.z = body.position.z + nz * min;
+  }
+  control = function physicalWorld154(dt, options) {
+    const before = rat?.position.clone();
+    const speed = controlBeforeWorldSolid154(dt, options);
+    if (!before || phase !== 'scavenge' || rat.userData.wallState) return speed;
+    resolveGeometry62(rat.position, before);
+    const g = wildlife88?.gecko;
+    if (g && !g.riding) pushAnimal154(rat.position, g.g, .48);
+    pushAnimal154(rat.position, wildlife88?.ratNpc?.g, .52);
+    return speed;
   };
 
 })();
