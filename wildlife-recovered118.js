@@ -288,4 +288,86 @@
     seatPip116();
   };
 
+  // Wild-gecko encounter: defeat it before it can be tamed and ridden.
+  function strikeGecko141(kind) {
+    const g = wildlife88?.gecko;
+    if (!g?.battle141 || g.tamed || !rat) return;
+    const offset = g.g.position.clone().sub(rat.position).setY(0);
+    if (offset.length() > 1.6) return;
+    const forward = new THREE.Vector3(Math.sin(rat.rotation.y), 0, Math.cos(rat.rotation.y));
+    if (forward.dot(offset.normalize()) < -.25) return;
+    const damage = kind === 'bite' ? 20 : 14;
+    g.hp141 = Math.max(0, g.hp141 - damage);
+    g.hit141 = .22;
+    if (g.hp141 <= 0) {
+      g.battle141 = false;
+      g.tamed = true;
+      home.geckoTamed88 = true;
+      save();
+      sayToast('The gecko yields. It is tame now — press E to ride.');
+    } else sayToast(`${kind === 'bite' ? 'Bite' : 'Tail whip'} landed · Gecko ${g.hp141}%`);
+  }
+
+  const biteBeforeGecko141 = doBite;
+  doBite = function geckoBite141(...args) {
+    const result = biteBeforeGecko141(...args);
+    strikeGecko141('bite');
+    return result;
+  };
+  const whipBeforeGecko141 = whip67;
+  whip67 = function geckoWhip141(...args) {
+    const result = whipBeforeGecko141(...args);
+    strikeGecko141('whip');
+    return result;
+  };
+
+  const geckoTickBeforeBattle141 = tickGecko88;
+  tickGecko88 = function tickGeckoBattle141(dt, g) {
+    geckoTickBeforeBattle141(dt, g);
+    if (!g?.battle141 || g.tamed || g.riding || !rat) return;
+    g.cool141 = Math.max(0, (g.cool141 || 0) - dt);
+    g.hit141 = Math.max(0, (g.hit141 || 0) - dt);
+    const offset = rat.position.clone().sub(g.g.position).setY(0);
+    const distance = offset.length();
+    if (distance > 1.15) {
+      offset.normalize();
+      g.g.position.addScaledVector(offset, dt * .72);
+      turn88(g.g, Math.atan2(offset.x, offset.z), dt, 6);
+    }
+    if (distance < 1.1 && g.cool141 <= 0 && !rat.userData.air) {
+      g.cool141 = 2.4;
+      const push = rat.position.clone().sub(g.g.position).setY(0).normalize();
+      rat.position.addScaledVector(push, .55);
+      ensureLife().stamina = Math.max(0, ensureLife().stamina - 9);
+      sayToast('Gecko snap! Roll away or strike back.');
+    }
+  };
+
+  const interactBeforeBattle141 = interactWildlife88;
+  interactWildlife88 = function interactGeckoBattle141() {
+    const near = wildlife88?.near;
+    if (near?.type === 'gecko' && !near.obj.tamed) {
+      const g = near.obj;
+      if (!g.battle141) {
+        g.battle141 = true;
+        g.hp141 = 100;
+        g.cool141 = 1.1;
+        sayToast('Wild gecko battle! Bite and Tail Whip to tame it.');
+      }
+      return true;
+    }
+    return interactBeforeBattle141();
+  };
+
+  const wildlifeTickBeforeBattle141 = tickWildlife88;
+  tickWildlife88 = function wildlifeBattle141(dt) {
+    wildlifeTickBeforeBattle141(dt);
+    const g = wildlife88?.gecko;
+    if (g?.battle141 && !g.tamed) {
+      ui.prompt.style.display = 'block';
+      ui.prompt.textContent = `WILD GECKO · ${g.hp141}% · Bite / Tail Whip`;
+      $('padE').textContent = 'Battle';
+    }
+  };
+
 })();
