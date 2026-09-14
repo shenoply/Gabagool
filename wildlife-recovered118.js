@@ -48,17 +48,17 @@
 
   function moving116(g) {
     const u = rat.userData;
-    const stick = Math.hypot(joy?.x || 0, joy?.z || 0) > .08;
-    const keyboard = !!(keys.w || keys.a || keys.s || keys.d ||
-      keys.arrowup || keys.arrowdown || keys.arrowleft || keys.arrowright);
-    const travelled = g.previous116.distanceToSquared(rat.position) > .000001;
+    const travelled = g.previous116.distanceToSquared(rat.position) > .00001;
     g.previous116.copy(rat.position);
-    return stick || keyboard || travelled || (u.vel || 0) > .03;
+    // Use actual mount speed, not held input, so the crawl eases in and has a
+    // natural settling stop instead of snapping between walk and idle.
+    return Math.min(1, Math.max(travelled ? .08 : 0, (u.vel || 0) / 4.8));
   }
 
-  function crawl116(g, moving) {
-    const phase = g.clock * (moving ? 6.4 : 1.45);
-    const strength = moving ? 1 : .10;
+  function crawl116(g, pace) {
+    g.crawlPhase116 = (g.crawlPhase116 || 0) + (1.15 + pace * 7.2) * (g.lastRideDt116 || 1 / 60);
+    const phase = g.crawlPhase116;
+    const strength = .10 + pace * .90;
     for (const d of g.recovered116) {
       const a = d.position.array;
       const r = d.rest;
@@ -109,6 +109,7 @@
   tickGecko88 = function tickRecovered116(dt, g) {
     prepare116(g);
     g.clock += dt;
+    g.lastRideDt116 = dt;
     const u = rat.userData;
     if (g.riding) {
       const moving = moving116(g);
@@ -314,6 +315,34 @@
     button.textContent = `Name gecko · ${home.geckoName88 || 'Gecko'}`;
     button.addEventListener('click', nameGecko150);
     $('modalActions').appendChild(button);
+  };
+
+  // Mounted travel uses a small velocity buffer. It keeps Pip responsive but
+  // lets the gecko gather speed and settle to a stop instead of skating.
+  const controlBeforeGeckoRide151 = control;
+  control = function smoothGeckoRide151(dt, options) {
+    const g = wildlife88?.gecko;
+    if (!g?.riding || !rat) return controlBeforeGeckoRide151(dt, options);
+    const before = rat.position.clone();
+    const beforeYaw = rat.rotation.y;
+    const result = controlBeforeGeckoRide151(dt, { ...options, walk: 2.38 });
+    const desired = rat.position.clone().sub(before).setY(0).multiplyScalar(1 / Math.max(dt, .001));
+    const blend = 1 - Math.exp(-dt * 4.6);
+    g.rideVelocity151 = g.rideVelocity151 || new THREE.Vector3();
+    g.rideVelocity151.lerp(desired, blend);
+    if (desired.lengthSq() < .001) g.rideVelocity151.multiplyScalar(1 - Math.exp(-dt * 7.5));
+    rat.position.copy(before).addScaledVector(g.rideVelocity151, dt);
+    if (options?.bounds) {
+      rat.position.x = THREE.MathUtils.clamp(rat.position.x, options.bounds[0], options.bounds[1]);
+      rat.position.z = THREE.MathUtils.clamp(rat.position.z, options.bounds[2], options.bounds[3]);
+    }
+    rat.userData.motionX = g.rideVelocity151.x;
+    rat.userData.motionZ = g.rideVelocity151.z;
+    rat.userData.vel = g.rideVelocity151.length();
+    const turned = Math.atan2(Math.sin(rat.rotation.y - beforeYaw), Math.cos(rat.rotation.y - beforeYaw));
+    const maxTurn = dt * 6.2;
+    rat.rotation.y = beforeYaw + THREE.MathUtils.clamp(turned, -maxTurn, maxTurn);
+    return Math.min(1, rat.userData.vel / 2.38);
   };
 
 })();
