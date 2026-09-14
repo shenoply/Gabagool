@@ -302,8 +302,6 @@
     if (g.hp141 <= 0) {
       g.battle141 = false;
       g.tamed = true;
-      home.geckoBattle141Won = true;
-      home.geckoTamed88 = true;
       save();
       sayToast('The gecko yields. It is tame now — press E to ride.');
     } else sayToast(`${kind === 'bite' ? 'Bite' : 'Tail whip'} landed · Gecko ${g.hp141}%`);
