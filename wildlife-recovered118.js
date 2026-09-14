@@ -504,10 +504,10 @@
     if (phase !== 'scavenge' || !root || root.userData.diveBoard164) return;
     const g = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0x76513b, roughness: .92 });
     const board = new THREE.Mesh(new THREE.BoxGeometry(.72, .12, 2.15), wood);
-    board.position.y = .74; board.castShadow = board.receiveShadow = true; g.add(board);
-    for (const z of [-.72, .42]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(.13, .72, .13), wood); leg.position.set(0, .36, z); leg.castShadow = true; g.add(leg); }
-    g.position.set(-12.5, 0, 27.78); g.name = 'Pool diving bench'; root.add(g); registerSolid62(g);
-    root.userData.diveBoard164 = { g, end: new THREE.Vector3(-12.5, .76, 28.72), splash: new THREE.Vector3(-12.5, 0, 30.05) };
+    board.position.y = 1.36; board.castShadow = board.receiveShadow = true; g.add(board);
+    for (const z of [-.72, .42]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(.13, 1.34, .13), wood); leg.position.set(0, .67, z); leg.castShadow = true; g.add(leg); }
+    g.position.set(-12.5, 0, 27.78); g.name = 'High pool diving bench'; root.add(g); registerSolid62(g);
+    root.userData.diveBoard164 = { g, end: new THREE.Vector3(-12.5, 1.38, 28.72), splash: new THREE.Vector3(-12.5, 0, 30.05) };
   }
   const seedWildlifeBeforeBoard164 = seedWildlife88;
   seedWildlife88 = function seedWithDiveBoard164() { const r = seedWildlifeBeforeBoard164(); addDiveBoard164(); return r; };
@@ -531,7 +531,7 @@
     if (u.poolLeap164) {
       const leap = u.poolLeap164; leap.t += dt; const q = Math.min(1, leap.t / .72);
       rat.position.lerpVectors(leap.from, board.splash, q);
-      rat.position.y = leap.from.y * (1 - q) + Math.sin(q * Math.PI) * 1.55;
+      rat.position.y = leap.from.y * (1 - q) + Math.sin(q * Math.PI) * 2.65;
       rat.rotation.y = Math.PI; u.air = true;
       if (q === 1) { u.poolLeap164 = null; u.air = false; u.diving163 = true; rat.position.y = waterVolume66(rat.position)?.position.y - .58 || 0; sayToast('Tap Surface when you want to rise.'); }
       return;
