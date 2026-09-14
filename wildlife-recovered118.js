@@ -346,7 +346,8 @@
   };
 
   // Rainyard Monitor home: actual exported GLB in a quiet rear-left corner.
-  const DEN_POS_154 = new THREE.Vector3(-20.2, 0, 28.5);
+  // Back-left map corner, just inside the fence line. The opening faces the yard.
+  const DEN_POS_155 = new THREE.Vector3(-18.75, 0, 24.75);
   const seedWildlifeBeforeDen153 = seedWildlife88;
   seedWildlife88 = function seedWildlifeWithMonitorHome153() {
     const result = seedWildlifeBeforeDen153();
@@ -357,15 +358,15 @@
       if (root !== owner || phase !== 'scavenge' || wildlife88.owner !== owner) return;
       const den = asset.scene;
       den.name = 'Rainyard Monitor clay-stone hide';
-      den.position.copy(DEN_POS_154);
-      den.rotation.y = Math.PI; // entrance points into the playable yard
-      den.scale.setScalar(1.55);
+      den.position.copy(DEN_POS_155);
+      den.rotation.y = 0;
+      den.scale.setScalar(1.45);
       den.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
       root.add(den); registerSolid62(den); wildlife88.den153 = den;
       const g = wildlife88.gecko;
       if (g) {
-        g.denHome153 = DEN_POS_154.clone().add(new THREE.Vector3(0, 0, -.55));
-        g.g.position.copy(g.denHome153); g.g.rotation.y = 0;
+        g.denHome153 = DEN_POS_155.clone().add(new THREE.Vector3(0, 0, .42));
+        g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
       }
     }, undefined, error => console.warn('Monitor hide failed to load:', error));
     return result;
@@ -376,14 +377,14 @@
   const tickGeckoBeforeDen153 = tickGecko88;
   tickGecko88 = function tickMonitorAtHome153(dt, g) {
     if (wildlife88.den153 && !g.denHome153) {
-      g.denHome153 = DEN_POS_154.clone().add(new THREE.Vector3(0, 0, -.55));
+      g.denHome153 = DEN_POS_155.clone().add(new THREE.Vector3(0, 0, .42));
     }
     if (!g.riding && g.denHome153) {
-      g.g.position.copy(g.denHome153); g.g.rotation.y = 0;
+      g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
       g.target.copy(g.denHome153); g.wander = 999;
       tickGeckoBeforeDen153(dt, g);
       if (g.denRestY153 === undefined) g.denRestY153 = g.model.position.y;
-      g.g.position.copy(g.denHome153); g.g.rotation.y = 0;
+      g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
       g.model.position.y = g.denRestY153 - .20;
       return;
     }
@@ -409,9 +410,28 @@
     if (!before || phase !== 'scavenge' || rat.userData.wallState) return speed;
     resolveGeometry62(rat.position, before);
     const g = wildlife88?.gecko;
+    // The decorative cave is not an enterable building: keep Pip outside the
+    // rock mass even at the open side, while its monitor can still be reached.
+    if (wildlife88?.den153 && !g?.riding) pushAnimal154(rat.position, wildlife88.den153, 1.72);
     if (g && !g.riding) pushAnimal154(rat.position, g.g, .48);
     pushAnimal154(rat.position, wildlife88?.ratNpc?.g, .52);
     return speed;
+  };
+
+  // The monitor's head is intentionally just beyond the solid den boundary,
+  // so the normal tame/ride interaction remains reachable from outside.
+  const tickWildlifeBeforeDenPrompt155 = tickWildlife88;
+  tickWildlife88 = function tickWildlifeMonitorPrompt155(dt) {
+    tickWildlifeBeforeDenPrompt155(dt);
+    const g = wildlife88?.gecko;
+    if (!g || g.riding || !g.denHome153 || !rat || rat.userData.wallState || sc?.talk) return;
+    const d = g.g.position.distanceTo(rat.position);
+    if (d > 2.45) return;
+    wildlife88.near = { type: 'gecko', obj: g, d };
+    const gn = g.name || home.geckoName88 || 'Gecko';
+    ui.prompt.style.display = 'block';
+    ui.prompt.textContent = g.tamed ? 'E · Ride ' + gn : 'E · Tame gecko';
+    $('padE').textContent = g.tamed ? 'Ride' : 'Tame';
   };
 
 })();
