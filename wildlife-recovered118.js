@@ -379,7 +379,7 @@
     if (wildlife88.den153 && !g.denHome153) {
       g.denHome153 = DEN_POS_155.clone().add(new THREE.Vector3(0, 0, .42));
     }
-    if (!g.riding && g.denHome153) {
+    if (!g.riding && g.denHome153 && !(g.callUntil173 > t)) {
       g.g.position.copy(g.denHome153); g.g.rotation.y = Math.PI;
       g.target.copy(g.denHome153); g.wander = 999;
       tickGeckoBeforeDen153(dt, g);
@@ -764,6 +764,38 @@
   mapPoint171 = function mapPointLarge173(el, x, z) {
     const map = $('miniMap171'); if (!map?.userData.large173) return pointBeforeLarge173(el, x, z);
     el.style.left = (12 + (x + 22) / 55 * 124) + 'px'; el.style.top = (137 - (z + 14) / 55 * 124) + 'px';
+  };
+
+  // Small, useful exploration tools rather than another complicated HUD.
+  function callGecko173() {
+    const g = wildlife88?.gecko;
+    if (!g?.tamed) { sayToast('Tame the gecko first.'); return; }
+    g.callUntil173 = t + 12; g.wander = 0; sayToast((g.name || 'Gecko') + ' comes to Pip for a moment.'); closeModal();
+  }
+  function senses173() {
+    const count = (polish171.finds171 || []).filter(f => !f.taken).length;
+    sayToast(count ? 'Pip catches ' + count + ' glint' + (count > 1 ? 's' : '') + ' nearby on the yard map.' : 'Pip cannot smell any more hidden shinies.');
+    const map = $('miniMap171'); if (map) { map.style.boxShadow = '0 0 0 4px #e9c867,0 0 24px #e9c867'; setTimeout(() => { if (map) map.style.boxShadow = ''; }, 1200); }
+  }
+  function collection173() {
+    const shiny = (polish171.finds171 || []).filter(f => f.taken).length;
+    const fish = home.pondFish173 || 0;
+    modal('Pip’s little collection', `<p>Shiny things found: <strong>${shiny} / 3</strong></p><p>Pond fish watched: <strong>${fish}</strong></p><p>Places: Pip’s Lane · Willow Pond · Monitor Den</p>`, [['Close', closeModal]]);
+  }
+  const menuBeforeExplore173 = menu65;
+  menu65 = function menuExplore173() {
+    menuBeforeExplore173();
+    const actions = $('modalActions'); if (!actions) return;
+    const add = (label, fn) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = label; b.onclick = fn; actions.appendChild(b); };
+    if (phase === 'scavenge') { add('Rat senses', senses173); add('Call gecko', callGecko173); add('Collection book', collection173); }
+    if (phase === 'house') add('Rest until evening', () => { home.weather42 = 'evening'; save(); closeModal(); sayToast('Pip wakes to a warm evening.'); });
+  };
+  const grabBeforeFish173 = grab;
+  grab = function pondFishInteraction173() {
+    if (pond173.owner === root && pond173.water && rat && !rat.userData.diving163 && Math.hypot(rat.position.x - pond173.water.position.x, rat.position.z - pond173.water.position.z) < 3.9) {
+      home.pondFish173 = (home.pondFish173 || 0) + 1; save(); sayToast('A little fish flicks its tail beneath the reeds.'); return true;
+    }
+    return grabBeforeFish173();
   };
 
 })();
