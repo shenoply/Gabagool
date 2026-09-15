@@ -750,7 +750,9 @@
   };
   const worldBeforePond173 = tickWorld38;
   tickWorld38 = function tickPond173(dt) {
-    worldBeforePond173(dt);
+    // Exploration polish is optional: never allow a visual add-on to freeze
+    // the base player/camera loop.
+    try { worldBeforePond173(dt); } catch (error) { console.warn('Optional exploration layer paused', error); }
     try {
       addPond173();
       if (pond173.owner !== root || !pond173.water) return;
