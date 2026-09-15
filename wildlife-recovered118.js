@@ -830,7 +830,49 @@
   const cameraBeforePlayyard177 = tickGameplayCamera;
   tickGameplayCamera = function framePlayyard177(dt) {
     cameraBeforePlayyard177(dt);
-    if (phase === 'scavenge' && !photo.active && gameCam.distance > 7.2) gameCam.distance = 6.4;
+    if (phase === 'scavenge' && !photo.active && gameCam.distance > 5.3) gameCam.distance = 4.8;
   };
+
+  // Build 178: retain the pond's generous footprint but landscape it into a
+  // real place, and give the new playyard a reason to explore.
+  const landscape178 = { owner: null, prize: null };
+  function rock178(x, z, scale, color = 0x73685a) {
+    const r = new THREE.Mesh(new THREE.DodecahedronGeometry(1, 1), new THREE.MeshStandardMaterial({ color, roughness: 1 })); r.position.set(x, scale * .45, z); r.scale.set(scale * 1.3, scale * .72, scale); r.rotation.set(.2, x * .37, z * .18); root.add(r); return r;
+  }
+  function addLandscape178() {
+    if (phase !== 'scavenge' || !root || landscape178.owner === root || !pond173.water) return;
+    landscape178.owner = root;
+    const cx = pond173.water.position.x, cz = pond173.water.position.z;
+    // Uneven stones and lily pads break the perfect manufactured rim.
+    for (let i = 0; i < 24; i++) { const a = i * 2.399, r = 2.55 + (i % 4) * .12; rock178(cx + Math.sin(a) * r, cz + Math.cos(a) * r * .79, .16 + (i % 3) * .055, i % 5 ? 0x6e6758 : 0x87745c); }
+    for (let i = 0; i < 9; i++) { const a = i * .93, pad = new THREE.Mesh(new THREE.CircleGeometry(.16 + (i % 3) * .035, 10), new THREE.MeshStandardMaterial({ color: 0x456f3f, roughness: 1, side: THREE.DoubleSide })); pad.rotation.x = -Math.PI / 2; pad.position.set(cx + Math.cos(a) * (1.05 + (i % 3) * .34), pond173.water.position.y + .016, cz + Math.sin(a) * (1.05 + (i % 3) * .34) * .74); root.add(pad); }
+    // A simple dirt stepping path connects Pip's Lane, the pond and new yard.
+    const pathMat = new THREE.MeshStandardMaterial({ color: 0x917552, roughness: 1 });
+    for (let i = 0; i < 14; i++) { const q = i / 13, stone = new THREE.Mesh(new THREE.CircleGeometry(.36 + (i % 3) * .04, 9), pathMat); stone.rotation.x = -Math.PI / 2; stone.position.set(7 + q * 15.3, .018, 28.5 + Math.sin(q * Math.PI) * 3.8); stone.rotation.z = i * .61; root.add(stone); }
+    // Landmarks: a tree, little shed, rocky hiding bush and a short log climb.
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.32, .48, 4.4, 7), new THREE.MeshStandardMaterial({ color: 0x5a412b, roughness: 1 })); trunk.position.set(38.5, 2.2, 43.2); root.add(trunk);
+    for (let i = 0; i < 4; i++) { const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.35 - i * .12, 1), new THREE.MeshStandardMaterial({ color: [0x456d3d, 0x587e45, 0x365c35, 0x5a843e][i], roughness: 1 })); crown.position.set(38.5 + Math.sin(i * 2.2) * .65, 5.2 + (i % 2) * .35, 43.2 + Math.cos(i * 2.2) * .65); root.add(crown); }
+    const shed = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0x76513b, roughness: 1 });
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(3.1, 2.15, 2.35), wood); wall.position.y = 1.08; shed.add(wall); const roof = new THREE.Mesh(new THREE.ConeGeometry(2.35, 1.05, 4), new THREE.MeshStandardMaterial({ color: 0x3e3934, roughness: 1 })); roof.position.y = 2.68; roof.rotation.y = Math.PI / 4; shed.add(roof); shed.position.set(42.1, 0, 47.7); shed.name = 'Little playyard shed'; root.add(shed); registerSolid62(shed);
+    for (let i = 0; i < 7; i++) rock178(28.2 + Math.sin(i * 1.7) * .8, 43 + Math.cos(i * 1.7) * .65, .33 + (i % 2) * .12, 0x4c7041);
+    for (let i = 0; i < 3; i++) { const log = new THREE.Mesh(new THREE.CylinderGeometry(.25, .28, 2.05, 9), new THREE.MeshStandardMaterial({ color: 0x69442d, roughness: 1 })); log.rotation.z = Math.PI / 2; log.position.set(31 + i * 1.2, .32 + i * .28, 39.8); log.name = 'Log climb'; root.add(log); }
+    const prize = new THREE.Mesh(new THREE.OctahedronGeometry(.18, 0), new THREE.MeshStandardMaterial({ color: 0xe6be4c, emissive: 0x593600, emissiveIntensity: .7 })); prize.position.set(42.1, .62, 46.1); prize.name = 'Playyard brass charm'; root.add(prize); landscape178.prize = prize;
+  }
+  const startBeforeRestore178 = startScavenge;
+  startScavenge = function restoreStart178() {
+    startBeforeRestore178(); const life = ensureLife();
+    if (life.hunger < 8 || life.thirst < 8) { life.hunger = Math.max(62, life.hunger); life.thirst = Math.max(62, life.thirst); save(); sayToast('Pip starts the day fed and hydrated.'); }
+    gameCam.distance = 4.8;
+  };
+  const grabBeforeLandscape178 = grab;
+  grab = function grabLandscapePrize178() {
+    if (landscape178.prize?.visible && rat?.position.distanceTo(landscape178.prize.position) < .85) { landscape178.prize.visible = false; pickupCard60('coin', true); sayToast('You found the playyard brass charm.'); return true; }
+    return grabBeforeLandscape178();
+  };
+  const worldBeforeLandscape178 = tickWorld38;
+  tickWorld38 = function tickLandscape178(dt) { worldBeforeLandscape178(dt); try { addLandscape178(); if (landscape178.prize?.visible) { landscape178.prize.rotation.y += dt * 2.4; landscape178.prize.position.y = .62 + Math.sin(t * 3) * .05; } } catch (error) { console.warn('Landscape pass paused', error); } };
+  const mapBeforeLabels178 = addMap171;
+  addMap171 = function mapLabels178() { mapBeforeLabels178(); const m = $('miniMap171'); if (m && !m.querySelector('.labels178')) { const l = document.createElement('small'); l.className = 'labels178'; l.textContent = 'Willow Pond · Playyard'; l.style.cssText = 'position:absolute;left:9px;bottom:7px;font-size:8px;opacity:.8'; m.appendChild(l); } };
+  const style178 = document.createElement('style'); style178.textContent = '#mute{top:340px!important;z-index:28!important}'; document.head.appendChild(style178);
 
 })();
