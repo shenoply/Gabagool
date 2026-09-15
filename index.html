@@ -1390,7 +1390,7 @@ let acc=0;const STEP=1/60;
 function loop(now){requestAnimationFrame(loop);if(car77?.riding&&(!gameplayActive()||document.hidden||!voiceOn)){stopEngine77();car77.speed=0;}if(phase==='introvideo'){last=now;acc=0;return;}let frame=Math.min(0.1,(now-last)/1000);last=now;acc+=frame;let n=0;
   try{
   while(acc>=STEP&&n<4){const dt=STEP;acc-=dt;n++;if(photo.active||document.hidden)continue;t+=dt;
-    if($('modal').style.display==='flex')continue;tickWildlife(dt);tickAtmosphere(dt);
+    if($('modal').style.display==='flex')continue;if(phase==='heaven'){tickHeaven183(dt);continue;}tickWildlife(dt);tickAtmosphere(dt);
     if(phase==='title')tickTitle(dt);else if(phase==='cutscene')tickCutscene(dt);else if(phase==='scavenge')tickScavenge(dt);else if(phase==='house')tickHouse(dt);else if(phase==='inside')tickInside(dt);else if(phase==='explore')tickArea(dt);else if(phase==='caught'){rat.animate(dt,1,true);if(sc.cat)sc.cat.m.animate(dt,0);}tickNature(dt);tickExtras(dt);tickLife(dt);drawLife();tickAnimals37(dt);tickWorld38(dt);tickFeatures41(dt);tickLife42(dt);tickPlay43(dt);tickModels44(dt);tickYard47(dt);tickGameplayCamera(dt);tickProps57(dt);tickSound58(dt);tick60(dt);waterTick65(dt);stationsTick65(dt);tick66(dt);}
   if(n===4||document.hidden)acc=0;
   if(photo.active)tickPhoto();
@@ -1441,7 +1441,7 @@ $('craftBook').onclick=()=>{craftGrid=Array(9).fill(null);openCraftBook();};
 
 // Camera gestures operate on the scene canvas, leaving touch controls independent.
 const gameCam={yaw:0,pitch:.58,distance:4.6,phase:null,pos:new THREE.Vector3(),ready:false,pointers:new Map(),pinch:0,moved:false,start:null};
-function gameplayActive(){return ['scavenge','explore','house','inside'].includes(phase)&&rat&&!photo.active&&$('modal').style.display!=='flex'&&!(sc&&sc.talk);}
+function gameplayActive(){return ['scavenge','explore','house','inside','heaven'].includes(phase)&&rat&&!photo.active&&$('modal').style.display!=='flex'&&!(sc&&sc.talk);}
 function cameraReset(){gameCam.yaw=0;gameCam.pitch=phase==='house'?.8:.58;gameCam.distance=phase==='house'?11:phase==='inside'?8:4.6;gameCam.ready=false;gameCam.pointers.clear();gameCam.pinch=0;}
 function zoomGame(factor){if(!gameplayActive())return;gameCam.distance=THREE.MathUtils.clamp(gameCam.distance*factor,phase==='house'?3:1.7,phase==='house'?19:12);}
 canvas.style.touchAction='none';
@@ -2871,5 +2871,6 @@ startTitle();
 requestAnimationFrame(loop);
 </script>
 <script src="wildlife-recovered118.js?v=182"></script>
+<script src="heaven-course183.js?v=183"></script>
 </body>
 </html>
