@@ -347,7 +347,7 @@
 
   // Rainyard Monitor home: actual exported GLB in a quiet rear-left corner.
   // Back-left map corner, just inside the fence line. The opening faces the yard.
-  const DEN_POS_155 = new THREE.Vector3(-18.75, 0, 24.75);
+  const DEN_POS_155 = new THREE.Vector3(28.1, 0, 36.2);
   const seedWildlifeBeforeDen153 = seedWildlife88;
   seedWildlife88 = function seedWildlifeWithMonitorHome153() {
     const result = seedWildlifeBeforeDen153();
@@ -674,6 +674,7 @@
     map.querySelector('b').style.cssText = 'position:absolute;left:9px;top:7px;font-weight:600';
     map.querySelectorAll('i').forEach(i => i.style.cssText = 'position:absolute;font-style:normal;transform:translate(-50%,-50%);font-size:16px');
     map.querySelector('[data-id="home"]').style.color = '#f4d987'; map.querySelector('[data-id="den"]').style.color = '#a8df9f'; map.querySelector('[data-id="pip"]').style.color = '#ffead0';
+    map.userData = {};
     document.body.appendChild(map);
     const style = document.createElement('style'); style.textContent = '#mute{top:224px!important;z-index:28!important}.photo #hud,.photo #settings,.photo #survival,.photo #weatherBadge,.photo #mute,.photo #pad,.photo #cameraTools,.photo #miniMap171,.photo #prompt{display:none!important}'; document.head.appendChild(style);
   }
@@ -719,6 +720,10 @@
   // the pool, so it is immediately playable on mobile.
   const pond173 = { owner: null, water: null, fish: [], clock: 0 };
   function addPond173() {
+    return buildNaturalPond179();
+  }
+  /* Retained for reference only; replaced by the sculpted basin below. */
+  function retiredPool173() {
     if (phase !== 'scavenge' || !root || pond173.owner === root) return;
     pond173.owner = root; pond173.fish = []; pond173.clock = 0;
     const center = new THREE.Vector3(23.2, 0, 32.1), g = new THREE.Group(); g.name = 'Willow pond';
@@ -733,7 +738,7 @@
   const waterBeforePond173 = waterVolume66;
   waterVolume66 = function waterWithPond173(p) {
     const w = pond173.water;
-    if (w && pond173.owner === root) { const dx = (p.x - w.position.x) / 2.37, dz = (p.z - w.position.z) / (2.37 * .78); if (dx * dx + dz * dz < 1) return w; }
+    if (w && pond173.owner === root && pondInside179(p.x, p.z)) return w;
     return waterBeforePond173(p);
   };
   const cameraBeforePond173 = tickGameplayCamera;
@@ -756,14 +761,14 @@
     try {
       addPond173();
       if (pond173.owner !== root || !pond173.water) return;
-      pond173.clock += dt; pond173.water.position.y = .48 + Math.sin(pond173.clock * 1.4) * .008;
+      pond173.clock += dt;
       for (const fish of pond173.fish) { const u = fish.userData, a = u.a + pond173.clock * u.speed; fish.position.set(pond173.water.position.x + Math.cos(a) * u.r, pond173.water.position.y - u.depth + Math.sin(pond173.clock * 2 + u.a) * .035, pond173.water.position.z + Math.sin(a) * u.r * .58); fish.rotation.y = -a + Math.PI / 2; fish.rotation.z = Math.sin(pond173.clock * 5 + u.a) * .16; }
     } catch (error) { console.warn('Pond update disabled for this frame', error); }
   };
 
   const mapBeforeLarge173 = addMap171;
   addMap171 = function addLargeMap173() {
-    mapBeforeLarge173(); const map = $('miniMap171'); if (!map || map.userData.large173) return;
+    mapBeforeLarge173(); const map = $('miniMap171'); if (!map) return; map.userData ||= {}; if (map.userData.large173) return;
     map.userData.large173 = true; map.style.width = '150px'; map.style.height = '150px'; map.style.borderRadius = '22px';
     $('mute').style.top = '270px';
   };
@@ -844,8 +849,7 @@
     landscape178.owner = root;
     const cx = pond173.water.position.x, cz = pond173.water.position.z;
     // Uneven stones and lily pads break the perfect manufactured rim.
-    for (let i = 0; i < 24; i++) { const a = i * 2.399, r = 2.55 + (i % 4) * .12; rock178(cx + Math.sin(a) * r, cz + Math.cos(a) * r * .79, .16 + (i % 3) * .055, i % 5 ? 0x6e6758 : 0x87745c); }
-    for (let i = 0; i < 9; i++) { const a = i * .93, pad = new THREE.Mesh(new THREE.CircleGeometry(.16 + (i % 3) * .035, 10), new THREE.MeshStandardMaterial({ color: 0x456f3f, roughness: 1, side: THREE.DoubleSide })); pad.rotation.x = -Math.PI / 2; pad.position.set(cx + Math.cos(a) * (1.05 + (i % 3) * .34), pond173.water.position.y + .016, cz + Math.sin(a) * (1.05 + (i % 3) * .34) * .74); root.add(pad); }
+    // Shore rocks and pads are part of the new pond itself.
     // A simple dirt stepping path connects Pip's Lane, the pond and new yard.
     const pathMat = new THREE.MeshStandardMaterial({ color: 0x917552, roughness: 1 });
     for (let i = 0; i < 14; i++) { const q = i / 13, stone = new THREE.Mesh(new THREE.CircleGeometry(.36 + (i % 3) * .04, 9), pathMat); stone.rotation.x = -Math.PI / 2; stone.position.set(7 + q * 15.3, .018, 28.5 + Math.sin(q * Math.PI) * 3.8); stone.rotation.z = i * .61; root.add(stone); }
@@ -874,5 +878,70 @@
   const mapBeforeLabels178 = addMap171;
   addMap171 = function mapLabels178() { mapBeforeLabels178(); const m = $('miniMap171'); if (m && !m.querySelector('.labels178')) { const l = document.createElement('small'); l.className = 'labels178'; l.textContent = 'Willow Pond · Playyard'; l.style.cssText = 'position:absolute;left:9px;bottom:7px;font-size:8px;opacity:.8'; m.appendChild(l); } };
   const style178 = document.createElement('style'); style178.textContent = '#mute{top:340px!important;z-index:28!important}'; document.head.appendChild(style178);
+
+  // One shared shoreline drives the mesh and swimming bounds.
+  function pondRadius179(a) { return 1 + .12 * Math.sin(3*a+.4) + .065 * Math.cos(5*a); }
+  function pondDistance179(x,z) { return Math.hypot((x-23.2)/3.6,(z-32.1)/2.9); }
+  function pondInside179(x,z) { const a=Math.atan2((z-32.1)/2.9,(x-23.2)/3.6); return pondDistance179(x,z)<pondRadius179(a); }
+  function buildNaturalPond179() {
+    if (phase !== 'scavenge' || !root || pond173.owner === root) return;
+    const g = new THREE.Group(); g.name='Willow pond · natural bank'; root.add(g);
+    pond173.owner=root; pond173.g=g; pond173.fish=[]; pond173.clock=0;
+    const material=(color)=>new THREE.MeshStandardMaterial({color,roughness:.95});
+    const rings=[0,.68,1,1.12,1.52], heights=[.04,.14,.8,.86,.015];
+    const colors=[0x173735,0x36504a,0x8d8061,0x847257,0x68804b];
+    const vertices=[], indices=[], shades=[], n=80;
+    for(let r=0;r<rings.length;r++) for(let i=0;i<=n;i++) {
+      const a=i/n*Math.PI*2, radius=pondRadius179(a)*rings[r];
+      vertices.push(23.2+Math.cos(a)*3.6*radius,heights[r],32.1+Math.sin(a)*2.9*radius);
+      const c=new THREE.Color(colors[r]); c.multiplyScalar(.94+.06*Math.sin(i*1.7)); shades.push(c.r,c.g,c.b);
+    }
+    for(let r=0;r<rings.length-1;r++) for(let i=0;i<n;i++) { const a=r*(n+1)+i,b=a+n+1; indices.push(a,b,a+1,b,b+1,a+1); }
+    const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3)); geo.setAttribute('color',new THREE.Float32BufferAttribute(shades,3)); geo.setIndex(indices); geo.computeVertexNormals();
+    const bank=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,side:THREE.DoubleSide})); bank.name='Sloping pond bank'; bank.receiveShadow=true; g.add(bank);
+    const shape=new THREE.Shape();
+    for(let i=0;i<=n;i++){const a=i/n*Math.PI*2,r=pondRadius179(a),x=Math.cos(a)*3.6*r,y=-Math.sin(a)*2.9*r;if(!i)shape.moveTo(x,y);else shape.lineTo(x,y);}
+    const water=new THREE.Mesh(new THREE.ShapeGeometry(shape),new THREE.MeshPhongMaterial({color:0x285c59,transparent:true,opacity:.68,shininess:65,specular:0x8dada5,side:THREE.DoubleSide,depthWrite:false})); water.rotation.x=-Math.PI/2; water.position.set(23.2,.8,32.1); water.name='Deep pond water';g.add(water);pond173.water=water;
+    const stoneMats=[material(0x7b796d),material(0x918674),material(0x646c61)];
+    for(let i=0;i<25;i++) {
+      if(i>7&&i<13)continue; // Open shallow entrance, not a ring wall.
+      const a=i/25*Math.PI*2,r=pondRadius179(a)*1.09,s=.24+(i%4)*.1;
+      const stone=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),stoneMats[i%3]);stone.scale.set(s*1.5,s*.62,s);stone.position.set(23.2+Math.cos(a)*3.6*r,.86,32.1+Math.sin(a)*2.9*r);stone.rotation.set(.1,a,.12);stone.castShadow=true;stone.receiveShadow=true;g.add(stone);registerSolid62(stone);
+    }
+    const leafMat=material(0x587d3f),stemMat=material(0x697a42),tipMat=material(0x69513a);
+    for(const [x,z] of [[20.4,33.3],[26.1,32.8]]) for(let j=0;j<9;j++) {
+      const h=.48+(j%4)*.16,px=x+Math.sin(j*2.4)*.35,pz=z+Math.cos(j*2.4)*.3;
+      const stem=new THREE.Mesh(new THREE.CylinderGeometry(.013,.02,h,5),stemMat);stem.position.set(px,.8+h/2,pz);g.add(stem);
+      const tip=new THREE.Mesh(new THREE.CylinderGeometry(.037,.037,.18,6),tipMat);tip.position.set(px,.8+h,pz);g.add(tip);
+      const blade=new THREE.Mesh(new THREE.ConeGeometry(.055,h*.85,3),leafMat);blade.position.set(px+.07,.8+h*.35,pz);blade.rotation.z=.25;g.add(blade);
+    }
+    for(let i=0;i<12;i++) {
+      const side=i<6?-1:1,x=23.2+side*(1.8+(i%3)*.25),z=32.1+.6+Math.sin(i*2.4)*.55;
+      const pad=new THREE.Mesh(new THREE.CircleGeometry(.18+(i%3)*.025,14,.12,Math.PI*2-.3),leafMat);pad.rotation.x=-Math.PI/2;pad.rotation.z=i;pad.position.set(x,.815,z);g.add(pad);
+    }
+    const log=new THREE.Mesh(new THREE.CylinderGeometry(.23,.3,2.5,9),material(0x59452e));log.rotation.z=Math.PI/2;log.rotation.y=.42;log.position.set(20,.95,34.1);log.castShadow=true;g.add(log);registerSolid62(log);
+    for(let i=0;i<7;i++) {
+      const fish=new THREE.Group(),mat=material([0x9d7647,0x756c48,0x6d8580][i%3]);
+      const body=new THREE.Mesh(new THREE.SphereGeometry(.1,10,6),mat);body.scale.set(1.7,.55,.7);fish.add(body);
+      const tail=new THREE.Mesh(new THREE.ConeGeometry(.065,.12,3),mat);tail.rotation.z=Math.PI/2;tail.position.x=-.19;fish.add(tail);
+      fish.userData={a:i*.86,r:.7+(i%4)*.52,speed:.16+(i%3)*.04,depth:.3+(i%2)*.13};g.add(fish);pond173.fish.push(fish);
+    }
+  }
+  const controlBeforePond179=control;
+  control=function(dt,options) {
+    if(phase!=='scavenge'||!options?.ground)return controlBeforePond179(dt,options);
+    const previous=options.ground;
+    return controlBeforePond179(dt,{...options,ground:(x,z)=>{
+      const a=Math.atan2((z-32.1)/2.9,(x-23.2)/3.6),q=pondDistance179(x,z)/pondRadius179(a);
+      if(q>=1.52)return previous(x,z);
+      if(q<1)return .04;
+      return q<1.12?.8+(q-1)*.5:.86*(1-(q-1.12)/.4);
+    }});
+  };
+  // Reproducible real-engine preview; does not change normal saved spawn.
+  if(new URLSearchParams(location.search).has('pondPreview')) {
+    const preview=document.createElement('button');preview.className='btn';preview.textContent='Preview pond';preview.style.cssText='position:fixed;top:12px;left:45%;z-index:200';
+    preview.onclick=()=>{startScavenge();rat.position.set(23.2,0,26.3);gameCam.yaw=Math.PI;gameCam.pitch=.32;gameCam.distance=3.8;gameCam.ready=false;preview.remove();};document.body.appendChild(preview);
+  }
 
 })();
