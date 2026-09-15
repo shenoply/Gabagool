@@ -592,4 +592,33 @@
     u.leap166 = false;
   };
 
+  // Build 169 movement poses: use the supplied Pip rig, then layer the
+  // recognisable low crawl, running long-jump and wall-kick silhouettes over it.
+  const makeRatBeforeMoves169 = makeRat;
+  makeRat = function makeMovementRat169() {
+    const g = makeRatBeforeMoves169(), animateBeforeMoves169 = g.animate;
+    g.animate = function animateMovementRat169(dt, ...args) {
+      animateBeforeMoves169(dt, ...args);
+      const u = g.userData, p = u.pipPivot;
+      if (!p) return;
+      if (u.crawl169 && !u.air && !u.swim66) {
+        p.position.y = .57; p.rotation.x = .54;
+        for (const side of ['Left', 'Right']) {
+          rotateBone69(u, side + 'Arm', -.72);
+          rotateBone69(u, side + 'ForeArm', -.48);
+          rotateBone69(u, side + 'UpLeg', .72);
+          rotateBone69(u, side + 'Leg', -.46);
+        }
+      } else if (u.wallJump169 > 0) {
+        u.wallJump169 = Math.max(0, u.wallJump169 - dt);
+        p.rotation.x = .38;
+        for (const side of ['Left', 'Right']) { rotateBone69(u, side + 'Arm', -.82); rotateBone69(u, side + 'UpLeg', .55); }
+      } else if (u.longJump169 && u.air) {
+        p.rotation.x = .32;
+        for (const side of ['Left', 'Right']) { rotateBone69(u, side + 'Arm', -.72); rotateBone69(u, side + 'ForeArm', -.32); rotateBone69(u, side + 'UpLeg', .28); }
+      }
+    };
+    return g;
+  };
+
 })();
