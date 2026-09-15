@@ -739,19 +739,24 @@
   const cameraBeforePond173 = tickGameplayCamera;
   tickGameplayCamera = function underwaterFollow173(dt) {
     cameraBeforePond173(dt);
-    const u = rat?.userData, water = rat && waterVolume66(rat.position);
-    if (!u?.diving163 || !water || photo.active) return;
-    const target = rat.position.clone().add(new THREE.Vector3(0, .13, 0));
-    const offset = new THREE.Vector3(Math.sin(gameCam.yaw) * 1.75, .28, Math.cos(gameCam.yaw) * 1.75);
-    camera.position.lerp(target.clone().add(offset), 1 - Math.exp(-dt * 9));
-    camera.lookAt(target);
+    try {
+      const u = rat?.userData, water = rat && waterVolume66(rat.position);
+      if (!u?.diving163 || !water || photo.active) return;
+      const target = rat.position.clone().add(new THREE.Vector3(0, .13, 0));
+      const offset = new THREE.Vector3(Math.sin(gameCam.yaw) * 1.75, .28, Math.cos(gameCam.yaw) * 1.75);
+      camera.position.lerp(target.clone().add(offset), 1 - Math.exp(-dt * 9));
+      camera.lookAt(target);
+    } catch (error) { console.warn('Underwater camera disabled for this frame', error); }
   };
   const worldBeforePond173 = tickWorld38;
   tickWorld38 = function tickPond173(dt) {
-    worldBeforePond173(dt); addPond173();
-    if (pond173.owner !== root || !pond173.water) return;
-    pond173.clock += dt; pond173.water.position.y = .48 + Math.sin(pond173.clock * 1.4) * .008;
-    for (const fish of pond173.fish) { const u = fish.userData, a = u.a + pond173.clock * u.speed; fish.position.set(pond173.water.position.x + Math.cos(a) * u.r, pond173.water.position.y - u.depth + Math.sin(pond173.clock * 2 + u.a) * .035, pond173.water.position.z + Math.sin(a) * u.r * .58); fish.rotation.y = -a + Math.PI / 2; fish.rotation.z = Math.sin(pond173.clock * 5 + u.a) * .16; }
+    worldBeforePond173(dt);
+    try {
+      addPond173();
+      if (pond173.owner !== root || !pond173.water) return;
+      pond173.clock += dt; pond173.water.position.y = .48 + Math.sin(pond173.clock * 1.4) * .008;
+      for (const fish of pond173.fish) { const u = fish.userData, a = u.a + pond173.clock * u.speed; fish.position.set(pond173.water.position.x + Math.cos(a) * u.r, pond173.water.position.y - u.depth + Math.sin(pond173.clock * 2 + u.a) * .035, pond173.water.position.z + Math.sin(a) * u.r * .58); fish.rotation.y = -a + Math.PI / 2; fish.rotation.z = Math.sin(pond173.clock * 5 + u.a) * .16; }
+    } catch (error) { console.warn('Pond update disabled for this frame', error); }
   };
 
   const mapBeforeLarge173 = addMap171;
