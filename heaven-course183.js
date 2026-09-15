@@ -3,20 +3,31 @@
   'use strict';
   const V=(x,y,z)=>new THREE.Vector3(x,y,z);
   let H=null;
+  function courseSound188(kind){
+    if(!H||typeof sfxCtx!=='function')return;const ac=sfxCtx();if(!ac)return;
+    if(!H.audioBus){H.audioBus=ac.createGain();H.audioBus.connect(ac.destination);}
+    const o=ac.createOscillator(),gain=ac.createGain(),now=ac.currentTime;
+    const tones={checkpoint:[660,990,.35],splash:[160,45,.5],leap:[600,90,.6],bump:[120,60,.12],step:[95,55,.06],wing:[220,70,.18]};
+    const [f,end,dur]=tones[kind]||[kind,kind,.4];o.type=typeof kind==='number'?'sine':'triangle';o.frequency.setValueAtTime(f,now);o.frequency.exponentialRampToValueAtTime(end,now+dur);gain.gain.setValueAtTime(typeof kind==='number'?.025:.055,now);gain.gain.exponentialRampToValueAtTime(.0001,now+dur);o.connect(gain).connect(H.audioBus);o.start(now);o.stop(now+dur);o.onended=()=>{o.disconnect();gain.disconnect();};
+  }
+  function courseAudio188(dt){
+    if(H.audioBus)H.audioBus.gain.value=typeof voiceOn==='undefined'||voiceOn?1:0;
+    H.musicClock=(H.musicClock||0)+dt;if(H.musicClock>.45){H.musicClock=0;if(!H.musicOff){const notes=[220,261.63,329.63,440,392,329.63,261.63,196];H.note=((H.note||0)+1)%notes.length;courseSound188(notes[H.note]);}}
+    const b=$('heavenSound188');if(b)b.textContent=typeof voiceOn!=='undefined'&&!voiceOn?'Sound: off':'Sound: on';
+  }
   const texture=new THREE.TextureLoader().load('stairway-reward183.jpg');
   texture.encoding=THREE.sRGBEncoding;
   const checkpoints=[
-    {p:[0,0,1],name:'Stairway entrance'},
+    {p:[0,0,1],name:'Leap of faith · starting lagoon'},
     {p:[0,2.4,-7.6],name:'Rooftop jumps'},
     {p:[0,4,-15],name:'Rope climb'},
     {p:[0,7,-17],name:'Zipline tower'},
     {p:[8,6,-23],name:'Across the rooftops'},
-    {p:[8,9,-31],name:'Lizard slalom · steer around barriers'},
+    {p:[8,9,-31],name:'Lizard causeway · ride freely'},
     {p:[14,9,-40],name:'Crawl & wall climb'},
     {p:[14,12.6,-46],name:'Bird crossing'},
     {p:[0,17.5,-54],name:'Final ascent'},
-    {p:[0,20.5,-63],name:'Summit leap'},
-    {p:[6,.3,-70],name:'Finish lagoon · claim portrait'}
+    {p:[0,20.5,-63],name:'Heaven summit · claim portrait'}
   ];
   const material=(color,kind)=>kind?MT(color,kind):new THREE.MeshStandardMaterial({color,roughness:.85});
   function mesh(w,h,d,x,y,z,mat,parent=root){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);if(H&&parent===root&&h>.05)H.solids.push({x,z,w,d,bottom:y-h/2,top:y+h/2,m});return m;}
@@ -44,6 +55,11 @@
       g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
       const mixer=new THREE.AnimationMixer(model);if(asset.animations[0])mixer.clipAction(asset.animations[0]).play();
       H.animals[key]={g,model,visual:model,mixer,rest:g.position.clone(),modelY:model.position.y};
+      if(key==='lizard'){
+        g.updateMatrixWorld(true);const ray=new THREE.Raycaster(V(g.position.x,g.position.y+3,g.position.z+.25),V(0,-1,0));const hit=ray.intersectObject(model,true)[0];
+        H.animals[key].seatY=hit?hit.point.y-g.position.y+.1:.35;
+        mesh(.32,.06,.32,0,H.animals[key].seatY-.05,.25,material(0x573b27),g);
+      }
       if(key==='bird'&&typeof prepareOsprey73==='function')prepareOsprey73(H.animals[key]);
     },undefined,()=>{if(H&&root===owner){H.assetError=true;sayToast('Companion model could not load. Retry this checkpoint to reload.');}});
   }
@@ -51,19 +67,27 @@
     const bar=document.createElement('section');bar.id='heaven183';
     bar.innerHTML='<strong>Stairway to Heaven</strong><small id="heavenStage183"></small><div><button id="heavenRetry183">Retry checkpoint</button><button id="heavenExit183">Back to yard</button></div><small id="heavenHelp183">Move: stick / WASD · Jump: Space · Use: E · Crawl: C</small>';
     document.body.appendChild(bar);$('heavenRetry183').onclick=respawn;$('heavenExit183').onclick=()=>startScavenge();
+    const sound=document.createElement('button');sound.id='heavenSound188';sound.textContent='Sound: on';sound.onclick=()=>$('mute').click();bar.appendChild(sound);
+    const music=document.createElement('button');music.textContent='Music: on';music.onclick=()=>{H.musicOff=!H.musicOff;music.textContent=H.musicOff?'Music: off':'Music: on';};bar.appendChild(music);
     const cameraBar=document.createElement('div');cameraBar.id='heavenCamera183';cameraBar.innerHTML='<button aria-label="Zoom out course">−</button><button aria-label="Reset course camera">↻</button><button aria-label="Zoom in course">+</button>';document.body.appendChild(cameraBar);
     const buttons=cameraBar.querySelectorAll('button');buttons[0].onclick=()=>zoomGame(1.2);buttons[1].onclick=()=>{gameCam.yaw=0;gameCam.pitch=.38;gameCam.distance=4.8;};buttons[2].onclick=()=>zoomGame(.83);
   }
   const previousClear=clear;
-  clear=function(){if(H?.sunColor&&sun.color)sun.color.copy(H.sunColor);H=null;document.body.classList.remove('heaven-course');$('heaven183')?.remove();$('heavenCamera183')?.remove();$('heavenLaunch186')?.remove();previousClear();};
+  clear=function(){if(H?.audioBus)H.audioBus.disconnect();if(H?.sunColor&&sun.color)sun.color.copy(H.sunColor);H=null;document.body.classList.remove('heaven-course');$('heaven183')?.remove();$('heavenCamera183')?.remove();$('heavenLaunch186')?.remove();previousClear();};
   window.startHeaven183=function() {
     exitPhoto();closeModal();clear();phase='heaven';sc=null;sfx.rain(false);radioStop();
     H={platforms:[],solids:[],blocks:[],actions:[],animals:{},completed:{},checkpoint:0,transit:null,grounded:true,vy:0,clock:0,won:false,sunColor:sun.color?.clone(),materials:{wood:material(0x99734c,'wood'),brick:material(0x92604a,'brick'),dark:material(0x49443b),stone:material(0xc7c2a6,'cobble')}};
     scene.background=new THREE.Color(0xbcd8ed);scene.fog=new THREE.Fog(0xbcd8ed,85,180);sun.intensity=1.15;sun.color?.set(0xffe2b1);hemi.intensity=.85;
-    rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,0,1);root.add(rat);rat.rotation.y=Math.PI;
+    H.opening=true;rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,12,7);root.add(rat);rat.rotation.y=Math.PI;
     gameCam.yaw=0;gameCam.pitch=.38;gameCam.distance=4.8;gameCam.ready=false;keys={};joy.x=joy.z=0;
     document.body.classList.add('heaven-course');ui.title.style.display='none';ui.pad.style.display='flex';ui.prompt.style.display='block';hud();
-    deck(0,0,1,5,4,'brick');
+    deck(0,12,7,4,3,'brick');
+    action('Leap of faith · dive into the lagoon',[0,12,7],[0,0,1],'leap',3.8,0);
+    deck(0,-2.2,1,5,5,'stone');deck(0,0,-1,5,1,'stone');
+    for(const x of [-2.5,2.5])mesh(.2,2.4,5,x,-1,1,H.materials.stone);
+    const water=new THREE.Mesh(new THREE.PlaneGeometry(4.8,4.8),new THREE.MeshPhongMaterial({color:0x418f9c,transparent:true,opacity:.55,side:THREE.DoubleSide}));water.rotation.x=-Math.PI/2;water.position.set(0,.23,1);root.add(water);
+    H.splash=new THREE.Mesh(new THREE.RingGeometry(.3,.4,32),new THREE.MeshBasicMaterial({color:0xe3ffff,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));H.splash.rotation.x=-Math.PI/2;H.splash.position.set(0,.25,1);root.add(H.splash);
+    sign('LEAP FIRST · THEN CLIMB TO HEAVEN',V(0,13.5,7),3.6);
     for(const x of [-2.3,2.3])mesh(.15,2.5,.15,x,1.25,2.5,H.materials.dark);
     for(let x=-2.2;x<2.3;x+=.35)mesh(.04,2.1,.04,x,1.05,2.5,H.materials.dark);
     sign('STAIRWAY TO HEAVEN',V(0,2.6,2.45),4);
@@ -83,13 +107,16 @@
     stairs(8,-24,6,15);deck(8,9,-31,3,2.4);
     // Continuous straight track. Steer around staggered barriers, never jump.
     H.runSide=V(9,0,6).normalize();H.runObstacles=[];
-    for(let i=0;i<=30;i++){const q=i/30;deck(8+6*q,9,-31-9*q,2.8,.65,'stone');}
+    const bridge=new THREE.Mesh(new THREE.BoxGeometry(3.2,.24,Math.hypot(6,9)+1),H.materials.wood);bridge.position.set(11,8.88,-35.5);bridge.rotation.y=Math.atan2(6,-9);bridge.castShadow=true;bridge.receiveShadow=true;root.add(bridge);
+    // Small invisible support cells match the rotated bridge footprint.
+    for(let i=0;i<=40;i++){const q=i/40,cell={x:8+6*q,z:-31-9*q,w:2.5,d:.6,y:9,bottom:8.76};H.platforms.push(cell);H.solids.push({...cell,top:9,m:bridge});}
+    for(const side of [-1,1])for(let i=0;i<=14;i++){const p=V(8+6*i/14,9.015,-31-9*i/14).addScaledVector(H.runSide,side*1.45);const stripe=new THREE.Mesh(new THREE.BoxGeometry(.045,.015,.3),material(0xe7c879));stripe.position.copy(p);stripe.rotation.y=bridge.rotation.y;root.add(stripe);}
     for(const [q,side] of [[.25,-1],[.5,1],[.75,-1]]){const p=V(8+6*q,9,-31-9*q).addScaledVector(H.runSide,side*.64);mesh(.65,.55,.65,p.x,9.275,p.z,H.materials.brick);H.runObstacles.push({q,offset:side*.64});}
     deck(11,4.5,-35.5,10,14,'brick');
     for(let i=0;i<55;i++){const spike=new THREE.Mesh(new THREE.ConeGeometry(.16,.7,5),H.materials.dark);spike.position.set(7+(i%9),4.85,-30-Math.floor(i/9)*1.7);root.add(spike);}
     for(let i=0;i<6;i++){const pts=[];for(let j=0;j<18;j++)pts.push(V(7+i*.9+Math.sin(j*.5)*.35,4.65,-32-j*.2));const snake=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),28,.09,6,false),material(i%2?0x66713c:0x483628));root.add(snake);}
     sign('SNAKE DEN · DO NOT FALL',V(11,6,-35.5),3);
-    action('Mount lizard · forward + steer',[8,9,-31],[14,9,-40],'lizard',10,5);
+    action('Mount lizard · steer, stop or reverse',[8,9,-31],[14,9,-40],'lizard',10,5);
     animal('lizard-recovered115.glb','lizard',[8.7,9,-31],1.65);
     deck(14,9,-40,3,2.2);deck(14,9,-42,1.5,3);
     mesh(1.7,.2,2.5,14,9.64,-42,H.materials.wood);
@@ -102,21 +129,13 @@
     action('Bird flight · hold forward',[14,12.6,-46],[0,17.5,-54],'bird',7,7);
     animal('osprey-build74.glb','bird',[14.8,13,-46],3.0);
     deck(0,17.5,-54,4,2.4,'stone');stairs(0,-55,17.5,15);deck(0,20.5,-63,5,3.4,'stone');
-    action('Leap down to the finish lagoon',[0,20.5,-63],[6,.3,-70],'leap',4.8,9);
-    deck(6,-2.1,-70,6,6,'stone');
-    for(const x of [3,9])mesh(.2,2.7,6,x,-.75,-70,H.materials.stone);
-    for(const z of [-73,-67])mesh(6,2.7,.2,6,-.75,z,H.materials.stone);
-    const water=new THREE.Mesh(new THREE.PlaneGeometry(5.8,5.8),new THREE.MeshPhongMaterial({color:0x418f9c,transparent:true,opacity:.6,side:THREE.DoubleSide}));water.rotation.x=-Math.PI/2;water.position.set(6,.55,-70);root.add(water);
-    H.splash=new THREE.Mesh(new THREE.RingGeometry(.3,.4,32),new THREE.MeshBasicMaterial({color:0xe3ffff,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));H.splash.rotation.x=-Math.PI/2;H.splash.position.set(6,.58,-70);root.add(H.splash);
-    sign('FINISH BELOW · LEAP',V(0,21.9,-63),2.5);
     // The loading boundary retains the same yard gate and urban setting.
-    mesh(25,.2,20,0,-.3,5,H.materials.brick);
+    for(const x of [-8,8])mesh(10,.2,20,x,-.3,5,H.materials.brick);
     for(const x of [-6,6]){mesh(3,7,18,x,3.2,-3,H.materials.brick);for(let z=-9;z<5;z+=3)mesh(.03,1.2,1.1,x+(x<0?1.51:-1.51),3.5,z,H.materials.dark);}
     sign('← PIP’S LANE',V(-2,1.3,1.5),2);
-    deck(6,.6,-73.7,6,1.4,'stone');
-    const reward=portrait(root,1.5);reward.position.set(6,1.95,-73.8);H.reward=reward;
+    const reward=portrait(root,1.5);reward.position.set(0,22,-64);H.reward=reward;
     const rewardBox=new THREE.Box3().setFromObject(reward),rewardSize=rewardBox.getSize(V(0,0,0)),rewardCenter=rewardBox.getCenter(V(0,0,0));H.solids.push({x:rewardCenter.x,z:rewardCenter.z,w:rewardSize.x,d:rewardSize.z,bottom:rewardBox.min.y,top:rewardBox.max.y,m:reward});
-    sign('FINISH · CLAIM & RETURN HOME',V(6,3.4,-73.8),3);
+    sign('HEAVEN · YOUR REWARD',V(0,23.5,-64),3);
     for(let i=0;i<checkpoints.length;i++) {
       const c=checkpoints[i],ring=new THREE.Mesh(new THREE.RingGeometry(.4,.48,24),new THREE.MeshBasicMaterial({color:0xe9c872,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.set(c.p[0],c.p[1]+.015,c.p[2]);root.add(ring);
       sign((i+1)+' · '+c.name,V(c.p[0],c.p[1]+1.3,c.p[2]-.75),2.5);
@@ -127,10 +146,10 @@
     root.updateMatrixWorld(true);H.cameraRay=new THREE.Raycaster();
     sayToast('Gate opened: Stairway to Heaven. Checkpoints save each section during this run.');
   };
-  function respawn(){if(!H)return;const p=checkpoints[H.checkpoint].p;H.transit=null;H.vy=0;H.grounded=true;rat.position.set(...p);rat.userData.swim66=false;rat.userData.air=false;rat.userData.crawl169=false;rat.userData.act=null;rat.userData.seated41=false;rat.userData.climb=null;rat.rotation.set(0,Math.PI,0);gameCam.ready=false;for(const a of Object.values(H.animals))a.g.position.copy(a.rest);$('padC').textContent='Crawl';sayToast('Back at '+checkpoints[H.checkpoint].name);}
+  function respawn(){if(!H)return;const p=H.opening?[0,12,7]:checkpoints[H.checkpoint].p;H.transit=null;H.vy=0;H.grounded=true;rat.position.set(...p);rat.userData.swim66=false;rat.userData.air=false;rat.userData.crawl169=false;rat.userData.act=null;rat.userData.seated41=false;rat.userData.climb=null;rat.rotation.set(0,Math.PI,0);gameCam.ready=false;for(const a of Object.values(H.animals))a.g.position.copy(a.rest);$('padC').textContent='Crawl';sayToast('Back at '+checkpoints[H.checkpoint].name);}
   function nearAction(){return H.actions.find(a=>a.required<=H.checkpoint&&a.p.distanceTo(rat.position)<1.4);}
-  function use(){if(!H||H.transit)return;const a=nearAction();if(a){if((a.type==='bird'||a.type==='lizard')&&!H.animals[a.type]){sayToast('Loading companion… use Retry if it does not appear.');return;}H.transit={...a,from:rat.position.clone(),progress:0};if(['climb','wall'].includes(a.type)){gameCam.yaw=0;gameCam.pitch=.25;gameCam.ready=false;}H.grounded=false;rat.userData.crawl169=false;return;}
-    if(H.checkpoint===10&&rat.position.distanceTo(V(6,.3,-70))<3.5){home.stairwayPortrait183=true;home.collectibles=home.collectibles||{};home.collectibles.stairwayHeaven=true;save();H.won=true;modal('Course complete!', '<p>Safe water landing! Your framed portrait is earned and will hang in Pip’s home.</p><img src="stairway-reward183.jpg" alt="Stairway reward portrait" style="display:block;max-height:35vh;max-width:90%;margin:auto;border:8px ridge #c39d4d">',[['Back to yard',()=>startScavenge()],['Keep exploring',closeModal]]);}}
+  function use(){if(!H||H.transit)return;const a=nearAction();if(a){if((a.type==='bird'||a.type==='lizard')&&!H.animals[a.type]){sayToast('Loading companion… use Retry if it does not appear.');return;}H.transit={...a,from:rat.position.clone(),progress:0};courseSound188(a.type==='leap'?'leap':'checkpoint');if(['climb','wall'].includes(a.type)){gameCam.yaw=0;gameCam.pitch=.25;gameCam.ready=false;}H.grounded=false;rat.userData.crawl169=false;return;}
+    if(H.checkpoint===9&&rat.position.distanceTo(V(0,20.5,-63))<3.5){home.stairwayPortrait183=true;home.collectibles=home.collectibles||{};home.collectibles.stairwayHeaven=true;save();H.won=true;modal('Course complete!', '<p>You reached Heaven! Your framed portrait is earned and will hang in Pip’s home.</p><img src="stairway-reward183.jpg" alt="Stairway reward portrait" style="display:block;max-height:35vh;max-width:90%;margin:auto;border:8px ridge #c39d4d">',[['Back to yard',()=>startScavenge()],['Keep exploring',closeModal]]);}}
   function underRoof(){return H&&H.blocks.some(b=>Math.abs(rat.position.x-b.x)<b.w/2+.16&&Math.abs(rat.position.z-b.z)<b.d/2+.16&&rat.position.y<b.bottom&&rat.position.y+.75>b.bottom);}
   function climbPath186(ride,q){
     const faceZ=ride.type==='climb'?-15.12:-44.42;
@@ -140,12 +159,23 @@
     if(q<.94)return high.lerp(over,(q-.78)/.16);
     return over.lerp(ride.to,(q-.94)/.06);
   }
-  function jump(){if(H?.transit?.type==='lizard')return;if(H&&!H.transit&&H.grounded&&!underRoof()){H.vy=6;H.grounded=false;rat.userData.air=true;rat.userData.crawl169=false;}}
+  function jump(){if(H?.opening&&!H.transit)return use();if(H?.transit?.type==='lizard')return;if(H&&!H.transit&&H.grounded&&!underRoof()){H.vy=6;H.grounded=false;rat.userData.air=true;rat.userData.crawl169=false;}}
   function riderPose187(u){
     if(!u.pipBones||!u.pipRest)return;
     const pose={Spine:[-.72,0,0],Spine01:[-.3,0,0],Head:[.72,0,0],LeftUpLeg:[-1.52,0,-.72],RightUpLeg:[-1.52,0,.72],LeftLeg:[1.86,0,0],RightLeg:[1.86,0,0],LeftArm:[.94,0,-.26],RightArm:[.94,0,.26],LeftForeArm:[.52,0,0],RightForeArm:[.52,0,0]};
     for(const [name,angles]of Object.entries(pose)){const b=u.pipBones[name],rest=u.pipRest[name];if(b&&rest)b.quaternion.copy(rest).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(...angles)));}
     if(u.pipPivot)u.pipPivot.rotation.set(-.08,0,0);
+  }
+  function seatRider188(a,u){
+    const hips=u.pipBones?.Hips;if(!hips)return;
+    rat.updateWorldMatrix(true,true);a.g.updateWorldMatrix(true,true);
+    const saddle=a.g.localToWorld(V(0,a.seatY+.08,.25));rat.position.add(saddle.sub(hips.getWorldPosition(V(0,0,0))));rat.updateWorldMatrix(true,true);
+    if(typeof armReach73==='function')for(const side of ['Left','Right'])armReach73(u,side,a.g.localToWorld(V(side==='Left'?-.12:.12,a.seatY+.24,.42)));
+  }
+  function leapPose188(u,q){
+    if(!u.pipPivot)return;u.pipPivot.rotation.x=q<.2?q/.2*.7:.7+Math.min(1,(q-.2)/.6)*.55;
+    if(!u.pipBones||!u.pipRest)return;
+    for(const [name,angles]of Object.entries({LeftArm:[0,0,-1.25],RightArm:[0,0,1.25],LeftForeArm:[.1,0,0],RightForeArm:[.1,0,0],LeftUpLeg:[.1,0,-.12],RightUpLeg:[.1,0,.12],LeftLeg:[.08,0,0],RightLeg:[.08,0,0]})){const b=u.pipBones[name],rest=u.pipRest[name];if(b&&rest)b.quaternion.copy(rest).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(...angles)));}
   }
   function birdGrip187(a,u){
     if(!a.wings73||!u.pipBones?.LeftHand||!u.pipBones?.RightHand)return;
@@ -161,19 +191,21 @@
   const oldGrab=grab;grab=function(){if(phase==='heaven')return use();return oldGrab();};
   addEventListener('keydown',e=>{if(phase!=='heaven'||/INPUT|TEXTAREA/.test(e.target?.tagName)||e.repeat)return;if(e.code==='Space'){e.preventDefault();jump();}if(e.key.toLowerCase()==='c')toggleCrawl169();});
   window.tickHeaven183=function(dt){
-    if(!H||!rat)return;H.clock+=dt;const u=rat.userData;
+    if(!H||!rat)return;H.clock+=dt;courseAudio188(dt);const u=rat.userData;
     if(H.transit){const ride=H.transit,manual=['bird','lizard','climb','wall','wallfinish'].includes(ride.type);const moving=!manual||keys.w||keys.arrowup||joy.z<-.15;
       if(ride.falling){ride.falling+=dt;rat.position.y-=ride.falling*13*dt;const mount=H.animals.lizard;if(mount)mount.g.position.y=rat.position.y-.18;if(rat.position.y<5.2){respawn();sayToast('You died in the snake den. Retry the run — steer around the barriers.');}return;}
-      if(moving)ride.progress=Math.min(1,ride.progress+dt/ride.duration);
+      if(moving&&ride.type!=='lizard')ride.progress=Math.min(1,ride.progress+dt/ride.duration);
       const q=ride.progress;rat.position.lerpVectors(ride.from,ride.to,q);rat.rotation.y=Math.atan2(ride.to.x-ride.from.x,ride.to.z-ride.from.z);
       if(['climb','wall'].includes(ride.type)){rat.position.copy(climbPath186(ride,q));rat.rotation.y=Math.PI;}
       if(ride.type==='bird')rat.position.y+=Math.sin(q*Math.PI)*1.7;
       if(ride.type==='lizard'){
         const steer=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+(Math.abs(joy.x)>.15?joy.x:0);
-        ride.offset=(ride.offset||0)+steer*dt*1.7;
-        if(q>.9)ride.offset*=Math.exp(-dt*6);
-        rat.position.addScaledVector(H.runSide,ride.offset);
-        if(Math.abs(ride.offset)>1.18||H.runObstacles.some(b=>Math.abs(q-b.q)<.045&&Math.abs(ride.offset-b.offset)<.8)){ride.falling=.01;sayToast('Falling into the snake den!');return;}
+        const throttle=Math.abs(joy.z)>.15?-joy.z:(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
+        const nextQ=Math.max(0,Math.min(1,ride.progress+throttle*dt/ride.duration)),nextOffset=(ride.offset||0)+steer*dt*1.15;
+        const blocked=H.runObstacles.some(b=>Math.abs(nextQ-b.q)<.065&&Math.abs(nextOffset-b.offset)<.72);
+        if(!blocked){ride.progress=nextQ;ride.offset=nextOffset;}else if(!ride.blocked)courseSound188('bump');ride.blocked=blocked;
+        rat.position.lerpVectors(ride.from,ride.to,ride.progress).addScaledVector(H.runSide,ride.offset||0);
+        if(Math.abs(ride.offset||0)>1.45){ride.falling=.01;sayToast('Falling into the snake den!');return;}
       }
       if(ride.type==='leap')rat.position.y=ride.from.y+2*Math.sin(q*Math.PI)+(ride.to.y-ride.from.y)*q*q;
       if(ride.type==='zipline'){
@@ -183,12 +215,12 @@
       }
       const a=H.animals[ride.type];if(a){a.g.position.copy(rat.position);a.g.rotation.y=rat.rotation.y;rat.position.y+=ride.type==='bird'?-.6:.18;}
       u.seated41=ride.type==='lizard';u.air=ride.type==='bird'||ride.type==='zipline';u.swim66=false;u.vel=0;rat.animate(dt,0,false);
-      if(ride.type==='lizard'){riderPose187(u);if(a&&typeof animateCourseLizard187==='function')animateCourseLizard187(a,dt,moving);}
+      if(ride.type==='lizard'){riderPose187(u);if(a){seatRider188(a,u);if(typeof animateCourseLizard187==='function')animateCourseLizard187(a,dt,moving&&!ride.blocked);}}
       if(u.pipPivot&&['climb','wall'].includes(ride.type)) {u.pipPivot.rotation.x=.08;for(const side of ['Left','Right']){const step=Math.sin(q*ride.duration*6+(side==='Left'?0:Math.PI));rotateBone69(u,side+'Arm',-1.9+step*.3);rotateBone69(u,side+'ForeArm',-.6);rotateBone69(u,side+'UpLeg',.65-step*.35);rotateBone69(u,side+'Leg',-.8);}}
-      if(u.pipPivot&&ride.type==='leap'){u.pipPivot.rotation.x=.75+Math.min(1,q/.8)*.65;for(const side of ['Left','Right'])rotateBone69(u,side+'Arm',-1.2);}
+      if(ride.type==='leap')leapPose188(u,q);
       if(u.pipPivot&&['bird','zipline'].includes(ride.type))for(const side of ['Left','Right'])rotateBone69(u,side+'Arm',-2.6);
       if(ride.type==='bird'&&a){if(a.wings73)a.wings73.phase.value=H.clock*5;birdGrip187(a,u);}
-      if(q===1){H.completed[ride.type]=true;if(ride.type==='leap')H.splashTime=1;rat.position.copy(ride.to);H.transit=null;H.vy=0;H.grounded=true;u.air=false;u.seated41=false;}
+      if(ride.progress===1){H.completed[ride.type]=true;if(ride.type==='leap'){H.splashTime=1;H.opening=false;courseSound188('splash');}rat.position.copy(ride.to);H.transit=null;H.vy=0;H.grounded=true;u.air=false;u.seated41=false;}
     }else{
       let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
       if(Math.hypot(joy.x,joy.z)>.15){dx=joy.x;dz=joy.z;}
@@ -204,7 +236,7 @@
         if(H.vy<=0&&b.top<=before.y+(H.grounded?.25:.03)&&b.top>=nextY-.02)floor=Math.max(floor,b.top);
       }
       for(const p of H.platforms)if(Math.abs(rat.position.x-p.x)<p.w/2&&Math.abs(rat.position.z-p.z)<p.d/2&&p.y<=before.y+(H.grounded?.25:.03)&&p.y>=nextY-.02)floor=Math.max(floor,p.y);
-      if(H.checkpoint===10&&Math.abs(rat.position.x-6)<2.85&&Math.abs(rat.position.z+70)<2.85){rat.position.y=.3;H.vy=0;H.grounded=true;u.swim66=true;}
+      if(!H.opening&&H.checkpoint===0&&Math.abs(rat.position.x)<2.35&&rat.position.z>-.5&&rat.position.z<3.35){rat.position.y=0;H.vy=0;H.grounded=true;u.swim66=true;}
       else if(Number.isFinite(floor)&&H.vy<=0){rat.position.y=floor;H.vy=0;H.grounded=true;u.swim66=false;}else{rat.position.y=nextY;H.grounded=false;u.swim66=false;}
       u.air=!H.grounded;u.vy=H.vy;u.vel=Math.hypot(vx,vz);u.run=false;
       if(len>.1){const yaw=Math.atan2(vx,vz);rat.rotation.y+=Math.atan2(Math.sin(yaw-rat.rotation.y),Math.cos(yaw-rat.rotation.y))*(1-Math.exp(-dt*10));}
@@ -213,15 +245,15 @@
     }
     for(const a of Object.values(H.animals))a.mixer.update(dt);
     // Sequential checkpoints prevent a jump from skipping required animal sections.
-    const next=checkpoints[H.checkpoint+1],requirement={3:'climb',4:'zipline',6:'lizard',7:'wall',8:'bird',10:'leap'}[H.checkpoint+1];if(next&&!H.transit&&(!requirement||H.completed[requirement])&&(H.checkpoint!==6||H.completed.crawl)&&rat.position.distanceTo(V(...next.p))<1.1){H.checkpoint++;sayToast('Checkpoint '+(H.checkpoint+1)+' · '+next.name);}
+    const next=checkpoints[H.checkpoint+1],requirement={1:'leap',3:'climb',4:'zipline',6:'lizard',7:'wall',8:'bird'}[H.checkpoint+1];if(next&&!H.transit&&(!requirement||H.completed[requirement])&&(H.checkpoint!==6||H.completed.crawl)&&rat.position.distanceTo(V(...next.p))<1.1){H.checkpoint++;courseSound188('checkpoint');sayToast('Checkpoint '+(H.checkpoint+1)+' · '+next.name);}
     if(H.splashTime>0){H.splashTime=Math.max(0,H.splashTime-dt);H.splash.material.opacity=H.splashTime;H.splash.scale.setScalar(1+(1-H.splashTime)*5);}
-    const a=nearAction();ui.prompt.style.display='block';ui.prompt.textContent=H.transit?(H.transit.type==='zipline'?'Zipline crossing…':H.transit.type==='leap'?'Leap of faith!':H.transit.type==='lizard'?'Forward to ride · left/right to dodge':'Hold forward to '+(H.transit.type==='bird'?'fly':'climb')):H.checkpoint===10?'E · Claim framed portrait':a?'E · '+a.label:H.checkpoint===6?'Crawl beneath the tunnel, then climb the brick wall':'Follow the gold checkpoint rings';
-    $('padE').textContent=H.checkpoint===10?'Claim':a?'Use':'—';$('padJ').textContent='Jump';$('padC').textContent=u.crawl169?'Stand':'Crawl';
+    const a=nearAction();ui.prompt.style.display='block';ui.prompt.textContent=H.transit?(H.transit.type==='zipline'?'Zipline crossing…':H.transit.type==='leap'?'Leap of faith!':H.transit.type==='lizard'?'Forward / reverse · steer around barriers':'Hold forward to '+(H.transit.type==='bird'?'fly':'climb')):H.checkpoint===9?'E · Claim framed portrait':a?'E · '+a.label:H.checkpoint===6?'Crawl beneath the tunnel, then climb the brick wall':'Follow the gold checkpoint rings';
+    $('padE').textContent=H.checkpoint===9?'Claim':a?'Use':'—';$('padJ').textContent='Jump';$('padC').textContent=u.crawl169?'Stand':'Crawl';
     $('heavenStage183').textContent=(H.checkpoint+1)+' / '+checkpoints.length+' · '+checkpoints[H.checkpoint].name;
     const target=rat.position.clone().add(V(0,.45,0)),d=gameCam.distance;
     const goal=target.clone().add(V(Math.sin(gameCam.yaw)*Math.cos(gameCam.pitch)*d,Math.sin(gameCam.pitch)*d,Math.cos(gameCam.yaw)*Math.cos(gameCam.pitch)*d));
     const look=goal.clone().sub(target),distance=look.length();H.cameraRay.set(target,look.normalize());H.cameraRay.far=distance;
-    const obstruction=H.cameraRay.intersectObjects(H.solids.map(b=>b.m),true).find(hit=>hit.distance>.12);
+    const obstruction=H.cameraRay.intersectObjects([...new Set(H.solids.map(b=>b.m))],true).find(hit=>hit.distance>.12);
     if(obstruction)goal.copy(target).addScaledVector(look,Math.max(.65,obstruction.distance-.2));
     if(!gameCam.ready){camera.position.copy(goal);gameCam.ready=true;}else camera.position.lerp(goal,1-Math.exp(-dt*8));camera.lookAt(target);gameCam.pos.copy(camera.position);
   };
