@@ -106,6 +106,10 @@
       Math.max(0, g.recoveredBaseLow116 - currentLow) * g.model.scale.y;
   }
 
+  window.animateCourseLizard187 = function(g,dt,moving) {
+    prepare116(g);g.lastRideDt116=dt;
+    if(moving)crawl116(g,.65);
+  };
   tickGecko88 = function tickRecovered116(dt, g) {
     prepare116(g);
     g.clock += dt;
