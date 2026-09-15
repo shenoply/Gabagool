@@ -45,9 +45,9 @@
   #stick{width:130px;height:130px;border-radius:50%;background:rgba(233,220,195,.16);border:2px solid rgba(233,220,195,.35);position:relative;pointer-events:auto;touch-action:none}
   #knob{width:56px;height:56px;border-radius:50%;background:var(--paper);position:absolute;left:35px;top:35px;opacity:.9}
   #pad .g{width:78px;height:78px;border-radius:50%;border:0;background:var(--ochre);color:var(--ink);font:inherit;font-size:16px;pointer-events:auto;touch-action:none}
-  #acts{display:grid;grid-template-columns:56px 78px;grid-template-rows:56px 56px;gap:8px;align-items:end;justify-items:end}
+  #acts{display:grid;grid-template-columns:56px 78px;grid-template-rows:56px 56px 56px;gap:8px;align-items:end;justify-items:end}
   #acts .s{width:56px;height:56px;border-radius:50%;border:0;background:rgba(233,220,195,.28);color:var(--paper);font:inherit;font-size:13px;pointer-events:auto;touch-action:none}
-  #padB{grid-column:1;grid-row:1}#padR{grid-column:2;grid-row:1;justify-self:start}#padJ{grid-column:1;grid-row:2}#padE{grid-column:2;grid-row:2}
+  #padB{grid-column:1;grid-row:1}#padR{grid-column:2;grid-row:1;justify-self:start}#padJ{grid-column:1;grid-row:2}#padC{grid-column:2;grid-row:2;justify-self:start}#padE{grid-column:2;grid-row:3}
   #vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(30,16,8,.55) 100%);pointer-events:none}
   #talk{position:absolute;left:12px;right:12px;bottom:22%;background:rgba(43,29,20,.92);border:2px solid var(--ochre);border-radius:14px;padding:12px 16px 10px;display:none;pointer-events:auto}
   #tname{color:var(--ochre);font-size:14px;margin-bottom:4px}
@@ -86,7 +86,7 @@
  @media(max-width:600px){#settings{top:87px}#hb{top:128px}#hlist .slot{min-width:143px;max-width:165px;min-height:72px}#shopping{bottom:170px;left:10px;max-width:calc(100vw - 20px);font-size:10px}#hplace .btn{padding:8px 10px}#hb .tab{padding:6px 9px;font-size:12px}}
 #openingArt{position:fixed;inset:0;pointer-events:none;background:#18262b url('opening-build48.png') center/cover no-repeat;opacity:0;transform-origin:46% 50%;will-change:transform,opacity}#title{background:linear-gradient(90deg,rgba(18,27,29,.94),rgba(18,27,29,.64) 35%,rgba(18,27,29,.02) 76%),url('opening-build48.png') center/cover}#title h1{font-size:clamp(54px,7vw,96px)}@media(max-width:600px){#title{background:linear-gradient(90deg,#142124cf,#14212475),url('opening-build48.png') 42% center/cover}#openingArt{background-position:43% center}}
 
-@media(max-width:600px){#hud{top:10px;left:10px;right:10px}#hud span{font:12px Arial,sans-serif;padding:7px 9px}#pad{padding:0 15px;bottom:20px}#stick{width:104px;height:104px;background:#d9e2d51c;border-color:#e5e7dc44}#knob{width:44px;height:44px;left:28px;top:28px}#acts{grid-template-columns:48px 62px;grid-template-rows:48px 62px;gap:7px}#acts .s{width:48px;height:48px;background:#2337389c;font:12px Arial,sans-serif}#pad .g{width:62px;height:62px;font-size:14px;background:#d6b77d}#prompt{font-size:14px;bottom:25%}}
+@media(max-width:600px){#hud{top:10px;left:10px;right:10px}#hud span{font:12px Arial,sans-serif;padding:7px 9px}#pad{padding:0 15px;bottom:20px}#stick{width:104px;height:104px;background:#d9e2d51c;border-color:#e5e7dc44}#knob{width:44px;height:44px;left:28px;top:28px}#acts{grid-template-columns:48px 62px;grid-template-rows:48px 48px 62px;gap:7px}#acts .s{width:48px;height:48px;background:#2337389c;font:12px Arial,sans-serif}#pad .g{width:62px;height:62px;font-size:14px;background:#d6b77d}#prompt{font-size:14px;bottom:25%}}
 @media(max-width:600px){#settings{top:46px;right:10px;gap:4px}#settings .btn{min-height:44px;font-size:10px;padding:5px 8px}#mute{top:94px!important;right:10px!important;font-size:11px!important;padding:8px 12px!important}#hb{top:132px}}
 #title .btn:disabled{opacity:.5;cursor:wait}
 .cg-layout{display:flex;gap:18px;align-items:center}.cg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex:0 0 58%}.cg-slot{min-height:56px;border:2px solid #b49c6c;border-radius:7px;background:#344842;color:#f5ead0;font-size:11px;padding:5px}.cg-palette{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0}.cg-book{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.cg-recipe{text-align:left;padding:10px;background:#e5d4ac;color:#293b31;border:0;border-radius:7px}.cg-recipe small{display:block;margin-top:5px}.cg-recipe:disabled{opacity:.5}#modalBody{max-height:62vh;overflow:auto}#modalActions{flex-wrap:wrap}@media(max-width:600px){#settings{max-width:95vw}.cg-layout{gap:8px}.cg-slot{font-size:10px}.cg-book{grid-template-columns:1fr}}
@@ -186,9 +186,9 @@ body.cinema #settings,body.photo #settings{visibility:hidden}
 @media(max-height:700px){.stage61{height:255px}.stage61 #hero61{width:185px;height:185px}.recipe61{padding-top:16px}.recipe61 h3{font-size:28px}}
 </style>
 <style>#modal.workbench61 .batch61,#modal.workbench61 .related61,#modal.workbench61 .relatedHeading61{display:none}#modal.workbench61 .purpose61{font-size:15px}.recipe61:after{content:none}#modal.workbench61 #browse63{min-height:44px;background:none;border:0;text-decoration:underline;color:#513e2b;font:16px system-ui;width:100%;margin-top:12px}#hb{top:auto!important;bottom:0;max-height:32vh;overflow:auto;z-index:50}#htabs{flex-wrap:nowrap;overflow:auto}#hlist{max-height:16vh}#hb .slot{min-width:115px;font-size:16px}#undoPlacement47{display:none}</style><style>
-#acts{grid-template-rows:48px 56px 62px!important;gap:8px!important}
+#acts{grid-template-rows:48px 56px 56px 62px!important;gap:8px!important}
 #acts #tail67{position:static!important;grid-column:1 / 3;grid-row:1;width:118px;min-height:48px;pointer-events:auto}
-#padB,#padR{grid-row:2!important}#padJ,#padE{grid-row:3!important}
+#padB,#padR{grid-row:2!important}#padJ{grid-row:3!important}#padC{grid-column:2!important;grid-row:3!important;justify-self:start!important}#padE{grid-row:4!important}
 #survival{gap:10px!important;padding:8px 10px!important}
 #survival #lifeFood,#survival #lifeWater{position:relative;display:block;padding-bottom:9px;font:14px system-ui!important}
 #lifeFood:after,#lifeWater:after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:3px;background:linear-gradient(to right,var(--meter-color,#abc577) var(--level,0%),#ffffff30 var(--level,0%))}
@@ -236,7 +236,7 @@ body.decor85 #hb{bottom:max(18px,env(safe-area-inset-bottom))!important;left:aut
   <button class="btn" id="go">Head home and rebuild</button>
   <div id="pad">
     <div id="stick"><div id="knob"></div></div>
-    <div id="acts"><button class="s" id="padB">Bite</button><button class="s" id="padR">Roll</button><button class="s" id="padJ">Jump</button><button class="g" id="padE">Grab</button></div>
+    <div id="acts"><button class="s" id="padB">Bite</button><button class="s" id="padR">Roll</button><button class="s" id="padJ">Jump</button><button class="s" id="padC">Crawl</button><button class="g" id="padE">Grab</button></div>
   </div>
   <button class="btn" id="stand41" style="display:none;position:absolute;bottom:28%;left:40%;pointer-events:auto">Stand up</button><div id="hb"><button class="tab" id="undo41">Undo placement</button><button class="tab" id="homePanelClose" aria-label="Hide home crafting and decoration menu">Hide menu ×</button>
     <div id="htabs"></div>
@@ -718,6 +718,7 @@ stick.addEventListener('pointerup',joyEnd);stick.addEventListener('pointercancel
 addEventListener('pointerup',joyEnd);addEventListener('pointercancel',joyEnd);addEventListener('touchend',()=>{if(joyId!==null&&!navigator.maxTouchPoints)return;},{passive:true});
 addEventListener('blur',()=>{joyId=null;joy.x=joy.z=0;keys={};});document.addEventListener('visibilitychange',()=>{joyId=null;joy.x=joy.z=0;keys={};});
 $('padE').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();grab();});
+$('padC').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();toggleCrawl169();});
 
 // ---------- cutscene ----------
 let cs;
@@ -772,6 +773,7 @@ function endCutscene(){if(phase!=='cutscene')return;$('openingArt').style.opacit
 // ---------- shared movement: walk, run, jump, roll, bite ----------
 const ctl={jump:false,roll:false,bite:false};
 function doJump(){if(rat?.userData.job67){if(rat.userData.job67.lock)return;rat.userData.job67=null;}if(dropRope66())return;if(rat&&rat.userData.climb){rat.userData.climb=null;rat.userData.air=true;rat.userData.vy=0;rat.userData.drop62=.5;return;}if(homeUse41){endHomeUse41();return;}if(photo.active)return;if(rat&&rat.userData.wallState){const u=rat.userData,w=u.wallState;u.wallState=null;rat.position.x+=w.nx*.16;rat.position.z+=w.nz*.16;u.air=true;u.vy=7.15;u.motionX=w.nx*5.2;u.motionZ=w.nz*5.2;u.wallJump169=.42;u.crawl169=false;u.drop62=.5;sfx.step('wood');sayToast('Wall jump!');return;}if(photo.active||!rat||rat.userData.interaction||rat.userData.climb||rat.userData.air||rat.userData.act||rat.userData.pick)return;const u=rat.userData,long=u.vel>1.05||keys.shift||Math.hypot(joy.x,joy.z)>.72;u.air=true;u.vy=long?7.0:6.2;u.crawl169=false;if(long)u.longJump169={t:0,dir:new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y))};u.drop62=.35;sfx.step('wood');}
+function toggleCrawl169(){const u=rat?.userData;if(!u||photo.active||u.air||u.swim66||u.rope66||u.wallState||u.climb||u.act||u.pick||u.interaction)return;u.crawl169=!u.crawl169;u.run=false;sayToast(u.crawl169?'Pip crawls low':'Pip stands up');}
 function doRoll(){if(rat?.userData.job67?.lock)return;if(rat)rat.userData.job67=null;if(rat&&(rat.userData.rope66||rat.userData.swim66))return;if(homeUse41){endHomeUse41();return;}const u=rat&&rat.userData;if(photo.active||!u||u.wallState||u.interaction||u.climb||u.act||u.pick)return;if(u.air){u.act={type:'airRoll',t:0};sfx.step('cobble');return;}u.act={type:'roll',t:0};u.rollDir=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));sfx.step('cobble');}
 function doBite(){if(rat?.userData.job67?.lock)return;if(rat&&rat.userData.rope66)return;if(homeUse41){endHomeUse41();return;}const u=rat&&rat.userData;if(!u||u.wallState||u.interaction||u.climb||u.act||u.pick||u.biteCD>0||photo.active)return;u.biteCD=1.4;u.act={type:'bite',t:0};sfx.hiss();
   if(phase==='scavenge'&&sc.cat){const c=sc.cat;const to=c.m.position.clone().sub(rat.position);to.y=0;const f=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));
@@ -1027,7 +1029,7 @@ function grab(){if(rat?.userData.job67?.lock)return;
   if(phase!=='scavenge')return;
   if(sc.talk){advanceTalk();return;}
   if(rat.userData.climb)return;
-  if(!sc.near){if(sc.nearHome){doorAction(startHouse);return;}if(yardExit()&&(!gate57||gate57.open)){startArea('courtyard');return;}if(sc.nearClimb){const u=rat.userData;if(!u.climb&&!u.act&&!u.air){u.climb={t:0,from:rat.position.clone(),to:new THREE.Vector3(5.07,2.6,-1.855)};rat.rotation.y=-Math.PI/2;}return;}if(sc.nearNb)startTalk();else if(sc.nearBoom){openRadio();if(!radio.on)radioPlay();}else{const u=rat.userData;if(!u.air&&!u.act&&!u.pick){u.crawl169=!u.crawl169;u.run=false;sayToast(u.crawl169?'Pip crawls low · Grab to stand':'Pip stands up');}}return;}
+  if(!sc.near){if(sc.nearHome){doorAction(startHouse);return;}if(yardExit()&&(!gate57||gate57.open)){startArea('courtyard');return;}if(sc.nearClimb){const u=rat.userData;if(!u.climb&&!u.act&&!u.air){u.climb={t:0,from:rat.position.clone(),to:new THREE.Vector3(5.07,2.6,-1.855)};rat.rotation.y=-Math.PI/2;}return;}if(sc.nearNb)startTalk();else if(sc.nearBoom){openRadio();if(!radio.on)radioPlay();}return;}
   const it=sc.near;if(!addToBag(it.id,1))return;it.taken=true;root.remove(it.m);bag();save();sfx.pickup();pickupCard60(it.id);
   const u=rat.userData;if(u.pick&&u.pick.item)u.pick.item.parent.remove(u.pick.item);
   const held=ITEMS[it.id].build();outline(held);held.traverse(o=>{if(o.isLight)o.intensity=0.4;});
@@ -2867,6 +2869,6 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=169"></script>
+<script src="wildlife-recovered118.js?v=170"></script>
 </body>
 </html>
