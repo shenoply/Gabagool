@@ -517,7 +517,7 @@
     const u = rat?.userData, board = root?.userData.diveBoard164;
     if (u && board && !u.air && !u.swim66 && !u.act && Math.hypot(rat.position.x - board.end.x, rat.position.z - board.end.z) < .78) {
       u.poolLeap164 = { t: 0, from: rat.position.clone() };
-      u.air = true; u.vy = 0; u.motionX = u.motionZ = 0;
+      u.air = true; u.vy = 0; u.motionX = u.motionZ = 0; u.leap166 = true;
       sayToast('Pip leaps into the pool!'); return;
     }
     return jumpBeforeBoard164();
@@ -539,6 +539,52 @@
     if (!u.swim66 && !u.air && Math.hypot(rat.position.x - board.end.x, rat.position.z - board.end.z) < .88) {
       $('padJ').textContent = 'Leap';
     }
+  };
+
+  // Leap of Faith: play Pip's forward dive whenever a descent begins from a
+  // meaningful height. A normal hop stays a normal jump; the board marks the
+  // leap immediately, and ledges activate it once Pip starts falling.
+  const motionBeforeLeap166 = motion67;
+  motion67 = function motionWithLeap166(g, dt, speed, base, act) {
+    const selected = motionBeforeLeap166(g, dt, speed, base, act);
+    const u = g?.userData;
+    return (g === rat && u?.leap166 && u.air && !u.swim66) ? 'Fall_Forward' : selected;
+  };
+
+  const makeRatBeforeLeap166 = makeRat;
+  makeRat = function makeLeapRat166() {
+    const g = makeRatBeforeLeap166(), animateBeforeLeap166 = g.animate;
+    g.animate = function animateLeapRat166(dt, ...args) {
+      animateBeforeLeap166(dt, ...args);
+      const u = g.userData;
+      if (!u.leap166 || !u.air || u.swim66 || !u.pipPivot) return;
+      // A compact forward swan-dive that keeps Pip readable at game distance.
+      u.pipPivot.rotation.x = .74;
+      for (const side of ['Left', 'Right']) {
+        rotateBone69(u, side + 'Arm', -.92);
+        rotateBone69(u, side + 'ForeArm', -.42);
+        rotateBone69(u, side + 'UpLeg', .24);
+      }
+    };
+    return g;
+  };
+
+  const worldBeforeLeap166 = tickWorld38;
+  tickWorld38 = function tickLeapOfFaith166(dt) {
+    worldBeforeLeap166(dt);
+    const u = rat?.userData;
+    if (!u || !rat) return;
+    if (u.air && !u.swim66) {
+      u.fallPeak166 = Math.max(u.fallPeak166 ?? rat.position.y, rat.position.y);
+      // Ordinary jumps peak below this; board jumps and ledge falls exceed it.
+      if (!u.leap166 && u.fallPeak166 > 1.15 && u.vy < -0.55) {
+        u.leap166 = true;
+        sayToast('Leap of faith!');
+      }
+      return;
+    }
+    u.fallPeak166 = rat.position.y;
+    u.leap166 = false;
   };
 
 })();
