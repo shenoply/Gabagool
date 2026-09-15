@@ -714,4 +714,56 @@
     if (gecko?.denHome153 && !gecko.riding) { if (gecko.restY171 === undefined) gecko.restY171 = gecko.model.position.y; gecko.model.rotation.z = Math.sin(polish171.clock * 1.8) * .025; gecko.model.position.y = gecko.restY171 + Math.sin(polish171.clock * 1.8) * .002; }
   };
 
+  // Build 173: a larger readable yard map, a natural pond and a proper
+  // underwater follow camera. The pond uses the same swim/dive controls as
+  // the pool, so it is immediately playable on mobile.
+  const pond173 = { owner: null, water: null, fish: [], clock: 0 };
+  function addPond173() {
+    if (phase !== 'scavenge' || !root || pond173.owner === root) return;
+    pond173.owner = root; pond173.fish = []; pond173.clock = 0;
+    const center = new THREE.Vector3(21.6, 0, 31.5), g = new THREE.Group(); g.name = 'Willow pond';
+    const shore = new THREE.Mesh(new THREE.CylinderGeometry(4.25, 4.55, .18, 32), new THREE.MeshStandardMaterial({ color: 0x765d40, roughness: 1 })); shore.scale.z = .74; shore.position.set(center.x, .01, center.z); g.add(shore);
+    const liner = new THREE.Mesh(new THREE.CylinderGeometry(3.85, 4.1, .16, 32), new THREE.MeshStandardMaterial({ color: 0x233c37, roughness: 1 })); liner.scale.z = .74; liner.position.set(center.x, .08, center.z); g.add(liner);
+    const water = new THREE.Mesh(new THREE.CircleGeometry(3.72, 40), new THREE.MeshStandardMaterial({ color: 0x397d89, transparent: true, opacity: .78, roughness: .18, metalness: .12, depthWrite: false })); water.scale.z = .74; water.rotation.x = -Math.PI / 2; water.position.set(center.x, .48, center.z); water.name = 'Deep pond water'; g.add(water); pond173.water = water;
+    const reedMat = new THREE.MeshStandardMaterial({ color: 0x4d6b38, roughness: 1 });
+    for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2, r = 3.8 + (i % 3) * .12; const reed = new THREE.Mesh(new THREE.CylinderGeometry(.022, .032, .42 + (i % 4) * .08, 5), reedMat); reed.position.set(center.x + Math.sin(a) * r, .3, center.z + Math.cos(a) * r * .72); reed.rotation.z = Math.sin(i * 4.1) * .15; g.add(reed); }
+    root.add(g); pond173.g = g;
+    for (let i = 0; i < 7; i++) { const fish = new THREE.Group(), body = new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), new THREE.MeshStandardMaterial({ color: [0xe2a64a, 0xd86c44, 0x8ab1c4][i % 3], roughness: .6 })); body.scale.set(1.5, .6, .65); fish.add(body); const tail = new THREE.Mesh(new THREE.ConeGeometry(.09, .18, 3), body.material); tail.rotation.z = -Math.PI / 2; tail.position.x = -.19; fish.add(tail); fish.userData = { a: i * .86, r: .55 + (i % 4) * .52, speed: .45 + (i % 3) * .11, depth: .13 + (i % 2) * .10 }; g.add(fish); pond173.fish.push(fish); }
+  }
+  const waterBeforePond173 = waterVolume66;
+  waterVolume66 = function waterWithPond173(p) {
+    const w = pond173.water;
+    if (w && pond173.owner === root) { const dx = (p.x - w.position.x) / 3.72, dz = (p.z - w.position.z) / (3.72 * .74); if (dx * dx + dz * dz < 1) return w; }
+    return waterBeforePond173(p);
+  };
+  const cameraBeforePond173 = tickGameplayCamera;
+  tickGameplayCamera = function underwaterFollow173(dt) {
+    cameraBeforePond173(dt);
+    const u = rat?.userData, water = rat && waterVolume66(rat.position);
+    if (!u?.diving163 || !water || photo.active) return;
+    const target = rat.position.clone().add(new THREE.Vector3(0, .13, 0));
+    const offset = new THREE.Vector3(Math.sin(gameCam.yaw) * 1.75, .28, Math.cos(gameCam.yaw) * 1.75);
+    camera.position.lerp(target.clone().add(offset), 1 - Math.exp(-dt * 9));
+    camera.lookAt(target);
+  };
+  const worldBeforePond173 = tickWorld38;
+  tickWorld38 = function tickPond173(dt) {
+    worldBeforePond173(dt); addPond173();
+    if (pond173.owner !== root || !pond173.water) return;
+    pond173.clock += dt; pond173.water.position.y = .48 + Math.sin(pond173.clock * 1.4) * .008;
+    for (const fish of pond173.fish) { const u = fish.userData, a = u.a + pond173.clock * u.speed; fish.position.set(pond173.water.position.x + Math.cos(a) * u.r, pond173.water.position.y - u.depth + Math.sin(pond173.clock * 2 + u.a) * .035, pond173.water.position.z + Math.sin(a) * u.r * .58); fish.rotation.y = -a + Math.PI / 2; fish.rotation.z = Math.sin(pond173.clock * 5 + u.a) * .16; }
+  };
+
+  const mapBeforeLarge173 = addMap171;
+  addMap171 = function addLargeMap173() {
+    mapBeforeLarge173(); const map = $('miniMap171'); if (!map || map.userData.large173) return;
+    map.userData.large173 = true; map.style.width = '150px'; map.style.height = '150px'; map.style.borderRadius = '22px';
+    $('mute').style.top = '270px';
+  };
+  const pointBeforeLarge173 = mapPoint171;
+  mapPoint171 = function mapPointLarge173(el, x, z) {
+    const map = $('miniMap171'); if (!map?.userData.large173) return pointBeforeLarge173(el, x, z);
+    el.style.left = (12 + (x + 22) / 55 * 124) + 'px'; el.style.top = (137 - (z + 14) / 55 * 124) + 'px';
+  };
+
 })();
