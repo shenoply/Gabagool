@@ -529,7 +529,12 @@
     const u = rat?.userData, board = root?.userData.diveBoard164;
     if (!u || !board) return;
     if (u.poolLeap164) {
-      const leap = u.poolLeap164; leap.t += dt; const q = Math.min(1, leap.t / .72);
+      const leap = u.poolLeap164;
+      // Let the launch and splash feel snappy, then hold the middle of the
+      // arc in a readable slow-motion beat for Pip's Leap of Faith pose.
+      const priorQ = Math.min(1, leap.t / 1.25);
+      leap.t += dt * (priorQ > .30 && priorQ < .74 ? .40 : 1);
+      const q = Math.min(1, leap.t / 1.25);
       rat.position.lerpVectors(leap.from, board.splash, q);
       rat.position.y = leap.from.y * (1 - q) + Math.sin(q * Math.PI) * 2.65;
       rat.rotation.y = Math.PI; u.air = true;
