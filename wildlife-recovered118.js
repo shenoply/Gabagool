@@ -621,4 +621,97 @@
     return g;
   };
 
+  // Build 171: compact feedback polish that makes everyday exploration feel
+  // much more alive without adding another heavy scene or combat system.
+  const polish171 = { dust: [], ripples: [], finds: [], clock: 0, waterClock: 0 };
+  const dustMat171 = new THREE.MeshBasicMaterial({ color: 0xdcc89b, transparent: true, opacity: .55, depthWrite: false });
+  const rippleMat171 = new THREE.MeshBasicMaterial({ color: 0xd9f7f2, transparent: true, opacity: .62, depthWrite: false, side: THREE.DoubleSide });
+
+  function burst171(list, position, kind = 'dust') {
+    if (!root) return;
+    const mesh = new THREE.Mesh(kind === 'dust' ? new THREE.CircleGeometry(.18, 12) : new THREE.RingGeometry(.07, .10, 14), kind === 'dust' ? dustMat171.clone() : rippleMat171.clone());
+    mesh.rotation.x = -Math.PI / 2; mesh.position.copy(position); mesh.position.y += .025; root.add(mesh);
+    list.push({ mesh, age: 0, kind });
+  }
+  function updateBurst171(list, dt) {
+    for (let i = list.length - 1; i >= 0; i--) {
+      const p = list[i]; p.age += dt; const q = p.age / (p.kind === 'dust' ? .48 : .7);
+      p.mesh.scale.setScalar(1 + q * (p.kind === 'dust' ? 3.3 : 5)); p.mesh.material.opacity = Math.max(0, (1 - q) * (p.kind === 'dust' ? .45 : .55));
+      if (q >= 1) { p.mesh.parent?.remove(p.mesh); p.mesh.geometry.dispose(); p.mesh.material.dispose(); list.splice(i, 1); }
+    }
+  }
+
+  const landBeforePolish171 = land57;
+  land57 = function landWithImpact171(u, impact, surface) {
+    landBeforePolish171(u, impact, surface);
+    if (impact > 3.5 && rat) {
+      burst171(polish171.dust, rat.position, 'dust');
+      gameCam.shake171 = Math.min(.18, impact * .012);
+    }
+  };
+
+  const pickupBeforePolish171 = pickupCard60;
+  pickupCard60 = function pickupWithSparkle171(id, rare) {
+    pickupBeforePolish171(id, rare);
+    if (!rat || !root) return;
+    const g = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color: rare ? 0xffd66d : 0xfff3ae, transparent: true, opacity: .95 });
+    for (let i = 0; i < 5; i++) { const star = new THREE.Mesh(new THREE.OctahedronGeometry(.04, 0), mat); star.userData.a = i * 1.26; g.add(star); }
+    g.position.copy(rat.position).add(new THREE.Vector3(0, .45, 0)); root.add(g); polish171.finds.push({ g, age: 0, mat });
+  };
+
+  const grabBeforePolish171 = grab;
+  grab = function grabPolishFind171() {
+    const find = polish171.finds171?.find(f => f.g.position.distanceTo(rat.position) < .85);
+    if (find) return grabBeforePolish171();
+    return grabBeforePolish171();
+  };
+
+  function addMap171() {
+    if ($('miniMap171')) return;
+    const map = document.createElement('div'); map.id = 'miniMap171';
+    map.innerHTML = '<b>Yard</b><i data-id="home">⌂</i><i data-id="den">●</i><i data-id="pip">●</i>';
+    map.style.cssText = 'display:none;position:fixed;right:12px;top:104px;width:108px;height:108px;border:2px solid #e7dbc0;border-radius:18px;background:#29463ddd;color:#f7eedc;z-index:24;pointer-events:none;overflow:hidden;font:11px system-ui';
+    map.querySelector('b').style.cssText = 'position:absolute;left:9px;top:7px;font-weight:600';
+    map.querySelectorAll('i').forEach(i => i.style.cssText = 'position:absolute;font-style:normal;transform:translate(-50%,-50%);font-size:16px');
+    map.querySelector('[data-id="home"]').style.color = '#f4d987'; map.querySelector('[data-id="den"]').style.color = '#a8df9f'; map.querySelector('[data-id="pip"]').style.color = '#ffead0';
+    document.body.appendChild(map);
+    const style = document.createElement('style'); style.textContent = '.photo #hud,.photo #settings,.photo #survival,.photo #weatherBadge,.photo #mute,.photo #pad,.photo #cameraTools,.photo #miniMap171,.photo #prompt{display:none!important}'; document.head.appendChild(style);
+  }
+  function mapPoint171(el, x, z) { el.style.left = (10 + (x + 20) / 50 * 88) + 'px'; el.style.top = (96 - (z / 38) * 88) + 'px'; }
+  function seedFinds171() {
+    if (phase !== 'scavenge' || !root || polish171.findOwner === root) return;
+    polish171.findOwner = root; polish171.finds171 = [];
+    [[-10.8, .12, 18.8], [15.2, .12, 8.9], [1.5, .12, 34.2]].forEach((p, i) => {
+      const g = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color: [0xd6b35e, 0x9dc4d4, 0xd77e54][i], emissive: [0x382200, 0x00222b, 0x340c00][i], emissiveIntensity: .6 });
+      const coin = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .035, 12), mat); coin.rotation.x = Math.PI / 2; g.add(coin); g.position.set(...p); g.name = 'Hidden shiny find'; root.add(g); polish171.finds171.push({ g, id: 'shiny' + i, taken: false, mat, phase: i });
+    });
+  }
+  const grabBeforeFinds171 = grab;
+  grab = function grabHiddenFind171() {
+    const f = polish171.finds171?.find(x => !x.taken && x.g.position.distanceTo(rat.position) < .72);
+    if (f) { f.taken = true; f.g.visible = false; pickupCard60('coin', true); sayToast('A hidden shiny thing for Pip’s collection.'); return true; }
+    return grabBeforeFinds171();
+  };
+
+  const cameraBeforePolish171 = tickGameplayCamera;
+  tickGameplayCamera = function cameraWithImpact171(dt) {
+    cameraBeforePolish171(dt);
+    if (gameCam.shake171 > .001 && !photo.active) { camera.position.x += Math.sin(t * 91) * gameCam.shake171; camera.position.y += Math.cos(t * 77) * gameCam.shake171; gameCam.shake171 *= Math.exp(-dt * 13); }
+  };
+
+  const worldBeforePolish171 = tickWorld38;
+  tickWorld38 = function tickPolish171(dt) {
+    worldBeforePolish171(dt); addMap171(); seedFinds171(); polish171.clock += dt;
+    updateBurst171(polish171.dust, dt); updateBurst171(polish171.ripples, dt);
+    const u = rat?.userData;
+    if (u?.swim66 && polish171.clock - polish171.waterClock > .34) { polish171.waterClock = polish171.clock; burst171(polish171.ripples, rat.position, 'ripple'); }
+    for (const f of polish171.finds) { f.age += dt; f.g.position.y += dt * .38; f.g.rotation.y += dt * 5; f.mat.opacity = Math.max(0, 1 - f.age / .55); if (f.age > .55) { f.g.parent?.remove(f.g); f.mat.dispose(); polish171.finds.splice(polish171.finds.indexOf(f), 1); } }
+    for (const f of polish171.finds171 || []) if (!f.taken) { f.g.rotation.y += dt * 1.8; f.g.position.y = .12 + Math.sin(polish171.clock * 2.5 + f.phase) * .05; }
+    const map = $('miniMap171'); if (map) { map.style.display = phase === 'scavenge' && !photo.active ? 'block' : 'none'; if (rat) mapPoint171(map.querySelector('[data-id="pip"]'), rat.position.x, rat.position.z); mapPoint171(map.querySelector('[data-id="home"]'), 0, -2); const den = wildlife88?.den153 ? DEN_POS_155 : new THREE.Vector3(-18.75, 0, 24.75); mapPoint171(map.querySelector('[data-id="den"]'), den.x, den.z); }
+    // A slow, restrained light cycle: warm afternoon through blue evening.
+    if (['scavenge', 'explore'].includes(phase)) { const day = .52 + .48 * Math.sin(polish171.clock * .035); sun.intensity = .25 + day * .65; hemi.intensity = .23 + day * .36; }
+    const gecko = wildlife88?.gecko;
+    if (gecko?.denHome153 && !gecko.riding) { if (gecko.restY171 === undefined) gecko.restY171 = gecko.model.position.y; gecko.model.rotation.z = Math.sin(polish171.clock * 1.8) * .025; gecko.model.position.y = gecko.restY171 + Math.sin(polish171.clock * 1.8) * .002; }
+  };
+
 })();
