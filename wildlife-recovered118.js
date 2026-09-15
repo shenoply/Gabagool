@@ -721,19 +721,19 @@
   function addPond173() {
     if (phase !== 'scavenge' || !root || pond173.owner === root) return;
     pond173.owner = root; pond173.fish = []; pond173.clock = 0;
-    const center = new THREE.Vector3(21.6, 0, 31.5), g = new THREE.Group(); g.name = 'Willow pond';
-    const shore = new THREE.Mesh(new THREE.CylinderGeometry(4.25, 4.55, .18, 32), new THREE.MeshStandardMaterial({ color: 0x765d40, roughness: 1 })); shore.scale.z = .74; shore.position.set(center.x, .01, center.z); g.add(shore);
-    const liner = new THREE.Mesh(new THREE.CylinderGeometry(3.85, 4.1, .16, 32), new THREE.MeshStandardMaterial({ color: 0x233c37, roughness: 1 })); liner.scale.z = .74; liner.position.set(center.x, .08, center.z); g.add(liner);
-    const water = new THREE.Mesh(new THREE.CircleGeometry(3.72, 40), new THREE.MeshStandardMaterial({ color: 0x397d89, transparent: true, opacity: .78, roughness: .18, metalness: .12, depthWrite: false })); water.scale.z = .74; water.rotation.x = -Math.PI / 2; water.position.set(center.x, .48, center.z); water.name = 'Deep pond water'; g.add(water); pond173.water = water;
+    const center = new THREE.Vector3(23.2, 0, 32.1), g = new THREE.Group(); g.name = 'Willow pond';
+    const shore = new THREE.Mesh(new THREE.CylinderGeometry(2.72, 2.94, .18, 32), new THREE.MeshStandardMaterial({ color: 0x765d40, roughness: 1 })); shore.scale.z = .78; shore.position.set(center.x, .01, center.z); g.add(shore);
+    const liner = new THREE.Mesh(new THREE.CylinderGeometry(2.46, 2.65, .16, 32), new THREE.MeshStandardMaterial({ color: 0x233c37, roughness: 1 })); liner.scale.z = .78; liner.position.set(center.x, .08, center.z); g.add(liner);
+    const water = new THREE.Mesh(new THREE.CircleGeometry(2.37, 40), new THREE.MeshStandardMaterial({ color: 0x397d89, transparent: true, opacity: .78, roughness: .18, metalness: .12, depthWrite: false })); water.scale.z = .78; water.rotation.x = -Math.PI / 2; water.position.set(center.x, .48, center.z); water.name = 'Deep pond water'; g.add(water); pond173.water = water;
     const reedMat = new THREE.MeshStandardMaterial({ color: 0x4d6b38, roughness: 1 });
-    for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2, r = 3.8 + (i % 3) * .12; const reed = new THREE.Mesh(new THREE.CylinderGeometry(.022, .032, .42 + (i % 4) * .08, 5), reedMat); reed.position.set(center.x + Math.sin(a) * r, .3, center.z + Math.cos(a) * r * .72); reed.rotation.z = Math.sin(i * 4.1) * .15; g.add(reed); }
+    for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2, r = 2.55 + (i % 3) * .10; const reed = new THREE.Mesh(new THREE.CylinderGeometry(.022, .032, .42 + (i % 4) * .08, 5), reedMat); reed.position.set(center.x + Math.sin(a) * r, .3, center.z + Math.cos(a) * r * .76); reed.rotation.z = Math.sin(i * 4.1) * .15; g.add(reed); }
     root.add(g); pond173.g = g;
     for (let i = 0; i < 7; i++) { const fish = new THREE.Group(), body = new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), new THREE.MeshStandardMaterial({ color: [0xe2a64a, 0xd86c44, 0x8ab1c4][i % 3], roughness: .6 })); body.scale.set(1.5, .6, .65); fish.add(body); const tail = new THREE.Mesh(new THREE.ConeGeometry(.09, .18, 3), body.material); tail.rotation.z = -Math.PI / 2; tail.position.x = -.19; fish.add(tail); fish.userData = { a: i * .86, r: .55 + (i % 4) * .52, speed: .45 + (i % 3) * .11, depth: .13 + (i % 2) * .10 }; g.add(fish); pond173.fish.push(fish); }
   }
   const waterBeforePond173 = waterVolume66;
   waterVolume66 = function waterWithPond173(p) {
     const w = pond173.water;
-    if (w && pond173.owner === root) { const dx = (p.x - w.position.x) / 3.72, dz = (p.z - w.position.z) / (3.72 * .74); if (dx * dx + dz * dz < 1) return w; }
+    if (w && pond173.owner === root) { const dx = (p.x - w.position.x) / 2.37, dz = (p.z - w.position.z) / (2.37 * .78); if (dx * dx + dz * dz < 1) return w; }
     return waterBeforePond173(p);
   };
   const cameraBeforePond173 = tickGameplayCamera;
@@ -799,10 +799,38 @@
   };
   const grabBeforeFish173 = grab;
   grab = function pondFishInteraction173() {
-    if (pond173.owner === root && pond173.water && rat && !rat.userData.diving163 && Math.hypot(rat.position.x - pond173.water.position.x, rat.position.z - pond173.water.position.z) < 3.9) {
+    if (pond173.owner === root && pond173.water && rat && !rat.userData.diving163 && Math.hypot(rat.position.x - pond173.water.position.x, rat.position.z - pond173.water.position.z) < 2.7) {
       home.pondFish173 = (home.pondFish173 || 0) + 1; save(); sayToast('A little fish flicks its tail beneath the reeds.'); return true;
     }
     return grabBeforeFish173();
+  };
+
+  // Open the east-rear corner into a real extra playyard with a matching fence.
+  const expansion177 = { owner: null };
+  function addPlayyard177() {
+    if (phase !== 'scavenge' || !root || expansion177.owner === root) return;
+    expansion177.owner = root;
+    const remove = [];
+    root.traverse(o => { if ((o.name === 'Backyard perimeter collider' || /Weathered backyard fence/.test(o.name || '')) && (o.position.x > 30 || o.position.z > 37)) remove.push(o); });
+    for (const o of remove) { removeSolid78(o); o.parent?.remove(o); }
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(27, 19), new THREE.MeshStandardMaterial({ color: 0x668c57, roughness: 1 })); ground.rotation.x = -Math.PI / 2; ground.position.set(34.5, .006, 42.5); ground.name = 'East playyard grass'; root.add(ground);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x51321e, roughness: 1 });
+    const fence = (x, z, w, d) => { const m = box(w, 2.75, d, mat); m.position.set(x, 1.375, z); m.name = 'Extended playyard fence'; solid78(m); };
+    fence(47, 42.5, .16, 19); fence(34.5, 52, 25, .16);
+    for (let i = 0; i < 18; i++) { const blade = new THREE.Mesh(new THREE.ConeGeometry(.035, .38 + (i % 3) * .12, 4), new THREE.MeshStandardMaterial({ color: i % 2 ? 0x4b793e : 0x739753 })); blade.position.set(25 + (i % 6) * 3.6, .2, 38.5 + Math.floor(i / 6) * 4.2); root.add(blade); }
+    root.userData.collisionCache62?.clear();
+  }
+  const controlBeforePlayyard177 = control;
+  control = function controlPlayyard177(dt, options) {
+    const next = phase === 'scavenge' ? { ...options, bounds: [-21, 46.6, -14, 51.6] } : options;
+    return controlBeforePlayyard177(dt, next);
+  };
+  const worldBeforePlayyard177 = tickWorld38;
+  tickWorld38 = function tickPlayyard177(dt) { worldBeforePlayyard177(dt); try { addPlayyard177(); } catch (error) { console.warn('Playyard extension paused', error); } };
+  const cameraBeforePlayyard177 = tickGameplayCamera;
+  tickGameplayCamera = function framePlayyard177(dt) {
+    cameraBeforePlayyard177(dt);
+    if (phase === 'scavenge' && !photo.active && gameCam.distance > 7.2) gameCam.distance = 6.4;
   };
 
 })();
