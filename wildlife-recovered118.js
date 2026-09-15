@@ -675,7 +675,7 @@
     map.querySelectorAll('i').forEach(i => i.style.cssText = 'position:absolute;font-style:normal;transform:translate(-50%,-50%);font-size:16px');
     map.querySelector('[data-id="home"]').style.color = '#f4d987'; map.querySelector('[data-id="den"]').style.color = '#a8df9f'; map.querySelector('[data-id="pip"]').style.color = '#ffead0';
     document.body.appendChild(map);
-    const style = document.createElement('style'); style.textContent = '.photo #hud,.photo #settings,.photo #survival,.photo #weatherBadge,.photo #mute,.photo #pad,.photo #cameraTools,.photo #miniMap171,.photo #prompt{display:none!important}'; document.head.appendChild(style);
+    const style = document.createElement('style'); style.textContent = '#mute{top:224px!important;z-index:28!important}.photo #hud,.photo #settings,.photo #survival,.photo #weatherBadge,.photo #mute,.photo #pad,.photo #cameraTools,.photo #miniMap171,.photo #prompt{display:none!important}'; document.head.appendChild(style);
   }
   function mapPoint171(el, x, z) { el.style.left = (10 + (x + 20) / 50 * 88) + 'px'; el.style.top = (96 - (z / 38) * 88) + 'px'; }
   function seedFinds171() {
