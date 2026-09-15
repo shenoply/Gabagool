@@ -446,7 +446,9 @@
       return swimming;
     }
     if (u.diving163) {
-      rat.position.y = water.position.y - .58;
+      rat.position.y = water === pond173.water
+        ? Math.max(pondFloor180(rat.position.x, rat.position.z) + .22, water.position.y - 1.65)
+        : water.position.y - .58;
       u.floor57 = rat.position.y;
     }
     if ($('padJ')) $('padJ').textContent = u.diving163 ? 'Surface' : 'Dive';
@@ -748,8 +750,14 @@
       const u = rat?.userData, water = rat && waterVolume66(rat.position);
       if (!u?.diving163 || !water || photo.active) return;
       const target = rat.position.clone().add(new THREE.Vector3(0, .13, 0));
-      const offset = new THREE.Vector3(Math.sin(gameCam.yaw) * 1.75, .28, Math.cos(gameCam.yaw) * 1.75);
-      camera.position.lerp(target.clone().add(offset), 1 - Math.exp(-dt * 9));
+      const offset = new THREE.Vector3(Math.sin(gameCam.yaw) * 1.15, .12, Math.cos(gameCam.yaw) * 1.15);
+      const goal = target.clone().add(offset);
+      if (water === pond173.water) {
+        // Keep the lens inside the actual shoreline, even when orbiting near a bank.
+        for (let i=0;i<12 && !pondInside179(goal.x,goal.z);i++) goal.lerp(target,.25);
+        goal.y = Math.min(water.position.y-.24, Math.max(goal.y,pondFloor180(goal.x,goal.z)+.18));
+      } else goal.y = Math.min(goal.y,water.position.y-.2);
+      camera.position.copy(goal);
       camera.lookAt(target);
     } catch (error) { console.warn('Underwater camera disabled for this frame', error); }
   };
@@ -883,12 +891,34 @@
   function pondRadius179(a) { return 1 + .12 * Math.sin(3*a+.4) + .065 * Math.cos(5*a); }
   function pondDistance179(x,z) { return Math.hypot((x-23.2)/3.6,(z-32.1)/2.9); }
   function pondInside179(x,z) { const a=Math.atan2((z-32.1)/2.9,(x-23.2)/3.6); return pondDistance179(x,z)<pondRadius179(a); }
+  function pondFloor180(x,z) {
+    const a=Math.atan2((z-32.1)/2.9,(x-23.2)/3.6),q=pondDistance179(x,z)/pondRadius179(a);
+    return q<.68 ? -2.4+q/.68*.6 : q<1 ? -1.8+(q-.68)/.32*2.6 : .8;
+  }
+  function excavatePond180() {
+    // Cut only flat ground surfaces; leave props, actors and their materials alone.
+    const bounds=new THREE.Box3(),size=new THREE.Vector3();
+    root.updateMatrixWorld(true);
+    root.traverse(mesh=>{
+      if(!mesh.isMesh||!mesh.geometry||mesh.isSkinnedMesh)return;
+      bounds.setFromObject(mesh);bounds.getSize(size);
+      if(size.y>.18||bounds.max.y>.2||bounds.min.y<-.2||size.x<4||size.z<4||bounds.max.x<19||bounds.min.x>28||bounds.max.z<28||bounds.min.z>36)return;
+      const cut=original=>{const mat=original.clone();mat.onBeforeCompile=shader=>{
+        shader.vertexShader='varying vec3 pondWorld180;\n'+shader.vertexShader;
+        shader.vertexShader=shader.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\npondWorld180=(modelMatrix*vec4(transformed,1.0)).xyz;');
+        shader.fragmentShader='varying vec3 pondWorld180;\n'+shader.fragmentShader;
+        shader.fragmentShader=shader.fragmentShader.replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nvec2 pondP180=(pondWorld180.xz-vec2(23.2,32.1))/vec2(3.6,2.9); float pondA180=atan(pondP180.y,pondP180.x); if(length(pondP180)<1.0+0.12*sin(3.0*pondA180+0.4)+0.065*cos(5.0*pondA180)) discard;');
+      };mat.customProgramCacheKey=()=> 'pond-cut-180';return mat;};
+      mesh.material=Array.isArray(mesh.material)?mesh.material.map(cut):cut(mesh.material);
+    });
+  }
   function buildNaturalPond179() {
     if (phase !== 'scavenge' || !root || pond173.owner === root) return;
+    excavatePond180();
     const g = new THREE.Group(); g.name='Willow pond · natural bank'; root.add(g);
     pond173.owner=root; pond173.g=g; pond173.fish=[]; pond173.clock=0;
     const material=(color)=>new THREE.MeshStandardMaterial({color,roughness:.95});
-    const rings=[0,.68,1,1.12,1.52], heights=[.04,.14,.8,.86,.015];
+    const rings=[0,.68,1,1.12,1.52], heights=[-2.4,-1.8,.8,.86,.015];
     const colors=[0x173735,0x36504a,0x8d8061,0x847257,0x68804b];
     const vertices=[], indices=[], shades=[], n=80;
     for(let r=0;r<rings.length;r++) for(let i=0;i<=n;i++) {
@@ -924,7 +954,7 @@
       const fish=new THREE.Group(),mat=material([0x9d7647,0x756c48,0x6d8580][i%3]);
       const body=new THREE.Mesh(new THREE.SphereGeometry(.1,10,6),mat);body.scale.set(1.7,.55,.7);fish.add(body);
       const tail=new THREE.Mesh(new THREE.ConeGeometry(.065,.12,3),mat);tail.rotation.z=Math.PI/2;tail.position.x=-.19;fish.add(tail);
-      fish.userData={a:i*.86,r:.7+(i%4)*.52,speed:.16+(i%3)*.04,depth:.3+(i%2)*.13};g.add(fish);pond173.fish.push(fish);
+      fish.userData={a:i*.86,r:.7+(i%4)*.52,speed:.16+(i%3)*.04,depth:.7+(i%3)*.45};g.add(fish);pond173.fish.push(fish);
     }
   }
   const controlBeforePond179=control;
@@ -934,7 +964,7 @@
     return controlBeforePond179(dt,{...options,ground:(x,z)=>{
       const a=Math.atan2((z-32.1)/2.9,(x-23.2)/3.6),q=pondDistance179(x,z)/pondRadius179(a);
       if(q>=1.52)return previous(x,z);
-      if(q<1)return .04;
+      if(q<1)return pondFloor180(x,z);
       return q<1.12?.8+(q-1)*.5:.86*(1-(q-1.12)/.4);
     }});
   };
