@@ -179,6 +179,9 @@
   };
   function enterExtension184(){const cover=document.createElement('div');cover.textContent='Pip’s Lane → Rooftops · Loading Stairway to Heaven…';cover.style.cssText='position:fixed;inset:0;display:grid;place-items:center;background:#243e39;color:#f8e8c5;font:20px system-ui;z-index:999;padding:30px;text-align:center';document.body.appendChild(cover);requestAnimationFrame(()=>requestAnimationFrame(()=>{try{startHeaven183();}finally{cover.remove();}}));}
   const gateUse=useGate57;useGate57=function(){if(nearGate57()){enterExtension184();return true;}return gateUse();};
+  // Replay is independent of the trophy and all old backyard job flags.
+  const grabBeforeReplay185=grab;grab=function(){if(phase==='scavenge'&&rat&&Math.hypot(rat.position.x-29.5,rat.position.z-19)<2.8){enterExtension184();return true;}return grabBeforeReplay185();};
+  const menuBeforeReplay185=menu65;menu65=function(){menuBeforeReplay185();const actions=$('modalActions');if(!actions||phase==='heaven')return;const b=document.createElement('button');b.className='btn';b.textContent=(home.stairwayPortrait183?'Replay':'Play')+' Stairway to Heaven';b.onclick=()=>{closeModal();enterExtension184();};actions.appendChild(b);};
   const yardStart184=startScavenge;startScavenge=function(){const returning=phase==='heaven';yardStart184();if(returning){rat.position.set(29,0,19);gameCam.yaw=-Math.PI/2;gameCam.ready=false;}};
   const areaStart=startArea;startArea=function(id){if(id==='courtyard'&&phase==='scavenge'){enterExtension184();return;}return areaStart(id);};
   const propsTick=tickProps57;tickProps57=function(dt){propsTick(dt);if(nearGate57()){ui.prompt.textContent='E · Stairway to Heaven';$('padE').textContent='Enter';}};
