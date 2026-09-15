@@ -11,7 +11,7 @@ c.rat=null;c.gameCam.pos=new THREE.Vector3();vm.createContext(c);
 // Expose state in this test VM only, never in the shipped course.
 const source=fs.readFileSync(require('path').join(__dirname,'../heaven-course183.js'),'utf8').replace('  const previousClear=clear;','  window.test183={state:()=>H,checkpoints,respawn,underRoof};\n  const previousClear=clear;');
 vm.runInContext(source,c);c.startHeaven183();let h=c.test183.state();
-assert(h.platforms.length>60);assert.equal(h.actions.length,4);assert(h.animals.bird&&h.animals.lizard);
+assert(h.platforms.length>60);assert.equal(h.actions.length,7);assert(h.animals.bird&&h.animals.lizard);
 function ticks(n){for(let i=0;i<n;i++)c.tickHeaven183(1/60);}
 ticks(5);assert.equal(c.rat.position.y,0);
 c.keys.w=true;ticks(175);c.keys.w=false;console.log('Stairs end',c.rat.position.toArray());assert(c.rat.position.y>2.3,'stairs should be walkable');
@@ -21,13 +21,15 @@ c.rat.position.set(0,2.4,-7.6);h.vy=0;h.grounded=true;ticks(2);assert.equal(h.ch
 for(const [takeoff,landing,y] of [[-8.5,-10.7,2.9],[-10.95,-13.15,3.45],[-13.35,-15.5,4]]){
   c.keys.w=true;while(c.rat.position.z>takeoff)c.tickHeaven183(1/60);c.doJump();while(c.rat.position.z>landing)c.tickHeaven183(1/60);c.keys.w=false;ticks(40);assert(Math.abs(c.rat.position.y-y)<.02,'jump gap landing '+landing);
 }
-for(const [type,checkpoint] of [['climb',2],['zipline',3],['lizard',5],['bird',7]]){
+for(const [type,checkpoint] of [['climb',2],['zipline',3],['bird',7],['leap',8]]){
   h.checkpoint=checkpoint;const a=h.actions.find(x=>x.type===type);c.rat.position.copy(a.p);h.grounded=true;c.grab();assert(h.transit,type+' starts');c.keys.w=true;ticks(Math.ceil(a.duration*60)+2);c.keys.w=false;assert(!h.transit,type+' ends');assert(h.completed[type]);assert.equal(h.checkpoint,checkpoint+1);assert(c.rat.position.distanceTo(a.to)<.16);
 }
 // Standing cannot enter tunnel; crawling can and cannot stand/jump inside it.
-h.checkpoint=6;h.transit=null;h.vy=0;h.grounded=true;c.rat.position.set(14,12,-40);c.rat.userData.crawl169=false;c.keys.w=true;ticks(30);assert(c.rat.position.z>-40.6);c.toggleCrawl169();ticks(70);assert(c.rat.position.z<-40.7);assert(h.completed.crawl);assert(c.test183.underRoof());c.toggleCrawl169();assert(c.rat.userData.crawl169);c.doJump();assert(h.grounded);c.keys.w=false;
+h.checkpoint=6;h.transit=null;h.vy=0;h.grounded=true;c.rat.position.set(14,9,-40);c.rat.userData.crawl169=false;c.keys.w=true;ticks(30);assert(c.rat.position.z>-40.6);c.toggleCrawl169();ticks(70);assert(c.rat.position.z<-40.7);assert(h.completed.crawl);assert(c.test183.underRoof());c.toggleCrawl169();assert(c.rat.userData.crawl169);c.doJump();assert(h.grounded);c.keys.w=false;
 // Falls return safely; reward persists in home data; leaving clears course state.
 c.rat.position.y=-40;ticks(1);assert(c.rat.position.distanceTo(new THREE.Vector3(...c.test183.checkpoints[6].p))<.1);
-h.checkpoint=9;c.rat.position.set(0,20.5,-63);c.grab();assert(c.home.stairwayPortrait183);assert(captures[0].includes('Heaven'));
+h.checkpoint=5;c.rat.position.copy(h.actions.find(a=>a.type==='lizard').p);c.grab();c.keys.w=true;for(let i=0;i<490;i++){if(h.transit?.type==='lizard'&&((h.transit.progress>.265&&h.transit.progress<.28)||(h.transit.progress>.605&&h.transit.progress<.62)))c.doJump();c.tickHeaven183(1/60);}c.keys.w=false;assert(h.completed.lizard);assert.equal(h.checkpoint,6);
+for(const [type,cp] of [['wall',6],['wallfinish',9]]){h.checkpoint=cp;const a=h.actions.find(a=>a.type===type);c.rat.position.copy(a.p);c.grab();c.keys.w=true;ticks(Math.ceil(a.duration*60)+1);c.keys.w=false;assert(h.completed[type]);}
+h.checkpoint=10;c.rat.position.set(0,20.5,-63);c.grab();assert(c.home.stairwayPortrait183);assert(captures[0].includes('Heaven'));
 c.startScavenge();assert.equal(c.test183.state(),null);assert.equal(c.phase,'scavenge');
 console.log('PASS: scene build, stairs, jump/landing, four traversal modes, crawl clearance, fall recovery, reward and cleanup');
