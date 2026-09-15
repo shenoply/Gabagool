@@ -753,13 +753,22 @@
       const u = rat?.userData, water = rat && waterVolume66(rat.position);
       if (!u?.diving163 || !water || photo.active || !['scavenge','explore'].includes(phase)) return;
       const target = rat.position.clone().add(new THREE.Vector3(0, .13, 0));
-      const offset = new THREE.Vector3(Math.sin(gameCam.yaw) * 1.15, .12, Math.cos(gameCam.yaw) * 1.15);
+      const distance = THREE.MathUtils.clamp(gameCam.distance * .68, 2.2, 3.6);
+      const offset = new THREE.Vector3(Math.sin(gameCam.yaw) * distance, .12, Math.cos(gameCam.yaw) * distance);
       const goal = target.clone().add(offset);
       if (water === pond173.water) {
-        // Keep the lens inside the actual shoreline, even when orbiting near a bank.
-        for (let i=0;i<20 && (!pondInside179(goal.x,goal.z)||pondFloor180(goal.x,goal.z)+.12>target.y);i++) goal.lerp(target,.25);
-        // Move closer at banks instead of lifting the camera into a top-down view.
-        goal.y = Math.min(water.position.y-.12, target.y+.04);
+        // Find room around the swimmer instead of collapsing the boom into Pip.
+        let found=false;
+        for(const d of [distance,2.2,1.8]) {
+          for(const turn of [0,.35,-.35,.7,-.7,1.05,-1.05,1.57,-1.57,2.1,-2.1,Math.PI]) {
+            const a=gameCam.yaw+turn,x=target.x+Math.sin(a)*d,z=target.z+Math.cos(a)*d;
+            if(!pondInside179(x,z)||pondFloor180(x,z)+.18>target.y+.22)continue;
+            goal.set(x,Math.min(water.position.y-.15,Math.max(target.y+.08,pondFloor180(x,z)+.18)),z);
+            found=true;break;
+          }
+          if(found)break;
+        }
+        if(!found)goal.set(23.2,Math.min(water.position.y-.2,target.y+.08),32.1);
       } else goal.y = Math.min(goal.y,water.position.y-.2);
       camera.position.copy(goal);
       gameCam.pos.copy(goal);
@@ -891,7 +900,7 @@
   const mapBeforeLabels178 = addMap171;
   addMap171 = function mapLabels178() { mapBeforeLabels178(); const m = $('miniMap171'); if (m && !m.querySelector('.labels178')) { const l = document.createElement('small'); l.className = 'labels178'; l.textContent = 'Willow Pond · Playyard'; l.style.cssText = 'position:absolute;left:9px;bottom:7px;font-size:8px;opacity:.8'; m.appendChild(l); } };
   const style178 = document.createElement('style'); style178.textContent = '#mute{top:340px!important;z-index:28!important}'; document.head.appendChild(style178);
-  const hud181=document.createElement('style');hud181.textContent='#miniMap171{width:104px!important;height:104px!important;border-radius:14px!important}#miniMap171 .labels178{display:none}#mute{top:auto!important;bottom:190px!important;left:12px!important;right:auto!important;z-index:40!important}';document.head.appendChild(hud181);
+  const hud181=document.createElement('style');hud181.textContent='#miniMap171{width:104px!important;height:104px!important;border-radius:14px!important}#miniMap171 .labels178{display:none}#mute#mute{top:auto!important;bottom:190px!important;left:12px!important;right:auto!important;height:36px!important;min-height:0!important;width:auto!important;padding:6px 12px!important;z-index:40!important}';document.head.appendChild(hud181);
   mapPoint171=function(el,x,z){el.style.left=(8+(x+22)/70*88)+'px';el.style.top=(94-(z+14)/67*80)+'px';};
 
   // One shared shoreline drives the mesh and swimming bounds.
