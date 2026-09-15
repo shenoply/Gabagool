@@ -403,11 +403,11 @@ function makeRatFallback(){
   let dy=g.rotation.y-u.lastYaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));u.lastYaw=g.rotation.y;u.yawV=smooth(u.yawV,Math.max(-5,Math.min(5,dy/Math.max(dt,.001))),dt,8);u.tailLag=smooth(u.tailLag,u.yawV*.07,dt,5);
   const w=u.walkB,r=u.runB,tm=u.clock;let crouch=0,lean=.10+r*.21,armLift=0;
   if(u.land>0){u.land=Math.max(0,u.land-dt);crouch=u.land/.18*.10;}
-  if(u.act){u.act.t+=dt;const a=u.act.t;if(u.act.type==='roll'){const q=Math.min(1,a/.55);torso.rotation.x=-q*Math.PI*2;crouch=.20;armLift=1.8;if(q===1){u.act=null;torso.rotation.x=0;}}else{const q=Math.sin(Math.min(1,a/.52)*Math.PI);lean+=q*.52;armLift=q*1.2;crouch=q*.06;if(a>=.52)u.act=null;}}
+  if(u.act){u.act.t+=dt;const a=u.act.t;if(u.act.type==='roll'||u.act.type==='airRoll'){const q=Math.min(1,a/.55);torso.rotation.x=-q*Math.PI*2;crouch=.20;armLift=1.8;if(q===1){u.act=null;torso.rotation.x=0;}}else{const q=Math.sin(Math.min(1,a/.52)*Math.PI);lean+=q*.52;armLift=q*1.2;crouch=q*.06;if(a>=.52)u.act=null;}}
   if(u.pick){u.pick.t+=dt;const q=u.pick.t/(u.pick.rare67?4.3:1.5);armLift=1.0;u.pick.item.visible=q>.12;u.pick.item.position.set(0,.41,.42);u.pick.item.rotation.x=0;if(q>.74)u.pick.item.scale.setScalar(u.pick.scale*Math.max(.01,1-(q-.74)/.25));if(q>=1){u.pick.item.parent.remove(u.pick.item);u.pick=null;}}
   if(u.climb)armLift=2.3;
   const hy=.65-crouch+Math.cos(u.phase*2)*.012*w+Math.sin(tm*1.6)*.007*(1-w);hips.position.y=smooth(hips.position.y,hy,dt,15);hips.rotation.z=smooth(hips.rotation.z,-Math.sin(u.phase)*.025*w-u.yawV*.016,dt,9);
-  if(!u.act||u.act.type!=='roll')torso.rotation.x=smooth(torso.rotation.x,lean*w+(u.air?.18:0),dt,9);
+  if(!u.act||(u.act.type!=='roll'&&u.act.type!=='airRoll'))torso.rotation.x=smooth(torso.rotation.x,lean*w+(u.air?.18:0),dt,9);
   torso.rotation.y=smooth(torso.rotation.y,Math.sin(u.phase)*.04*w,dt,9);body.scale.set(1+Math.sin(tm*1.7)*.008,1+Math.sin(tm*1.7)*.010,1);
   head.rotation.x=smooth(head.rotation.x,-lean*w*.7+(u.sleeping?.28:Math.sin(tm*1.1)*.025),dt,8);head.rotation.y=smooth(head.rotation.y,u.yawV*.06+(1-w)*Math.sin(tm*.47)*.17+(panic?Math.sin(tm*3)*.14:0),dt,7);head.rotation.z=smooth(head.rotation.z,u.sleeping?.19:-hips.rotation.z*.65,dt,8);
   u.blink-=dt;if(u.blink<=0){u.blinkT=.14;u.blink=2.4+Math.random()*2.9;}u.blinkT=Math.max(0,u.blinkT-dt);const eyeScale=u.sleeping?.06:u.blinkT>0?Math.max(.07,Math.abs(u.blinkT-.07)/.07):1;eyes.forEach(e=>e.scale.y=eyeScale);
@@ -772,7 +772,7 @@ function endCutscene(){if(phase!=='cutscene')return;$('openingArt').style.opacit
 // ---------- shared movement: walk, run, jump, roll, bite ----------
 const ctl={jump:false,roll:false,bite:false};
 function doJump(){if(rat?.userData.job67){if(rat.userData.job67.lock)return;rat.userData.job67=null;}if(dropRope66())return;if(rat&&rat.userData.climb){rat.userData.climb=null;rat.userData.air=true;rat.userData.vy=0;rat.userData.drop62=.5;return;}if(homeUse41){endHomeUse41();return;}if(photo.active)return;if(rat&&rat.userData.wallState){leaveWall();return;}if(photo.active||!rat||rat.userData.interaction||rat.userData.climb||rat.userData.air||rat.userData.act||rat.userData.pick)return;rat.userData.air=true;rat.userData.vy=6.2;rat.userData.drop62=.35;sfx.step('wood');}
-function doRoll(){if(rat?.userData.job67?.lock)return;if(rat)rat.userData.job67=null;if(rat&&(rat.userData.rope66||rat.userData.swim66))return;if(homeUse41){endHomeUse41();return;}const u=rat&&rat.userData;if(photo.active||!u||u.wallState||u.interaction||u.climb||u.act||u.air||u.pick)return;u.act={type:'roll',t:0};u.rollDir=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));sfx.step('cobble');}
+function doRoll(){if(rat?.userData.job67?.lock)return;if(rat)rat.userData.job67=null;if(rat&&(rat.userData.rope66||rat.userData.swim66))return;if(homeUse41){endHomeUse41();return;}const u=rat&&rat.userData;if(photo.active||!u||u.wallState||u.interaction||u.climb||u.act||u.pick)return;if(u.air){u.act={type:'airRoll',t:0};sfx.step('cobble');return;}u.act={type:'roll',t:0};u.rollDir=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));sfx.step('cobble');}
 function doBite(){if(rat?.userData.job67?.lock)return;if(rat&&rat.userData.rope66)return;if(homeUse41){endHomeUse41();return;}const u=rat&&rat.userData;if(!u||u.wallState||u.interaction||u.climb||u.act||u.pick||u.biteCD>0||photo.active)return;u.biteCD=1.4;u.act={type:'bite',t:0};sfx.hiss();
   if(phase==='scavenge'&&sc.cat){const c=sc.cat;const to=c.m.position.clone().sub(rat.position);to.y=0;const f=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));
     if(to.length()<.9&&to.normalize().dot(f)>0.3&&c.state!=='leave'){c.state='leave';sfx.yowl();ui.prompt.textContent='Got him on the nose!';}}}
@@ -2248,7 +2248,7 @@ function motion67(g,dt,speed,base,act){
  else if(u.climb&&u.climb.to.y>=u.climb.from.y)base='Ledge_Pull_Up';
  else if(u.wallState&&u.wallState.clock<.5&&g.position.y>u.wallState.o.h-.45)base='Ledge_Grab';
  else if(u.wallState&&!u.wallState.moving&&g.position.y>u.wallState.o.h-.45)base='Ledge_Hang_Loop';
- else if(act?.type==='roll')base='Forward_Roll';
+ else if(act?.type==='roll'||act?.type==='airRoll')base='Forward_Roll';
  else if(u.heavy67&&!u.pick&&!u.air&&!u.wallState&&!act)base=speed>.07?'Carry_Heavy_Walk_Loop':'Carry_Idle_Loop';
  else if(u.pick)base=!u.pick.rare67||u.pick.t<1.5?'Carry_Pickup':u.pick.t<3.1?'Inspect_Find':'Pocket_Find';
  else if(!u.air&&!u.wallState&&!act){if(u.gap67&&moving)base='Squeeze_Shuffle_Loop';else if(u.cover67)base=moving?'Sneak_Walk_Loop':'Hide_Idle_Loop';}
@@ -2866,6 +2866,6 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=167"></script>
+<script src="wildlife-recovered118.js?v=168"></script>
 </body>
 </html>

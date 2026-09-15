@@ -553,7 +553,7 @@
   motion67 = function motionWithLeap166(g, dt, speed, base, act) {
     const selected = motionBeforeLeap166(g, dt, speed, base, act);
     const u = g?.userData;
-    return (g === rat && u?.leap166 && u.air && !u.swim66) ? 'Fall_Forward' : selected;
+    return (g === rat && u?.leap166 && u.air && !u.swim66 && u.act?.type !== 'airRoll') ? 'Fall_Forward' : selected;
   };
 
   const makeRatBeforeLeap166 = makeRat;
