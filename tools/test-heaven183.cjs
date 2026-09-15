@@ -6,11 +6,13 @@ const elements=new Map();
 function element(){return {style:{},classList:{add(){},remove(){}},remove(){},appendChild(){},querySelectorAll(){return [element(),element(),element()];},getContext(){return {fillRect(){},strokeRect(){},fillText(){}};}};}
 const $=id=>{if(!elements.has(id))elements.set(id,element());return elements.get(id);};
 let captures;
+class TestAudio {constructor(src){this.src=src;this.paused=true;}play(){this.paused=false;return Promise.resolve();}pause(){this.paused=true;}removeAttribute(){this.src='';}load(){}}
 const c={THREE,console,URLSearchParams,location:{search:''},document:{createElement:element,body:element(),head:element()},$,addEventListener(){},MT:color=>new THREE.MeshStandardMaterial({color}),root:new THREE.Group(),scene:new THREE.Scene(),sun:{},hemi:{},sfx:{rain(){}},radioStop(){},exitPhoto(){},closeModal(){},sayToast(){},save(){},home:{},HD:8,phase:'scavenge',sc:null,keys:{},joy:{x:0,z:0},gameCam:{yaw:0,pitch:.38,distance:4.8,ready:false},camera:new THREE.PerspectiveCamera(55,.6,.01,150),ui:{title:element(),pad:element(),prompt:element()},makeRat(){const r=new THREE.Group();r.animate=()=>{};return r;},clear(){c.root=new THREE.Group();},startScavenge(){c.clear();c.phase='scavenge';},startHouse(){c.clear();c.phase='house';},startArea(){},tickProps57(){},useGate57(){},nearGate57(){return false;},doJump(){},grab(){},toggleCrawl169(){c.rat.userData.crawl169=!c.rat.userData.crawl169;},rotateBone69(){},zoomGame(f){c.gameCam.distance*=f;},modal(...args){captures=args;},loader88:{load(file,cb){const g=new THREE.Group();g.add(new THREE.Mesh(new THREE.BoxGeometry(1,.3,.5)));cb({scene:g,animations:[]});}}};c.window=c;
 c.menu65=()=>{};c.requestAnimationFrame=fn=>fn();c.rat=null;c.gameCam.pos=new THREE.Vector3();vm.createContext(c);
 // Expose state in this test VM only, never in the shipped course.
 const source=fs.readFileSync(require('path').join(__dirname,'../heaven-course183.js'),'utf8').replace('  const previousClear=clear;','  window.test183={state:()=>H,checkpoints,respawn,underRoof};\n  const previousClear=clear;');
-vm.runInContext(source,c);c.startHeaven183();let h=c.test183.state();
+c.Audio=TestAudio;c.voiceOn=true;vm.runInContext(source,c);c.startHeaven183();let h=c.test183.state();
+const missionAudio=h.music189;assert.equal(missionAudio.src,'mission-music189.mp3');assert(missionAudio.loop&&!missionAudio.paused);c.voiceOn=false;c.tickHeaven183(0);assert(missionAudio.muted);c.voiceOn=true;c.tickHeaven183(0);assert(!missionAudio.muted);
 assert(h.platforms.length>60);assert.equal(h.actions.length,6);assert(h.animals.bird&&h.animals.lizard);
 assert(h.solids.length>h.platforms.length,'structural props are collidable');
 for(const cloud of c.root.children.filter(m=>m.name==='Cosmetic distant cloud')){assert(cloud.position.y<0&&Math.abs(cloud.position.x)>30);assert(!h.solids.some(s=>s.m===cloud));}
