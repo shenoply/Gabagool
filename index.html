@@ -1396,6 +1396,7 @@ function loop(now){requestAnimationFrame(loop);if(car77?.riding&&(!gameplayActiv
   if(photo.active)tickPhoto();
   if(!photo.active&&sc?.talk&&phase==='scavenge')frameNeighbour63();
   else talkHint86();
+  if(typeof applyDiveCamera181==='function')applyDiveCamera181();
   renderer.render(scene,camera);
   if(photo.capture){photo.capture=false;canvas.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="wet-whiskers-photo.png";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});}
   }catch(e){console.error(e);}}
@@ -2869,6 +2870,6 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=180"></script>
+<script src="wildlife-recovered118.js?v=181"></script>
 </body>
 </html>
