@@ -675,7 +675,7 @@
   function addMap171() {
     if ($('miniMap171')) return;
     const map = document.createElement('div'); map.id = 'miniMap171';
-    map.innerHTML = '<b>Yard</b><i data-id="home">⌂</i><i data-id="den">●</i><i data-id="pip">●</i>';
+    map.innerHTML = '<b>Yard</b><i data-id="home">⌂</i><i data-id="den" aria-label="Lizard den">🦎</i><i data-id="pip">●</i>';
     map.style.cssText = 'display:none;position:fixed;right:12px;top:104px;width:108px;height:108px;border:2px solid #e7dbc0;border-radius:18px;background:#29463ddd;color:#f7eedc;z-index:24;pointer-events:none;overflow:hidden;font:11px system-ui';
     map.querySelector('b').style.cssText = 'position:absolute;left:9px;top:7px;font-weight:600';
     map.querySelectorAll('i').forEach(i => i.style.cssText = 'position:absolute;font-style:normal;transform:translate(-50%,-50%);font-size:16px');
