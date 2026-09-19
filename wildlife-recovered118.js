@@ -675,12 +675,12 @@
   function addMap171() {
     if ($('miniMap171')) return;
     const map = document.createElement('div'); map.id = 'miniMap171';
-    map.innerHTML = '<b>Yard</b><i data-id="home">⌂</i><i data-id="den" aria-label="Lizard den">🦎</i><i data-id="bird" aria-label="Osprey transport">🦅</i><i data-id="mission-bridge" aria-label="Bridge string" title="Bridge string">🪢</i><i data-id="mission-vinyl" aria-label="Lost vinyl" title="Lost vinyl">♪</i><i data-id="mission-pool" aria-label="Pool key" title="Pool key">🔑</i><i data-id="pip">●</i>';
+    map.innerHTML = '<b>Yard</b><i data-id="home">⌂</i><i data-id="den" aria-label="Lizard den">🦎</i><i data-id="bird" aria-label="Osprey transport">🦅</i><i data-id="mission-bridge" aria-label="Bridge string" title="Bridge string">!</i><i data-id="mission-vinyl" aria-label="Lost vinyl" title="Lost vinyl">♪</i><i data-id="mission-pool" aria-label="Pool key" title="Pool key">🔑</i><i data-id="pip">●</i>';
     map.style.cssText = 'display:none;position:fixed;right:12px;top:104px;width:108px;height:108px;border:2px solid #e7dbc0;border-radius:18px;background:#29463ddd;color:#f7eedc;z-index:24;pointer-events:none;overflow:hidden;font:11px system-ui';
     map.querySelector('b').style.cssText = 'position:absolute;left:9px;top:7px;font-weight:600';
     map.querySelectorAll('i').forEach(i => i.style.cssText = 'position:absolute;font-style:normal;transform:translate(-50%,-50%);font-size:16px');
     map.querySelector('[data-id="home"]').style.color = '#f4d987'; map.querySelector('[data-id="den"]').style.color = '#a8df9f'; map.querySelector('[data-id="bird"]').style.color = '#b9def5'; map.querySelector('[data-id="pip"]').style.color = '#ffead0';
-    map.querySelectorAll('[data-id^="mission-"]').forEach(i => { i.style.display = 'none'; i.style.color = '#ffd75e'; i.style.fontWeight = '800'; i.style.filter = 'drop-shadow(0 1px 2px #182c27)'; });
+    map.querySelectorAll('[data-id^="mission-"]').forEach(i => { i.style.display = 'none'; i.style.color = '#2b3f38'; i.style.background = '#ffd75e'; i.style.border = '1px solid #fff0a8'; i.style.borderRadius = '50%'; i.style.width = '18px'; i.style.height = '18px'; i.style.lineHeight = '17px'; i.style.textAlign = 'center'; i.style.fontWeight = '900'; i.style.filter = 'drop-shadow(0 1px 2px #182c27)'; });
     map.userData = {};
     document.body.appendChild(map);
     const style = document.createElement('style'); style.textContent = '#mute{top:224px!important;z-index:28!important}.photo #hud,.photo #settings,.photo #survival,.photo #weatherBadge,.photo #mute,.photo #pad,.photo #cameraTools,.photo #miniMap171,.photo #prompt{display:none!important}'; document.head.appendChild(style);

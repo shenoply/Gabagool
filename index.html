@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 197</title>
+<title>Wet Whiskers · Build 198</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -2448,7 +2448,7 @@ function seed76(){if(phase!=='scavenge')return;const s=progress76();yard76={owne
  for(const [x,z,h]of [[-9,23,.45],[-9,21,.9],[-9,19,1.28],[-9,15,1.28],[-9,11,1.28],[-9,8.5,1.28],[-9,3.5,1.28],[-9,0,1.28],[-7,-1,1.85],[-5.8,-2.8,2.6]])deck76(x,z,h,1.5,1.7);
  for(const [za,zb]of [[19,15],[15,11],[11,8.5],[3.5,0]])slope76([-9,1.28,za],[-9,1.28,zb],.8);
  slope76([-9,.04,25],[-9,.45,23]);slope76([-9,1.28,0],[-7,1.85,-1]);slope76([-7,1.85,-1],[-5.8,2.6,-2.8]);slope76([-5.8,2.6,-2.8],[-3.5,2.8,-3.5]);
- y.bridge=piece76('Hinged shortcut plank',-9,2.5,6,1.05,.14,3.6,y.wood);y.tie=piece76('Chewable bridge string',-9,1.6,8,.04,.8,.04,y.rope,false);bridgePose76();
+ y.bridge=piece76('Hinged shortcut plank',-9,2.5,6,1.05,.14,3.6,y.wood);const tieMat76=new THREE.MeshStandardMaterial({color:0xf0c75e,emissive:0x6b4300,emissiveIntensity:.85,roughness:.9});y.tie=piece76('Chewable bridge string',-9,1.22,8,.14,1.55,.14,tieMat76,false);y.tieBeacon=new THREE.Mesh(new THREE.TorusGeometry(.42,.055,8,24),new THREE.MeshBasicMaterial({color:0xffdf6b,transparent:true,opacity:.8,depthWrite:false}));y.tieBeacon.rotation.x=-Math.PI/2;y.tieBeacon.position.set(-9,.1,8);y.tieBeacon.name='Bridge string mission beacon';root.add(y.tieBeacon);bridgePose76();
  rope76(-9.8,18.8,1.28,-9,19);rope76(-5.8,-1.8,2.6,-5.8,-2.8);
  // The high fence route joins existing shelves and ends in stairs rather than a dead end.
  deck76(21.5,25,2.6,1.4,1.1);deck76(24,25,2.6,1.4,1.1);slope76([19,2.6,25],[24,2.6,25],.65);for(let i=0;i<5;i++)deck76(24,23.4-i*1.1,2.1-i*.42,1.3,1.15);
@@ -2506,6 +2506,7 @@ const benchBefore76=benchReady;benchReady=function(){return courtyardReady76()||
 const pantryBefore76=pantryReady;pantryReady=function(){return courtyardReady76()||pantryBefore76();};
 const stationBefore76=stationMessage;stationMessage=function(c){if(courtyardReady76()&&(!c.station||c.station==='workbench'))return '';return stationBefore76(c);};
 const tickBefore76=tickWorld38;tickWorld38=function(dt){tickBefore76(dt);const y=yard76;if(!y||y.owner!==root||phase!=='scavenge'||!gameplayActive())return;y.time+=dt;
+ const bridgeMission76=progress76();if(y.tieBeacon){const showTie76=!!bridgeMission76.missionsActive&&!bridgeMission76.bridge;y.tieBeacon.visible=showTie76;if(showTie76){const pulse76=1+Math.sin(y.time*4)*.16;y.tieBeacon.scale.setScalar(pulse76);y.tieBeacon.material.opacity=.58+Math.sin(y.time*4)*.22;y.tie.rotation.y+=dt*1.2;}}
  if(y.falling!==undefined){y.falling+=dt;y.prize.m.position.y=Math.max(.1,1.58-3*y.falling*y.falling);if(y.prize.m.position.y===.1)delete y.falling;}
  const rain=weather42().rain;y.water=THREE.MathUtils.clamp(y.water+dt*(rain>.15?.033:-.008),.23,1.48);y.rainWater.position.y=y.water;
  for(const [m,target]of [[y.cork,new THREE.Vector3(-3.2,y.water+.085,27)],[y.float,new THREE.Vector3(y.floatTarget.x,.65+Math.sin(y.time*1.5)*.016,y.floatTarget.z)]]){const before=m.position.clone();m.position.lerp(target,1-Math.exp(-dt*3));const u=rat.userData;if(!u.air&&!u.swim66&&Math.abs(rat.position.x-before.x)<.52&&Math.abs(rat.position.z-before.z)<.52&&Math.abs(rat.position.y-(before.y+.075))<.15)rat.position.add(m.position.clone().sub(before));m.updateWorldMatrix(true,false);}
@@ -2635,7 +2636,7 @@ function cleanPoolZone78(){
  for(const node of [...root.children]){if(!remove.test(node.name||''))continue;const p=node.position;if(p.x<-16.25&&p.z>30){removeSolid78(node);root.remove(node);}}
 }
 function clearLegacyWood81(){
- const remove=/^(Batched backyard structures|Salvage route deck|Deck support|Walkable escape plank|Hinged shortcut plank|Small prize shelf|Loose shelf brace|Bird-route salvage shelf|Climbing rope to salvage platform|Knotted route rope|Knotted climbing rope|Chewable bridge string|Legacy wooden platform|Legacy wooden platform support|Backyard picnic table|Garden stepping stone|Climbable garden rock|Collectible steel rod|Torn record sleeve scrap|Cream[ _]enamel|Rusty[ _]drums|Blue[ _]galvanized[ _]steel)$/i,dead=[];
+ const remove=/^(Batched backyard structures|Salvage route deck|Deck support|Walkable escape plank|Small prize shelf|Loose shelf brace|Bird-route salvage shelf|Climbing rope to salvage platform|Knotted route rope|Knotted climbing rope|Legacy wooden platform|Legacy wooden platform support|Backyard picnic table|Garden stepping stone|Climbable garden rock|Collectible steel rod|Torn record sleeve scrap|Cream[ _]enamel|Rusty[ _]drums|Blue[ _]galvanized[ _]steel)$/i,dead=[];
  root.traverse(o=>{const source=(o.userData?.sourceMaterial78||'').trim();if(remove.test(o.name||'')||remove.test(source))dead.push(o);});
  for(const o of dead){removeSolid78(o);o.parent?.remove(o);}
  if(world60?.owner===root){for(const f of world60.finds||[]){f.cover?.parent?.remove(f.cover);f.tag?.parent?.remove(f.tag);f.opened=true;f.g.visible=!home.discoveries60[f.id];f.g.position.y=.1;}for(const shortcut of world60.shortcuts||[]){removeSolid78(shortcut.g);shortcut.g.parent?.remove(shortcut.g);}world60.platforms=[];world60.rope66=null;world60.ropes71=[];world60.shortcuts=[];}
@@ -2893,7 +2894,7 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=197"></script>
-<script src="heaven-course183.js?v=197"></script>
+<script src="wildlife-recovered118.js?v=198"></script>
+<script src="heaven-course183.js?v=198"></script>
 </body>
 </html>
