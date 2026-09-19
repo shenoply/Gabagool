@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 195</title>
+<title>Wet Whiskers · Build 196</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -2586,7 +2586,7 @@ const motionBefore77=motion67;motion67=function(g,dt,speed,base,act){if(g.userDa
 const controlBefore77=control;control=function(dt,options){const result=controlCar77(dt,options);return result===null?controlBefore77(dt,options):result;};
 const grabBefore77=grab;grab=function(){if(car77?.riding)return exitCar77();if(gameplayActive()&&nearCar77())return enterCar77();return grabBefore77();};
 const hintsBefore77=ropeHints66;ropeHints66=function(){hintsBefore77();if(!rat)return;const driving=!!car77?.riding&&car77.owner===root;carPanel77.style.display=driving&&gameplayActive()?'flex':'none';if(driving){if(wallPanel)wallPanel.style.display='none';tailButton67.style.display='none';ui.prompt.style.display='none';$('padE').textContent='Exit';}else if(nearCar77()&&gameplayActive()){ui.prompt.style.display='block';ui.prompt.textContent='Drive toy car';$('padE').textContent='Drive';}};
-const startBefore77=startScavenge;startScavenge=function(){disposeCar77();startBefore77();addCar77();};
+const startBefore77=startScavenge;startScavenge=function(){disposeCar77();startBefore77();};
 for(const name of ['doJump','doBite','doRoll','whip67']){const fn=({doJump,doBite,doRoll,whip67})[name];const guarded=function(...args){if(car77?.riding)return;return fn(...args);};if(name==='doJump')doJump=guarded;if(name==='doBite')doBite=guarded;if(name==='doRoll')doRoll=guarded;if(name==='whip67')whip67=guarded;}
 addEventListener('keydown',e=>{if(!e.repeat&&e.key.toLowerCase()==='h')honk77();});
 addEventListener('visibilitychange',()=>{if(document.hidden){stopEngine77();if(car77)car77.speed=0;}});
@@ -2893,7 +2893,7 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=195"></script>
-<script src="heaven-course183.js?v=195"></script>
+<script src="wildlife-recovered118.js?v=196"></script>
+<script src="heaven-course183.js?v=196"></script>
 </body>
 </html>

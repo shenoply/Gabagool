@@ -196,7 +196,6 @@
         savedPivot116 = null;
         u.pipClip = null;
       }
-      if (g) g.rideSeat195 = null;
       return;
     }
     if (!savedPivot116) savedPivot116 = {
@@ -207,14 +206,11 @@
     // Pip's normal standing pivot is y=.9. Calculate the saddle from the
     // rendered lizard's actual height rather than a fixed magic number. This
     // stays correct at the smaller gameplay scale and prevents belly-clipping.
-    if (!g.rideSeat195) {
-      const worldBox = new THREE.Box3().setFromObject(g.model);
-      g.rideSeat195 = {backHeight:Math.max(.18,worldBox.max.y-g.g.position.y),saddle:saddlePoint121(g)};
-    }
-    const backHeight = g.rideSeat195.backHeight;
+    const worldBox = new THREE.Box3().setFromObject(g.model);
+    const backHeight = Math.max(.18, worldBox.max.y - g.g.position.y);
     // Use the recovered lizard's actual neck point, transformed into Pip's
     // local space. This cannot be reversed by either model's facing axis.
-    const saddle = g.rideSeat195.saddle;
+    const saddle = saddlePoint121(g);
     // Lift the rider clear of the textured back; the recovered mesh's visual
     // body sits higher than its geometry bounding box around the shoulders.
     // Sit down into the mount rather than standing upright on it.
