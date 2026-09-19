@@ -1,0 +1,41 @@
+/* The actual game-ready roadster geometry; shared by the preview and game. */
+(function(scope){
+function createRoadster202(THREE){
+ const car=new THREE.Group();car.name='Pip’s Roadster';const body=new THREE.Group();car.add(body);body.scale.setScalar(.70);
+ const paint=new THREE.MeshStandardMaterial({color:0x214d39,metalness:.36,roughness:.29}),chrome=new THREE.MeshStandardMaterial({color:0xc2c9c5,metalness:.85,roughness:.22}),leather=new THREE.MeshStandardMaterial({color:0xdfd1ae,roughness:.85}),rubber=new THREE.MeshStandardMaterial({color:0x171a18,roughness:.95}),black=new THREE.MeshStandardMaterial({color:0x222a25,roughness:.8}),glass=new THREE.MeshStandardMaterial({color:0xa9cdd0,transparent:true,opacity:.22,depthWrite:false,roughness:.12,side:THREE.DoubleSide}),lamp=new THREE.MeshStandardMaterial({color:0xf6edd2,emissive:0x8e7340,emissiveIntensity:.25,roughness:.3}),red=new THREE.MeshStandardMaterial({color:0xa8231c,roughness:.3});
+ const v=(x,y,z)=>new THREE.Vector3(x,y,z);
+ function mesh(geo,mat,name,parent=body){const m=new THREE.Mesh(geo,mat);m.name=name;m.castShadow=true;m.receiveShadow=true;m.userData.noInk=true;m.userData.keepGeometry=true;parent.add(m);return m;}
+ function rounded(w,h,d,r,mat,name,x,y,z){r=Math.min(r,w/2,h/2);const s=new THREE.Shape(),a=-w/2,b=-h/2;s.moveTo(a+r,b);s.lineTo(a+w-r,b);s.quadraticCurveTo(a+w,b,a+w,b+r);s.lineTo(a+w,b+h-r);s.quadraticCurveTo(a+w,b+h,a+w-r,b+h);s.lineTo(a+r,b+h);s.quadraticCurveTo(a,b+h,a,b+h-r);s.lineTo(a,b+r);s.quadraticCurveTo(a,b,a+r,b);const g=new THREE.ExtrudeGeometry(s,{depth:Math.max(.001,d-2*r),bevelEnabled:true,bevelThickness:r,bevelSize:r*.35,bevelSegments:3,steps:1,curveSegments:5});g.translate(0,0,-(d-2*r)/2);g.computeVertexNormals();const m=mesh(g,mat,name);m.position.set(x,y,z);return m;}
+ function tube(points,r,mat,name,segments=32,parent=body){return mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(p=>v(...p))),segments,r,6,false),mat,name,parent);}
+ function ellipsoid(x,y,z,sx,sy,sz,mat,name){const m=mesh(new THREE.SphereGeometry(1,24,12),mat,name);m.position.set(x,y,z);m.scale.set(sx,sy,sz);return m;}
+ function loft(stations,mat,name){const pts=[],idx=[],n=32;for(const [z,w,mid,h]of stations)for(let j=0;j<=n;j++){const a=j/n*Math.PI*2;pts.push(Math.cos(a)*w,mid+Math.sin(a)*h,z);}for(let i=0;i<stations.length-1;i++)for(let j=0;j<n;j++){const a=i*(n+1)+j,b=a+n+1;idx.push(a,a+1,b,b,a+1,b+1);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));g.setIndex(idx);g.computeVertexNormals();return mesh(g,mat,name);}
+ rounded(1.10,.07,1.76,.025,black,'Underside',0,.22,0);
+ rounded(1.04,.08,1.02,.025,black,'Open cockpit floor',0,.29,-.26);
+ loft([[.14,.51,.43,.10],[.24,.57,.445,.135],[.43,.60,.45,.17],[.7,.61,.43,.17],[.95,.57,.405,.145],[1.10,.47,.37,.12],[1.17,.34,.35,.09],[1.20,.04,.34,.035]],paint,'Sculpted bonnet');
+ loft([[-1.18,.03,.37,.025],[-1.13,.41,.39,.095],[-.99,.55,.435,.12],[-.80,.59,.46,.13],[-.64,.55,.47,.105]],paint,'Rounded rear deck');
+ // Side panels have real curved wheel openings, with hollow cockpit above.
+ for(const side of [-1,1]){const pts=[],idx=[],N=90;for(let i=0;i<=N;i++){const z=-1.12+i/N*2.24,arch=Math.min(Math.abs(z-.74),Math.abs(z+.73));const edge=Math.pow(Math.abs(z)/1.12,6);const top=.53+.15*Math.exp(-Math.pow((z-.74)/.32,2))+.13*Math.exp(-Math.pow((z+.73)/.34,2))-.17*edge;const bottom=Math.min(top-.022,arch<.285?.24+Math.sqrt(.285*.285-arch*arch):.25);const width=.63-.30*edge;pts.push(side*width,bottom,z,side*(width+.014),top,z,side*(width-.11),top-.012,z,side*(width-.09),bottom,z);}
+ for(let i=0;i<N;i++)for(let j=0;j<4;j++){const a=i*4+j,b=i*4+(j+1)%4;idx.push(a,b,a+4,b,b+4,a+4);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));g.setIndex(side===1?idx:idx.flatMap((_,i)=>i%3===0?[idx[i],idx[i+2],idx[i+1]]:[]));g.computeVertexNormals();const m=mesh(g,paint,'Curved wing and door');m.material=paint.clone();m.material.side=THREE.DoubleSide;
+ tube([[side*.54,.54,.2],[side*.58,.55,-.10],[side*.59,.55,-.4],[side*.55,.55,-.66]],.013,chrome,'Cockpit chrome rim');
+ tube([[side*.625,.50,.15],[side*.632,.31,.08],[side*.632,.30,-.42],[side*.626,.51,-.57]],.0045,black,'Door seam',26);
+ rounded(.025,.018,.105,.007,chrome,'Door handle',side*.634,.50,-.35);
+ const mirror=ellipsoid(side*.70,.73,.22,.055,.039,.025,chrome,'Wing mirror');tube([[side*.59,.55,.22],[side*.68,.64,.22],[side*.70,.70,.22]],.010,chrome,'Mirror stem',8);
+ }
+ for(const x of [-.28,.28]){rounded(.43,.105,.39,.034,leather,'Cream seat cushion',x,.36,-.33);const back=rounded(.43,.37,.10,.035,leather,'Cream seat back',x,.54,-.53);back.rotation.x=-.12;for(let j=-2;j<=2;j++)tube([[x+j*.064,.40,-.469],[x+j*.064,.53,-.455],[x+j*.064,.67,-.47]],.004,new THREE.MeshStandardMaterial({color:0xb7a987,roughness:1}),'Seat stitching',8);}
+ rounded(1.02,.15,.10,.024,black,'Dashboard',0,.53,.14);
+ for(const [x,r]of [[-.30,.048],[-.18,.032]]){const gauge=mesh(new THREE.CircleGeometry(r,24),chrome,'Gauge surround');gauge.position.set(x,.56,.079);gauge.rotation.y=Math.PI;const face=mesh(new THREE.CircleGeometry(r*.8,24),black,'Gauge face');face.position.set(x,.56,.077);face.rotation.y=Math.PI;}
+ const screen=new THREE.Shape();screen.moveTo(-.50,0);screen.lineTo(.50,0);screen.lineTo(.46,.34);screen.quadraticCurveTo(0,.39,-.46,.34);screen.closePath();const windshield=mesh(new THREE.ShapeGeometry(screen,12),glass,'Windscreen');windshield.position.set(0,.59,.21);windshield.rotation.x=-.22;
+ tube([[-.5,.59,.21],[-.49,.77,.17],[-.46,.93,.13],[0,.965,.125],[.46,.93,.13],[.49,.77,.17],[.5,.59,.21]],.014,chrome,'Windscreen frame',44);tube([[-.5,.59,.21],[0,.60,.21],[.5,.59,.21]],.012,chrome,'Windscreen sill',16);
+ const wheel=new THREE.Group();wheel.name='Steering wheel';wheel.position.set(-.28,.62,-.055);wheel.rotation.x=-.48;body.add(wheel);mesh(new THREE.TorusGeometry(.115,.014,7,28),black,'Steering rim',wheel);for(let i=0;i<3;i++){const a=i/3*Math.PI*2;tube([[0,0,0],[Math.cos(a)*.105,Math.sin(a)*.105,0]],.006,chrome,'Steering spoke',2,wheel);}const hub=mesh(new THREE.SphereGeometry(.027,12,8),chrome,'Steering boss',wheel);hub.scale.z=.35;
+ tube([[-.28,.40,.09],[-.28,.62,-.055]],.012,chrome,'Steering column',2);tube([[.02,.33,-.20],[.02,.49,-.15]],.009,chrome,'Gear lever',2);ellipsoid(.02,.49,-.15,.024,.024,.024,black,'Gear knob');
+ for(const side of [-1,1]){const x=side*.45;ellipsoid(x,.49,1.02,.12,.12,.075,chrome,'Headlight bezel');ellipsoid(x,.49,1.093,.096,.096,.026,lamp,'Round headlight');ellipsoid(side*.47,.38,-1.10,.059,.08,.028,chrome,'Tail light bezel');ellipsoid(side*.47,.38,-1.125,.043,.06,.014,red,'Tail light');}
+ ellipsoid(0,.34,1.176,.335,.097,.033,black,'Recessed grille');for(const y of [.295,.33,.365,.40])tube([[-.27,y,1.185],[0,y,1.21],[.27,y,1.185]],.008,chrome,'Grille bar',12);
+ for(const z of [-1.16,1.19])tube([[-.57,.24,z*.95],[-.35,.23,z],[0,.23,z*1.025],[.35,.23,z],[.57,.24,z*.95]],.022,chrome,'Curved chrome bumper',24);
+ tube([[-.42,.60,-.80],[-.4,.64,-.90],[.4,.64,-.90],[.42,.60,-.80]],.012,chrome,'Rear luggage rail',20);
+ const hubs=[],steeringPivots=[];
+ for(const x of [-.655,.655])for(const z of [-.73,.74]){const pivot=new THREE.Group();pivot.position.set(x,.245,z);body.add(pivot);steeringPivots.push(pivot);const h=new THREE.Group();pivot.add(h);h.name='Wheel';hubs.push(h);const tyre=mesh(new THREE.CylinderGeometry(.245,.245,.14,32,1),rubber,'Tyre',h);tyre.rotation.z=Math.PI/2;const sign=Math.sign(x);const cap=mesh(new THREE.SphereGeometry(1,20,10),chrome,'Domed hubcap',h);cap.scale.set(.024,.142,.142);cap.position.x=sign*.077;const rim=mesh(new THREE.TorusGeometry(.182,.012,6,32),chrome,'Wheel rim',h);rim.rotation.y=Math.PI/2;rim.position.x=sign*.073;for(const r of [.208,.226]){const line=mesh(new THREE.TorusGeometry(r,.003,4,32),black,'Tyre sidewall',h);line.rotation.y=Math.PI/2;line.position.x=sign*.072;}}
+ car.userData={seat:new THREE.Vector3(-.28,.33,-.33).multiplyScalar(.70),wheel,hubs,steeringPivots,wheelRadius:.245*.70,scaleFactor:.70};
+ return car;
+}
+scope.createRoadster202=createRoadster202;if(typeof module!=='undefined')module.exports=createRoadster202;
+})(typeof window!=='undefined'?window:globalThis);
