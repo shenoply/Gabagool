@@ -12,10 +12,10 @@
   }
   function courseAudio188(dt){
     if(H.audioBus)H.audioBus.gain.value=typeof voiceOn==='undefined'||voiceOn?1:0;
-    if(H.music189){H.music189.muted=H.musicOff||(typeof voiceOn!=='undefined'&&!voiceOn);}
+    musicTick69();
     const b=$('heavenSound188');if(b)b.textContent=typeof voiceOn!=='undefined'&&!voiceOn?'Sound: off':'Sound: on';
   }
-  function playMission189(){if(H?.music189&&H.music189.paused&&!H.musicOff)H.music189.play().catch(()=>{});}
+  function playMission189(){if(H){music69.unlocked=true;music69.blocked=false;musicTick69();}}
   addEventListener('pointerdown',playMission189);
   addEventListener('keydown',playMission189);
   const texture=new THREE.TextureLoader().load('stairway-reward183.jpg');
@@ -71,17 +71,17 @@
     bar.innerHTML='<strong>Stairway to Heaven</strong><small id="heavenStage183"></small><div><button id="heavenRetry183">Retry checkpoint</button><button id="heavenExit183">Back to yard</button></div><small id="heavenHelp183">Move: stick / WASD · Jump: Space · Use: E · Crawl: C</small>';
     document.body.appendChild(bar);$('heavenRetry183').onclick=respawn;$('heavenExit183').onclick=()=>startScavenge();
     const sound=document.createElement('button');sound.id='heavenSound188';sound.textContent='Sound: on';sound.onclick=()=>$('mute').click();bar.appendChild(sound);
-    const music=document.createElement('button');music.textContent='Music: on';music.onclick=()=>{H.musicOff=!H.musicOff;music.textContent=H.musicOff?'Music: off':'Music: on';if(H.musicOff)H.music189?.pause();else playMission189();courseAudio188(0);};bar.appendChild(music);
+    const music=document.createElement('button');music.textContent=piano.enabled?'Music: on':'Music: off';music.onclick=()=>{piano.enabled=!piano.enabled;music.textContent=piano.enabled?'Music: on':'Music: off';playMission189();};bar.appendChild(music);const next=document.createElement('button');next.textContent='Next song';next.onclick=()=>{piano.enabled=true;music.textContent='Music: on';music69.unlocked=true;nextMusic190();};bar.appendChild(next);
     const cameraBar=document.createElement('div');cameraBar.id='heavenCamera183';cameraBar.innerHTML='<button aria-label="Zoom out course">−</button><button aria-label="Reset course camera">↻</button><button aria-label="Zoom in course">+</button>';document.body.appendChild(cameraBar);
     const buttons=cameraBar.querySelectorAll('button');buttons[0].onclick=()=>zoomGame(1.2);buttons[1].onclick=()=>{gameCam.yaw=0;gameCam.pitch=.38;gameCam.distance=4.8;};buttons[2].onclick=()=>zoomGame(.83);
   }
   const previousClear=clear;
-  clear=function(){if(H?.music189){H.music189.pause();H.music189.removeAttribute('src');H.music189.load();}if(H?.audioBus)H.audioBus.disconnect();if(H?.sunColor&&sun.color)sun.color.copy(H.sunColor);H=null;document.body.classList.remove('heaven-course');$('heaven183')?.remove();$('heavenCamera183')?.remove();$('heavenLaunch186')?.remove();previousClear();};
+  clear=function(){if(H?.audioBus)H.audioBus.disconnect();if(H?.sunColor&&sun.color)sun.color.copy(H.sunColor);H=null;document.body.classList.remove('heaven-course');$('heaven183')?.remove();$('heavenCamera183')?.remove();$('heavenLaunch186')?.remove();previousClear();};
   window.startHeaven183=function() {
     exitPhoto();closeModal();clear();phase='heaven';sc=null;sfx.rain(false);radioStop();
     H={platforms:[],solids:[],blocks:[],actions:[],animals:{},completed:{},checkpoint:0,transit:null,grounded:true,vy:0,clock:0,won:false,sunColor:sun.color?.clone(),materials:{wood:material(0x99734c,'wood'),brick:material(0x92604a,'brick'),dark:material(0x49443b),stone:material(0xc7c2a6,'cobble')}};
     scene.background=new THREE.Color(0xbcd8ed);scene.fog=new THREE.Fog(0xbcd8ed,85,180);sun.intensity=1.15;sun.color?.set(0xffe2b1);hemi.intensity=.85;
-    if(typeof Audio!=='undefined'){H.music189=new Audio('mission-music189.mp3');H.music189.loop=true;H.music189.volume=.55;H.music189.muted=typeof voiceOn!=='undefined'&&!voiceOn;playMission189();}
+    playMission189();
     H.opening=true;rat=makeRat();rat.scale.setScalar(.25);rat.position.set(0,12,7);root.add(rat);rat.rotation.y=Math.PI;
     gameCam.yaw=0;gameCam.pitch=.38;gameCam.distance=4.8;gameCam.ready=false;keys={};joy.x=joy.z=0;
     document.body.classList.add('heaven-course');ui.title.style.display='none';ui.pad.style.display='flex';ui.prompt.style.display='block';hud();
@@ -276,3 +276,4 @@
   style.textContent+='#heavenLaunch186{position:fixed;left:12px;bottom:245px;z-index:60;padding:10px 14px;border:1px solid #ffe4a0;border-radius:12px;background:#e4b854;color:#243e39;font:bold 13px system-ui;pointer-events:auto}#heaven183{padding:8px;font-size:12px;max-width:310px}#heavenHelp183{display:none!important}#heaven183 button{padding:6px;font-size:12px}';
   if(new URLSearchParams(location.search).has('heavenPreview')){const b=document.createElement('button');b.className='btn';b.textContent='Play Stairway to Heaven';b.style.cssText='position:fixed;top:12px;right:12px;z-index:200';b.onclick=()=>{b.remove();startHeaven183();};document.body.appendChild(b);}
 })();
+

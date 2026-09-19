@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers</title>
+<title>Wet Whiskers · Build 190</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -2304,21 +2304,36 @@ function ambientVoice69(name,line,pos){if(!voiceOn||!gameplayActive()||sound66.u
  const cue=recordings69.find(c=>c.name===name&&c.text.replace(/[^a-z]/gi,'').toLowerCase()===line.replace(/[^a-z]/gi,'').toLowerCase())||recordings69.find(c=>c.name===name);
  const el=$('chatter66');el.textContent=name+': '+line;el.style.display='block';sound66.voicePos=pos;sound66.voiceClock=(cue?.duration||5)+2;playVoice69(cue,pos);sound66.utterance={recorded69:true};return true;}
 function lineVoice69(text,onend){return playVoice69(recordings69.find(c=>c.text===text),null,onend);}
-const music69={index:0,el:null,pending:false,blocked:false,unlocked:false,volume:.35,tracks:[
- {title:'Bach · Goldberg Aria',file:'bach69-0.mp3'},
- {title:'Bach · Variation 1',file:'bach69-1.mp3'},
- {title:'Bach · Variation 5',file:'bach69-2.mp3'}
+// Build 190: shared shuffled soundtrack across gameplay and the course.
+const music69={index:-1,last:null,bag:[],el:null,pending:false,blocked:false,unlocked:false,volume:.35,tracks:[
+ {title:'Sabah Fakhri · Ah Ya Helw Ya Msallini',file:'sabah190.mp3'},
+ {title:'Cream · White Room',file:'white-room190.mp3'},
+ {title:'Megadeth · Symphony of Destruction',file:'symphony190.mp3'},
+ {title:'I Like It Like That',file:'i-like-it190.mp3'},
+ {title:'Frank Sinatra · You Make Me Feel So Young',file:'mission-music189.mp3'},
+ {title:'James Brown · The Payback',file:'payback190.mp3'}
 ]};
-function musicElement69(){if(!music69.el){const el=music69.el=new Audio();el.preload='none';el.addEventListener('ended',()=>{music69.index=(music69.index+1)%music69.tracks.length;setTrack69();musicTick69();});el.addEventListener('error',()=>{music69.blocked=true;music69.pending=false;$('pianoToggle').textContent='Music · tap to retry';});}return music69.el;}
-function setTrack69(){const el=musicElement69();el.pause();el.src=music69.tracks[music69.index].file;music69.blocked=false;$('pianoToggle').textContent=music69.tracks[music69.index].title;}
-function musicTick69(){if(typeof music69==='undefined'||!music69.unlocked)return;const allowed=piano.enabled&&voiceOn&&!document.hidden&&!radio.on&&['scavenge','explore','house','inside'].includes(phase);if(!allowed){music69.el?.pause();return;}const el=musicElement69();if(!el.getAttribute?.('src')&&!el.src)setTrack69();el.volume=music69.volume*((speech69.current||sc?.talk)?.3:1);if(el.paused&&!music69.pending&&!music69.blocked){music69.pending=true;el.play().then(()=>{music69.pending=false;}).catch(()=>{music69.pending=false;music69.blocked=true;$('pianoToggle').textContent='Music · tap to play';});}}
-function chooseMusic69(i){radioStop();music69.index=i;piano.enabled=true;music69.unlocked=true;music69.blocked=false;setTrack69();musicTick69();musicMenu69();}
-function musicMenu69(){modal('Music',`<p>${piano.enabled?'Playing':'Paused'} · ${music69.tracks[music69.index].title}</p><p>Recorded piano performances by Kimiko Ishizaka. Public domain (CC0).</p>`,[
+try{music69.last=localStorage.getItem('ww-last-song190');}catch{}
+function nextIndex190(){
+ if(!music69.bag.length){
+  music69.bag=music69.tracks.map((_,i)=>i);
+  for(let i=music69.bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[music69.bag[i],music69.bag[j]]=[music69.bag[j],music69.bag[i]];}
+  const end=music69.bag.length-1;
+  if(music69.tracks[music69.bag[end]].file===music69.last){const j=Math.floor(Math.random()*end);[music69.bag[end],music69.bag[j]]=[music69.bag[j],music69.bag[end]];}
+ }
+ return music69.bag.pop();
+}
+function nextMusic190(){music69.index=nextIndex190();setTrack69();musicTick69();}
+function musicElement69(){if(!music69.el){const el=music69.el=new Audio();el.preload='none';el.loop=false;el.addEventListener('ended',nextMusic190);el.addEventListener('error',()=>{music69.blocked=true;music69.pending=false;$('pianoToggle').textContent='Music · tap to retry';});}return music69.el;}
+function setTrack69(){if(music69.index<0)music69.index=nextIndex190();const el=musicElement69();el.pause();el.src=music69.tracks[music69.index].file;music69.last=music69.tracks[music69.index].file;try{localStorage.setItem('ww-last-song190',music69.last);}catch{}music69.blocked=false;$('pianoToggle').textContent=music69.tracks[music69.index].title;}
+function musicTick69(){if(typeof music69==='undefined'||!music69.unlocked)return;const allowed=piano.enabled&&voiceOn&&!document.hidden&&!radio.on&&['scavenge','explore','house','inside','heaven'].includes(phase);if(!allowed){music69.el?.pause();return;}const el=musicElement69();if(!el.getAttribute?.('src')&&!el.src)setTrack69();el.volume=music69.volume*((speech69.current||sc?.talk)?.3:1);if(el.paused&&!music69.pending&&!music69.blocked){music69.pending=true;el.play().then(()=>{music69.pending=false;if(!piano.enabled||!voiceOn||document.hidden||radio.on)el.pause();}).catch(()=>{music69.pending=false;music69.blocked=true;$('pianoToggle').textContent='Music · tap to play';});}}
+function chooseMusic69(i){radioStop();piano.enabled=true;music69.unlocked=true;music69.blocked=false;if(i!==music69.index){music69.index=i;music69.bag=music69.bag.filter(n=>n!==i);setTrack69();}musicTick69();musicMenu69();}
+function musicMenu69(){modal('Music',`<p>${piano.enabled?'Playing':'Paused'} · ${music69.tracks[music69.index]?.title||'Shuffled soundtrack'}</p><p>Six songs, shuffled without consecutive repeats.</p>`,[
  [piano.enabled?'Pause':'Play',()=>{music69.unlocked=true;music69.blocked=false;piano.enabled=!piano.enabled;musicTick69();musicMenu69();}],
  ...music69.tracks.map((c,i)=>[c.title,()=>chooseMusic69(i)]),
- ['Next track',()=>chooseMusic69((music69.index+1)%music69.tracks.length)],
+ ['Next song',()=>{radioStop();piano.enabled=true;music69.unlocked=true;nextMusic190();musicMenu69();}],
  ['Volume · '+Math.round(music69.volume*100)+'%',()=>{music69.volume=music69.volume>.5?.2:music69.volume>.25?.6:.35;musicTick69();musicMenu69();}],
- ['Music credits',()=>modal('Music credits','<p>J.S. Bach · Goldberg Variations: Aria, Variation 1 and Variation 5.</p><p>Performed by Kimiko Ishizaka. Open Goldberg Variations, 2012. CC0 public-domain dedication. Normalized and encoded as MP3 for this game.</p><p><a href="https://opengoldbergvariations.org/" target="_blank" rel="noopener">Recording project and license</a></p><p>Character dialogue is synthetic audio generated with the open Kokoro model, rather than the phone’s speech engine.</p>',[['Back',musicMenu69]])],['Close',closeModal]
+ ['Close',closeModal]
  ]);}
 $('pianoToggle').onclick=musicMenu69;
 const unlock69=()=>{music69.unlocked=true;music69.blocked=false;musicTick69();if(voiceOn)voiceBuffer69().catch(()=>{});};
@@ -2871,6 +2886,7 @@ startTitle();
 requestAnimationFrame(loop);
 </script>
 <script src="wildlife-recovered118.js?v=187"></script>
-<script src="heaven-course183.js?v=189"></script>
+<script src="heaven-course183.js?v=190"></script>
 </body>
 </html>
+
