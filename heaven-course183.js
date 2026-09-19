@@ -65,7 +65,7 @@
     bar.innerHTML='<div><button id="heavenRetry183">Retry</button><button id="heavenExit183">Exit</button></div>';
     document.body.appendChild(bar);$('heavenRetry183').onclick=respawn;$('heavenExit183').onclick=()=>startScavenge();
     const sound=document.createElement('button');sound.id='heavenSound188';sound.textContent='Sound: on';sound.onclick=()=>$('mute').click();bar.appendChild(sound);
-    const music=document.createElement('button');music.textContent=piano.enabled?'Music: on':'Music: off';music.onclick=()=>{piano.enabled=!piano.enabled;music.textContent=piano.enabled?'Music: on':'Music: off';playMission189();};bar.appendChild(music);const next=document.createElement('button');next.textContent='Next song';next.onclick=()=>{piano.enabled=true;music.textContent='Music: on';music69.unlocked=true;nextMusic190();};bar.appendChild(next);
+    const music=document.createElement('button');music.id='heavenMusicMute192';music.textContent=piano.enabled?'Mute music':'Unmute music';music.onclick=toggleMusicMute192;bar.appendChild(music);const next=document.createElement('button');next.textContent='Next song';next.onclick=()=>{piano.enabled=true;music69.unlocked=true;nextMusic190();syncMusicMute192();};bar.appendChild(next);
     const cameraBar=document.createElement('div');cameraBar.id='heavenCamera183';cameraBar.innerHTML='<button aria-label="Zoom out course">−</button><button aria-label="Reset course camera">↻</button><button aria-label="Zoom in course">+</button>';document.body.appendChild(cameraBar);
     const buttons=cameraBar.querySelectorAll('button');buttons[0].onclick=()=>zoomGame(1.2);buttons[1].onclick=()=>{gameCam.yaw=0;gameCam.pitch=.38;gameCam.distance=4.8;};buttons[2].onclick=()=>zoomGame(.83);
   }

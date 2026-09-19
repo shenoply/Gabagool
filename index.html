@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 191</title>
+<title>Wet Whiskers · Build 192</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -227,7 +227,7 @@ body.decor85 #hb{bottom:max(18px,env(safe-area-inset-bottom))!important;left:aut
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
   <div id="bars"></div><div id="sub" aria-live="polite"></div>
-  <div id="survival"><button class="btn" id="supplies">Supplies</button><span id="lifeFood"></span><span id="lifeWater"></span><span id="lifeEnergy"></span></div><div id="cameraTools"><button class="btn" id="camIn" aria-label="Zoom in">＋</button><button class="btn" id="camOut" aria-label="Zoom out">−</button><button class="btn" id="camReset">Reset view</button></div><div id="weatherBadge"></div><div id="chatter66" role="status" aria-live="polite"></div><div id="settings"><button class="btn" id="weather42">Weather</button><button class="btn" id="pianoToggle">Music</button><button class="btn" id="homePanelToggle" style="display:none" aria-expanded="false">Decorate home</button><button class="btn" id="craftBook">Craft</button><button class="btn" id="menu65">Menu</button><button class="btn" id="map">Areas</button><button class="btn" id="quality">Quality: cosy</button><button class="btn" id="photo">Photo mode</button></div>
+  <div id="survival"><button class="btn" id="supplies">Supplies</button><span id="lifeFood"></span><span id="lifeWater"></span><span id="lifeEnergy"></span></div><div id="cameraTools"><button class="btn" id="camIn" aria-label="Zoom in">＋</button><button class="btn" id="camOut" aria-label="Zoom out">−</button><button class="btn" id="camReset">Reset view</button></div><div id="weatherBadge"></div><div id="chatter66" role="status" aria-live="polite"></div><div id="settings"><button class="btn" id="weather42">Weather</button><button class="btn" id="pianoToggle">Music</button><button class="btn" id="musicMute">Mute music</button><button class="btn" id="homePanelToggle" style="display:none" aria-expanded="false">Decorate home</button><button class="btn" id="craftBook">Craft</button><button class="btn" id="menu65">Menu</button><button class="btn" id="map">Areas</button><button class="btn" id="quality">Quality: cosy</button><button class="btn" id="photo">Photo mode</button></div>
   <div id="photoTools"><small>Pause a little. Look around.</small><button class="btn" id="photoLeft" aria-label="Orbit left">↶</button><button class="btn" id="photoRight" aria-label="Orbit right">↷</button><button class="btn" id="photoZoom">Zoom</button><button class="btn" id="photoSave">Save photo</button><button class="btn" id="photoExit">Back</button></div>
   <div id="hud"><span id="phase"></span><button id="bag" type="button" aria-label="Open bag"></button></div>
   <button class="btn" id="mute" style="position:absolute;top:56px;right:14px;font-size:13px;padding:6px 12px;background:rgba(43,29,20,.7);color:var(--paper)">Sound: on</button>
@@ -2305,7 +2305,7 @@ function ambientVoice69(name,line,pos){if(!voiceOn||!gameplayActive()||sound66.u
  const el=$('chatter66');el.textContent=name+': '+line;el.style.display='block';sound66.voicePos=pos;sound66.voiceClock=(cue?.duration||5)+2;playVoice69(cue,pos);sound66.utterance={recorded69:true};return true;}
 function lineVoice69(text,onend){return playVoice69(recordings69.find(c=>c.text===text),null,onend);}
 // Build 190: shared shuffled soundtrack across gameplay and the course.
-const music69={index:-1,last:null,bag:[],el:null,pending:false,blocked:false,unlocked:false,volume:.35,tracks:[
+const music69={index:-1,last:null,bag:[],el:null,pending:false,blocked:false,unlocked:false,volume:.12,tracks:[
  {title:'Sabah Fakhri · Ah Ya Helw Ya Msallini',file:'sabah190.mp3'},
  {title:'Cream · White Room',file:'white-room190.mp3'},
  {title:'Megadeth · Symphony of Destruction',file:'symphony190.mp3'},
@@ -2313,7 +2313,7 @@ const music69={index:-1,last:null,bag:[],el:null,pending:false,blocked:false,unl
  {title:'Frank Sinatra · You Make Me Feel So Young',file:'mission-music189.mp3'},
  {title:'James Brown · The Payback',file:'payback190.mp3'}
 ]};
-try{music69.last=localStorage.getItem('ww-last-song190');}catch{}
+try{music69.last=localStorage.getItem('ww-last-song190');if(localStorage.getItem('ww-music-muted192')==='1')piano.enabled=false;}catch{}
 function nextIndex190(){
  if(!music69.bag.length){
   music69.bag=music69.tracks.map((_,i)=>i);
@@ -2327,15 +2327,18 @@ function nextMusic190(){music69.index=nextIndex190();setTrack69();musicTick69();
 function musicElement69(){if(!music69.el){const el=music69.el=new Audio();el.preload='none';el.loop=false;el.addEventListener('ended',nextMusic190);el.addEventListener('error',()=>{music69.blocked=true;music69.pending=false;$('pianoToggle').textContent='Music · tap to retry';});}return music69.el;}
 function setTrack69(){if(music69.index<0)music69.index=nextIndex190();const el=musicElement69();el.pause();el.src=music69.tracks[music69.index].file;music69.last=music69.tracks[music69.index].file;try{localStorage.setItem('ww-last-song190',music69.last);}catch{}music69.blocked=false;$('pianoToggle').textContent=music69.tracks[music69.index].title;}
 function musicTick69(){if(typeof music69==='undefined'||!music69.unlocked)return;const allowed=piano.enabled&&voiceOn&&!document.hidden&&!radio.on&&['scavenge','explore','house','inside','heaven'].includes(phase);if(!allowed){music69.el?.pause();return;}const el=musicElement69();if(!el.getAttribute?.('src')&&!el.src)setTrack69();el.volume=music69.volume*((speech69.current||sc?.talk)?.3:1);if(el.paused&&!music69.pending&&!music69.blocked){music69.pending=true;el.play().then(()=>{music69.pending=false;if(!piano.enabled||!voiceOn||document.hidden||radio.on)el.pause();}).catch(()=>{music69.pending=false;music69.blocked=true;$('pianoToggle').textContent='Music · tap to play';});}}
-function chooseMusic69(i){radioStop();piano.enabled=true;music69.unlocked=true;music69.blocked=false;if(i!==music69.index){music69.index=i;music69.bag=music69.bag.filter(n=>n!==i);setTrack69();}musicTick69();musicMenu69();}
+function chooseMusic69(i){radioStop();piano.enabled=true;music69.unlocked=true;music69.blocked=false;if(i!==music69.index){music69.index=i;music69.bag=music69.bag.filter(n=>n!==i);setTrack69();}musicTick69();syncMusicMute192();musicMenu69();}
 function musicMenu69(){modal('Music',`<p>${piano.enabled?'Playing':'Paused'} · ${music69.tracks[music69.index]?.title||'Shuffled soundtrack'}</p><p>Six songs, shuffled without consecutive repeats.</p>`,[
- [piano.enabled?'Pause':'Play',()=>{music69.unlocked=true;music69.blocked=false;piano.enabled=!piano.enabled;musicTick69();musicMenu69();}],
+ [piano.enabled?'Pause':'Play',()=>{music69.unlocked=true;music69.blocked=false;piano.enabled=!piano.enabled;musicTick69();syncMusicMute192();musicMenu69();}],
  ...music69.tracks.map((c,i)=>[c.title,()=>chooseMusic69(i)]),
- ['Next song',()=>{radioStop();piano.enabled=true;music69.unlocked=true;nextMusic190();musicMenu69();}],
- ['Volume · '+Math.round(music69.volume*100)+'%',()=>{music69.volume=music69.volume>.5?.2:music69.volume>.25?.6:.35;musicTick69();musicMenu69();}],
+ ['Next song',()=>{radioStop();piano.enabled=true;music69.unlocked=true;nextMusic190();syncMusicMute192();musicMenu69();}],
+ ['Volume · '+Math.round(music69.volume*100)+'%',()=>{music69.volume=music69.volume>.16?.08:music69.volume>.1?.2:.12;musicTick69();musicMenu69();}],
  ['Close',closeModal]
  ]);}
 $('pianoToggle').onclick=musicMenu69;
+function syncMusicMute192(){const label=piano.enabled?'Mute music':'Unmute music';$('musicMute').textContent=label;const course=$('heavenMusicMute192');if(course)course.textContent=label;}
+function toggleMusicMute192(){piano.enabled=!piano.enabled;music69.unlocked=true;music69.blocked=false;try{localStorage.setItem('ww-music-muted192',piano.enabled?'0':'1');}catch{}musicTick69();syncMusicMute192();}
+$('musicMute').onclick=toggleMusicMute192;syncMusicMute192();
 const unlock69=()=>{music69.unlocked=true;music69.blocked=false;musicTick69();if(voiceOn)voiceBuffer69().catch(()=>{});};
 for(const id of ['start','newgame'])$(id).addEventListener('click',unlock69);
 $('mute').addEventListener('click',()=>{if(!voiceOn)stopVoice69();musicTick69();});
@@ -2886,6 +2889,6 @@ startTitle();
 requestAnimationFrame(loop);
 </script>
 <script src="wildlife-recovered118.js?v=187"></script>
-<script src="heaven-course183.js?v=191"></script>
+<script src="heaven-course183.js?v=192"></script>
 </body>
 </html>
