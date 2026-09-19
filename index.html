@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 194</title>
+<title>Wet Whiskers · Build 195</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -193,7 +193,8 @@ body.cinema #settings,body.photo #settings{visibility:hidden}
 #survival #lifeFood,#survival #lifeWater{position:relative;display:block;padding-bottom:9px;font:14px system-ui!important}
 #lifeFood:after,#lifeWater:after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:3px;background:linear-gradient(to right,var(--meter-color,#abc577) var(--level,0%),#ffffff30 var(--level,0%))}
 #survival .needs-low83{color:#ffd29a;--meter-color:#e59954}#survival .needs-low83:before{content:'! ';font-weight:bold}
-#geckoWhistle193{position:fixed!important;right:16px!important;bottom:175px!important;top:auto!important;z-index:55!important;min-width:132px;min-height:48px;padding:10px 16px!important;background:#486b51!important;color:#fff2cf!important;border:2px solid #c9dca9!important;box-shadow:0 5px 18px #0008;font:700 14px system-ui,sans-serif!important}body.photo #geckoWhistle193,body.cinema #geckoWhistle193{display:none!important}.lizard-map193{margin:10px 0 18px;padding:12px 14px;border-radius:12px;background:#dce7d1;color:#31543d;font:600 16px system-ui,sans-serif}@media(max-width:600px){#geckoWhistle193{right:12px!important;bottom:174px!important;min-width:118px;font-size:13px!important}}
+#geckoWhistle193{position:fixed!important;right:16px!important;bottom:175px;top:auto;z-index:55!important;min-width:132px;min-height:48px;padding:10px 16px!important;background:#486b51!important;color:#fff2cf!important;border:2px solid #c9dca9!important;box-shadow:0 5px 18px #0008;font:700 14px system-ui,sans-serif!important}body.photo #geckoWhistle193,body.cinema #geckoWhistle193{display:none!important}.lizard-map193{margin:10px 0 18px;padding:12px 14px;border-radius:12px;background:#dce7d1;color:#31543d;font:600 16px system-ui,sans-serif}@media(max-width:600px){#geckoWhistle193{right:12px!important;min-width:118px;font-size:13px!important}}
+#title .credits195,#title .controls{display:none!important}#title #pipLoading{font:600 13px system-ui,sans-serif;opacity:.8!important}#title #pipRetry{background:#d7c39b;color:#263c35}
 </style>
 <style>
 /* Build 85: clear workshop hierarchy and thumb-friendly room editing. */
@@ -218,12 +219,9 @@ body.decor85 #hb{bottom:max(18px,env(safe-area-inset-bottom))!important;left:aut
     <div class="eyebrow">A little rat. A fresh start.</div><h1>Wet<br>Whiskers</h1>
     <p>The storm took almost everything. Find little treasures. Make something lovely. Build a home that feels like you.</p>
     <button class="btn" id="start" disabled>Begin Pip’s story</button>
-    <button class="btn" id="newgame" disabled style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">New game (wipe save)</button>
-    <p class="controls" style="font-size:13px;opacity:.6">WASD move · Shift run · Space jump · Q roll · F bite · E grab · R rotate</p>
+    <button class="btn" id="newgame" disabled style="background:rgba(233,220,195,.2);color:var(--paper);font-size:14px">Start fresh</button>
     <button class="btn" id="pipRetry" style="display:none;font-size:13px" onclick="location.reload()">Retry Pip download</button>
-    <p style="font-size:11px;opacity:.7">Pip & Zaytona: owner-provided Meshy models and animations.</p>
-    <p style="font-size:10px;opacity:.65">Crow: Alexei Ostapenko · CC-BY 4.0. Framed picture supplied by the owner.</p><p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Loading animated Pip…</p>
-    <p style="font-size:10px;opacity:.65">Sakura: Jogoss · Kingfisher & osprey: Pigcraft · Hound & squirrel: iRahulRajput · CC-BY 4.0. Bird flock: Blender Artist · Grass: Natural_Disbuster · CC-BY 4.0. Cherry row and dumpster supplied by owner. Trees & daisies: Márcio Meireles · CC-BY 4.0. Original raccoons and doghouse. Cities: Neberkenezer & smooth998 · CC-BY 4.0. Textures: Poly Haven · CC0. Owner-supplied tabby, gecko, snake, ant, rat, plant and backyard prop models. Mobile adaptations. Music: J.S. Bach, Open Goldberg Variations, performed by Kimiko Ishizaka (CC0). Audio normalized and MP3 encoded for the game. Synthetic character recordings generated with Kokoro (Apache 2.0 model). Nature and animal effects synthesized for this game.</p><p style="font-size:11px;opacity:.55">Neighbour model: "The Fat Rat" by Ryan Honey (CC-BY 4.0) · Owner-supplied wildlife · <strong>build 94</strong> · Stable startup + wildlife repair</p>
+    <p id="pipLoading" style="font-size:12px;opacity:.7" role="status">Preparing Pip’s Lane…</p>
   </div>
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
@@ -255,8 +253,8 @@ body.decor85 #hb{bottom:max(18px,env(safe-area-inset-bottom))!important;left:aut
 
 <script>
 let startupFailureShown68=false;
-function startupFailure55(message){if(startupFailureShown68)return;startupFailureShown68=true;const status=document.getElementById('pipLoading'),retry=document.getElementById('pipRetry');if(status)status.textContent=message;if(retry){retry.textContent='Retry loading';retry.style.display='block';}}
-window.addEventListener('error',e=>{if(document.getElementById('start')?.disabled)startupFailure55('The game could not start. '+(e.message||'A required file failed to load.')+' Tap Retry loading.');});
+function startupFailure55(message){if(startupFailureShown68)return;startupFailureShown68=true;console.warn('Startup retry available:',message);const status=document.getElementById('pipLoading'),retry=document.getElementById('pipRetry');if(status)status.textContent='Something did not finish loading.';if(retry){retry.textContent='Try again';retry.style.display='block';}}
+window.addEventListener('error',e=>{if(document.getElementById('start')?.disabled)startupFailure55(e.message||'A required file failed to load.');});
 </script>
 <script src="three-r128-build55.js" onerror="startupFailure55('The game engine did not download. Tap Retry loading.')"></script>
 <script src="GLTFLoader.js" onerror="console.warn('GLTFLoader unavailable')"></script>
@@ -2870,7 +2868,7 @@ function tickRatNpc88(dt,n){n.clock+=dt;n.wander-=dt;n.talking=Math.max(0,(n.tal
  const stride=n.walking?Math.sin(n.clock*8.5):0;for(const [name,mul]of [['Arm_L.000',.5],['Arm_R.000',-.5],['Leg_L.000',-.6],['Leg_R.000',.6],['Tail.000',.18]])n.bones[name]?.rotateX(stride*mul);
  const bob=n.walking?Math.abs(stride)*.035:Math.sin(n.clock*2)*.006;n.model.position.y=n.modelBaseY+bob;n.model.rotation.z=n.walking?stride*.035:0;}
 function tickWildlife88(dt){
- $('geckoWhistle193').style.display=phase==='scavenge'&&!photo.active&&$('modal').style.display!=='flex'?'inline-block':'none';if(!rat||phase!=='scavenge')return;seedWildlife88();if(wildlife88.owner!==root)return;wildlife88.near=null;
+ const whistle=$('geckoWhistle193'),map193=$('miniMap171'),canWhistle=phase==='scavenge'&&!photo.active&&$('modal').style.display!=='flex'&&!wildlife88.gecko?.riding;whistle.style.display=canWhistle?'inline-block':'none';if(canWhistle&&map193){const r=map193.getBoundingClientRect();whistle.style.setProperty('top',Math.round(r.bottom+8)+'px','important');whistle.style.setProperty('bottom','auto','important');whistle.style.setProperty('right',Math.max(10,Math.round(innerWidth-r.right))+'px','important');}if(!rat||phase!=='scavenge')return;seedWildlife88();if(wildlife88.owner!==root)return;wildlife88.near=null;
  const g=wildlife88.gecko;if(g){tickGecko88(dt,g);const d=g.g.position.distanceTo(rat.position);if(d<1.35)wildlife88.near={type:'gecko',obj:g,d};}
  const n=wildlife88.ratNpc;if(n){n.mixer?.update(dt);tickRatNpc88(dt,n);const d=n.g.position.distanceTo(rat.position);if(d<1.7&&(!wildlife88.near||d<wildlife88.near.d))wildlife88.near={type:'rat',obj:n,d};}
  if(wildlife88.snake)tickSnake88(dt,wildlife88.snake);if(wildlife88.cat)tickCat88(dt,wildlife88.cat);if(wildlife88.ant)tickAnt88(dt,wildlife88.ant);
@@ -2879,8 +2877,9 @@ function tickWildlife88(dt){
 function interactWildlife88(){const x=wildlife88.near;if(!x)return false;if(x.type==='rat'){x.obj.talking=2.4;sayToast('Neighbour rat: “Ants found crumbs by the gate. Watch the snake near the timber.”');return true;}const g=x.obj,gn=g.name||home.geckoName88||'Gecko';if(g.riding){g.riding=false;rat.userData.geckoRide88=false;rat.userData.seated41=false;sayToast('Pip hops down from '+gn+'.');return true;}if(!g.tamed){g.tamed=true;g.name=home.geckoName88||'Gecko';home.geckoTamed88=true;save();sayToast('Gecko tamed! Name it from Menu.');return true;}drivingClips77(rat.userData);g.riding=true;rat.userData.geckoRide88=true;rat.userData.seated41=true;sayToast('Riding '+gn+' · tap Dismount to hop off');return true;}
 function whistleGecko193(){
  if(phase!=='scavenge'){sayToast('The lizard is back at its den in Pip’s Lane.');return;}const g=wildlife88.gecko;if(!g){seedWildlife88();sayToast('Pip whistles toward the lizard den…');return;}if(!g.tamed){sayToast('Tame the lizard at its clay-stone den first.');return;}if(g.riding){sayToast((g.name||'Gecko')+' is already carrying Pip.');return;}
- const ac=sfxCtx();if(ac){tone(ac,{f:1250,f2:1850,dur:.16,vol:.045,type:'sine'});setTimeout(()=>tone(ac,{f:1550,f2:2150,dur:.2,vol:.04,type:'sine'}),130);}g.callUntil173=t+14;g.recall88=14;g.wander=0;sayToast('Pip whistles — '+(g.name||'Gecko')+' is coming!');
+ whistleSound195();g.callUntil173=t+14;g.recall88=14;g.wander=0;sayToast('Pip whistles — '+(g.name||'Gecko')+' is coming!');
 }
+function whistleSound195(){if(!voiceOn)return;const ac=sfxCtx();if(!ac)return;ac.resume().catch(()=>{});const now=ac.currentTime,master=ac.createGain(),filter=ac.createBiquadFilter();filter.type='highpass';filter.frequency.value=700;master.gain.setValueAtTime(.0001,now);master.gain.exponentialRampToValueAtTime(.18,now+.025);master.gain.setValueAtTime(.15,now+.30);master.gain.exponentialRampToValueAtTime(.0001,now+.62);filter.connect(master).connect(ac.destination);for(const [ratio,level]of [[1,1],[2,.18]]){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(1120*ratio,now);o.frequency.exponentialRampToValueAtTime(1780*ratio,now+.18);o.frequency.exponentialRampToValueAtTime(1320*ratio,now+.55);g.gain.value=level;o.connect(g).connect(filter);o.start(now);o.stop(now+.64);o.onended=()=>{o.disconnect();g.disconnect();};}setTimeout(()=>{filter.disconnect();master.disconnect();},800);}
 $('geckoWhistle193').onclick=whistleGecko193;
 function mountedPose90(){const g=wildlife88.gecko,u=rat?.userData;if(!g?.riding||!u?.pipPivot)return;u.pipPivot.position.y=.68;u.pipPivot.position.z=-.08;u.pipPivot.rotation.x=-.28;for(const side of ['Left','Right']){rotateBone69(u,side+'Arm',-.5);rotateBone69(u,side+'ForeArm',-.45);}}
 const worldBefore88=tickWorld38;tickWorld38=function(dt){worldBefore88(dt);tickWildlife88(dt);};
@@ -2894,7 +2893,7 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=194"></script>
-<script src="heaven-course183.js?v=194"></script>
+<script src="wildlife-recovered118.js?v=195"></script>
+<script src="heaven-course183.js?v=195"></script>
 </body>
 </html>

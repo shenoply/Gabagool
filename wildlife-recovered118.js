@@ -196,6 +196,7 @@
         savedPivot116 = null;
         u.pipClip = null;
       }
+      if (g) g.rideSeat195 = null;
       return;
     }
     if (!savedPivot116) savedPivot116 = {
@@ -206,11 +207,14 @@
     // Pip's normal standing pivot is y=.9. Calculate the saddle from the
     // rendered lizard's actual height rather than a fixed magic number. This
     // stays correct at the smaller gameplay scale and prevents belly-clipping.
-    const worldBox = new THREE.Box3().setFromObject(g.model);
-    const backHeight = Math.max(.18, worldBox.max.y - g.g.position.y);
+    if (!g.rideSeat195) {
+      const worldBox = new THREE.Box3().setFromObject(g.model);
+      g.rideSeat195 = {backHeight:Math.max(.18,worldBox.max.y-g.g.position.y),saddle:saddlePoint121(g)};
+    }
+    const backHeight = g.rideSeat195.backHeight;
     // Use the recovered lizard's actual neck point, transformed into Pip's
     // local space. This cannot be reversed by either model's facing axis.
-    const saddle = saddlePoint121(g);
+    const saddle = g.rideSeat195.saddle;
     // Lift the rider clear of the textured back; the recovered mesh's visual
     // body sits higher than its geometry bounding box around the shoulders.
     // Sit down into the mount rather than standing upright on it.
@@ -675,11 +679,11 @@
   function addMap171() {
     if ($('miniMap171')) return;
     const map = document.createElement('div'); map.id = 'miniMap171';
-    map.innerHTML = '<b>Yard</b><i data-id="home">⌂</i><i data-id="den" aria-label="Lizard den">🦎</i><i data-id="pip">●</i>';
+    map.innerHTML = '<b>Yard</b><i data-id="home">⌂</i><i data-id="den" aria-label="Lizard den">🦎</i><i data-id="bird" aria-label="Osprey transport">🦅</i><i data-id="pip">●</i>';
     map.style.cssText = 'display:none;position:fixed;right:12px;top:104px;width:108px;height:108px;border:2px solid #e7dbc0;border-radius:18px;background:#29463ddd;color:#f7eedc;z-index:24;pointer-events:none;overflow:hidden;font:11px system-ui';
     map.querySelector('b').style.cssText = 'position:absolute;left:9px;top:7px;font-weight:600';
     map.querySelectorAll('i').forEach(i => i.style.cssText = 'position:absolute;font-style:normal;transform:translate(-50%,-50%);font-size:16px');
-    map.querySelector('[data-id="home"]').style.color = '#f4d987'; map.querySelector('[data-id="den"]').style.color = '#a8df9f'; map.querySelector('[data-id="pip"]').style.color = '#ffead0';
+    map.querySelector('[data-id="home"]').style.color = '#f4d987'; map.querySelector('[data-id="den"]').style.color = '#a8df9f'; map.querySelector('[data-id="bird"]').style.color = '#b9def5'; map.querySelector('[data-id="pip"]').style.color = '#ffead0';
     map.userData = {};
     document.body.appendChild(map);
     const style = document.createElement('style'); style.textContent = '#mute{top:224px!important;z-index:28!important}.photo #hud,.photo #settings,.photo #survival,.photo #weatherBadge,.photo #mute,.photo #pad,.photo #cameraTools,.photo #miniMap171,.photo #prompt{display:none!important}'; document.head.appendChild(style);
@@ -714,7 +718,7 @@
     if (u?.swim66 && polish171.clock - polish171.waterClock > .34) { polish171.waterClock = polish171.clock; burst171(polish171.ripples, rat.position, 'ripple'); }
     for (const f of polish171.finds) { f.age += dt; f.g.position.y += dt * .38; f.g.rotation.y += dt * 5; f.mat.opacity = Math.max(0, 1 - f.age / .55); if (f.age > .55) { f.g.parent?.remove(f.g); f.mat.dispose(); polish171.finds.splice(polish171.finds.indexOf(f), 1); } }
     for (const f of polish171.finds171 || []) if (!f.taken) { f.g.rotation.y += dt * 1.8; f.g.position.y = .12 + Math.sin(polish171.clock * 2.5 + f.phase) * .05; }
-    const map = $('miniMap171'); if (map) { map.style.display = phase === 'scavenge' && !photo.active ? 'block' : 'none'; if (rat) mapPoint171(map.querySelector('[data-id="pip"]'), rat.position.x, rat.position.z); mapPoint171(map.querySelector('[data-id="home"]'), 0, -2); const den = wildlife88?.den153 ? DEN_POS_155 : new THREE.Vector3(-18.75, 0, 24.75); mapPoint171(map.querySelector('[data-id="den"]'), den.x, den.z); }
+    const map = $('miniMap171'); if (map) { map.style.display = phase === 'scavenge' && !photo.active ? 'block' : 'none'; if (rat) mapPoint171(map.querySelector('[data-id="pip"]'), rat.position.x, rat.position.z); mapPoint171(map.querySelector('[data-id="home"]'), 0, -2); const den = wildlife88?.den153 ? DEN_POS_155 : new THREE.Vector3(-18.75, 0, 24.75); mapPoint171(map.querySelector('[data-id="den"]'), den.x, den.z); const bird=typeof rideActor71==='function'?rideActor71():null,birdMark=map.querySelector('[data-id="bird"]');if(bird&&birdMark){birdMark.style.display='block';mapPoint171(birdMark,bird.g.position.x,bird.g.position.z);}else if(birdMark)birdMark.style.display='none'; }
     // A slow, restrained light cycle: warm afternoon through blue evening.
     if (['scavenge', 'explore'].includes(phase)) { const day = .52 + .48 * Math.sin(polish171.clock * .035); sun.intensity = .25 + day * .65; hemi.intensity = .23 + day * .36; }
     const gecko = wildlife88?.gecko;
