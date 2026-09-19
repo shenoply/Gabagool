@@ -34,7 +34,10 @@ function createRoadster202(THREE){
  tube([[-.42,.60,-.80],[-.4,.64,-.90],[.4,.64,-.90],[.42,.60,-.80]],.012,chrome,'Rear luggage rail',20);
  const hubs=[],steeringPivots=[];
  for(const x of [-.655,.655])for(const z of [-.73,.74]){const pivot=new THREE.Group();pivot.position.set(x,.245,z);body.add(pivot);steeringPivots.push(pivot);const h=new THREE.Group();pivot.add(h);h.name='Wheel';hubs.push(h);const tyre=mesh(new THREE.CylinderGeometry(.245,.245,.14,32,1),rubber,'Tyre',h);tyre.rotation.z=Math.PI/2;const sign=Math.sign(x);const cap=mesh(new THREE.SphereGeometry(1,20,10),chrome,'Domed hubcap',h);cap.scale.set(.024,.142,.142);cap.position.x=sign*.077;const rim=mesh(new THREE.TorusGeometry(.182,.012,6,32),chrome,'Wheel rim',h);rim.rotation.y=Math.PI/2;rim.position.x=sign*.073;for(const r of [.208,.226]){const line=mesh(new THREE.TorusGeometry(r,.003,4,32),black,'Tyre sidewall',h);line.rotation.y=Math.PI/2;line.position.x=sign*.072;}}
- car.userData={brake,brakeTarget,gearTarget,seat:new THREE.Vector3(-.28,.33,-.33).multiplyScalar(.70),wheel,hubs,steeringPivots,wheelRadius:.245*.70,scaleFactor:.70};
+ const wipers=[];for(const x of [-.25,.23]){const pivot=new THREE.Group();pivot.position.set(x,.605,.217);pivot.rotation.x=-.22;body.add(pivot);tube([[0,0,0],[0,.19,0]],.006,chrome,'Wiper arm',2,pivot);tube([[-.06,.19,.004],[.09,.19,.004]],.009,black,'Wiper blade',2,pivot);pivot.rotation.z=1.12;wipers.push(pivot);}
+ rounded(.18,.07,.045,.012,chrome,'Radio console',-.10,.51,-.14);const radioTarget=new THREE.Object3D();radioTarget.position.set(-.10,.53,-.17);body.add(radioTarget);const radioKnob=ellipsoid(-.10,.53,-.17,.022,.022,.013,black,'Radio tuning knob');
+ const indicators=[];for(const side of [-1,1])for(const z of [-1.115,1.07]){const mat=new THREE.MeshStandardMaterial({color:0x815019,emissive:0xff9b20,emissiveIntensity:0});const light=ellipsoid(side*.52,.35,z,.04,.027,.025,mat,'Amber turn indicator');light.userData.side=side;indicators.push(light);}
+ car.userData={wipers,radioTarget,radioKnob,indicators,brake,brakeTarget,gearTarget,seat:new THREE.Vector3(-.28,.33,-.33).multiplyScalar(.70),wheel,hubs,steeringPivots,wheelRadius:.245*.70,scaleFactor:.70};
  return car;
 }
 scope.createRoadster202=createRoadster202;if(typeof module!=='undefined')module.exports=createRoadster202;

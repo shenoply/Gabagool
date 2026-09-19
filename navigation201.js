@@ -16,11 +16,12 @@ body.menu-open65 #navigation201,body.photo #navigation201,body.heaven-course #na
 @media(max-height:540px){#navigation201{top:58px;width:112px;gap:4px;right:8px}#navigation201 #miniMap171{display:none!important}#navigation201 button{min-height:30px!important;padding:6px!important}#navigation201 #navTarget201{max-height:40px;overflow:hidden}}
 @media(max-width:480px){.map201{height:280px}.map201-list{grid-template-columns:1fr 1fr}#navigation201{top:94px}}
 `;document.head.appendChild(style);
-  const mapButton=document.createElement('button');mapButton.className='btn';mapButton.textContent='⌖ Open yard map';mapButton.onclick=()=>openYard201();rail.appendChild(mapButton);
+  const mapButton=document.createElement('button');mapButton.className='btn';mapButton.textContent='⌖ Yard & city map';mapButton.onclick=()=>openYard201();rail.appendChild(mapButton);
   const targetLabel=document.createElement('div');targetLabel.id='navTarget201';targetLabel.hidden=true;rail.appendChild(targetLabel);
   let tracked=null,lastRefresh=0;
-  const point=(x,z)=>({x:Math.max(5,Math.min(95,8+(x+22)/70*84)),y:Math.max(7,Math.min(94,91-(z+14)/67*80))});
+  const point=(x,z)=>({x:Math.max(5,Math.min(95,6+(x+22)/54*88)),y:Math.max(7,Math.min(94,95-(z+14)/84*88))});
   function destinations(){const s=progress76(),bird=typeof rideActor71==='function'?rideActor71():null;return [
+    {id:'city',icon:'↟',name:'Open city streets',x:4,z:43,detail:'Drive north through the open gate at the top of the yard. Follow the marked street loop past the café, record shop and market. Traffic keeps to its lanes and slows for you.'},
     {id:'home',icon:'⌂',name:'Pip’s home',x:0,z:-2,detail:'Return home to decorate and arrange your crafted furniture.'},
     {id:'rat',icon:'R',name:'Big Rat',x:NB.x,z:NB.z,detail:s.jobs?'Jobs complete. Your reward is in storage.':'Talk to Big Rat, then recover the vinyl and silver key.'},
     {id:'alley',icon:'A',name:'Alley route / rooftops',x:29.5,z:19,detail:'The east gate leads to Stairway to Heaven. Approach it and press Enter. The course is always replayable.'},
@@ -38,7 +39,7 @@ body.menu-open65 #navigation201,body.photo #navigation201,body.heaven-course #na
     if(phase!=='scavenge'){openMap();return;}const all=destinations(),d=all.find(d=>d.id===selected)||all[0];
     const markers=all.filter(d=>!d.unavailable).map(d=>{const p=point(d.x,d.z);return `<button data-map201="${d.id}" class="${d.id===selected?'selected':''}" style="left:${p.x}%;top:${p.y}%" aria-label="${d.name}" title="${d.name}">${d.icon}</button>`;}).join('');
     const p=point(rat.position.x,rat.position.z);
-    modal('Pip’s Lane · Yard map',`<div class="map201"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M12 15H72V85H12Z" fill="#45623f" stroke="#a08959" stroke-width="1.5"/><path d="M34 82L34 50L60 50L60 30L25 30" fill="none" stroke="#a99c78" stroke-width="3" opacity=".5"/><ellipse cx="62" cy="35" rx="6" ry="4" fill="#447d86"/><rect x="14" y="34" width="8" height="6" rx="2" fill="#75aeb4"/></svg>${markers}<span class="player" style="left:${p.x}%;top:${p.y}%" title="Pip">●</span></div><p class="map201-note"><b>${d.name}</b><br>${d.detail}</p><div class="map201-list">${all.filter(d=>!d.unavailable).map(d=>`<button data-map201="${d.id}" class="${d.id===selected?'active':''}">${d.icon} · ${d.name}</button>`).join('')}</div>`,[['Track destination',()=>track(d.id),!!d.unavailable],['Objectives',openObjectives200],['Close',closeModal]]);
+    modal('Pip’s Lane · Yard & city',`<div class="map201"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M9 42H89V94H9Z" fill="#45623f" stroke="#a08959" stroke-width="1.5"/><rect x="17" y="11" width="68" height="25" rx="6" fill="#53595b"/><rect x="37" y="21" width="31" height="6" rx="1" fill="#b49b78"/><path d="M48 44V34" stroke="#53595b" stroke-width="8"/><path d="M26 16H77V32H26Z" fill="none" stroke="#dfcf95" stroke-width=".5" stroke-dasharray="2 2"/><text x="51" y="8" text-anchor="middle" fill="#f5e5b9" font-size="3">CITY STREETS · TRAFFIC</text></svg>${markers}<span class="player" style="left:${p.x}%;top:${p.y}%" title="Pip">●</span></div><p class="map201-note"><b>${d.name}</b><br>${d.detail}</p><div class="map201-list">${all.filter(d=>!d.unavailable).map(d=>`<button data-map201="${d.id}" class="${d.id===selected?'active':''}">${d.icon} · ${d.name}</button>`).join('')}</div>`,[['Track destination',()=>track(d.id),!!d.unavailable],['Objectives',openObjectives200],['Close',closeModal]]);
     $('modalBody').querySelectorAll('[data-map201]').forEach(b=>b.onclick=()=>openYard201(b.dataset.map201));
   }
   window.openYard201=openYard201;
@@ -46,6 +47,7 @@ body.menu-open65 #navigation201,body.photo #navigation201,body.heaven-course #na
     ['Big Rat’s jobs',s.jobs?'Complete — reward collected':!s.missionsActive?'Talk to Big Rat to begin':s.vinyl&&s.pool?'Return to Big Rat to collect your reward':'In progress','rat',`<p>${s.vinyl?'✓':'○'} Recover the violet-label vinyl</p><p>${s.pool?'✓':'○'} Find the silver pool key</p>`],
     ['Alley route / Stairway to Heaven',home.stairwayPortrait183?'Portrait earned · replay any time':'Available · east gate, marked A','alley','<p>Complete the rooftop course and claim the framed rat portrait.</p>'],
     ['Meet your lizard',home.geckoTamed88?'Tamed · whistle to call it':'Visit the clay-stone den','den',''],
+    ['Explore the city streets','Open · north gate, marked ↟','city','<p>Drive the neighbourhood loop. Try the drift button, indicators and radio.</p>'],
     ['Take the convertible for a drive','Available · marked C','car','<p>Drive, reverse, steer and honk. Stop before getting out.</p>'],
     ['Rebuild your home','Collect salvage → craft → decorate','bench','']
   ];modal('Objectives',`<div class="objectives200">${items.map(([name,status,id,body])=>`<section><b>${name}</b>${body}<p>${status}</p><button class="objective201-track" data-objective201="${id}">Show on map</button></section>`).join('')}</div>`,[['Yard map',()=>openYard201()],['Travel',openMap],['Close',closeModal]]);$('modalBody').querySelectorAll('[data-objective201]').forEach(b=>b.onclick=()=>openYard201(b.dataset.objective201));};

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 203</title>
+<title>Wet Whiskers · Build 204</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -595,12 +595,12 @@ function radioStation(on){const ac=sfxCtx();if(!ac){return;}
   if(!on){if(radio.loopNodes){radio.loopNodes.forEach(n=>{try{n.stop();}catch(e){}});radio.loopNodes=null;}return;}
   if(radio.loopNodes)return;
   // original lo-fi loop, 4 bars at 84 bpm, scheduled 30s ahead then re-armed
-  const bpm=84,beat=60/bpm,bar=beat*4;const nodes=[];const g=ac.createGain();g.gain.value=0.5;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;g.connect(lp).connect(ac.destination);
+  const bpm=radio.preset204===1?108:radio.preset204===2?66:84,beat=60/bpm,bar=beat*4;const nodes=[];const g=ac.createGain();g.gain.value=0.5;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;g.connect(lp).connect(ac.destination);
   const t0=ac.currentTime+0.05;
   const kick=(t)=>{const o=ac.createOscillator(),e=ac.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+0.12);e.gain.setValueAtTime(0.5,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.25);o.connect(e).connect(g);o.start(t);o.stop(t+0.3);nodes.push(o);};
   const snare=(t)=>{const src=ac.createBufferSource();src.buffer=SFX.nb||(SFX.nb=noiseBuf(ac));const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;const e=ac.createGain();e.gain.setValueAtTime(0.18,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.15);src.connect(f).connect(e).connect(g);src.start(t);src.stop(t+0.2);nodes.push(src);};
   const hat=(t)=>{const src=ac.createBufferSource();src.buffer=SFX.nb;const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=7000;const e=ac.createGain();e.gain.setValueAtTime(0.06,t);e.gain.exponentialRampToValueAtTime(0.001,t+0.05);src.connect(f).connect(e).connect(g);src.start(t);src.stop(t+0.06);nodes.push(src);};
-  const note=(f,t,d,vol,type='triangle',det=0)=>{const o=ac.createOscillator(),e=ac.createGain();o.type=type;o.frequency.value=f;o.detune.value=det;e.gain.setValueAtTime(0.0001,t);e.gain.exponentialRampToValueAtTime(vol,t+0.02);e.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(e).connect(g);o.start(t);o.stop(t+d+0.05);nodes.push(o);};
+  const note=(f,t,d,vol,type='triangle',det=0)=>{f*=radio.preset204===1?1.189:radio.preset204===2?.891:1;const o=ac.createOscillator(),e=ac.createGain();o.type=type;o.frequency.value=f;o.detune.value=det;e.gain.setValueAtTime(0.0001,t);e.gain.exponentialRampToValueAtTime(vol,t+0.02);e.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(e).connect(g);o.start(t);o.stop(t+d+0.05);nodes.push(o);};
   const chords=[[220,261.6,329.6],[174.6,220,261.6],[196,246.9,293.7],[164.8,196,246.9]];const bass=[110,87.3,98,82.4];const mel=[440,523.3,493.9,440,392,440,329.6,392, 349.2,440,392,349.2,329.6,293.7,329.6,261.6];
   for(let rep=0;rep<8;rep++)for(let b=0;b<4;b++){const bt=t0+(rep*4+b)*bar;
     kick(bt);kick(bt+beat*2.5);snare(bt+beat);snare(bt+beat*3);for(let h=0;h<8;h++)hat(bt+h*beat/2);
@@ -2474,7 +2474,7 @@ function seed76(){if(phase!=='scavenge')return;const s=progress76();yard76={owne
  piece76('Gate alley paving',36,-.005,19,8,.05,13,M(0x747974),false);
  for(const z of [12.5,25.5])piece76('Alley curb',36,.1,z,8,.2,.24,M(0xaaa491));
  for(const [x,z,w,d,h]of [[41,7,9,9,8],[43,31,12,9,11],[52,19,8,18,15]]){piece76('Neighbourhood brick building',x,h/2,z,w,h,d,MT(0x8e7768,'brick',w/2,h/2),false);piece76('Roof parapet',x,h+.12,z,w+.2,.24,d+.2,M(0x6f706c),false);for(let k=0;k<3;k++)piece76('Recessed alley window',x-w/2-.02,2+k*2.3,z,.035,.95,1.1,M(0x424f50),false);}
- for(const [x,z,w,d]of [[-22,32.5,.13,11],[32,30,.13,16],[3.7,38,6.6,.13]])piece76('Backyard perimeter fence',x,1.5,z,w,3,d,MT(0x526f66,'wood'));
+ for(const [x,z,w,d]of [[-22,32.5,.13,11],[32,30,.13,16],[.85,38,.9,.13]])piece76('Backyard perimeter fence',x,1.5,z,w,3,d,MT(0x526f66,'wood'));
  // Keep route decks and props on the exact visible mesh collision system.
  root.updateMatrixWorld(true);root.userData.collisionCache62?.clear();
 }
@@ -2894,10 +2894,11 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=203"></script>
-<script src="heaven-course183.js?v=203"></script>
-<script src="navigation201.js?v=203"></script>
-<script src="roadster202.js?v=203"></script>
-<script src="driving203.js?v=203"></script>
+<script src="wildlife-recovered118.js?v=204"></script>
+<script src="heaven-course183.js?v=204"></script>
+<script src="navigation201.js?v=204"></script>
+<script src="roadster202.js?v=204"></script>
+<script src="driving203.js?v=204"></script>
+<script src="city204.js?v=204"></script>
 </body>
 </html>
