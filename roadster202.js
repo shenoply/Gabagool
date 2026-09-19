@@ -37,7 +37,9 @@ function createRoadster202(THREE){
  const wipers=[];for(const x of [-.25,.23]){const pivot=new THREE.Group();pivot.position.set(x,.605,.217);pivot.rotation.x=-.22;body.add(pivot);tube([[0,0,0],[0,.19,0]],.006,chrome,'Wiper arm',2,pivot);tube([[-.06,.19,.004],[.09,.19,.004]],.009,black,'Wiper blade',2,pivot);pivot.rotation.z=1.12;wipers.push(pivot);}
  rounded(.18,.07,.045,.012,chrome,'Radio console',-.10,.51,-.14);const radioTarget=new THREE.Object3D();radioTarget.position.set(-.10,.53,-.17);body.add(radioTarget);const radioKnob=ellipsoid(-.10,.53,-.17,.022,.022,.013,black,'Radio tuning knob');
  const indicators=[];for(const side of [-1,1])for(const z of [-1.115,1.07]){const mat=new THREE.MeshStandardMaterial({color:0x815019,emissive:0xff9b20,emissiveIntensity:0});const light=ellipsoid(side*.52,.35,z,.04,.027,.025,mat,'Amber turn indicator');light.userData.side=side;indicators.push(light);}
- car.userData={wipers,radioTarget,radioKnob,indicators,brake,brakeTarget,gearTarget,seat:new THREE.Vector3(-.28,.33,-.33).multiplyScalar(.70),wheel,hubs,steeringPivots,wheelRadius:.245*.70,scaleFactor:.70};
+ tube([[-.10,.32,-.25],[-.10,.564,-.25]],.009,chrome,'Ashtray stand',2);
+ const ashtray=mesh(new THREE.CylinderGeometry(.039,.028,.012,16),chrome,'Console ashtray');ashtray.position.set(-.10,.57,-.25);const ashbed=mesh(new THREE.CircleGeometry(.032,16),black,'Ashtray bowl');ashbed.rotation.x=-Math.PI/2;ashbed.position.set(-.10,.577,-.25);const ashTarget=new THREE.Object3D();ashTarget.position.set(-.10,.59,-.25);body.add(ashTarget);
+ car.userData={ashTarget,wipers,radioTarget,radioKnob,indicators,brake,brakeTarget,gearTarget,seat:new THREE.Vector3(-.28,.33,-.33).multiplyScalar(.70),wheel,hubs,steeringPivots,wheelRadius:.245*.70,scaleFactor:.70};
  return car;
 }
 scope.createRoadster202=createRoadster202;if(typeof module!=='undefined')module.exports=createRoadster202;

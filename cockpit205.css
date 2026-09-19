@@ -1,0 +1,24 @@
+/* Explicit overrides isolate driving controls from the game's global gold buttons. */
+#carPanel203{display:none!important}
+.driving203 #acts,.driving203 #go,.driving203 #survival,.driving203 #bag,.driving203 #craftBook,.driving203 #shopping{display:none!important}
+#cockpit205{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));width:156px;z-index:65;pointer-events:none;font:12px/1.2 system-ui,sans-serif;color:#f4edda}
+#cockpit205[hidden],#cockpit205 [hidden]{display:none!important}
+#cockpit205 button{box-sizing:border-box;position:static!important;transform:none!important;margin:0!important;min-width:0!important;box-shadow:none;pointer-events:auto;touch-action:none;font-family:system-ui,sans-serif!important;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#cockpit205 button:focus-visible{outline:2px solid #f0cf8c;outline-offset:3px}
+#cockpit205 .cockpit205-quick{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px}
+#cockpit205 .cockpit205-key{width:44px!important;height:44px!important;min-height:44px!important;padding:0!important;flex:0 0 44px!important;border:1px solid #e4ead044!important;border-radius:14px!important;background:#203731e8!important;color:#f4edda!important;font:bold 12px system-ui!important;backdrop-filter:blur(8px)}
+#cockpit205 [data-short205]{font-size:0!important}#cockpit205 [data-short205]::after{content:attr(data-short205);font:bold 12px system-ui}
+#cockpit205 .cockpit205-key.selected{border-color:#e8c484!important;background:#486152!important}
+#cockpit205 .cockpit205-main{display:flex;align-items:center;flex-direction:column;margin-left:auto;width:78px;gap:5px}
+#cockpit205 .cockpit205-drift{width:74px!important;height:74px!important;min-height:74px!important;padding:0!important;flex:none!important;border:1px solid #f9e6ba99!important;border-radius:50%!important;background:#d5b16fe8!important;color:#20352e!important;font:800 13px system-ui!important;letter-spacing:.08em}
+#cockpit205 .cockpit205-drift[aria-pressed=true]{background:#f3d99d!important;box-shadow:0 0 0 5px #d5b16f30!important}
+#cockpit205 .cockpit205-note{font:8px system-ui;letter-spacing:.1em;color:#f5ead2;text-shadow:0 1px 3px #000;white-space:nowrap}
+#cockpit205 .cockpit205-drawer{position:absolute;right:0;bottom:162px;width:min(250px,calc(100vw - 28px));max-height:calc(100dvh - 280px);overflow:auto;overscroll-behavior:contain;padding:12px;box-sizing:border-box;border:1px solid #c7d0b64d;border-radius:18px;background:#182f2aef;box-shadow:0 8px 32px #0005;backdrop-filter:blur(14px);pointer-events:auto}
+#cockpit205 .cockpit205-title{display:flex;align-items:center;justify-content:space-between;font:700 10px system-ui;letter-spacing:.13em;margin:0 0 9px 3px}
+#cockpit205 .cockpit205-close{height:36px!important;width:36px!important;min-height:36px!important;background:#ffffff0b!important;border:0!important;color:#ede4ce!important;border-radius:10px!important;font:23px system-ui!important;padding:0!important}
+#cockpit205 .cockpit205-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#cockpit205 .cockpit205-secondary{width:100%!important;height:auto!important;min-height:44px!important;padding:8px 6px!important;background:#e9ecd20d!important;color:#f4edda!important;border:1px solid #dce7c821!important;border-radius:10px!important;font:600 11px/1.3 system-ui!important;white-space:normal!important}
+#cockpit205 .cockpit205-secondary[aria-pressed=true]{background:#d5b16f!important;color:#20352e!important;border-color:#d5b16f!important}
+#cockpit205 .cockpit205-secondary:last-child{color:#e0bd96!important}
+@media(max-height:500px){#cockpit205{bottom:12px;width:156px}#cockpit205 .cockpit205-drawer{bottom:0;right:168px;max-height:calc(100dvh - 40px);width:240px}}
+@media(max-width:360px){#cockpit205{right:8px;width:148px}#cockpit205 .cockpit205-quick{gap:6px}}
