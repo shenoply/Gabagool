@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 192</title>
+<title>Wet Whiskers · Build 193</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -193,6 +193,7 @@ body.cinema #settings,body.photo #settings{visibility:hidden}
 #survival #lifeFood,#survival #lifeWater{position:relative;display:block;padding-bottom:9px;font:14px system-ui!important}
 #lifeFood:after,#lifeWater:after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:3px;background:linear-gradient(to right,var(--meter-color,#abc577) var(--level,0%),#ffffff30 var(--level,0%))}
 #survival .needs-low83{color:#ffd29a;--meter-color:#e59954}#survival .needs-low83:before{content:'! ';font-weight:bold}
+#geckoWhistle193{background:#486b51!important;color:#fff2cf!important;border-color:#c9dca9!important}.lizard-map193{margin:10px 0 18px;padding:12px 14px;border-radius:12px;background:#dce7d1;color:#31543d;font:600 16px system-ui,sans-serif}
 </style>
 <style>
 /* Build 85: clear workshop hierarchy and thumb-friendly room editing. */
@@ -227,7 +228,7 @@ body.decor85 #hb{bottom:max(18px,env(safe-area-inset-bottom))!important;left:aut
   <div id="toast" role="status"></div><div id="shopping"></div>
   <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section><button id="modalClose" class="btn" aria-label="Close">×</button><h2 id="modalTitle"></h2><div id="modalBody"></div><div id="modalActions"></div></section></div>
   <div id="bars"></div><div id="sub" aria-live="polite"></div>
-  <div id="survival"><button class="btn" id="supplies">Supplies</button><span id="lifeFood"></span><span id="lifeWater"></span><span id="lifeEnergy"></span></div><div id="cameraTools"><button class="btn" id="camIn" aria-label="Zoom in">＋</button><button class="btn" id="camOut" aria-label="Zoom out">−</button><button class="btn" id="camReset">Reset view</button></div><div id="weatherBadge"></div><div id="chatter66" role="status" aria-live="polite"></div><div id="settings"><button class="btn" id="weather42">Weather</button><button class="btn" id="pianoToggle">Music</button><button class="btn" id="musicMute">Mute music</button><button class="btn" id="homePanelToggle" style="display:none" aria-expanded="false">Decorate home</button><button class="btn" id="craftBook">Craft</button><button class="btn" id="menu65">Menu</button><button class="btn" id="map">Areas</button><button class="btn" id="quality">Quality: cosy</button><button class="btn" id="photo">Photo mode</button></div>
+  <div id="survival"><button class="btn" id="supplies">Supplies</button><span id="lifeFood"></span><span id="lifeWater"></span><span id="lifeEnergy"></span></div><div id="cameraTools"><button class="btn" id="camIn" aria-label="Zoom in">＋</button><button class="btn" id="camOut" aria-label="Zoom out">−</button><button class="btn" id="camReset">Reset view</button></div><div id="weatherBadge"></div><div id="chatter66" role="status" aria-live="polite"></div><div id="settings"><button class="btn" id="weather42">Weather</button><button class="btn" id="pianoToggle">Music</button><button class="btn" id="musicMute">Mute music</button><button class="btn" id="geckoWhistle193" style="display:none" aria-label="Whistle for your lizard">♪ Call lizard</button><button class="btn" id="homePanelToggle" style="display:none" aria-expanded="false">Decorate home</button><button class="btn" id="craftBook">Craft</button><button class="btn" id="menu65">Menu</button><button class="btn" id="map">Areas</button><button class="btn" id="quality">Quality: cosy</button><button class="btn" id="photo">Photo mode</button></div>
   <div id="photoTools"><small>Pause a little. Look around.</small><button class="btn" id="photoLeft" aria-label="Orbit left">↶</button><button class="btn" id="photoRight" aria-label="Orbit right">↷</button><button class="btn" id="photoZoom">Zoom</button><button class="btn" id="photoSave">Save photo</button><button class="btn" id="photoExit">Back</button></div>
   <div id="hud"><span id="phase"></span><button id="bag" type="button" aria-label="Open bag"></button></div>
   <button class="btn" id="mute" style="position:absolute;top:56px;right:14px;font-size:13px;padding:6px 12px;background:rgba(43,29,20,.7);color:var(--paper)">Sound: on</button>
@@ -1308,7 +1309,7 @@ function place(){if(!hs.sel)return;const q=ghostPose();if(!q.ok){sfx.nope();retu
   if(source==='storage'){if(!(home.storage[id]>0))return;rememberDecor41();home.storage[id]--;if(!home.storage[id])delete home.storage[id];}else if(source==='part'){if(!(inv[id]>0))return;rememberDecor41();inv[id]--;if(!inv[id])delete inv[id];}else if(source==='move'){rememberDecor41();removePlaced(hs.moving);hs.moving=null;}else return;
   const p={id,x:q.x,z:q.z,rot:q.rot,...(source==='move'?hs.moveStyle:{})};if(def.wall){p.wall=q.wall;p.y=q.y;}else if(q.surface)p.elevation=q.y;home.placed.push(p);spawnPlaced(p);stampUndo41();sfx.place();cancelPlace();bag();save();renderPanel();}
 $('snap').addEventListener('click',()=>{hs.snap=!hs.snap;renderPanel()});
-function openMap(){if(!['house','scavenge','inside','explore'].includes(phase)||photo.active||sc&&sc.talk)return;modal('Beyond the doorstep','<p>Different corners of the block hold different treasures.</p>',[['Junkyard',()=>{closeModal();if(phase==='house')cancelPlace();startScavenge()}],['Laundry courtyard',()=>{closeModal();if(phase==='house')cancelPlace();startArea('courtyard')}],['Rain garden',()=>{closeModal();if(phase==='house')cancelPlace();startArea('garden')}],['Rain drain',()=>{closeModal();startArea('drain')}],['Home',()=>{closeModal();startHouse()}]]);}
+function openMap(){if(!['house','scavenge','inside','explore'].includes(phase)||photo.active||sc&&sc.talk)return;modal('Beyond the doorstep','<p>Different corners of the block hold different treasures.</p><p class="lizard-map193">🦎 Lizard den · Pip’s Lane</p>',[['Pip’s Lane · lizard den',()=>{closeModal();if(phase==='house')cancelPlace();startScavenge()}],['Laundry courtyard',()=>{closeModal();if(phase==='house')cancelPlace();startArea('courtyard')}],['Rain garden',()=>{closeModal();if(phase==='house')cancelPlace();startArea('garden')}],['Rain drain',()=>{closeModal();startArea('drain')}],['Home',()=>{closeModal();startHouse()}]]);}
 $('map').addEventListener('click',openMap);
 function newWildlife(parent,type,pos,scale=1){const m=type==='crow'?makeCrow():makeFenceCat();m.position.set(...pos);m.scale.setScalar(scale);outline(m);parent.add(m);wildlife.push({m,type,base:m.position.clone(),flight:0});return m;}
 function tickWildlife(dt){for(let i=wildlife.length-1;i>=0;i--){const a=wildlife[i];let p=a.m;while(p.parent)p=p.parent;if(p!==scene){wildlife.splice(i,1);continue;}if(a.type==='crow'&&rat){if(!a.flight&&rat.position.distanceTo(a.base)<2.7){a.flight=.01;crowCall();}if(a.flight){a.flight+=dt;const q=Math.min(1,a.flight/5);a.m.position.copy(a.base);a.m.position.x+=Math.sin(q*Math.PI*2)*2.6;a.m.position.y+=Math.sin(q*Math.PI)*2.2;a.m.position.z-=Math.sin(q*Math.PI)*1.2;if(q===1)a.flight=0;}}a.m.animate(dt,a.flight>0);}}
@@ -2822,12 +2823,19 @@ function pump88(){while(active88<2&&queue88.length){const job=queue88.shift();ac
 function load88(file,done){queue88.push({file,done,owner:root});pump88();}
 function addPlant88(source,name,pos,height,yaw=0){const src=source.getObjectByName(name);if(!src)return;const g=new THREE.Group(),model=fit88(src.clone(true),height);g.add(model);g.position.set(...pos);g.rotation.y=yaw;g.name='Uploaded garden plant';root.add(g);registerSolid62(g);wildlife88.decor.push(g);}
 function addProp88(source,name,pos,height,yaw=0){const src=source.getObjectByName(name);if(!src)return;const g=new THREE.Group(),model=fit88(src.clone(true),height);g.add(model);g.position.set(...pos);g.rotation.y=yaw;g.name='Uploaded city prop';root.add(g);registerSolid62(g);wildlife88.decor.push(g);}
+function makeGeckoDen193(){
+ const den=new THREE.Group(),clay=MT(0x9a6548,'stone',1.4,1.1),dark=M(0x241b18);den.position.set(8.1,0,28);den.name='Gecko clay-stone den';
+ const entrance=sph(.52,dark,10,7);entrance.scale.set(1.12,.78,.24);entrance.position.set(0,.43,-.44);entrance.userData.noInk=true;den.add(entrance);
+ for(const [x,y,z,sx,sy,sz] of [[-.72,.25,-.2,.9,.72,.8],[.72,.25,-.2,.9,.72,.8],[-.58,.67,-.17,.82,.7,.72],[.58,.67,-.17,.82,.7,.72],[-.25,.91,-.12,.8,.62,.7],[.25,.91,-.12,.8,.62,.7],[-.72,.24,.42,.86,.65,.82],[.72,.24,.42,.86,.65,.82],[0,.44,.58,1.18,.82,.78]]){const stone=sph(.48,clay,8,6);stone.position.set(x,y,z);stone.scale.set(sx,sy,sz);stone.rotation.set((x+z)*.17,z*.25,x*.12);den.add(stone);}
+ root.add(den);wildlife88.decor.push(den);return den;
+}
 function seedWildlife88(){
  if(!root||phase!=='scavenge'||wildlife88.owner===root||wildlife88.loading)return;
  wildlife88={owner:root,loading:true,gecko:null,ratNpc:null,snake:null,cat:null,ant:null,near:null,decor:[]};
+ makeGeckoDen193();
  // A rideable companion, not a dinosaur: keep the recovered lizard just over
  // rat height so Pip can still mount it without filling the whole screen.
- load88('gecko',a=>{const x=actor88(a,.43,[8.1,0,27.1],'Tameable uploaded gecko');x.tamed=!!home.geckoTamed88;x.name=home.geckoName88||'Gecko';x.riding=false;x.wander=0;play88(x,/idle/i);wildlife88.gecko=x;});
+ load88('gecko',a=>{const x=actor88(a,.43,[8.1,0,27.15],'Tameable uploaded gecko');x.tamed=!!home.geckoTamed88;x.name=home.geckoName88||'Gecko';x.riding=false;x.wander=0;x.recall88=0;play88(x,/idle/i);wildlife88.gecko=x;});
  load88('rat',a=>{const x=actor88(a,.72,[10.2,0,28.4],'Uploaded neighbour rat');x.home=x.g.position.clone();x.wander=.2;x.walking=false;x.talking=0;x.modelBaseY=x.model.position.y;wildlife88.ratNpc=x;});
  load88('snake',a=>{const x=actor88(a,.34,[-13.8,0,21.2],'Uploaded warning snake');x.home=x.g.position.clone();x.state='rest';wildlife88.snake=x;});
  load88('cat',a=>{const x=actor88(a,1.05,[23.8,0,14.2],'Uploaded roaming cat');styleCat88(x);x.home=x.g.position.clone();x.wander=0;x.mixer.timeScale=1.8;play88(x,/walk/i);wildlife88.cat=x;});
@@ -2846,7 +2854,7 @@ function tickGecko88(dt,g){
  g.clock+=dt;g.mixer?.update(dt);const u=rat.userData;
  if(g.riding){g.g.position.set(rat.position.x,Math.max(0,rat.position.y-.02),rat.position.z);g.g.rotation.y=rat.rotation.y;g.model.rotation.y=Math.PI;u.geckoRide88=true;u.seated41=true;if((u.vel||0)>.08){play88(g,/walk/i);g.mixer.timeScale=2;}else{play88(g,/idle/i);g.mixer.timeScale=1;}return;}
  u.geckoRide88=false;if(u.seated41)u.seated41=false;const d=g.g.position.distanceTo(rat.position);
- if(g.tamed){const desired=rat.position.clone().add(new THREE.Vector3(-Math.sin(rat.rotation.y)*2.75,0,-Math.cos(rat.rotation.y)*2.75)),v=desired.sub(g.g.position);v.y=0;if(v.length()>1.35){const gap=v.length();v.normalize();g.g.position.addScaledVector(v,dt*(gap>5?2.4:1.15));turn88(g.g,Math.atan2(v.x,v.z),dt,7);play88(g,/walk/i);g.mixer.timeScale=1.55;}else{play88(g,/idle/i);g.mixer.timeScale=1;}}
+ if(g.tamed){g.recall88=Math.max(0,(g.recall88||0)-dt);const desired=rat.position.clone().add(new THREE.Vector3(-Math.sin(rat.rotation.y)*2.75,0,-Math.cos(rat.rotation.y)*2.75)),v=desired.sub(g.g.position);v.y=0;if(v.length()>1.35){const gap=v.length(),speed=g.recall88?(gap>5?6:3.4):(gap>5?2.4:1.15);v.normalize();g.g.position.addScaledVector(v,dt*speed);turn88(g.g,Math.atan2(v.x,v.z),dt,g.recall88?11:7);play88(g,/walk/i);g.mixer.timeScale=g.recall88?2.2:1.55;}else{g.recall88=0;play88(g,/idle/i);g.mixer.timeScale=1;}}
  else{g.wander-=dt;if(g.wander<=0){g.wander=3+Math.random()*4;g.target.set(8.1+(Math.random()-.5)*3,0,27.1+(Math.random()-.5)*3);}const v=g.target.clone().sub(g.g.position);v.y=0;if(v.length()>.2){v.normalize();g.g.position.addScaledVector(v,dt*.28);g.g.rotation.y=Math.atan2(v.x,v.z);play88(g,/walk/i);}else play88(g,/idle/i);}
 }
 function tickSnake88(dt,s){
@@ -2869,13 +2877,18 @@ function tickRatNpc88(dt,n){n.clock+=dt;n.wander-=dt;n.talking=Math.max(0,(n.tal
  const stride=n.walking?Math.sin(n.clock*8.5):0;for(const [name,mul]of [['Arm_L.000',.5],['Arm_R.000',-.5],['Leg_L.000',-.6],['Leg_R.000',.6],['Tail.000',.18]])n.bones[name]?.rotateX(stride*mul);
  const bob=n.walking?Math.abs(stride)*.035:Math.sin(n.clock*2)*.006;n.model.position.y=n.modelBaseY+bob;n.model.rotation.z=n.walking?stride*.035:0;}
 function tickWildlife88(dt){
- if(!rat||phase!=='scavenge')return;seedWildlife88();if(wildlife88.owner!==root)return;wildlife88.near=null;
+ $('geckoWhistle193').style.display=phase==='scavenge'?'inline-block':'none';if(!rat||phase!=='scavenge')return;seedWildlife88();if(wildlife88.owner!==root)return;wildlife88.near=null;
  const g=wildlife88.gecko;if(g){tickGecko88(dt,g);const d=g.g.position.distanceTo(rat.position);if(d<1.35)wildlife88.near={type:'gecko',obj:g,d};}
  const n=wildlife88.ratNpc;if(n){n.mixer?.update(dt);tickRatNpc88(dt,n);const d=n.g.position.distanceTo(rat.position);if(d<1.7&&(!wildlife88.near||d<wildlife88.near.d))wildlife88.near={type:'rat',obj:n,d};}
  if(wildlife88.snake)tickSnake88(dt,wildlife88.snake);if(wildlife88.cat)tickCat88(dt,wildlife88.cat);if(wildlife88.ant)tickAnt88(dt,wildlife88.ant);
  if(wildlife88.near&&!(sc&&sc.talk)&&!rat.userData.wallState){const x=wildlife88.near,gn=x.obj.name||home.geckoName88||'Gecko';ui.prompt.style.display='block';ui.prompt.textContent=x.type==='rat'?'E · Talk to neighbour rat':x.obj.riding?'E · Dismount '+gn:x.obj.tamed?'E · Ride '+gn:'E · Tame gecko';$('padE').textContent=x.type==='rat'?'Talk':x.obj.riding?'Dismount':x.obj.tamed?'Ride':'Tame';}
 }
 function interactWildlife88(){const x=wildlife88.near;if(!x)return false;if(x.type==='rat'){x.obj.talking=2.4;sayToast('Neighbour rat: “Ants found crumbs by the gate. Watch the snake near the timber.”');return true;}const g=x.obj,gn=g.name||home.geckoName88||'Gecko';if(g.riding){g.riding=false;rat.userData.geckoRide88=false;rat.userData.seated41=false;sayToast('Pip hops down from '+gn+'.');return true;}if(!g.tamed){g.tamed=true;g.name=home.geckoName88||'Gecko';home.geckoTamed88=true;save();sayToast('Gecko tamed! Name it from Menu.');return true;}drivingClips77(rat.userData);g.riding=true;rat.userData.geckoRide88=true;rat.userData.seated41=true;sayToast('Riding '+gn+' · tap Dismount to hop off');return true;}
+function whistleGecko193(){
+ if(phase!=='scavenge'){sayToast('The lizard is back at its den in Pip’s Lane.');return;}const g=wildlife88.gecko;if(!g){seedWildlife88();sayToast('Pip whistles toward the lizard den…');return;}if(!g.tamed){sayToast('Tame the lizard at its clay-stone den first.');return;}if(g.riding){sayToast((g.name||'Gecko')+' is already carrying Pip.');return;}
+ const ac=sfxCtx();if(ac){tone(ac,{f:1250,f2:1850,dur:.16,vol:.045,type:'sine'});setTimeout(()=>tone(ac,{f:1550,f2:2150,dur:.2,vol:.04,type:'sine'}),130);}g.recall88=10;g.wander=0;sayToast('Pip whistles — '+(g.name||'Gecko')+' is coming!');
+}
+$('geckoWhistle193').onclick=whistleGecko193;
 function mountedPose90(){const g=wildlife88.gecko,u=rat?.userData;if(!g?.riding||!u?.pipPivot)return;u.pipPivot.position.y=.68;u.pipPivot.position.z=-.08;u.pipPivot.rotation.x=-.28;for(const side of ['Left','Right']){rotateBone69(u,side+'Arm',-.5);rotateBone69(u,side+'ForeArm',-.45);}}
 const worldBefore88=tickWorld38;tickWorld38=function(dt){worldBefore88(dt);tickWildlife88(dt);};
 const modelsBefore90=tickModels44;tickModels44=function(dt){modelsBefore90(dt);mountedPose90();};
@@ -2889,6 +2902,6 @@ startTitle();
 requestAnimationFrame(loop);
 </script>
 <script src="wildlife-recovered118.js?v=187"></script>
-<script src="heaven-course183.js?v=192"></script>
+<script src="heaven-course183.js?v=193"></script>
 </body>
 </html>
