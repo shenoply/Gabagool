@@ -9,7 +9,7 @@
  function toggle(open){drawer.hidden=!open;menu.setAttribute('aria-expanded',String(open));menu.classList.toggle('selected',open);if(!open&&document.activeElement&&drawer.contains(document.activeElement))menu.focus();}
  menu.onclick=()=>toggle(drawer.hidden);close.onclick=()=>toggle(false);const title=el('header','cockpit205-title','CAR CONTROLS');title.appendChild(close);drawer.appendChild(title);
  const grid=el('div','cockpit205-grid');drawer.appendChild(grid);
- for(const b of [brake,left,right,radio,wipers,map,exit]){b.classList.add('cockpit205-secondary');grid.appendChild(b);}
+ for(const b of [left,right,brake,wipers,radio,map,exit]){b.classList.add('cockpit205-secondary');grid.appendChild(b);}
  horn.dataset.short205='Horn';view.dataset.short205='View';for(const b of [horn,view]){b.classList.add('cockpit205-key');quick.appendChild(b);}quick.appendChild(menu);
  // Keep the dynamic full view name accessible, while the visible label stays short.
  horn.setAttribute('aria-label','Sound horn');view.setAttribute('aria-label','Change camera view');

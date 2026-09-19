@@ -1,6 +1,6 @@
 /* Explicit overrides isolate driving controls from the game's global gold buttons. */
 #carPanel203{display:none!important}
-.driving203 #acts,.driving203 #go,.driving203 #survival,.driving203 #bag,.driving203 #craftBook,.driving203 #shopping{display:none!important}
+.driving203 #navigation201,.driving203 #acts,.driving203 #go,.driving203 #survival,.driving203 #bag,.driving203 #craftBook,.driving203 #shopping{display:none!important}
 #cockpit205{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));width:156px;z-index:65;pointer-events:none;font:12px/1.2 system-ui,sans-serif;color:#f4edda}
 #cockpit205[hidden],#cockpit205 [hidden]{display:none!important}
 #cockpit205 button{box-sizing:border-box;position:static!important;transform:none!important;margin:0!important;min-width:0!important;box-shadow:none;pointer-events:auto;touch-action:none;font-family:system-ui,sans-serif!important;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -20,5 +20,5 @@
 #cockpit205 .cockpit205-secondary{width:100%!important;height:auto!important;min-height:44px!important;padding:8px 6px!important;background:#e9ecd20d!important;color:#f4edda!important;border:1px solid #dce7c821!important;border-radius:10px!important;font:600 11px/1.3 system-ui!important;white-space:normal!important}
 #cockpit205 .cockpit205-secondary[aria-pressed=true]{background:#d5b16f!important;color:#20352e!important;border-color:#d5b16f!important}
 #cockpit205 .cockpit205-secondary:last-child{color:#e0bd96!important}
-@media(max-height:500px){#cockpit205{bottom:12px;width:156px}#cockpit205 .cockpit205-drawer{bottom:0;right:168px;max-height:calc(100dvh - 40px);width:240px}}
+@media(max-height:500px) and (min-width:600px){#cockpit205{bottom:12px;width:156px}#cockpit205 .cockpit205-drawer{bottom:0;right:168px;max-height:calc(100dvh - 40px);width:240px}}
 @media(max-width:360px){#cockpit205{right:8px;width:148px}#cockpit205 .cockpit205-quick{gap:6px}}
