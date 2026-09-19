@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 200</title>
+<title>Wet Whiskers · Build 201</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -1386,7 +1386,7 @@ function finishAlley29(){
 softenFurniture();
 // ---------- loop ----------
 let acc=0;const STEP=1/60;
-function loop(now){requestAnimationFrame(loop);if(car77?.riding&&(!gameplayActive()||document.hidden||!voiceOn)){stopEngine77();car77.speed=0;}if(phase==='introvideo'){last=now;acc=0;return;}let frame=Math.min(0.1,(now-last)/1000);last=now;acc+=frame;let n=0;
+function loop(now){requestAnimationFrame(loop);if(car77?.riding&&(!gameplayActive()||document.hidden)){stopEngine77();car77.speed=0;}else if(car77?.riding&&!voiceOn)stopEngine77();if(phase==='introvideo'){last=now;acc=0;return;}let frame=Math.min(0.1,(now-last)/1000);last=now;acc+=frame;let n=0;
   try{
   while(acc>=STEP&&n<4){const dt=STEP;acc-=dt;n++;if(photo.active||document.hidden)continue;t+=dt;
     if($('modal').style.display==='flex')continue;if(phase==='heaven'){tickHeaven183(dt);continue;}tickWildlife(dt);tickAtmosphere(dt);
@@ -2869,7 +2869,7 @@ function tickRatNpc88(dt,n){n.clock+=dt;n.wander-=dt;n.talking=Math.max(0,(n.tal
  const stride=n.walking?Math.sin(n.clock*8.5):0;for(const [name,mul]of [['Arm_L.000',.5],['Arm_R.000',-.5],['Leg_L.000',-.6],['Leg_R.000',.6],['Tail.000',.18]])n.bones[name]?.rotateX(stride*mul);
  const bob=n.walking?Math.abs(stride)*.035:Math.sin(n.clock*2)*.006;n.model.position.y=n.modelBaseY+bob;n.model.rotation.z=n.walking?stride*.035:0;}
 function tickWildlife88(dt){
- const whistle=$('geckoWhistle193'),map193=$('miniMap171'),canWhistle=phase==='scavenge'&&!photo.active&&$('modal').style.display!=='flex'&&!wildlife88.gecko?.riding;whistle.style.display=canWhistle?'inline-block':'none';if(canWhistle&&map193){const r=map193.getBoundingClientRect();whistle.style.setProperty('top',Math.round(r.bottom+48)+'px','important');whistle.style.setProperty('bottom','auto','important');whistle.style.setProperty('right',Math.max(10,Math.round(innerWidth-r.right))+'px','important');}if(!rat||phase!=='scavenge')return;seedWildlife88();if(wildlife88.owner!==root)return;wildlife88.near=null;
+ const whistle=$('geckoWhistle193'),map193=$('miniMap171'),canWhistle=phase==='scavenge'&&!photo.active&&$('modal').style.display!=='flex'&&!wildlife88.gecko?.riding;whistle.style.display=canWhistle?'inline-block':'none';if(canWhistle&&map193&&!$('navigation201')){const r=map193.getBoundingClientRect();whistle.style.setProperty('top',Math.round(r.bottom+48)+'px','important');whistle.style.setProperty('bottom','auto','important');whistle.style.setProperty('right',Math.max(10,Math.round(innerWidth-r.right))+'px','important');}if(!rat||phase!=='scavenge')return;seedWildlife88();if(wildlife88.owner!==root)return;wildlife88.near=null;
  const g=wildlife88.gecko;if(g){tickGecko88(dt,g);const d=g.g.position.distanceTo(rat.position);if(d<1.35)wildlife88.near={type:'gecko',obj:g,d};}
  const n=wildlife88.ratNpc;if(n){n.mixer?.update(dt);tickRatNpc88(dt,n);const d=n.g.position.distanceTo(rat.position);if(d<1.7&&(!wildlife88.near||d<wildlife88.near.d))wildlife88.near={type:'rat',obj:n,d};}
  if(wildlife88.snake)tickSnake88(dt,wildlife88.snake);if(wildlife88.cat)tickCat88(dt,wildlife88.cat);if(wildlife88.ant)tickAnt88(dt,wildlife88.ant);
@@ -2894,7 +2894,8 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=200"></script>
-<script src="heaven-course183.js?v=200"></script>
+<script src="wildlife-recovered118.js?v=201"></script>
+<script src="heaven-course183.js?v=201"></script>
+<script src="navigation201.js?v=201"></script>
 </body>
 </html>
