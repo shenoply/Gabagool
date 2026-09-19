@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 196</title>
+<title>Wet Whiskers · Build 197</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -2430,7 +2430,7 @@ const grabBefore75=grab;grab=function(){if(gameplayActive()&&!photo.active&&!sc?
 const hintsBefore75=ropeHints66;ropeHints66=function(){hintsBefore75();if(rat?.userData.board75){ui.prompt.style.display='block';ui.prompt.textContent='Jumping to grab';$('padE').textContent='Let go';}else if(boarding71()){ui.prompt.style.display='block';ui.prompt.textContent='Hang on · Jump and grab the osprey';$('padE').textContent='Hang on';}};
 // Backyard routes: all progress is stored independently of older saves.
 let yard76=null;
-function progress76(){return home.yard76||(home.yard76={bridge:false,bag:false,prize:false,vinyl:false,pool:false,cat:false,rain:false,jobs:false});}
+function progress76(){return home.yard76||(home.yard76={bridge:false,bag:false,prize:false,vinyl:false,pool:false,cat:false,rain:false,jobs:false,missionsActive:false});}
 function piece76(name,x,y,z,w,h,d,mat,solid=true){const m=box(w,h,d,mat);m.name=name;m.position.set(x,y,z);root.add(m);if(solid)registerSolid62(m);return m;}
 function deck76(x,z,h,w=1.5,d=1.5){const m=piece76('Salvage route deck',x,h-.07,z,w,.14,d,yard76.wood);world60.platforms.push({x,z,h,hx:w/2,hz:d/2,mesh62:m,bottom62:h-.14});for(const a of [-1,1])for(const b of [-1,1])piece76('Deck support',x+a*(w/2-.12),(h-.14)/2,z+b*(d/2-.12),.12,Math.max(.04,h-.14),.12,yard76.wood);return m;}
 function slope76(a,b,width=1.2){const p=new THREE.Vector3(...a),q=new THREE.Vector3(...b),v=q.clone().sub(p);const m=box(width,.12,v.length(),yard76.wood);m.name='Walkable escape plank';m.position.copy(p).add(q).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),v.clone().normalize());const normal=new THREE.Vector3(0,1,0).applyQuaternion(m.quaternion);m.position.y-=.06/Math.max(.2,normal.y);root.add(m);registerSolid62(m);return m;}
@@ -2498,7 +2498,7 @@ const tailBefore76=tailHit67;tailHit67=function(g){tailBefore76(g);const y=yard7
 const grabBefore76=grab;grab=function(){if(!gameplayActive())return grabBefore76();const n=near76();if(!n)return grabBefore76();switch(n.kind){case 'chest':chest60();break;case 'bench':openCraftBook();break;case 'record':musicMenu69();break;case 'tie':case 'bag':doBite();break;case 'brace':whip67();break;case 'float':yard76.floatTarget.x=Math.max(-14.5,yard76.floatTarget.x-.5);yard76.floatTarget.z=30.7;sequence67(rat,['Push'],{duration:.45});break;case 'find':collect76(n.f);break;default:sayToast(n.label);}return;};
 const hintsBefore76=ropeHints66;ropeHints66=function(){hintsBefore76();const n=near76();if(n){ui.prompt.style.display='block';ui.prompt.textContent=n.label;$('padE').textContent=({tie:'Bite',bag:'Bite',brace:'Whip',float:'Push',find:'Collect',bench:'Craft',chest:'Bag',record:'Play'})[n.kind]||'Look';}};
 function claimJobs76(){const s=progress76();if(!s.vinyl||!s.pool||!s.bridge||s.jobs)return false;s.jobs=true;home.pantry.nail=(home.pantry.nail||0)+3;home.pantry.string=(home.pantry.string||0)+3;save();closeModal();sayToast('Alley route unlocked. Reward stored in your chest.');return true;}
-function jobs76(){const s=progress76(),ready=s.vinyl&&s.pool&&s.bridge;modal('Big Rat’s backyard jobs',`<p>${s.vinyl?'✓':'○'} Recover the violet-label vinyl above the dumpster.</p><p>${s.pool?'✓':'○'} Find the silver key in the old pool.</p><p>${s.bridge?'✓':'○'} Chew through the string to lower the plank.</p><p>${s.jobs?'The alley route is yours.':ready?'You did it. The alley gate is ready.':'Finish all three to unlock the alley route and earn six useful scraps.'}</p>`,[['Collect reward',()=>{claimJobs76();},!ready||s.jobs],['Talk',()=>{closeModal();talkBefore76();}],['Close',closeModal]]);}
+function jobs76(){const s=progress76(),ready=s.vinyl&&s.pool&&s.bridge;if(!s.missionsActive){s.missionsActive=true;save();}modal('Big Rat’s backyard jobs',`<p><b>Targets are now marked on your yard map.</b></p><p>${s.vinyl?'✓':'○'} Recover the violet-label vinyl above the dumpster.</p><p>${s.pool?'✓':'○'} Find the silver key in the old pool.</p><p>${s.bridge?'✓':'○'} Chew through the string to lower the plank.</p><p>${s.jobs?'The alley route is yours.':ready?'You did it. The alley gate is ready.':'Finish all three to unlock the alley route and earn six useful scraps.'}</p>`,[['Collect reward',()=>{claimJobs76();},!ready||s.jobs],['Talk',()=>{closeModal();talkBefore76();}],['Close',closeModal]]);}
 const talkBefore76=startTalk;startTalk=function(){if(phase==='scavenge'&&yard76?.owner===root)return jobs76();return talkBefore76();};
 const gateBefore76=useGate57;useGate57=function(){if(nearGate57()&&!progress76().jobs&&!home.routes?.courtyard){jobs76();return true;}return gateBefore76();};
 function courtyardReady76(){return phase==='scavenge'&&yard76?.owner===root&&rat.position.distanceTo(yard76.bench.position)<1.6;}
@@ -2893,7 +2893,7 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=196"></script>
-<script src="heaven-course183.js?v=196"></script>
+<script src="wildlife-recovered118.js?v=197"></script>
+<script src="heaven-course183.js?v=197"></script>
 </body>
 </html>
