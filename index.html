@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 198</title>
+<title>Wet Whiskers · Build 199</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -2438,7 +2438,6 @@ function rope76(x,z,h,tx,tz){const g=new THREE.Group(),mat=yard76.rope;const lin
 function collectible76(id){if(id==='vinyl')return record60(0x937eab);const g=new THREE.Group(),mat=M(id==='pool'?0xa9aeb0:id==='cat'?0x7e9495:0xc3a467);if(id==='pool'){const ring=new THREE.Mesh(new THREE.TorusGeometry(.095,.025,6,14),mat);ring.rotation.x=Math.PI/2;g.add(ring);const shaft=box(.04,.035,.25,mat);shaft.position.z=.18;g.add(shaft);for(const z of [.24,.3]){const tooth=box(.095,.035,.035,mat);tooth.position.set(.035,0,z);g.add(tooth);}}else{const disc=cyl(.14,.14,.04,mat,16);g.add(disc);if(id==='cat')for(const x of [-.045,.045])for(const z of [-.045,.045]){const hole=cyl(.019,.019,.005,M(0x263c3c),8);hole.position.set(x,.023,z);g.add(hole);}if(id==='prize'){const hub=cyl(.07,.07,.18,mat,12);hub.position.y=.08;g.add(hub);const top=cyl(.14,.14,.035,mat,16);top.position.y=.17;g.add(top);}}return g;}
 function find76(id,label,pos,style='coin'){const m=collectible76(id);m.position.set(...pos);m.name=label;m.visible=!progress76()[id];root.add(m);const f={id,label,m};yard76.finds.push(f);return f;}
 function collect76(f){const s=progress76();if(s[f.id])return;const actor=rat;sequence67(rat,['Inspect_Find','Pocket_Find'],{lock:true,done:()=>{if(s[f.id])return;s[f.id]=true;f.m.visible=false;home.collectibles=home.collectibles||{};home.collectibles[f.id+'76']=true;home.discoveries60[f.id+'76']=true;home.storage[f.id+'76']=(home.storage[f.id+'76']||0)+1;save();bag();sfx.pickup();sayToast(f.label+' recovered — safely stored at home.');}});}
-function bridgePose76(){const y=yard76;if(!y)return;y.bridge.rotation.x=progress76().bridge?0:Math.PI/2;y.bridge.position.set(-9,progress76().bridge?1.21:2.5,6);y.tie.visible=!progress76().bridge;y.bridge.updateWorldMatrix(true,true);}
 function seed76(){if(phase!=='scavenge')return;const s=progress76();yard76={owner:root,wood:MT(0x867254,'wood'),rope:M(0xa49470),finds:[],time:0,water:.23,catAlert:0};const y=yard76;
  // Home courtyard: a single shared storage chest, a usable workbench and record station.
  const chest=chestModel60();chest.position.set(8.6,0,33);root.add(chest);registerSolid62(chest);y.chest=chest;
@@ -2448,7 +2447,6 @@ function seed76(){if(phase!=='scavenge')return;const s=progress76();yard76={owne
  for(const [x,z,h]of [[-9,23,.45],[-9,21,.9],[-9,19,1.28],[-9,15,1.28],[-9,11,1.28],[-9,8.5,1.28],[-9,3.5,1.28],[-9,0,1.28],[-7,-1,1.85],[-5.8,-2.8,2.6]])deck76(x,z,h,1.5,1.7);
  for(const [za,zb]of [[19,15],[15,11],[11,8.5],[3.5,0]])slope76([-9,1.28,za],[-9,1.28,zb],.8);
  slope76([-9,.04,25],[-9,.45,23]);slope76([-9,1.28,0],[-7,1.85,-1]);slope76([-7,1.85,-1],[-5.8,2.6,-2.8]);slope76([-5.8,2.6,-2.8],[-3.5,2.8,-3.5]);
- y.bridge=piece76('Hinged shortcut plank',-9,2.5,6,1.05,.14,3.6,y.wood);const tieMat76=new THREE.MeshStandardMaterial({color:0xf0c75e,emissive:0x6b4300,emissiveIntensity:.85,roughness:.9});y.tie=piece76('Chewable bridge string',-9,1.22,8,.14,1.55,.14,tieMat76,false);y.tieBeacon=new THREE.Mesh(new THREE.TorusGeometry(.42,.055,8,24),new THREE.MeshBasicMaterial({color:0xffdf6b,transparent:true,opacity:.8,depthWrite:false}));y.tieBeacon.rotation.x=-Math.PI/2;y.tieBeacon.position.set(-9,.1,8);y.tieBeacon.name='Bridge string mission beacon';root.add(y.tieBeacon);bridgePose76();
  rope76(-9.8,18.8,1.28,-9,19);rope76(-5.8,-1.8,2.6,-5.8,-2.8);
  // The high fence route joins existing shelves and ends in stairs rather than a dead end.
  deck76(21.5,25,2.6,1.4,1.1);deck76(24,25,2.6,1.4,1.1);slope76([19,2.6,25],[24,2.6,25],.65);for(let i=0;i<5;i++)deck76(24,23.4-i*1.1,2.1-i*.42,1.3,1.15);
@@ -2486,19 +2484,18 @@ NB.set(15,0,10);
 const startBefore76=startScavenge;startScavenge=function(){startBefore76();seed76();batch76();};
 function near76(){const y=yard76,u=rat?.userData;if(!y||y.owner!==root||phase!=='scavenge'||!u||u.bird71||u.board75||u.rope66||u.wallState||u.climb||u.job67?.lock||u.air)return null;const p=rat.position,near=m=>p.distanceTo(m.position)<1.15;
  if(near(y.chest))return {kind:'chest',label:'Open storage chest'};if(near(y.bench))return {kind:'bench',label:'Use courtyard workbench'};if(near(y.record))return {kind:'record',label:'Play records'};
- if(!progress76().bridge&&near(y.tie))return {kind:'tie',label:'Bite through the bridge string'};
  if(!progress76().bag&&near(y.bag))return {kind:'bag',label:'Bite open tied parcel'};
  if(!progress76().prizeDown&&near(y.brace))return {kind:'brace',label:'Tail whip the loose brace'};
  if(near(y.float)&&u.swim66)return {kind:'float',label:'Push floating lid toward the exit'};
  for(const f of y.finds)if(f.m.visible&&near(f.m)){if(f.id==='prize'&&!progress76().prizeDown)continue;if(f.id==='rain'&&y.water<1.15)return {kind:'waitRain',label:'Rain must lift the cork to uncover this stash'};if(f.id==='cat'&&(y.catAlert>0||!y.catSleeping))return {kind:'waitCat',label:'Wait for Zaytona to nap; approach slowly'};return {kind:'find',f,label:'Collect '+f.label};}return null;
 }
-function biteTarget76(kind){const y=yard76,s=progress76();if(!y||y.owner!==root||s[kind==='tie'?'bridge':'bag'])return;const target=kind==='tie'?y.tie:y.bag;if(rat.position.distanceTo(target.position)>1.15)return;if(kind==='tie'){s.bridge=true;bridgePose76();sfx.step('wood');sayToast('The plank drops into place — shortcut unlocked.');}else{if(totalBag()+4>bagCapacity()){sayToast('Make room for four pieces of salvage.');return;}s.bag=true;y.bag.visible=y.bagTie.visible=false;inv.string=(inv.string||0)+2;inv.foil=(inv.foil||0)+2;bag();sfx.pickup();sayToast('Parcel opened: 2 string and 2 foil.');}save();}
-const biteBefore76=doBite;doBite=function(){const n=near76();if(n&&['tie','bag'].includes(n.kind)&&gameplayActive()){const kind=n.kind;biteBefore76();sequence67(rat,['Idle'],{lock:true,duration:.65,done:()=>biteTarget76(kind)});return;}return biteBefore76();};
+function biteTarget76(){const y=yard76,s=progress76();if(!y||y.owner!==root||s.bag||rat.position.distanceTo(y.bag.position)>1.15)return;if(totalBag()+4>bagCapacity()){sayToast('Make room for four pieces of salvage.');return;}s.bag=true;y.bag.visible=y.bagTie.visible=false;inv.string=(inv.string||0)+2;inv.foil=(inv.foil||0)+2;bag();sfx.pickup();sayToast('Parcel opened: 2 string and 2 foil.');save();}
+const biteBefore76=doBite;doBite=function(){const n=near76();if(n?.kind==='bag'&&gameplayActive()){biteBefore76();sequence67(rat,['Idle'],{lock:true,duration:.65,done:biteTarget76});return;}return biteBefore76();};
 const tailBefore76=tailHit67;tailHit67=function(g){tailBefore76(g);const y=yard76,s=progress76();if(y?.owner===root&&!s.prizeDown&&g.position.distanceTo(y.brace.position)<1.15){s.prizeDown=true;y.brace.rotation.z=.6;y.falling=0;save();sfx.step('wood');sayToast('Something fell from the shelf.');}};
-const grabBefore76=grab;grab=function(){if(!gameplayActive())return grabBefore76();const n=near76();if(!n)return grabBefore76();switch(n.kind){case 'chest':chest60();break;case 'bench':openCraftBook();break;case 'record':musicMenu69();break;case 'tie':case 'bag':doBite();break;case 'brace':whip67();break;case 'float':yard76.floatTarget.x=Math.max(-14.5,yard76.floatTarget.x-.5);yard76.floatTarget.z=30.7;sequence67(rat,['Push'],{duration:.45});break;case 'find':collect76(n.f);break;default:sayToast(n.label);}return;};
-const hintsBefore76=ropeHints66;ropeHints66=function(){hintsBefore76();const n=near76();if(n){ui.prompt.style.display='block';ui.prompt.textContent=n.label;$('padE').textContent=({tie:'Bite',bag:'Bite',brace:'Whip',float:'Push',find:'Collect',bench:'Craft',chest:'Bag',record:'Play'})[n.kind]||'Look';}};
-function claimJobs76(){const s=progress76();if(!s.vinyl||!s.pool||!s.bridge||s.jobs)return false;s.jobs=true;home.pantry.nail=(home.pantry.nail||0)+3;home.pantry.string=(home.pantry.string||0)+3;save();closeModal();sayToast('Alley route unlocked. Reward stored in your chest.');return true;}
-function jobs76(){const s=progress76(),ready=s.vinyl&&s.pool&&s.bridge;if(!s.missionsActive){s.missionsActive=true;save();}modal('Big Rat’s backyard jobs',`<p><b>Targets are now marked on your yard map.</b></p><p>${s.vinyl?'✓':'○'} Recover the violet-label vinyl above the dumpster.</p><p>${s.pool?'✓':'○'} Find the silver key in the old pool.</p><p>${s.bridge?'✓':'○'} Chew through the string to lower the plank.</p><p>${s.jobs?'The alley route is yours.':ready?'You did it. The alley gate is ready.':'Finish all three to unlock the alley route and earn six useful scraps.'}</p>`,[['Collect reward',()=>{claimJobs76();},!ready||s.jobs],['Talk',()=>{closeModal();talkBefore76();}],['Close',closeModal]]);}
+const grabBefore76=grab;grab=function(){if(!gameplayActive())return grabBefore76();const n=near76();if(!n)return grabBefore76();switch(n.kind){case 'chest':chest60();break;case 'bench':openCraftBook();break;case 'record':musicMenu69();break;case 'bag':doBite();break;case 'brace':whip67();break;case 'float':yard76.floatTarget.x=Math.max(-14.5,yard76.floatTarget.x-.5);yard76.floatTarget.z=30.7;sequence67(rat,['Push'],{duration:.45});break;case 'find':collect76(n.f);break;default:sayToast(n.label);}return;};
+const hintsBefore76=ropeHints66;ropeHints66=function(){hintsBefore76();const n=near76();if(n){ui.prompt.style.display='block';ui.prompt.textContent=n.label;$('padE').textContent=({bag:'Bite',brace:'Whip',float:'Push',find:'Collect',bench:'Craft',chest:'Bag',record:'Play'})[n.kind]||'Look';}};
+function claimJobs76(){const s=progress76();if(!s.vinyl||!s.pool||s.jobs)return false;s.jobs=true;home.pantry.nail=(home.pantry.nail||0)+3;home.pantry.string=(home.pantry.string||0)+3;save();closeModal();sayToast('Alley route unlocked. Reward stored in your chest.');return true;}
+function jobs76(){const s=progress76(),ready=s.vinyl&&s.pool;if(!s.missionsActive){s.missionsActive=true;save();}modal('Big Rat’s backyard jobs',`<p><b>Targets are now marked on your yard map.</b></p><p>${s.vinyl?'✓':'○'} Recover the violet-label vinyl.</p><p>${s.pool?'✓':'○'} Find the silver key in the old pool.</p><p>${s.jobs?'The alley route is yours.':ready?'You did it. The alley gate is ready.':'Finish both jobs to unlock the alley route and earn six useful scraps.'}</p>`,[['Collect reward',()=>{claimJobs76();},!ready||s.jobs],['Talk',()=>{closeModal();talkBefore76();}],['Close',closeModal]]);}
 const talkBefore76=startTalk;startTalk=function(){if(phase==='scavenge'&&yard76?.owner===root)return jobs76();return talkBefore76();};
 const gateBefore76=useGate57;useGate57=function(){if(nearGate57()&&!progress76().jobs&&!home.routes?.courtyard){jobs76();return true;}return gateBefore76();};
 function courtyardReady76(){return phase==='scavenge'&&yard76?.owner===root&&rat.position.distanceTo(yard76.bench.position)<1.6;}
@@ -2506,7 +2503,6 @@ const benchBefore76=benchReady;benchReady=function(){return courtyardReady76()||
 const pantryBefore76=pantryReady;pantryReady=function(){return courtyardReady76()||pantryBefore76();};
 const stationBefore76=stationMessage;stationMessage=function(c){if(courtyardReady76()&&(!c.station||c.station==='workbench'))return '';return stationBefore76(c);};
 const tickBefore76=tickWorld38;tickWorld38=function(dt){tickBefore76(dt);const y=yard76;if(!y||y.owner!==root||phase!=='scavenge'||!gameplayActive())return;y.time+=dt;
- const bridgeMission76=progress76();if(y.tieBeacon){const showTie76=!!bridgeMission76.missionsActive&&!bridgeMission76.bridge;y.tieBeacon.visible=showTie76;if(showTie76){const pulse76=1+Math.sin(y.time*4)*.16;y.tieBeacon.scale.setScalar(pulse76);y.tieBeacon.material.opacity=.58+Math.sin(y.time*4)*.22;y.tie.rotation.y+=dt*1.2;}}
  if(y.falling!==undefined){y.falling+=dt;y.prize.m.position.y=Math.max(.1,1.58-3*y.falling*y.falling);if(y.prize.m.position.y===.1)delete y.falling;}
  const rain=weather42().rain;y.water=THREE.MathUtils.clamp(y.water+dt*(rain>.15?.033:-.008),.23,1.48);y.rainWater.position.y=y.water;
  for(const [m,target]of [[y.cork,new THREE.Vector3(-3.2,y.water+.085,27)],[y.float,new THREE.Vector3(y.floatTarget.x,.65+Math.sin(y.time*1.5)*.016,y.floatTarget.z)]]){const before=m.position.clone();m.position.lerp(target,1-Math.exp(-dt*3));const u=rat.userData;if(!u.air&&!u.swim66&&Math.abs(rat.position.x-before.x)<.52&&Math.abs(rat.position.z-before.z)<.52&&Math.abs(rat.position.y-(before.y+.075))<.15)rat.position.add(m.position.clone().sub(before));m.updateWorldMatrix(true,false);}
@@ -2894,7 +2890,7 @@ const clearBefore88=clear;clear=function(){queue88=[];wildlife88={owner:null,loa
 startTitle();
 requestAnimationFrame(loop);
 </script>
-<script src="wildlife-recovered118.js?v=198"></script>
-<script src="heaven-course183.js?v=198"></script>
+<script src="wildlife-recovered118.js?v=199"></script>
+<script src="heaven-course183.js?v=199"></script>
 </body>
 </html>
