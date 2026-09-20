@@ -9,7 +9,7 @@
  function target(id,object,label,action,anchor=object,inside=false){tag(object,id);const t={id,object,label,action,anchor,inside};targets.push(t);return t;}
  function installed(p){return !state()[p.id]||state()[p.id].installed!==false;}
  function persist(p){state()[p.id]={installed:installed(p),position:p.mesh.getWorldPosition(V()).toArray(),upgraded:!!state()[p.id]?.upgraded};save();}
- function attach(){const c=car77;if(owner===c)return;owner=c;targets=[];parts=[];selected=null;mirror=null;if(!c)return;vehicle219.attach(c);const a=c.cabin219;
+ function attach(){const c=car77;if(owner===c)return;owner=c;targets=[];parts=[];selected=null;mirror=null;if(!c)return;vehicle219.attach(c);const a=c.cabin219;const serviceState=vehicle219.data();if(serviceState.resetRevision223!==223){serviceState.parts220={};serviceState.oil=serviceState.coolant=serviceState.condition=100;serviceState.temperature=22;serviceState.resetRevision223=223;save();}
   for(const [i,d]of a.doors.entries()){
    const side=i?1:-1,handle=mesh(d.pivot,new THREE.BoxGeometry(.025,.028,.10),0xc8c6ae,'Interior door handle',V(-side*.10,.15,-.43));
    const crank=mesh(d.pivot,new THREE.SphereGeometry(.025,10,8),0xc8b07a,'Window crank',V(-side*.12,.09,-.25));
@@ -23,7 +23,7 @@
   target('oil',a.oil,()=>vehicle219.data().oil>=99?'Oil full':(inv.oil219?'Add oil':'Oil bottle needed'),()=>vehicle219.serviceStart('oil'));
   target('coolant',a.coolant,()=>vehicle219.data().coolant>=99?'Cooling water full':(inv.coolant219?'Add cooling water':'Water bottle needed'),()=>vehicle219.serviceStart('coolant'));
   target('repair',a.engine.getObjectByName('Engine block'),()=>vehicle219.data().condition>=99?'Engine healthy':'Repair engine · 2 foil + 1 nail',()=>vehicle219.serviceStart('repair'));
-  const filter=mesh(a.engine,new THREE.CylinderGeometry(.075,.075,.07,16),0x707d68,'Air filter',V(0,.51,.43));
+  const filter=mesh(a.engine,new THREE.CylinderGeometry(.075,.075,.07,16),0x707d68,'Air filter',V(0,.49,.43));
   const plugs=mesh(a.engine,new THREE.BoxGeometry(.17,.035,.035),0xc7baa0,'Spark plug rail',V(.10,.50,.68));
   const belt=mesh(a.engine,new THREE.TorusGeometry(.075,.013,6,20),0x353b33,'Drive belt',V(0,.39,.83));
   const brake=mesh(c.steeringPivots[1],new THREE.BoxGeometry(.08,.09,.12),0x6f7265,'Brake caliper',V(.02,0,0));
@@ -37,7 +37,7 @@
   }
  }
  function valid(t){if(!active()||!t)return false;const c=car77,a=c.cabin219;
-  if(c.riding)return t.inside;
+  if(c.riding)return roadsterControls203.viewIndex!==0&&t.inside;
   if(t.id.startsWith('mirror')||t.id==='roof'||t.id.startsWith('window'))return false;
   if(t.id==='oil'||t.id==='coolant'||t.id==='repair'||t.part?.requiresHood&&(t.id.startsWith('slot-')||t.id.startsWith('part-')&&installed(t.part))){if(!a.hoodOpen||a.hoodValue<.95)return false;}
   if(t.id.startsWith('slot-')&&(!held||held.part!==t.part))return false;
@@ -62,9 +62,9 @@
  function refit(p){if(!held||held.part!==p||!valid(targets.find(t=>t.id==='slot-'+p.id))||car77.ignition206)return false;p.parent.add(p.mesh);p.mesh.position.copy(p.position);p.mesh.quaternion.copy(p.quaternion);p.mesh.scale.copy(p.scale);p.slot.visible=false;p.mesh.traverse(m=>m.userData.heldCarPart221=false);registerSolid62(p.mesh);state()[p.id]={installed:true,upgraded:!!state()[p.id]?.upgraded};held=null;selected=null;save();tutorial219.record('service');sayToast(p.name+' refitted.');return true;}
  function drop(){if(!held)return;const p=held.part;if(held.owner===root){const forward=V(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));p.mesh.position.copy(rat.position).addScaledVector(forward,.35);p.mesh.position.y=rat.position.y+.08;p.mesh.quaternion.identity();const bounds=new THREE.Box3().setFromObject(p.mesh);p.mesh.position.y+=rat.position.y+.01-bounds.min.y;persist(p);}held=null;selected=null;}
  function upgrade(p){if(!p.upgrade||held||!installed(p))return false;const u=vehicle219.upgrades[p.upgrade];if(vehicle219.data().upgrades[p.upgrade])return false;if(!Object.entries(u.needs).every(([k,n])=>(inv[k]||0)>=n))return false;if(!pickup(p))return false;for(const [k,n]of Object.entries(u.needs))inv[k]-=n;state()[p.id].upgraded=true;vehicle219.data().upgrades[p.upgrade]=true;p.mesh.traverse(m=>{if(m.isMesh&&m.material?.color){m.material=m.material.clone();m.material.color.setHex(0xc4ae72);}});save();bag();sayToast('Upgraded '+p.name+' in hand. Tap its slot to fit it.');return true;}
- const originalInterlock=vehicle219.interlocked;vehicle219.interlocked=()=>originalInterlock()||parts.some(p=>!installed(p));
+ const originalInterlock=vehicle219.interlocked;vehicle219.interlocked=()=>originalInterlock()||parts.some(p=>!installed(p)&&(/^(wheel|radiator|filter|plugs|belt|brakes)/.test(p.id)||p.name==='Engine block'));
  const enterBefore220=enterCar77;enterCar77=function(){if(held){sayToast('Put down or refit the part before entering.');return false;}return enterBefore220();};
- const baseTune=vehicle219.tuning;vehicle219.tuning=()=>{const t=baseTune();if(parts.some(p=>!installed(p)))t.power=0;return t;};
+ const baseTune=vehicle219.tuning;vehicle219.tuning=()=>{const t=baseTune();if(parts.some(p=>!installed(p)&&(/^(wheel|radiator|filter|plugs|belt|brakes)/.test(p.id)||p.name==='Engine block')))t.power=0;return t;};
  const bar=document.createElement('div');bar.id='carContext220';bar.hidden=true;const action=document.createElement('button'),secondary=document.createElement('button');action.id='partAction220';secondary.id='partSecondary220';bar.append(action,secondary);document.body.appendChild(bar);
  const carry=document.createElement('button');carry.id='carryPart220';carry.hidden=true;carry.onclick=drop;document.body.appendChild(carry);
  const done=document.createElement('button');done.id='mirrorDone220';done.textContent='Mirror: drag to aim · Done';done.hidden=true;done.onclick=()=>{mirror=null;gesture=null;save();};document.body.appendChild(done);
@@ -88,7 +88,7 @@
  canvas.addEventListener('pointerup',release,true);canvas.addEventListener('pointercancel',release,true);canvas.addEventListener('click',e=>{if(performance.now()-lastTap<400){e.preventDefault();e.stopImmediatePropagation();}},true);
  addEventListener('blur',()=>{gesture=null;mirror=null;});document.addEventListener('visibilitychange',()=>{gesture=null;mirror=null;});
  const make=makeRat;makeRat=function(){const g=make(),animate=g.animate;g.animate=function(...args){animate(...args);if(held&&g===rat&&held.owner===root&&g.userData.pipBones?.LeftHand){const b=g.userData.pipBones,shoulder=b.LeftArm.getWorldPosition(V()),forward=V(0,-.025,.075).applyAxisAngle(V(0,1,0),g.rotation.y);let aim=held.aim?.clone()||shoulder.clone().add(forward);const delta=aim.clone().sub(shoulder);if(delta.length()>.095)aim=shoulder.clone().add(delta.setLength(.095));solveArm203(THREE,g,'Left',aim,shoulder.clone().add(V(0,-.15,0)));held.part.mesh.position.copy(b.LeftHand.getWorldPosition(V()));held.part.mesh.quaternion.copy(g.getWorldQuaternion(new THREE.Quaternion()));}};return g;};
- const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(!active()){bar.hidden=carry.hidden=done.hidden=exit.hidden=true;if(held&&held.owner!==root){held=null;}return;}attach();if(Math.abs(car77.speed)>.08)mirror=null;if(held)persistTimer(dt);refresh+=dt;if(refresh>.10){refresh=0;renderUI();}};
+ const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(!active()){bar.hidden=carry.hidden=done.hidden=exit.hidden=true;if(held&&held.owner!==root){held=null;}return;}attach();if(Math.abs(car77.speed)>.08||roadsterControls203.viewIndex===0){mirror=null;gesture=null;}if(held)persistTimer(dt);refresh+=dt;if(refresh>.10){refresh=0;renderUI();}};
  let saveClock=0;function persistTimer(dt){saveClock+=dt;if(saveClock>2){saveClock=0;persist(held.part);}}
  window.carTouch220={serviceTarget(kind){return parts.find(p=>p.name===(kind==='coolant'?'Coolant cap':'Oil filler'))?.slot;},attach,hit,current,pickup,refit,drop,upgrade,renderUI,get targets(){return targets;},get parts(){return parts;},get held(){return held;},get mirror(){return mirror;}};
 })();
