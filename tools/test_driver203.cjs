@@ -29,4 +29,17 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert'),THREE=require('
  ctx.camera.aspect=.46;ctx.camera.updateProjectionMatrix();ctx.gameCam.ready=false;ctx.gameCam.distance=1.7;ctx.wallSolids=()=>[{x:c.g.position.x+2,z:c.g.position.z,hx:.1,hz:1,h:2}];ctx.tickGameplayCamera(.016);assert(ctx.camera.position.distanceTo(c.g.position.clone().add(new THREE.Vector3(0,.34,0)))>=ctx.camera207.minimumDistance(.46,ctx.camera.fov)-.01,'Wall selects a clear angle instead of a face closeup');ctx.wallSolids=()=>[];
  ctx.roadsterControls203.setView(2);ctx.tickGameplayCamera(.016);assert(ctx.camera.near===.012,'Hands view still owns its camera');ctx.roadsterControls203.setView(0);
  console.log('PASS: portrait/landscape car framing, obstacle avoidance and first-person camera');
+
+ // Expanded road network, higher speed and zero translation lag.
+ const trafficPositions=ctx.city204.state.cars.map(t=>t.g.position.clone());ctx.city204.state.cars.forEach(t=>t.g.position.set(999,0,999));
+ let roadSamples=0;for(const [a,b,z0,z1]of ctx.city204.roads209){const horizontal=b-a>z1-z0;for(let q=.03;q<.98;q+=.03){const p=new THREE.Vector3(horizontal?a+(b-a)*q:(a+b)/2,0,horizontal?(z0+z1)/2:z0+(z1-z0)*q);assert(!ctx.blockedCar77(p,.4),'Road centre must be driveable at '+p.toArray());roadSamples++;}}
+ c.g.position.set(-70,0,65);c.g.rotation.y=Math.PI/2;c.travelYaw=c.g.rotation.y;c.speed=0;c.handbrake=false;c.ignition206=true;ctx.keys.w=true;for(let i=0;i<180;i++)ctx.controlCar77(1/60,{});assert(c.speed>8.9,'Car reaches increased top speed');ctx.keys.w=false;
+ ctx.gameCam.ready=false;ctx.tickGameplayCamera(.016);const oldCamera=ctx.camera.position.clone();c.g.position.x+=.5;ctx.tickGameplayCamera(.016);assert(Math.abs(ctx.camera.position.x-oldCamera.x-.5)<1e-7,'Camera follows translation without trailing');
+ ctx.city204.state.cars.forEach((t,i)=>t.g.position.copy(trafficPositions[i]));
+ const canvasContext={fillRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},fillText(){}};ctx.document.querySelector=()=>null;ctx.document.createElement=()=>({...el(),addEventListener(){},getContext:()=>canvasContext});ctx.$=()=>({...el(),addEventListener(){},click(){}});let mapReset=null;ctx.cockpit207={set(k,v){mapReset=[k,v];}};
+ vm.runInContext(fs.readFileSync(require('path').join(__dirname,'../touring209.js'),'utf8'),ctx);assert(mapReset[1]==='small','Map opens each session');
+ assert(Math.abs(ctx.touring209.telemetry({speed:9,ignition206:true}).kph-32.4)<1e-8);assert(ctx.touring209.telemetry({speed:-2,ignition206:true}).gear==='R');assert(ctx.touring209.telemetry({speed:0,ignition206:false}).rpm===0);
+ c.riding=false;const nearBefore=ctx.camera.near;ctx.touring209.toggleFoot(true);assert(ctx.touring209.firstPerson);ctx.tickGameplayCamera(.016);assert(Math.abs(ctx.camera.position.y-rat.position.y-.4)<1e-7);ctx.renderer.render(ctx.scene,ctx.camera);assert(rat.visible,'First-person render restores model visibility');ctx.touring209.toggleFoot(false);assert(ctx.camera.near===nearBefore);ctx.touring209.toggleFoot(true);ctx.enterCar77();assert(!ctx.touring209.firstPerson,'Entering car exits walking first person');
+ assert(c.g.getObjectByName('Saddle leather door insert'));assert(c.g.getObjectByName('Walnut centre console'));
+ console.log('PASS:',roadSamples,'road samples, increased speed, direct camera tracking, telemetry, walking first person and cabin trim');
 },e=>{throw e});
