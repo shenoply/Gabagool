@@ -24,7 +24,7 @@
    ['drive','Accelerate gently','Joystick up / W accelerates. Ease off to coast. Drive a short distance.'],
    ['steer','Steer','Joystick left/right or A/D steers. Steering is gentler at higher speeds.'],
    ['brake','Brake & reverse','Pull the joystick back / hold S to brake. Keep holding after stopping to reverse slowly.'],
-   ['carView','Car camera','Tap Car view / V to cycle Hands, Driver, Dashboard, Shoulder and Outside. Drag to look down.'],
+   ['carView','Car camera','Tap Cockpit / V to cycle Hands, Driver, Dashboard, Shoulder and Outside. Drag to look down.'],
    ['horn','Horn','Tap the speaker / horn button (H).'],
    ['carMenu','Car controls','Tap the three-line car button for Drive, Cabin and City pages.'],
    ['handbrake','Parking brake','Use Handbrake on the Drive page (B). Release it before driving.'],
@@ -54,7 +54,7 @@
  };
  // Keep the first drive short; optional cabin controls remain available in the handbook.
  chapters.cabin=chapters.car.slice(5,-1);
- chapters.car=[...chapters.car.slice(0,5),['outside','Switch outside','Tap Outside view to see the whole car. Tap Hands cockpit to return.'],chapters.car.at(-1)];
+ chapters.car=[...chapters.car.slice(0,5),['outside','Switch outside','Tap Outside view to see the whole car. Tap Cockpit to return.'],chapters.car.at(-1)];
  function readiness(){if(!car77?.riding||!chapter||chapter!=='car')return '';const id=chapters.car[index][0];if(!['drive','steer','brake'].includes(id))return '';if(car77.cabin219?.hoodOpen)return 'Hood open — stop, step out and close it at the front.';if(window.vehicle219?.interlocked())return 'Close the doors and refit missing parts before driving.';if(!car77.ignition206)return 'Engine off — tap Start engine first.';return '';}
  let lastHint='';
  const handbook=[

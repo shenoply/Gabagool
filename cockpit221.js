@@ -6,5 +6,5 @@
  const enter=enterCar77;enterCar77=function(){const was=car77?.riding,result=enter();if(!was&&car77?.riding){roadsterControls203.setView(2);keys={};joy.x=joy.z=0;rat.userData.motionX=rat.userData.motionZ=0;}return result;};
  // Remove the driver's seat from the cockpit foreground; restore after rendering.
  const render=renderer.render;renderer.render=function(sceneArg,cam){const hidden=[];if(sceneArg===scene&&cam===camera&&car77?.riding&&roadsterControls203.viewIndex>0&&roadsterControls203.viewIndex!==4){car77.visual.traverse(o=>{if(o.isMesh&&/seat cushion|seat back|Seat stitching/i.test(o.name)&&(o.position.x<0||(o.name==='Seat stitching'&&(o.geometry.computeBoundingBox(),o.geometry.boundingBox.max.x<0)))){hidden.push([o,o.visible]);o.visible=false;}});}try{return render.call(this,sceneArg,cam);}finally{for(const [o,v]of hidden)o.visible=v;}};
- const tick=tickWorld38;tickWorld38=function(dt){tick(dt);outside.textContent=roadsterControls203.viewIndex===0?'Hands cockpit':'Outside view';};
+ const tick=tickWorld38;tickWorld38=function(dt){tick(dt);outside.textContent=roadsterControls203.viewIndex===0?'Cockpit':'Outside view';};
 })();
