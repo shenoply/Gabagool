@@ -30,5 +30,6 @@ sewer211.enter('city');if(!sewer211.active||rat.position.z<29)throw Error('City 
 `,ctx);
 await new Promise(r=>setTimeout(r,200));
 if(process.env.WW_EXTRA_TEST)vm.runInContext(fs.readFileSync(path.resolve(P,process.env.WW_EXTRA_TEST),'utf8'),ctx,{filename:process.env.WW_EXTRA_TEST});
+if(process.env.WW_SCENE_EXPORT&&ctx.sceneExport220)fs.writeFileSync(process.env.WW_SCENE_EXPORT,JSON.stringify(ctx.sceneExport220));
 console.log(JSON.stringify(ctx.report,null,2));process.exit(0);
 })().catch(e=>{console.error(e.stack);process.exit(1)});
