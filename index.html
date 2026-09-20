@@ -2198,7 +2198,7 @@ function tick66(dt){if(gameplayActive())ropeHints66();
  }
  const dog=actors44.find(a=>a.owner===root&&a.id==='hound'),nearDog=!!dog&&dog.g.position.distanceTo(rat.position)<5;if(nearDog&&sound66.dogCooldown===0){effect58('dog',dog.g.position);sound66.dogCooldown=sound66.dogNear?24:12;}sound66.dogNear=nearDog;
  const cat=zaytona&&zaytona.owner===root?zaytona:null,nearCat=!!cat&&cat.g.position.distanceTo(rat.position)<4.2;if(nearCat&&sound66.catCooldown===0&&!sound66.utterance){meow66(cat.g.position);sound66.catCooldown=18+Math.random()*10;}sound66.catNear=nearCat;
- const birds=actors44.find(a=>a.owner===root&&a.id==='songbirds');if(birds&&birds.g.position.distanceTo(rat.position)<6&&sound66.birdCooldown===0&&!sound66.utterance){const [name,line]=birdLines66[sound66.birdLine%birdLines66.length];voice66(name,line,birds.g.position,[1.25,.85,1.6][sound66.birdLine%3]);sound66.birdLine++;sound66.birdCooldown=10+(sound66.birdLine%3===0?25:0);}
+ const birds=actors44.find(a=>a.owner===root&&a.id==='songbirds');if(birds&&birds.g.position.distanceTo(rat.position)<6&&sound66.birdCooldown===0&&!sound66.utterance){const [name,line]=birdLines66[sound66.birdLine%birdLines66.length];voice66(name,line,birds.g.position,[1.25,.85,1.6][sound66.birdLine%3]);sound66.birdLine++;sound66.birdCooldown=(recordings69.find(c=>c.name===name&&c.text===line)?.duration||5)+1.2+(sound66.birdLine%3===0?16:0);}
  if(sound66.voicePos&&sound66.voicePos.distanceTo(rat.position)>8){stopVoice69();if(sound66.utterance&&'speechSynthesis'in window)speechSynthesis.cancel();sound66.utterance=null;sound66.voicePos=null;sound66.voiceClock=0;$('chatter66').style.display='none';}
 
 }
@@ -2906,7 +2906,7 @@ requestAnimationFrame(loop);
 <script src="motoring206.js?v=207"></script>
 <script src="cockpit206.js?v=207"></script>
 <script src="camera207.js?v=207"></script>
-<script src="cockpit207.js?v=207"></script>
+<script src="cockpit207.js?v=207.1"></script>
 <script src="audio207.js?v=207"></script>
 </body>
 </html>
