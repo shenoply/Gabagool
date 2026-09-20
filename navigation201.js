@@ -22,6 +22,8 @@ body.menu-open65 #navigation201,body.photo #navigation201,body.heaven-course #na
   const point=(x,z)=>({x:Math.max(5,Math.min(95,6+(x+22)/54*88)),y:Math.max(7,Math.min(94,95-(z+14)/84*88))});
   function destinations(){const s=progress76(),bird=typeof rideActor71==='function'?rideActor71():null;return [
     ...(window.motoring206?.destinations()||[]),
+    {id:'sewer-yard',icon:'↓',name:'SEWER · yard entrance',x:6.8,z:29.4,detail:'Round iron cover beside the north-yard path. Walk onto it and press Sewer. A canoe waits below.'},
+    {id:'sewer-city',icon:'↓',name:'SEWER · city entrance',x:4,z:59,detail:'Round iron cover just inside the original city. Walk onto it and press Sewer.'},
     {id:'city',icon:'↟',name:'Original city',x:4,z:56,detail:'Use the open north gate and follow the short entrance to the original uploaded city. Its streets are open for walking and driving; building walls are solid.'},
     {id:'home',icon:'⌂',name:'Pip’s home',x:0,z:-2,detail:'Return home to decorate and arrange your crafted furniture.'},
     {id:'rat',icon:'R',name:'Big Rat',x:NB.x,z:NB.z,detail:s.jobs?'Jobs complete. Your reward is in storage.':'Talk to Big Rat, then recover the vinyl and silver key.'},
