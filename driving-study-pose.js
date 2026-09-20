@@ -30,7 +30,20 @@ function createPipDrivingStudy(model,car){
    for(let i=0;i<p.count;i++){let w=0;for(let k=0;k<4;k++)if(si.array[i*4+k]===id)w+=sw.array[i*4+k];if(w<.8)continue;const v=V().fromBufferAttribute(p,i);m.boneTransform(i,v);m.localToWorld(v);sum.add(v);count++;}
   });return count?sum.divideScalar(count):hand.getWorldPosition(V());
  }
+ // Keep the original textured paw surface on the driver-facing side of the rim.
+ const paws=[];model.traverse(m=>{if(!m.isSkinnedMesh)return;const p=m.geometry.attributes.position,si=m.geometry.attributes.skinIndex,sw=m.geometry.attributes.skinWeight,ids=['Left','Right'].map(s=>m.skeleton.bones.indexOf(bones[s+'Hand'])),vertices=[];for(let i=0;i<p.count;i++){let w=0;for(let k=0;k<4;k++)if(ids.includes(si.array[i*4+k]))w+=sw.array[i*4+k];if(w>.05)vertices.push(i);}paws.push({m,vertices,base:p.array.slice()});});
+ function clearRim(){
+  model.updateMatrixWorld(true);wheel.updateWorldMatrix(true,false);
+  for(const {m,vertices}of paws){m.skeleton.update();const p=m.geometry.attributes.position,si=m.geometry.attributes.skinIndex,sw=m.geometry.attributes.skinWeight;
+   for(const i of vertices){const local=V().fromBufferAttribute(p,i),point=local.clone();m.boneTransform(i,point);m.localToWorld(point);wheel.worldToLocal(point);const radial=Math.hypot(point.x,point.y),offset=radial-.095,clearance=.018;
+    if(Math.abs(offset)>=clearance)continue;const surface=-Math.sqrt(clearance*clearance-offset*offset)-.002;if(point.z<=surface)continue;point.z=surface;wheel.localToWorld(point);m.worldToLocal(point);
+    const skin=new THREE.Matrix4();skin.elements.fill(0);for(let k=0;k<4;k++){const weight=sw.array[i*4+k];if(!weight)continue;const b=new THREE.Matrix4().fromArray(m.skeleton.boneMatrices,si.array[i*4+k]*16);for(let j=0;j<16;j++)skin.elements[j]+=b.elements[j]*weight;}
+    const inverse=m.bindMatrixInverse.clone().multiply(skin).multiply(m.bindMatrix).invert();point.applyMatrix4(inverse);p.setXYZ(i,point.x,point.y,point.z);
+   }p.needsUpdate=true;m.geometry.computeVertexNormals();
+  }
+ }
  function update(steering=0){
+  for(const {m,base}of paws){m.geometry.attributes.position.array.set(base);m.geometry.attributes.position.needsUpdate=true;}
   for(const [name,b]of Object.entries(bones))b.quaternion.copy(rest[name]);wheel.rotation.z=steering;
   for(const side of ['Left','Right']){bones[side+'UpLeg'].rotateX(-1.15);bones[side+'Leg'].rotateX(1.05);}
   bones.Spine.rotateX(.06);for(const [name,b]of Object.entries(bones))if(/Tail_/.test(name))b.rotateX(-.10);
@@ -45,7 +58,7 @@ function createPipDrivingStudy(model,car){
   const errors={};
   for(const side of ['Left','Right']){
    const arm=bones[side+'Arm'],hand=bones[side+'Hand'],sign=wheel.worldToLocal(arm.getWorldPosition(V())).x<0?-1:1;
-   const desired=wheel.localToWorld(V(sign*.090,-.010,-.013)),pole=arm.getWorldPosition(V()).add(V(sign*.13,-.035,-.025));
+   const desired=wheel.localToWorld(V(sign*.096,-.010,-.024)),pole=arm.getWorldPosition(V()).add(V(sign*.13,-.035,-.025));
    const basis=new THREE.Matrix4().makeBasis(V(0,sign,0),V(0,0,1),V(sign,0,0)),orientation=wheel.getWorldQuaternion(new THREE.Quaternion()).multiply(new THREE.Quaternion().setFromRotationMatrix(basis));
    for(let i=0;i<5;i++){
     hand.quaternion.copy(hand.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(orientation));model.updateMatrixWorld(true);
@@ -56,7 +69,7 @@ function createPipDrivingStudy(model,car){
    hand.quaternion.copy(hand.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(orientation));model.updateMatrixWorld(true);
    errors[side]=meshCentre(side).distanceTo(desired);
   }
-  return errors;
+  clearRim();return errors;
  }
  update();return {model,bones,update};
 }

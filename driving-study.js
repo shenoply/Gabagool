@@ -30,7 +30,7 @@
    mesh.skeleton.bones.forEach((b,i)=>{for(let p=b;p;p=p.parent)if(/head|neck|tail/i.test(p.name)){hidden.add(i);break;}});
    const visible=i=>{let w=0;for(let k=0;k<4;k++)if(hidden.has(si.array[i*4+k]))w+=sw.array[i*4+k];return w<.25;};
    for(let i=0;i<(full.index?full.index.count:full.attributes.position.count);i+=3){const tri=[0,1,2].map(k=>full.index?full.index.getX(i+k):i+k);if(tri.every(visible))keep.push(...tri);}
-   inside.setIndex(keep);inside.clearGroups();firstPersonMeshes.push({mesh,full,inside});
+   inside.setAttribute('position',full.attributes.position);inside.setAttribute('normal',full.attributes.normal);inside.setIndex(keep);inside.clearGroups();firstPersonMeshes.push({mesh,full,inside});
   });window.drivingStudy={scene,camera,car,study,renderer,choose};choose(mode);
  },undefined,()=>{$('error').style.display='block';$('error').textContent='Pip’s model could not load. Reload this page to try again.';});
  const pointers=new Map();let pinch=0;const canvas=renderer.domElement;
