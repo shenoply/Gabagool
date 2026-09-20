@@ -2326,7 +2326,7 @@ function nextIndex190(){
 function nextMusic190(){music69.index=nextIndex190();setTrack69();musicTick69();}
 function musicElement69(){if(!music69.el){const el=music69.el=new Audio();el.preload='none';el.loop=false;el.addEventListener('ended',nextMusic190);el.addEventListener('error',()=>{music69.blocked=true;music69.pending=false;$('pianoToggle').textContent='Music · tap to retry';});}return music69.el;}
 function setTrack69(){if(music69.index<0)music69.index=nextIndex190();const el=musicElement69();el.pause();el.src=music69.tracks[music69.index].file;music69.last=music69.tracks[music69.index].file;try{localStorage.setItem('ww-last-song190',music69.last);}catch{}music69.blocked=false;$('pianoToggle').textContent=music69.tracks[music69.index].title;}
-function musicTick69(){if(typeof music69==='undefined'||!music69.unlocked)return;const allowed=!(phase==='explore'&&area?.id==='sewer211')&&piano.enabled&&voiceOn&&!document.hidden&&!radio.on&&['scavenge','explore','house','inside','heaven'].includes(phase);if(!allowed){music69.el?.pause();return;}const el=musicElement69();if(!el.getAttribute?.('src')&&!el.src)setTrack69();el.volume=music69.volume*((speech69.current||sc?.talk)?.3:1);if(el.paused&&!music69.pending&&!music69.blocked){music69.pending=true;el.play().then(()=>{music69.pending=false;if(!piano.enabled||!voiceOn||document.hidden||radio.on||(phase==='explore'&&area?.id==='sewer211'))el.pause();}).catch(()=>{music69.pending=false;music69.blocked=true;$('pianoToggle').textContent='Music · tap to play';});}}
+function musicTick69(){if(window.sewerAudio218?.active){sewerAudio218.tick();return;}if(typeof music69==='undefined'||!music69.unlocked)return;const allowed=!(phase==='explore'&&area?.id==='sewer211')&&piano.enabled&&voiceOn&&!document.hidden&&!radio.on&&['scavenge','explore','house','inside','heaven'].includes(phase);if(!allowed){music69.el?.pause();return;}const el=musicElement69();if(!el.getAttribute?.('src')&&!el.src)setTrack69();el.volume=music69.volume*((speech69.current||sc?.talk)?.3:1);if(el.paused&&!music69.pending&&!music69.blocked){music69.pending=true;el.play().then(()=>{music69.pending=false;if(!piano.enabled||!voiceOn||document.hidden||radio.on||(phase==='explore'&&area?.id==='sewer211'))el.pause();}).catch(()=>{music69.pending=false;music69.blocked=true;$('pianoToggle').textContent='Music · tap to play';});}}
 function chooseMusic69(i){radioStop();piano.enabled=true;music69.unlocked=true;music69.blocked=false;if(i!==music69.index){music69.index=i;music69.bag=music69.bag.filter(n=>n!==i);setTrack69();}musicTick69();syncMusicMute192();musicMenu69();}
 function musicMenu69(){modal('Music',`<p>${piano.enabled?'Playing':'Paused'} · ${music69.tracks[music69.index]?.title||'Shuffled soundtrack'}</p><p>Six songs, shuffled without consecutive repeats.</p>`,[
  [piano.enabled?'Pause':'Play',()=>{music69.unlocked=true;music69.blocked=false;piano.enabled=!piano.enabled;musicTick69();syncMusicMute192();musicMenu69();}],
@@ -2912,7 +2912,8 @@ requestAnimationFrame(loop);
 <script src="hud208.js?v=210"></script>
 <script src="touring209.js?v=215"></script>
 <script src="canoe212.js?v=214"></script>
-<script src="sewerBoat215.js?v=217"></script>
+<script src="sewerAudio218.js?v=218"></script>
+<script src="sewerBoat215.js?v=218"></script>
 <script src="sewer211.js?v=215"></script>
 </body>
 </html>
