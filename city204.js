@@ -15,16 +15,17 @@
  button('City map',()=>openYard201('city'));
  addEventListener('keydown',e=>{if(e.repeat||!active()||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;const k=e.key.toLowerCase();if(k==='shift'){e.preventDefault();car77.drifting=true;car77.reach={kind:'brake',time:0,duration:.75};}if(k==='q')signal(-1);if(k==='r')signal(1);if(k==='n')tune();});addEventListener('keyup',e=>{if(e.key==='Shift')release();});
  const style=document.createElement('style');style.textContent='#carPanel203{right:max(8px,env(safe-area-inset-right))!important;bottom:156px!important;width:min(280px,61vw);max-width:280px;max-height:42dvh;overflow:auto;align-content:flex-end;touch-action:none}#carPanel203 button{min-height:40px;flex:1 0 42%;padding:7px 8px!important;font-size:12px!important}#carPanel203 button[aria-pressed=true]{background:#efbe62;color:#1b322c}@media(max-height:500px){#carPanel203{bottom:12px!important;right:12px!important;width:270px;max-height:64dvh}}';document.head.appendChild(style);
- const roads209=[[-86,24,40.5,49.5],[52,94,40.5,49.5],[-86,94,60.5,69.5],[-86,94,73.5,82.5],[-86,94,-24.5,-15.5],[-84.5,-75.5,-20,78],[83.5,92.5,-20,78],[-44.5,-35.5,45,78],[15.5,24.5,45,78],[51.5,60.5,45,78]];
+ const roads209=[[-86,24,40.5,49.5],[52,94,40.5,49.5],[-86,94,60.5,69.5],[-86,94,73.5,82.5],[-86,94,-24.5,-15.5],[-84.5,-75.5,-20,78],[83.5,92.5,-20,78],[-44.5,-35.5,45,78],[15.5,24.5,45,78],[51.5,60.5,45,78],[-66,-58,78,141],[66,74,78,141],[-66,74,137,145]];
  const onRoad=p=>roads209.some(([a,b,c,d])=>p.x>=a&&p.x<=b&&p.z>=c&&p.z<=d);
- const inCity=p=>(p.z>=40&&p.z<=66&&p.x>=-15&&p.x<=27)||onRoad(p);
+ const inDistrict=p=>p.x>=-62&&p.x<=70&&p.z>=83&&p.z<=141;
+ const inCity=p=>(p.z>=40&&p.z<=66&&p.x>=-15&&p.x<=27)||onRoad(p)||inDistrict(p);
  const connector=p=>p.z>=34&&p.z<=42&&p.x>=1.5&&p.x<=6.5;
  const inExtension=p=>inCity(p)||connector(p);
  function citySolid(p,r=.3){if(p.z>36.3&&!inExtension(p))return true;if(city?.owner===root){if(city.solids.some(o=>Math.abs(p.x-o.x)<o.hx+r&&Math.abs(p.z-o.z)<o.hz+r))return true;if(city.cars.some(t=>Math.hypot(p.x-t.g.position.x,p.z-t.g.position.z)<r+.62))return true;}return false;}
  const blocked=blockedCar77;blockedCar77=function(p,r=.39){if(phase==='scavenge'&&inExtension(p))return citySolid(p,r);if(phase==='scavenge'&&p.z>36.3)return true;return blocked(p,r);};
- const resolve=resolveGeometry62;resolveGeometry62=function(p,before){if(phase==='scavenge'&&inExtension(p)){if(citySolid(p,.2))p.copy(before);return;}resolve(p,before);};
+ const resolve=resolveGeometry62;resolveGeometry62=function(p,before){if(phase==='scavenge'&&inExtension(p)){if(inDistrict(p)||inDistrict(before))resolve(p,before);if(citySolid(p,.2))p.copy(before);return;}resolve(p,before);};
  const walls=wallSolids;wallSolids=function(){const list=walls();return phase==='scavenge'&&city?.owner===root?[...list,...city.solids.map(s=>({...s,h:3}))]:list;};
- const controlBefore=control;control=function(dt,options){if(phase==='scavenge'&&city?.owner===root&&options?.bounds){options={...options,bounds:[-86,94,-25,83],ground:options.ground};const ground=arguments[1].ground;options.ground=(x,z)=>z>36.3?0:ground?ground(x,z):0;const before=rat.position.clone(),result=controlBefore(dt,options);if(rat.position.z>36.3&&!inExtension(rat.position))rat.position.copy(before);return result;}return controlBefore(dt,options);};
+ const controlBefore=control;control=function(dt,options){if(phase==='scavenge'&&city?.owner===root&&options?.bounds){options={...options,bounds:[-86,94,-25,145],ground:options.ground};const ground=arguments[1].ground;options.ground=(x,z)=>z>36.3?0:ground?ground(x,z):0;const before=rat.position.clone(),result=controlBefore(dt,options);if(rat.position.z>36.3&&!inExtension(rat.position))rat.position.copy(before);return result;}return controlBefore(dt,options);};
  function part(parent,w,h,d,x,y,z,color,name){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.8}));m.position.set(x,y,z);m.name=name;m.userData.noInk=true;parent.add(m);return m;}
  function route(lane){const pts=[],cx=6,cz=53,hx=14+lane,hz=8+lane,r=4;for(let corner=0;corner<4;corner++){const a=corner*Math.PI/2,ox=cx+(corner===0||corner===3?1:-1)*(hx-r),oz=cz+(corner<2?1:-1)*(hz-r);for(let j=0;j<=12;j++){const t=a+j/12*Math.PI/2;pts.push(new THREE.Vector3(ox+Math.cos(t)*r,0,oz+Math.sin(t)*r));}}return new THREE.CatmullRomCurve3(pts,true,'centripetal');}
  function seed(){if(phase!=='scavenge'||!root||city?.owner===root)return;city={owner:root,g:new THREE.Group(),cars:[],solids:[]};root.add(city.g);const g=city.g;g.name='Open city streets';
@@ -48,5 +49,5 @@
  c.signalTime=(c.signalTime||0)+dt;if(Math.abs(c.steer)>.35)c.signalTurned=true;if(c.indicator&&(c.signalTime>9||(c.signalTurned&&Math.abs(c.steer)<.08&&c.signalTime>1.2))){c.indicator=0;updateSignals();}for(const l of c.indicators)l.material.emissiveIntensity=c.indicator===l.userData.side&&clock%.8<.4?2:0;
  if(c.reach?.kind==='radio')c.radioKnob.rotation.z=Math.sin(c.reach.time/c.reach.duration*Math.PI)*.8;
  };
- window.city204={roads209,onRoad,seed,route,inExtension,citySolid,get state(){return city;},release,tune,signal};
+ window.city204={roads209,onRoad,inDistrict,seed,route,inExtension,citySolid,get state(){return city;},release,tune,signal};
 })();
