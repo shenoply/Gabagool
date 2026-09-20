@@ -20,4 +20,13 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert'),THREE=require('
 
 
 
+
+ // Build 207: outside view must frame the complete car on narrow phones.
+ ctx.keys.w=false;c.riding=true;ctx.gameCam.pos=new THREE.Vector3();ctx.gameCam.distance=1.7;ctx.gameCam.pitch=.43;ctx.gameCam.yaw=Math.PI/2;
+ const cameraHit=fs.readFileSync(require('path').join(__dirname,'../index.html'),'utf8').match(/function cameraBoxHit\(origin[\s\S]*?return lo>\.05\?lo:null;}/)[0];vm.runInContext(cameraHit,ctx);
+ vm.runInContext(fs.readFileSync(require('path').join(__dirname,'../camera207.js'),'utf8'),ctx);
+ for(const aspect of [.46,393/760,2]){ctx.camera.aspect=aspect;ctx.camera.updateProjectionMatrix();ctx.gameCam.ready=false;ctx.gameCam.distance=1.7;ctx.tickGameplayCamera(.016);ctx.camera.updateMatrixWorld(true);for(const x of [-.6,.6])for(const z of [-1,1])for(const y of [0,.85]){const point=c.g.position.clone().add(new THREE.Vector3(x,y,z)).project(ctx.camera);assert(Math.abs(point.x)<.85&&Math.abs(point.y)<.85,'Whole car has a margin in every viewport');}}
+ ctx.camera.aspect=.46;ctx.camera.updateProjectionMatrix();ctx.gameCam.ready=false;ctx.gameCam.distance=1.7;ctx.wallSolids=()=>[{x:c.g.position.x+2,z:c.g.position.z,hx:.1,hz:1,h:2}];ctx.tickGameplayCamera(.016);assert(ctx.camera.position.distanceTo(c.g.position.clone().add(new THREE.Vector3(0,.34,0)))>=ctx.camera207.minimumDistance(.46,ctx.camera.fov)-.01,'Wall selects a clear angle instead of a face closeup');ctx.wallSolids=()=>[];
+ ctx.roadsterControls203.setView(2);ctx.tickGameplayCamera(.016);assert(ctx.camera.near===.012,'Hands view still owns its camera');ctx.roadsterControls203.setView(0);
+ console.log('PASS: portrait/landscape car framing, obstacle avoidance and first-person camera');
 },e=>{throw e});

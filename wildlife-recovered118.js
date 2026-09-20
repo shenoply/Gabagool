@@ -907,7 +907,7 @@
   addMap171 = function mapLabels178() { mapBeforeLabels178(); const m = $('miniMap171'); if (m && !m.querySelector('.labels178')) { const l = document.createElement('small'); l.className = 'labels178'; l.textContent = 'Willow Pond · Playyard'; l.style.cssText = 'position:absolute;left:9px;bottom:7px;font-size:8px;opacity:.8'; m.appendChild(l); } };
   const style178 = document.createElement('style'); style178.textContent = '#mute{top:340px!important;z-index:28!important}'; document.head.appendChild(style178);
   const hud181=document.createElement('style');hud181.textContent='#miniMap171{width:138px!important;height:138px!important;border-radius:17px!important}#miniMap171 .labels178{display:none}#mute#mute{top:auto!important;bottom:190px!important;left:12px!important;right:auto!important;height:36px!important;min-height:0!important;width:auto!important;padding:6px 12px!important;z-index:40!important}';document.head.appendChild(hud181);
-  mapPoint171=function(el,x,z){if(!el)return;el.style.left=(9+(x+22)/70*120)+'px';el.style.top=(126-(z+14)/67*110)+'px';};
+  mapPoint171=function(el,x,z){if(!el)return;el.style.left=Math.max(6,Math.min(94,6+(x+22)/54*88))+'%';el.style.top=Math.max(6,Math.min(94,94-(z+14)/84*88))+'%';};
   window.mapPoint171=(el,x,z)=>mapPoint171(el,x,z);
 
   // One shared shoreline drives the mesh and swimming bounds.
