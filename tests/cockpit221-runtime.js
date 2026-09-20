@@ -1,0 +1,8 @@
+(()=>{
+ const check=(x,m)=>{if(!x)throw Error(m);};closeModal();tutorial219.pause();tickWorld38(.03);carTouch220.attach();const c=car77;
+ rat.position.copy(c.g.position).add(new THREE.Vector3(1,0,0));enterCar77();check(c.riding&&roadsterControls203.viewIndex===2,'Hands not default');check(tutorial219.progress.chapter==='car','Car tutorial not activated');
+ $('outsideView221').onclick();check(roadsterControls203.viewIndex===0,'Outside button');$('outsideView221').onclick();check(roadsterControls203.viewIndex===2,'Hands return');
+ c.speed=0;exitCar77();c.ignition206=false;tutorial219.pause();const p=carTouch220.parts.find(p=>p.id==='wheel0');rat.position.copy(p.mesh.getWorldPosition(new THREE.Vector3()));rat.position.y=0;registerSolid62(p.mesh);check(carTouch220.pickup(p),'Wheel pickup');check(!surfaces57.some(m=>m.mesh?.userData.heldCarPart221),'Held wheel in ground surfaces');const y=rat.position.y;for(let i=0;i<120;i++){rat.animate(1/60,0);control(1/60);}check(rat.position.y<y+.6,'Wheel launches Pip');carTouch220.drop();
+ const a=c.cabin219;a.hoodOpen=true;a.hoodValue=1;const engineParts=carTouch220.parts.filter(p=>p.requiresHood);check(engineParts.length>=10,'Not all engine meshes removable');for(const part of engineParts){rat.position.copy(part.mesh.getWorldPosition(new THREE.Vector3()));rat.position.y=0;check(carTouch220.pickup(part),'Cannot remove '+part.name);}carTouch220.drop();check(engineParts.every(p=>vehicle219.data().parts220[p.id]?.installed===false),'Multiple parts removal failed');
+ check(tutorial219.chapters.car.length===7,'Core tutorial too long');report.cockpit221={defaultHands:true,outsideToggle:true,wheelNoLaunch:true,engineParts:engineParts.length,shortTutorial:true};
+})();

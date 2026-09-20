@@ -814,10 +814,10 @@ function control(dt,{walk=6,bounds,ground,locked=false}){
   const jl=Math.hypot(joy.x,joy.z);if(jl>0.15){dx=joy.x;dz=joy.z;}
   if(!photo.active){const forward=(phase==='house'||phase==='inside')?new THREE.Vector3(-Math.sin(gameCam.yaw),0,-Math.cos(gameCam.yaw)):camera.getWorldDirection(new THREE.Vector3());forward.y=0;if(forward.lengthSq()<.001)forward.set(-Math.sin(gameCam.yaw),0,-Math.cos(gameCam.yaw));forward.normalize();const right=new THREE.Vector3(-forward.z,0,forward.x),ox=dx,oz=dz;dx=right.x*ox-forward.x*oz;dz=right.z*ox-forward.z*oz;}
   let len=Math.hypot(dx,dz);let speed=0;
-  u.exhausted=false;u.run=(len>0.15)&&!u.swim66&&!u.crawl169&&(keys.shift||jl>0.72);
+  u.exhausted=false;u.run=(len>0.15)&&!u.swim66&&!u.crawl169&&(keys.shift||jl>0.94);
   if(locked||u.pick||(u.act&&u.act.type==='bite'))len=0;
   if(u.act&&u.act.type==='roll'){u.motionX=u.motionZ=0;const d=u.rollDir;rat.position.x+=d.x*dt*10;rat.position.z+=d.z*dt*10;speed=0;}
-  else{const blocked=locked||u.pick||(u.act&&u.act.type==='bite');if(len>1||(u.run&&len>.15)){dx/=len;dz/=len;len=1;}const moving=len>.15;const target=walk*(u.swim66?.45:1)*(u.crawl169?.42:1)*(u.run?2.05*(dewEnergy>0?1.15:1):1)*(u.air?.85:1),blend=1-Math.exp(-dt*(moving?9:15));u.motionX=blocked?0:THREE.MathUtils.lerp(u.motionX||0,moving?dx*target:0,blend);u.motionZ=blocked?0:THREE.MathUtils.lerp(u.motionZ||0,moving?dz*target:0,blend);u.vel=Math.hypot(u.motionX,u.motionZ);if(u.vel<.015)u.motionX=u.motionZ=u.vel=0;rat.position.x+=u.motionX*dt;rat.position.z+=u.motionZ*dt;speed=Math.min(1,u.vel/walk);if(moving&&!blocked){const ty=Math.atan2(dx,dz);let d=Math.atan2(Math.sin(ty-rat.rotation.y),Math.cos(ty-rat.rotation.y));rat.rotation.y+=d*(1-Math.exp(-dt*11));}}
+  else{const blocked=locked||u.pick||(u.act&&u.act.type==='bite');if(len>1||(u.run&&len>.15)){dx/=len;dz/=len;len=1;}const moving=len>.15;const target=walk*(u.swim66?.45:1)*(u.crawl169?.42:1)*(u.run?(phase==='heaven'?2.05:1.4)*(dewEnergy>0?1.15:1):1)*(u.air?.85:1),blend=1-Math.exp(-dt*(moving?9:15));u.motionX=blocked?0:THREE.MathUtils.lerp(u.motionX||0,moving?dx*target:0,blend);u.motionZ=blocked?0:THREE.MathUtils.lerp(u.motionZ||0,moving?dz*target:0,blend);u.vel=Math.hypot(u.motionX,u.motionZ);if(u.vel<.015)u.motionX=u.motionZ=u.vel=0;rat.position.x+=u.motionX*dt;rat.position.z+=u.motionZ*dt;speed=Math.min(1,u.vel/walk);if(moving&&!blocked){const ty=Math.atan2(dx,dz);let d=Math.atan2(Math.sin(ty-rat.rotation.y),Math.cos(ty-rat.rotation.y));rat.rotation.y+=d*(1-Math.exp(-dt*11));}}
   if(u.longJump169&&u.air){u.longJump169.t+=dt;if(u.longJump169.t<.62){rat.position.x+=u.longJump169.dir.x*dt*3.3;rat.position.z+=u.longJump169.dir.z*dt*3.3;}else u.longJump169=null;}
   if(bounds){rat.position.x=Math.max(bounds[0],Math.min(bounds[1],rat.position.x));rat.position.z=Math.max(bounds[2],Math.min(bounds[3],rat.position.z));}
   if(!u.wallState){if(['scavenge','explore','house'].includes(phase))resolveGeometry62(rat.position,before62);routesResolve62(rat.position,before62);}
@@ -955,7 +955,7 @@ function tickScavenge(dt){
   tickZaytona(dt);if(fatMixer)fatMixer.update(dt);const catBefore=sc.cat&&sc.cat.m.position.clone();tickCat(dt);if(sc.cat&&catBefore)yardResolve(sc.cat.m.position,catBefore);if(phase!=='scavenge')return;
   const groundAlley=(x,z)=>{const lx=x/1.3,lz=(z+4)/1.3;const c=Math.cos(.42),sn=Math.sin(.42),half=2.45*c;if(Math.abs(lx)<=2&&Math.abs(lz-4.25)<=half)return Math.max(0,1.3*(1-(lz-4.25)*Math.tan(.42)+.125/c));if(Math.abs(lx)<4.5&&Math.abs(lz)<=2)return 2.6;return 0;};
   const before=rat.position.clone();
-  const speed=control(dt,{walk:3.15,bounds:[-21,31,-14,38],ground:(x,z)=>Math.max(groundAlley(x,z),yardGround(x,z,rat.position.y)),locked:!!sc.talk});
+  const speed=control(dt,{walk:2.5,bounds:[-21,31,-14,38],ground:(x,z)=>Math.max(groundAlley(x,z),yardGround(x,z,rat.position.y)),locked:!!sc.talk});
   if(gate57&&!gate57.open&&rat.position.x>30.25&&Math.abs(rat.position.z-19)<2.8)rat.position.x=Math.min(before.x,30.25);
   // Shared control already resolves this movement against scenery and route decks.
   rat.userData.pushing=!rat.userData.wallState&&!rat.userData.air&&speed>.1&&rat.position.distanceTo(before)<.002;
@@ -1069,7 +1069,7 @@ function startInside(){
 }
 function tickInside(dt){
   if(!world60||world60.owner!==root)seedRoutes60();
-  const speed=control(dt,{walk:4.5,bounds:[-IW/2+1.2,IW/2-1.2,-ID/2+1.3,ID/2-0.9]});
+  const speed=control(dt,{walk:2.8,bounds:[-IW/2+1.2,IW/2-1.2,-ID/2+1.3,ID/2-0.9]});
   rat.animate(dt,speed,false);steps(dt,speed,'steel');
   ins.near=null;let best=1.8;ins.items.forEach(it=>{if(it.taken)return;const d=it.m.position.distanceTo(rat.position);if(d<best){best=d;ins.near=it;}});
   ins.nearHole=rat.position.distanceTo(new THREE.Vector3(-3.2,0,ID/2-0.5))<1.5;
@@ -1123,7 +1123,7 @@ function houseTap(e){if(phase!=='house'||!hs||photo.active||$('modal').style.dis
   const hits=ray2.intersectObjects(hs.placed.map(e=>e.m),true);if(!hits.length)return;let o=hits[0].object;const entry=hs.placed.find(e=>{let ok=false;e.m.traverse(c=>{if(c===o)ok=true;});return ok;});if(entry)furnitureMenu(entry);}
 function tickHouse(dt){
  if(tickHomeUse41(dt))return;
-  const before47=rat.position.clone();let speed=control(dt,{walk:3.2,bounds:[-HW/2+0.5,HW/2-0.5,-HD/2+0.5,HD/2-0.5]});
+  const before47=rat.position.clone();let speed=control(dt,{walk:2.5,bounds:[-HW/2+0.5,HW/2-0.5,-HD/2+0.5,HD/2-0.5]});
   // Furniture uses its visible mesh; walking off a top remains possible.
   rat.position.x=THREE.MathUtils.clamp(rat.position.x,-HW/2+.5,HW/2-.5);rat.position.z=THREE.MathUtils.clamp(rat.position.z,-HD/2+.5,HD/2-.5);
   const actual47=Math.hypot(rat.position.x-before47.x,rat.position.z-before47.z)/Math.max(dt,.001);if(actual47<.03){rat.userData.motionX=rat.userData.motionZ=0;}rat.userData.vel=actual47;speed=speed>.01?Math.min(1,actual47/3.2):0;if(speed===0)rat.userData.vel=0;rat.userData.pushing=false;
@@ -1949,7 +1949,7 @@ function makeGymPlatform52(){const stage={planks:[],dust:null};const wood52=MT(0
 function collapseGym52(stage,t){for(let i=0;i<stage.planks.length;i++){const b=stage.planks[i],u=Math.min(1,t/1.1),side=i<5?-1:1;b.position.copy(b.userData.origin52);b.position.y=Math.max(2.8,b.userData.origin52.y-4*u*u);b.visible=t<1.1;b.position.x+=side*u*.3;b.rotation.z=side*u*(.14+i%3*.12);b.rotation.x=Math.sin(i*2.4)*u*.16;}if(stage.dust){const p=stage.dust.geometry.attributes.position;stage.dust.visible=t<2;stage.dust.material.opacity=Math.max(0,.55*(1-t/2));for(let i=0;i<p.count;i++){const angle=i*2.399,r=(.3+i%7*.18)*(1+t);p.setXYZ(i,Math.cos(angle)*r,3+Math.sin(i)*.15+t*.6,-.5+Math.sin(angle)*r);}p.needsUpdate=true;}}
 // Surface contacts share the same transforms as the visible props.
 
-function groundSurface57(x,z,y){let best=null;downRay57.set(new THREE.Vector3(x,y+(rat&&rat.userData.air?.06:.38),z),new THREE.Vector3(0,-1,0));downRay57.far=50;for(const surface of surfaces57){if(!visible62(surface.mesh))continue;surface.mesh.updateWorldMatrix(true,false);const hit=downRay57.intersectObject(surface.mesh,false)[0];if(hit&&hit.face&&hit.face.normal.clone().transformDirection(surface.mesh.matrixWorld).y>.1&&(!best||hit.point.y>best.h))best={h:hit.point.y,surface};}return best;}
+function groundSurface57(x,z,y){let best=null;downRay57.set(new THREE.Vector3(x,y+(rat&&rat.userData.air?.06:.38),z),new THREE.Vector3(0,-1,0));downRay57.far=50;for(const surface of surfaces57){if(!visible62(surface.mesh)||surface.mesh.userData.heldCarPart221)continue;surface.mesh.updateWorldMatrix(true,false);const hit=downRay57.intersectObject(surface.mesh,false)[0];if(hit&&hit.face&&hit.face.normal.clone().transformDirection(surface.mesh.matrixWorld).y>.1&&(!best||hit.point.y>best.h))best={h:hit.point.y,surface};}return best;}
 function land57(u,impact,surface){u.land=.18;u.land57=.2;const type=surface?surface.kind:phase==='scavenge'&&ramp57&&Math.abs(rat.position.x)<2.6&&rat.position.z>-.9&&rat.position.z<4.5?'wood':phase==='inside'?'steel':phase==='house'?'wood':'soft';sfx.step(type==='tyre'?'soft':type);if(surface&&(surface.kind==='sponge'||surface.kind==='tyre')&&impact>1){u.spring57={t:.1,surface,h:rat.position.y,speed:surface.kind==='sponge'?9.4:Math.min(10.8,6.5+impact*.3)};surface.squash=.1;}}
 function makeGate57(){const group=new THREE.Group(),leaf=new THREE.Group();group.position.set(30.6,0,16.2);root.add(group);group.add(leaf);const wood57=MT(0x72918a,'wood');for(const z of [0,5.6]){const post=box(.22,3.4,.22,wood57);post.position.set(0,1.7,z);group.add(post);}for(let i=0;i<11;i++){const plank=box(.12,2.9,.47,wood57);plank.position.set(0,1.5,.27+i*.5);leaf.add(plank);}for(const y of [.5,2.5]){const rail=box(.2,.15,5.4,MT(0x98734c,'wood'));rail.position.set(.12,y,2.8);leaf.add(rail);}const latch=box(.25,.12,.55,M(0x4d5556));latch.position.set(-.18,1.4,5.1);leaf.add(latch);gate57={owner:root,group,leaf,open:false,angle:0};}
 function nearGate57(){return phase==='scavenge'&&gate57&&gate57.owner===root&&Math.hypot(rat.position.x-29.5,rat.position.z-19)<2.8;}
@@ -2058,7 +2058,7 @@ $('craftBook').onclick=()=>{craftMade40=null;craftDetail40=true;craftBatch47=1;i
 </script>
 <script>
 // Collision geometry follows visible scenery; cosmetic materials never create walls.
-function registerSolid62(group){group.updateWorldMatrix(true,true);group.traverse(m=>{if(!m.isMesh||!m.visible||!m.geometry||/dirt|paving|grass|flower|leaf|foliage/i.test(m.name))return;accelerate64(m);if(!surfaces57.some(s=>s.mesh===m))surfaces57.push({mesh:m,kind:/rubber/i.test(m.name)?'tyre':'solid',solid62:true});else{const s=surfaces57.find(s=>s.mesh===m);s.solid62=true;}});}
+function registerSolid62(group){group.updateWorldMatrix(true,true);group.traverse(m=>{if(!m.isMesh||!m.visible||!m.geometry||m.userData.heldCarPart221||/dirt|paving|grass|flower|leaf|foliage/i.test(m.name))return;accelerate64(m);if(!surfaces57.some(s=>s.mesh===m))surfaces57.push({mesh:m,kind:/rubber/i.test(m.name)?'tyre':'solid',solid62:true});else{const s=surfaces57.find(s=>s.mesh===m);s.solid62=true;}});}
 function visible62(m){for(let o=m;o;o=o.parent){if(!o.visible)return false;if(o===root)return true;}return false;}
 function solidMeshes62(){return surfaces57.filter(s=>s.solid62&&visible62(s.mesh)&&!s.mesh.userData.noCollision211&&!(s.mesh.name==='Backyard perimeter collider')).map(s=>s.mesh);}
 function resolveGeometry62(pos,before){
@@ -2900,7 +2900,7 @@ requestAnimationFrame(loop);
 <script src="navigation201.js?v=215&old=210"></script>
 <script src="roadster202.js?v=219"></script>
 <script src="vehiclePhysics219.js?v=219"></script>
-<script src="driving203.js?v=220"></script>
+<script src="driving203.js?v=221"></script>
 <script src="original-city210.js?v=210"></script>
 <script src="city204.js?v=211"></script>
 <script src="smoking205.js?v=207"></script>
@@ -2916,8 +2916,9 @@ requestAnimationFrame(loop);
 <script src="sewerAudio218.js?v=218"></script>
 <script src="sewerBoat215.js?v=218"></script>
 <script src="sewer211.js?v=215"></script>
-<script src="vehicle219.js?v=220"></script>
-<script src="tutorial219.js?v=220"></script>
-<script src="carTouch220.js?v=220"></script>
+<script src="vehicle219.js?v=221"></script>
+<script src="tutorial219.js?v=221"></script>
+<script src="carTouch220.js?v=221"></script>
+<script src="cockpit221.js?v=221"></script>
 </body>
 </html>
