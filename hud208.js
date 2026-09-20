@@ -7,7 +7,7 @@
  document.addEventListener('pointerdown',e=>{if(!rail.contains(e.target))open(false);});
  rail.addEventListener('click',e=>{const button=e.target.closest('button');if(button&&button!==toggle&&!button.closest('#mapTools207'))open(false);});
  // Hiding the map also dismisses the panel: only the compass remains.
- rail.querySelector('#mapTools207')?.addEventListener('click',()=>open(false));
+ rail.querySelector('#mapTools207')?.addEventListener('click',()=>open(false),true);
  addEventListener('keydown',e=>{if(e.key==='Escape')open(false);});addEventListener('blur',()=>open(false));
  const style=document.createElement('style');style.textContent=`
  body #navigation201:not(.tools-open208)>button:not(#navigationToggle208),body #navigation201:not(.tools-open208)>#mapTools207,body #navigation201:not(.tools-open208)>#navTarget201{display:none!important}
