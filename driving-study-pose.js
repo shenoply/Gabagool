@@ -52,13 +52,15 @@ function createPipDrivingStudy(model,car){
    }p.needsUpdate=true;m.geometry.computeVertexNormals();
   }
  }
- function update(steering=0){
+ function update(steering=0,reach=null){
+  const reachWeight=reach?.weight||0;
   for(const {m,base}of paws){m.geometry.attributes.position.array.set(base);m.geometry.attributes.position.needsUpdate=true;}
   for(const [name,b]of Object.entries(bones))b.quaternion.copy(rest[name]);wheel.rotation.z=steering;
   for(const side of ['Left','Right']){bones[side+'UpLeg'].rotateX(-1.15);bones[side+'Leg'].rotateX(1.05);}
   bones.Spine.rotateX(.06);for(const [name,b]of Object.entries(bones))if(/Tail_/.test(name))b.rotateX(-.10);
   model.updateMatrixWorld(true);car.updateMatrixWorld(true);
-  const hip=car.localToWorld(car.userData.seat.clone().add(V(0,.115,-.015+Math.abs(steering)*.025))),actual=bones.Hips.getWorldPosition(V());model.position.add(car.worldToLocal(hip).sub(car.worldToLocal(actual)));model.updateMatrixWorld(true);
+  const hip=car.localToWorld(car.userData.seat.clone().add(V(reachWeight*(reach?.side==='Right'?-.025:.025),.115,-.015+Math.abs(steering)*.025+reachWeight*.025))),actual=bones.Hips.getWorldPosition(V());model.position.add(car.worldToLocal(hip).sub(car.worldToLocal(actual)));model.updateMatrixWorld(true);
+  if(reachWeight&&reach.target){const spine=bones.Spine,origin=spine.getWorldPosition(V()),direction=reach.target.clone().add(V(0,.13,0)).sub(origin).normalize(),up=V(0,1,0),delta=new THREE.Quaternion().setFromUnitVectors(up,direction),angle=2*Math.acos(Math.min(1,Math.abs(delta.w)));delta.slerp(new THREE.Quaternion(),1-reachWeight*Math.min(1,.6/Math.max(angle,.001)));const world=spine.getWorldQuaternion(new THREE.Quaternion());spine.quaternion.copy(spine.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(delta.multiply(world)));model.updateMatrixWorld(true);}
   for(const side of ['Left','Right']){
    const sign=car.worldToLocal(bones[side+'UpLeg'].getWorldPosition(V())).x<car.userData.seat.x?-1:1,legRig={userData:{pipBones:{[side+'Arm']:bones[side+'UpLeg'],[side+'ForeArm']:bones[side+'Leg'],[side+'Hand']:bones[side+'Foot']}},updateWorldMatrix:(a,b)=>model.updateWorldMatrix(a,b)};
    solveArm203(THREE,legRig,side,car.localToWorld(V(car.userData.seat.x+sign*.042,.295,-.14)),car.localToWorld(V(car.userData.seat.x+sign*.08,.31,.06)));
@@ -69,6 +71,7 @@ function createPipDrivingStudy(model,car){
   for(const side of ['Left','Right']){
    const arm=bones[side+'Arm'],hand=bones[side+'Hand'],sign=wheel.worldToLocal(arm.getWorldPosition(V())).x<0?-1:1;
    const desired=wheel.localToWorld(V(sign*.095,-.010,-.010)),pole=arm.getWorldPosition(V()).add(V(sign*.13,-.035,-.025));
+   if(reachWeight&&reach.side===side&&reach.target)desired.lerp(reach.target,reachWeight);
    const basis=new THREE.Matrix4().makeBasis(V(0,sign,0),V(0,0,1),V(sign,0,0)),orientation=wheel.getWorldQuaternion(new THREE.Quaternion()).multiply(new THREE.Quaternion().setFromRotationMatrix(basis));
    for(let i=0;i<5;i++){
     hand.quaternion.copy(hand.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(orientation));model.updateMatrixWorld(true);

@@ -8,8 +8,9 @@
  const fill=new THREE.DirectionalLight(0xcce1e3,.9);fill.position.set(3,2,3);scene.add(fill);
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshStandardMaterial({color:0x254239,roughness:1}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=-.012;scene.add(floor);
  const firstPersonMeshes=[];let firstPersonFov=90;
- const originals=[];car.traverse(o=>{if(o.isMesh)originals.push([o,o.visible]);});
- let lastAngle=null,study=null,mode='pose',yaw=-1.1,pitch=.28,distance=1.5,target=V(-.17,.34,-.17),motion=false,time=0,angle=0,dragged=false;
+ const originals=[];
+ let lastAngle=null,study=null,mode='cockpit',yaw=-1.1,pitch=.28,distance=1.5,target=V(-.17,.34,-.17),motion=false,time=0,angle=0,dragged=false;
+ const cabin=createStudyCabin({THREE,car,renderer,camera,getMode:()=>mode,onStatus:text=>$('status').textContent=text});car.traverse(o=>{if(o.isMesh)originals.push([o,o.visible]);});
  function choose(name){mode=name;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));const close=name!=='car'&&name!=='cockpit';for(const [o,v]of originals){o.visible=v&&(!close||/seat|steering|dashboard|pedal|gear/i.test(o.name));}
   if(study){study.model.visible=true;for(const {mesh,full,inside}of firstPersonMeshes)mesh.geometry=name==='cockpit'?inside:full;}
   target.set(-.17,.34,-.17);yaw=-1.1;pitch=.28;distance=Math.max(1.15,.76/camera.aspect);
@@ -17,12 +18,12 @@
   if(name==='hands'){target.copy(car.userData.wheel.getWorldPosition(V()));for(const [o]of originals)if(/dashboard|seat/i.test(o.name))o.visible=false;yaw=.55;pitch=.25;distance=Math.max(.42,.30/camera.aspect);}
   if(name==='car'){target.set(0,.28,0);distance=Math.max(2.6,1.65/camera.aspect);yaw=-.75;pitch=.30;}
   if(name==='cockpit'){pitch=.30;yaw=0;firstPersonFov=90;}
-  $('status').textContent=name==='cockpit'?'Drag to look · pinch to zoom · tap First person to centre':'Drag to rotate · pinch to zoom';
+  $('status').textContent=name==='cockpit'?'Tap radio knobs, window switch or door handle · drag to look':'Drag to rotate · pinch to zoom';
  }
  function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();choose(mode);}
  addEventListener('resize',resize);resize();document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>choose(b.dataset.view));
- $('motion').onclick=()=>{motion=!motion;$('motion').classList.toggle('active',motion);$('motion').textContent=motion?'Pause steering':'Test steering';};
- $('steering').oninput=e=>{angle=Number(e.target.value);motion=false;$('motion').classList.remove('active');$('motion').textContent='Test steering';};
+ $('motion').onclick=()=>{motion=!motion;$('motion').classList.toggle('active',motion);$('motion').textContent=motion?'Pause drive':'Test drive';};
+ $('steering').oninput=e=>{angle=Number(e.target.value);motion=false;$('motion').classList.remove('active');$('motion').textContent='Test drive';};
  new THREE.GLTFLoader().load('rat-animation-pack67.glb',asset=>{
   const mixer=new THREE.AnimationMixer(asset.scene),idle=asset.animations.find(c=>c.name==='Idle_4');if(idle){mixer.clipAction(idle).play();mixer.update(0);}
   study=createPipDrivingStudy(asset.scene,car);
@@ -31,7 +32,7 @@
    const visible=i=>{let w=0;for(let k=0;k<4;k++)if(hidden.has(si.array[i*4+k]))w+=sw.array[i*4+k];return w<.25;};
    for(let i=0;i<(full.index?full.index.count:full.attributes.position.count);i+=3){const tri=[0,1,2].map(k=>full.index?full.index.getX(i+k):i+k);if(tri.every(visible))keep.push(...tri);}
    inside.setAttribute('position',full.attributes.position);inside.setAttribute('normal',full.attributes.normal);inside.setIndex(keep);inside.clearGroups();firstPersonMeshes.push({mesh,full,inside});
-  });window.drivingStudy={scene,camera,car,study,renderer,choose};choose(mode);
+  });window.drivingStudy={scene,camera,car,study,renderer,choose,cabin};choose(mode);
  },undefined,()=>{$('error').style.display='block';$('error').textContent='Pip’s model could not load. Reload this page to try again.';});
  const pointers=new Map();let pinch=0;const canvas=renderer.domElement;
  canvas.onpointerdown=e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});pinch=0;};
@@ -39,7 +40,7 @@
  canvas.onpointerup=canvas.onpointercancel=e=>{pointers.delete(e.pointerId);pinch=0;};canvas.onwheel=e=>{e.preventDefault();if(mode==='cockpit')firstPersonFov=THREE.MathUtils.clamp(firstPersonFov+e.deltaY*.025,55,100);else distance=THREE.MathUtils.clamp(distance+e.deltaY*.002,.25,6);};
  const mirrorStudy=createStudyMirrors({THREE,scene,car,renderer,camera,onSelect:pivot=>{if(!study)return;choose('cockpit');study.model.updateMatrixWorld(true);const eye=study.bones.Head.getWorldPosition(V()).add(V(0,.015,-.025)),delta=pivot.getWorldPosition(V()).sub(eye);yaw=Math.atan2(delta.x,delta.z);pitch=-Math.atan2(delta.y,Math.hypot(delta.x,delta.z));},onStatus:text=>$('status').textContent=text});
  new ResizeObserver(()=>{const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(stage);
- const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);time+=dt;if(motion){angle=Math.sin(time*.65)*.30;$('steering').value=angle;}if(study&&lastAngle!==angle){study.update(angle);lastAngle=angle;}
+ const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);time+=dt;if(motion){angle=Math.sin(time*.65)*.30;$('steering').value=angle;}car.position.y=THREE.MathUtils.damp(car.position.y,motion?Math.sin(time*3)*.002:0,5,dt);car.rotation.z=THREE.MathUtils.damp(car.rotation.z,motion?-angle*.045:0,4,dt);car.updateMatrixWorld(true);const reach=cabin.tick(dt,angle,motion);if(study&&(lastAngle!==angle||reach)){study.update(angle,reach);lastAngle=angle;}
   if(mode==='cockpit'){camera.fov=firstPersonFov;if(study){study.model.updateMatrixWorld(true);camera.position.copy(study.bones.Head.getWorldPosition(V())).add(V(0,.015,-.025));}else camera.position.set(car.userData.seat.x,.60,-.25);camera.lookAt(camera.position.clone().add(V(Math.sin(yaw)*Math.cos(pitch),-Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch))));}
   else{camera.fov=40;camera.position.copy(target).add(V(Math.sin(yaw)*Math.cos(pitch)*distance,Math.sin(pitch)*distance,Math.cos(yaw)*Math.cos(pitch)*distance));camera.lookAt(target);}
   camera.updateProjectionMatrix();mirrorStudy.mirrors.forEach(m=>m.pivot.visible=mode==='car'||mode==='cockpit');mirrorStudy.render(dt,draw=>{const old=firstPersonMeshes.map(x=>x.mesh.geometry);try{firstPersonMeshes.forEach(x=>x.mesh.geometry=x.full);draw();}finally{firstPersonMeshes.forEach((x,i)=>x.mesh.geometry=old[i]);}});renderer.render(scene,camera);
