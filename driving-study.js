@@ -30,7 +30,7 @@
  canvas.onpointerdown=e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});pinch=0;};
  canvas.onpointermove=e=>{const old=pointers.get(e.pointerId);if(!old)return;const dx=e.clientX-old.x,dy=e.clientY-old.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1){yaw-=dx*.006;pitch=THREE.MathUtils.clamp(pitch+dy*.004,-.1,1.35);}else{const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch)distance=THREE.MathUtils.clamp(distance*pinch/d,.25,6);pinch=d;}};
  canvas.onpointerup=canvas.onpointercancel=e=>{pointers.delete(e.pointerId);pinch=0;};canvas.onwheel=e=>{e.preventDefault();distance=THREE.MathUtils.clamp(distance+e.deltaY*.002,.25,6);};
- const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);time+=dt;if(motion){angle=Math.sin(time*.65)*.45;$('steering').value=angle;}if(study&&lastAngle!==angle){study.update(angle);lastAngle=angle;}
+ const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05);time+=dt;if(motion){angle=Math.sin(time*.65)*.30;$('steering').value=angle;}if(study&&lastAngle!==angle){study.update(angle);lastAngle=angle;}
   if(mode==='cockpit'){camera.fov=75;camera.position.set(car.userData.seat.x,.545,-.30);camera.lookAt(camera.position.clone().add(V(Math.sin(yaw)*Math.cos(pitch),-Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch))));}
   else{camera.fov=40;camera.position.copy(target).add(V(Math.sin(yaw)*Math.cos(pitch)*distance,Math.sin(pitch)*distance,Math.cos(yaw)*Math.cos(pitch)*distance));camera.lookAt(target);}
   camera.updateProjectionMatrix();renderer.render(scene,camera);

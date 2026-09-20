@@ -21,7 +21,9 @@ function createPipDrivingStudy(model,car){
  const forward=bones.headfront.getWorldPosition(V()).sub(bones.Head.getWorldPosition(V()));model.rotation.y=-Math.atan2(forward.x,forward.z);
  const rig={userData:{pipBones:bones},updateWorldMatrix:(a,b)=>model.updateWorldMatrix(a,b)};
  model.userData.pipBones=bones;grip220(model);
- const wheel=car.userData.wheel,centres={};
+ const wheel=car.userData.wheel,centres={};wheel.position.z=-.125;wheel.position.y=.70;wheel.rotation.x=-.20;const column=car.getObjectByName('Steering column');column.geometry.dispose();column.geometry=new THREE.TubeGeometry(new THREE.LineCurve3(V(-.28,.43,.09),wheel.position.clone()),1,.009,10,false);
+ car.traverse(o=>{if(o.name==='Cream seat cushion'){o.scale.z=.77;o.position.z=-.37;o.position.y=.345;}});
+
  function meshCentre(side){
   const hand=bones[side+'Hand'],sum=V();let count=0;model.updateMatrixWorld(true);
   model.traverse(m=>{if(!m.isSkinnedMesh)return;const id=m.skeleton.bones.indexOf(hand);if(id<0)return;m.skeleton.update();const p=m.geometry.attributes.position,si=m.geometry.attributes.skinIndex,sw=m.geometry.attributes.skinWeight;
@@ -33,15 +35,17 @@ function createPipDrivingStudy(model,car){
   for(const side of ['Left','Right']){bones[side+'UpLeg'].rotateX(-1.15);bones[side+'Leg'].rotateX(1.05);}
   bones.Spine.rotateX(.06);for(const [name,b]of Object.entries(bones))if(/Tail_/.test(name))b.rotateX(-.10);
   model.updateMatrixWorld(true);car.updateMatrixWorld(true);
-  const hip=car.localToWorld(car.userData.seat.clone().add(V(0,.065,.0))),actual=bones.Hips.getWorldPosition(V());model.position.add(car.worldToLocal(hip).sub(car.worldToLocal(actual)));model.updateMatrixWorld(true);
+  const hip=car.localToWorld(car.userData.seat.clone().add(V(0,.115,-.015+Math.abs(steering)*.025))),actual=bones.Hips.getWorldPosition(V());model.position.add(car.worldToLocal(hip).sub(car.worldToLocal(actual)));model.updateMatrixWorld(true);
   for(const side of ['Left','Right']){
-   const sign=side==='Left'?-1:1,legRig={userData:{pipBones:{[side+'Arm']:bones[side+'UpLeg'],[side+'ForeArm']:bones[side+'Leg'],[side+'Hand']:bones[side+'Foot']}},updateWorldMatrix:(a,b)=>model.updateWorldMatrix(a,b)};
-   solveArm203(THREE,legRig,side,car.localToWorld(V(car.userData.seat.x+sign*.042,.215,-.035)),car.localToWorld(V(car.userData.seat.x+sign*.08,.31,.06)));
+   const sign=car.worldToLocal(bones[side+'UpLeg'].getWorldPosition(V())).x<car.userData.seat.x?-1:1,legRig={userData:{pipBones:{[side+'Arm']:bones[side+'UpLeg'],[side+'ForeArm']:bones[side+'Leg'],[side+'Hand']:bones[side+'Foot']}},updateWorldMatrix:(a,b)=>model.updateWorldMatrix(a,b)};
+   solveArm203(THREE,legRig,side,car.localToWorld(V(car.userData.seat.x+sign*.042,.295,-.14)),car.localToWorld(V(car.userData.seat.x+sign*.08,.31,.06)));
+   const foot=bones[side+'Foot'],toe=bones[side+'ToeBase'];model.updateMatrixWorld(true);if(toe){const from=toe.getWorldPosition(V()).sub(foot.getWorldPosition(V())).normalize(),toward=V(0,0,1).transformDirection(car.matrixWorld),world=foot.getWorldQuaternion(new THREE.Quaternion());foot.quaternion.copy(foot.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(new THREE.Quaternion().setFromUnitVectors(from,toward).multiply(world)));}
+
   }
   const errors={};
   for(const side of ['Left','Right']){
    const arm=bones[side+'Arm'],hand=bones[side+'Hand'],sign=wheel.worldToLocal(arm.getWorldPosition(V())).x<0?-1:1;
-   const desired=wheel.localToWorld(V(sign*.095,0,-.013)),pole=arm.getWorldPosition(V()).add(V(sign*.13,-.035,-.025));
+   const desired=wheel.localToWorld(V(sign*.090,-.010,-.013)),pole=arm.getWorldPosition(V()).add(V(sign*.13,-.035,-.025));
    const basis=new THREE.Matrix4().makeBasis(V(0,sign,0),V(0,0,1),V(sign,0,0)),orientation=wheel.getWorldQuaternion(new THREE.Quaternion()).multiply(new THREE.Quaternion().setFromRotationMatrix(basis));
    for(let i=0;i<5;i++){
     hand.quaternion.copy(hand.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(orientation));model.updateMatrixWorld(true);
