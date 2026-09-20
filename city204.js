@@ -19,13 +19,14 @@
  const inDistrict=p=>{const b=city?.collision?.bounds;return !!b&&p.x>=b.min.x&&p.x<=b.max.x&&p.z>=b.min.z&&p.z<=b.max.z;};
  const onRoad=p=>roads209.some(([a,b,c,d])=>p.x>=a&&p.x<=b&&p.z>=c&&p.z<=d);
  const inExtension=p=>onRoad(p)||inDistrict(p);
- function citySolid(p,r=.3){if(!inExtension(p))return true;return !!city?.collision?.blocked(p,r);}
- const blocked=blockedCar77;blockedCar77=function(p,r=.39){if(phase==='scavenge'&&p.z>36.3)return citySolid(p,r);return blocked(p,r);};
- const resolve=resolveGeometry62;resolveGeometry62=function(p,before){if(phase==='scavenge'&&(inExtension(p)||inExtension(before))){if(!inExtension(p)){p.copy(before);return;}city?.collision?.resolve(p,before,.2);return;}resolve(p,before);};
- const controlBefore=control;control=function(dt,options){if(phase==='scavenge'&&city?.owner===root&&options?.bounds){const ground=options.ground;options={...options,bounds:[-86,94,-25,145],ground:(x,z)=>inExtension({x,z})?0:ground?ground(x,z):0};const before=rat.position.clone(),result=controlBefore(dt,options);if(rat.position.z>52&&!inExtension(rat.position))rat.position.copy(before);return result;}return controlBefore(dt,options);};
+ function citySolid(p,r=.3){return inDistrict(p)&&!!city?.collision?.blocked(p,r);}
+ const blocked=blockedCar77;blockedCar77=function(p,r=.39){if(phase==='scavenge')return citySolid(p,r);return blocked(p,r);};
+ const resolve=resolveGeometry62;resolveGeometry62=function(p,before){if(phase==='scavenge'&&(inDistrict(p)||inDistrict(before))){city?.collision?.resolve(p,before,.2);return;}resolve(p,before);};
+ const controlBefore=control;control=function(dt,options){if(phase==='scavenge'&&city?.owner===root&&options?.bounds){const ground=options.ground;options={...options,bounds:[-86,94,-25,145],ground:(x,z)=>inExtension({x,z})?0:ground?ground(x,z):0};const before=rat.position.clone(),result=controlBefore(dt,options);return result;}return controlBefore(dt,options);};
  function part(parent,w,h,d,x,y,z,color,name){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.8}));m.position.set(x,y,z);m.name=name;m.userData.noInk=true;parent.add(m);return m;}
  function seed(){if(phase!=='scavenge'||!root)return;
   if(city?.owner!==root){city={owner:root,g:new THREE.Group(),cars:[],solids:[],collision:null};root.add(city.g);city.g.name='Original city entrance';
+   part(city.g,123,.04,22,4,-.06,45,0x668055,'City approach grass');
    part(city.g,5,.04,22,4,-.02,45,0x484c50,'North gate connection');
    for(const x of [1.25,6.75])part(city.g,.22,2.3,.22,x,1.15,37.5,0x65513b,'Open city gate post');
    const sign=markerText('ORIGINAL CITY ↑');sign.position.set(4,2.5,37.5);sign.scale.setScalar(.32);city.g.add(sign);

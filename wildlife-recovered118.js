@@ -416,7 +416,7 @@
     const g = wildlife88?.gecko;
     // The decorative cave is not an enterable building: keep Pip outside the
     // rock mass even at the open side, while its monitor can still be reached.
-    if (wildlife88?.den153 && !g?.riding) pushAnimal154(rat.position, wildlife88.den153, 1.72);
+    // The visible den rocks provide collision; a broad circular blocker hides usable ground.
     if (g && !g.riding) pushAnimal154(rat.position, g.g, .48);
     pushAnimal154(rat.position, wildlife88?.ratNpc?.g, .52);
     return speed;

@@ -27,7 +27,7 @@
  function lights(){if(!car77?.riding||!gameplayActive())return;car77.lights206=!car77.lights206;}
  const engineBefore=engine77;engine77=function(){if(car77?.ignition206===false)return;return engineBefore();};
  const add=addCar77;addCar77=function(){add();attachCar();seed();};
- const enter=enterCar77;enterCar77=function(){stand();const r=enter();if(car77?.riding){attachCar();car77.ignition206=false;stopEngine77();window.cockpit206?.select('Drive');cockpit205.toggle(true);sayToast('Turn the ignition on in Car controls.');}return r;};
+ const enter=enterCar77;enterCar77=function(){stand();const r=enter();if(car77?.riding){attachCar();car77.ignition206=false;stopEngine77();window.cockpit206?.select('Drive');cockpit205.toggle(false);sayToast('Press Start engine to drive.');}return r;};
  const exit=exitCar77;exitCar77=function(){endLook();const r=exit();if(car77&&!car77.riding)car77.ignition206=false;return r;};
  const controlCar=controlCar77;controlCar77=function(dt,options){const c=car77;if(c?.riding&&!c.ignition206){const brake=c.handbrake;c.handbrake=true;const r=controlCar(dt,options);c.handbrake=brake;return r;}return controlCar(dt,options);};
  function beginLook(direction){if(!car77?.riding||!gameplayActive())return;if(look)return;look={direction,view:roadsterControls203.viewIndex};if(!look.view)roadsterControls203.setView(1);}
