@@ -17,7 +17,7 @@
    if(!keep.length){geo.dispose();return;}geo.setIndex(keep);geo.clearGroups();const copy=new THREE.SkinnedMesh(geo,source.material);copy.skeleton=source.skeleton;copy.bindMatrix.copy(source.bindMatrix);copy.bindMatrixInverse.copy(source.bindMatrixInverse);copy.bindMode=source.bindMode;copy.matrixAutoUpdate=false;copy.frustumCulled=false;rig.add(copy);meshes.push({source,copy});
   });
  }
- function pose(){build();if(!rig)return;for(const {source,copy}of meshes){source.updateWorldMatrix(true,false);copy.matrix.copy(source.matrixWorld);copy.matrixWorld.copy(source.matrixWorld);copy.bindMatrixInverse.copy(source.bindMatrixInverse);if(copy.userData.sourceGeometry223!==source.geometry){copy.geometry.attributes.position.copy(source.geometry.attributes.position);copy.geometry.attributes.position.needsUpdate=true;copy.geometry.attributes.normal.copy(source.geometry.attributes.normal);copy.geometry.attributes.normal.needsUpdate=true;copy.userData.sourceGeometry223=source.geometry;}}}
+ function pose(){build();if(!rig)return;for(const {source,copy}of meshes){source.updateWorldMatrix(true,false);source.updateMatrixWorld(true);copy.matrix.copy(source.matrixWorld);copy.matrixWorld.copy(source.matrixWorld);copy.bindMatrixInverse.copy(source.bindMatrixInverse);if(copy.userData.sourceGeometry223!==source.geometry){copy.geometry.attributes.position.copy(source.geometry.attributes.position);copy.geometry.attributes.position.needsUpdate=true;copy.geometry.attributes.normal.copy(source.geometry.attributes.normal);copy.geometry.attributes.normal.needsUpdate=true;copy.userData.sourceGeometry223=source.geometry;}}}
  const baseEnter=enterCar77;enterCar77=function(){
   if(entry||car77?.riding)return false;if(window.carTouch220?.held)return baseEnter();
   const c=car77;if(!c||!rat)return false;vehicle219.attach(c);
@@ -54,7 +54,7 @@
   pose();
  };
  const render=renderer.render;renderer.render=function(s,cam){
-  const use=s===scene&&cam===camera&&car77?.riding&&[1,2,3].includes(roadsterControls203.viewIndex);
+  if(s===scene&&cam===camera)pose();const use=s===scene&&cam===camera&&car77?.riding&&[1,2,3].includes(roadsterControls203.viewIndex);
   const rv=rat?.visible,gv=rig?.visible;if(rig)rig.visible=use;if(rat&&use)rat.visible=false;else if(rat&&s===scene&&car77?.riding)rat.visible=true;
   try{return render.call(this,s,cam);}finally{if(rat)rat.visible=rv;if(rig)rig.visible=gv;}
  };

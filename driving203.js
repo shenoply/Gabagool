@@ -48,7 +48,7 @@ function pose(g){const c=car77,u=g.userData;if(!c?.riding||!u.drive77||!u.pipBon
  // Plant the pelvis on the cushion, independently of the character's animation root.
  const hip=c.g.localToWorld(c.seat.clone().add(new THREE.Vector3(weight*.015,.040-weight*.012,.027))),actual=b.Hips.getWorldPosition(new THREE.Vector3());g.position.add(hip.sub(actual));g.updateWorldMatrix(true,true);
  if(r?.kind==='mirror'&&r.target){const shoulder=b[(r.side||'Left')+'Arm'];if(shoulder){const shift=r.target.getWorldPosition(new THREE.Vector3()).sub(shoulder.getWorldPosition(new THREE.Vector3()));shift.multiplyScalar(Math.max(0,1-.085/shift.length()));shift.clampLength(0,.22);shift.multiplyScalar(Math.max(0,Math.min(1,q/.18,(1-q)/.28)));g.position.add(shift);g.updateWorldMatrix(true,true);}}
- const errors={};for(const side of ['Left','Right']){const arm=b[side+'Arm'];if(!arm)continue;for(const name of [side+'Arm',side+'ForeArm',side+'Hand'])if(b[name]&&u.pipRest[name])b[name].quaternion.copy(u.pipRest[name]);g.updateWorldMatrix(true,true);const shoulder=c.wheel.worldToLocal(arm.getWorldPosition(new THREE.Vector3())),sign=shoulder.x<0?-1:1;let target=c.wheel.localToWorld(new THREE.Vector3(sign*.105,.004,-.035));
+ const errors={};for(const side of ['Left','Right']){const arm=b[side+'Arm'];if(!arm)continue;for(const name of [side+'Arm',side+'ForeArm',side+'Hand'])if(b[name]&&u.pipRest[name])b[name].quaternion.copy(u.pipRest[name]);g.updateWorldMatrix(true,true);const shoulder=c.wheel.worldToLocal(arm.getWorldPosition(new THREE.Vector3())),sign=shoulder.x<0?-1:1;let target=c.wheel.localToWorld(new THREE.Vector3(sign*.095,.012,-.070));
  // Lean across the bench for distant mirrors; the other paw braces by the torso.
  if(r?.kind==='mirror'&&side!==(r.side||'Left'))target=arm.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0,-.08,.02));
  // The hand nearest the centre console reaches, the other keeps steering.
@@ -58,6 +58,21 @@ function pose(g){const c=car77,u=g.userData;if(!c?.riding||!u.drive77||!u.pipBon
  // Fingers point over the rim; curled tips turn inward, with the thumbs above the grip.
  const hand=b[side+'Hand'];if(hand){const wheelQ=c.wheel.getWorldQuaternion(new THREE.Quaternion()),basis=new THREE.Matrix4().makeBasis(new THREE.Vector3(0,sign,0),new THREE.Vector3(0,0,1),new THREE.Vector3(sign,0,0)),grip=new THREE.Quaternion().setFromRotationMatrix(basis);const world=wheelQ.multiply(grip);const local=hand.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(world);hand.quaternion.slerp(local,1-(r&&side===(r.side||'Left')?Math.max(0,weight):0));g.updateWorldMatrix(true,true);}
  }
+ // Align the visible paw surface rather than treating its wrist joint as the grip.
+ if(!r){for(const side of ['Left','Right']){const hand=b[side+'Hand'],arm=b[side+'Arm'];if(!hand||!arm)continue;
+  const sign=c.wheel.worldToLocal(arm.getWorldPosition(new THREE.Vector3())).x<0?-1:1;
+  const desired=c.wheel.localToWorld(new THREE.Vector3(sign*.095,0,-.013)),orientation=hand.getWorldQuaternion(new THREE.Quaternion());
+  for(let iteration=0;iteration<3;iteration++){
+   g.updateMatrixWorld(true);const center=new THREE.Vector3();let count=0,contactGeometry=null;g.traverse(m=>{if(m.isSkinnedMesh&&m.skeleton.bones.includes(hand))contactGeometry=m.geometry;});const cached=hand.userData.contact224;if(cached?.geometry===contactGeometry){center.copy(hand.localToWorld(cached.local.clone()));count=1;}
+   if(!count)
+   g.traverse(m=>{if(!m.isSkinnedMesh||!m.visible)return;const id=m.skeleton.bones.indexOf(hand);if(id<0)return;const geo=m.geometry,si=geo.attributes.skinIndex,sw=geo.attributes.skinWeight,pos=geo.attributes.position;m.skeleton.update();
+    for(let i=0;i<pos.count;i++){let weight=0;for(let k=0;k<4;k++)if(si.array[i*4+k]===id)weight+=sw.array[i*4+k];if(weight<.8)continue;const v=new THREE.Vector3().fromBufferAttribute(pos,i);m.boneTransform(i,v);m.localToWorld(v);center.add(v);count++;}
+   });
+   if(!count)break;center.divideScalar(count);if(cached?.geometry!==contactGeometry)hand.userData.contact224={geometry:contactGeometry,local:hand.worldToLocal(center.clone())};errors[side]=center.distanceTo(desired);if(errors[side]<.001)break;
+   const wrist=hand.getWorldPosition(new THREE.Vector3()).add(desired.clone().sub(center)),pole=arm.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(sign*.035,-.16,-.07).applyAxisAngle(new THREE.Vector3(0,1,0),c.g.rotation.y));
+   solveArm203(THREE,g,side,wrist,pole);hand.quaternion.copy(hand.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(orientation));g.updateWorldMatrix(true,true);
+  }
+ }}
  c.handErrors203=errors;if(scope.pipSmoke205)scope.pipSmoke205.pose(g);if(firstPerson&&viewIndex!==4&&b.Head){headHidden={bone:b.Head,scale:b.Head.scale.clone()};b.Head.scale.setScalar(.0001);g.updateWorldMatrix(true,true);}
 }
 const make=makeRat;makeRat=function(){const g=make(),animate=g.animate;g.animate=function(...args){restoreHead();animate(...args);pose(g);};return g;};
