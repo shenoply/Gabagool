@@ -18,7 +18,7 @@
   // Search around obstructions before allowing a wall to push the camera into Pip's face.
   if(best.available<minimum)for(const lift of [pitch,.85,1.15])for(const offset of [0,.4,-.4,.8,-.8,1.4,-1.4,Math.PI]){const next=candidate(gameCam.yaw+offset,lift);if(next.available>best.available)best=next;if(best.available>=minimum)break;}
   const desired=best.direction.clone().multiplyScalar(best.available);
-  if(activeCar!==c||!lastOutside||!gameCam.ready)offset.copy(desired);else offset.lerp(desired,1-Math.exp(-dt*18));
+  if(activeCar!==c||!lastOutside||!gameCam.ready)offset.copy(desired);else offset.lerp(desired,1-Math.exp(-dt*9));
   const ray=offset.clone().normalize();let safe=offset.length();for(const o of solids){const hit=cameraBoxHit(target,ray,safe,o);if(hit!==null)safe=Math.min(safe,Math.max(.85,hit-.22));}offset.setLength(safe);gameCam.pos.copy(target).add(offset);
   camera.position.copy(gameCam.pos);camera.lookAt(target);gameCam.ready=true;activeCar=c;lastOutside=true;
  };

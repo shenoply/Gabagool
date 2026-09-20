@@ -28,5 +28,7 @@ sewer211.showMap();if($('modal').style.display!=='flex')throw Error('Sewer map f
 rat.position.copy(sewer211.entrances[1].below);tickArea(.016);grab();if(phase!=='scavenge'||rat.position.distanceTo(new THREE.Vector3(4,0,60.2))>.01)throw Error('City ladder exit failed');
 sewer211.enter('city');if(!sewer211.active||rat.position.z<29)throw Error('City entry failed');if(sewer211.state.finds.some(f=>f.id==='west'))throw Error('Saved cache respawned');sewer211.exit('yard');if(rat.position.distanceTo(new THREE.Vector3(6.8,0,28.2))>.01)throw Error('Yard return failed');report.sewerRoundTrip=true;report.salvageSaved=true;
 `,ctx);
+await new Promise(r=>setTimeout(r,200));
+if(process.env.WW_EXTRA_TEST)vm.runInContext(fs.readFileSync(path.resolve(P,process.env.WW_EXTRA_TEST),'utf8'),ctx,{filename:process.env.WW_EXTRA_TEST});
 console.log(JSON.stringify(ctx.report,null,2));process.exit(0);
 })().catch(e=>{console.error(e.stack);process.exit(1)});

@@ -1446,7 +1446,7 @@ function cameraReset(){gameCam.yaw=0;gameCam.pitch=phase==='house'?.8:.58;gameCa
 function zoomGame(factor){if(!gameplayActive())return;gameCam.distance=THREE.MathUtils.clamp(gameCam.distance*factor,phase==='house'?3:1.7,phase==='house'?19:12);}
 canvas.style.touchAction='none';
 canvas.addEventListener('pointerdown',e=>{if(!gameplayActive())return;gameCam.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});canvas.setPointerCapture(e.pointerId);if(gameCam.pointers.size===1){gameCam.start={x:e.clientX,y:e.clientY};gameCam.moved=false;}else{gameCam.moved=true;const a=[...gameCam.pointers.values()];gameCam.pinch=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);}});
-canvas.addEventListener('pointermove',e=>{const old=gameCam.pointers.get(e.pointerId);if(!old||!gameplayActive())return;const dx=e.clientX-old.x,dy=e.clientY-old.y;gameCam.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(gameCam.pointers.size>1){const a=[...gameCam.pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(gameCam.pinch>0&&d>5)zoomGame(gameCam.pinch/d);gameCam.pinch=d;}else{if(gameCam.start&&Math.hypot(e.clientX-gameCam.start.x,e.clientY-gameCam.start.y)>6)gameCam.moved=true;if(gameCam.moved){gameCam.yaw-=dx*.007;gameCam.pitch=THREE.MathUtils.clamp(gameCam.pitch+dy*.005,car77?.riding&&window.roadsterControls203?.viewIndex>0?-.7:.14,car77?.riding&&window.roadsterControls203?.viewIndex>0?2.1:1.3);}}});
+canvas.addEventListener('pointermove',e=>{const old=gameCam.pointers.get(e.pointerId);if(!old||!gameplayActive())return;const dx=e.clientX-old.x,dy=e.clientY-old.y;gameCam.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(gameCam.pointers.size>1){const a=[...gameCam.pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(gameCam.pinch>0&&d>5)zoomGame(gameCam.pinch/d);gameCam.pinch=d;}else{if(gameCam.start&&Math.hypot(e.clientX-gameCam.start.x,e.clientY-gameCam.start.y)>6)gameCam.moved=true;if(gameCam.moved){gameCam.yaw-=dx*.0048;gameCam.pitch=THREE.MathUtils.clamp(gameCam.pitch+dy*.0035,car77?.riding&&window.roadsterControls203?.viewIndex>0?-.7:.14,car77?.riding&&window.roadsterControls203?.viewIndex>0?2.1:1.3);}}});
 function endCameraPointer(e){if(!gameCam.pointers.has(e.pointerId))return;const tap=gameCam.pointers.size===1&&!gameCam.moved;gameCam.pointers.delete(e.pointerId);gameCam.pinch=0;if(tap&&e.type==='pointerup'&&gameplayActive()&&phase==='house')houseTap(e);}
 for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(name,endCameraPointer);
 canvas.addEventListener('wheel',e=>{if(!gameplayActive())return;e.preventDefault();zoomGame(Math.exp(e.deltaY*.001));},{passive:false});
@@ -2545,7 +2545,7 @@ function batch76(){const fixed=/^(Salvage route deck|Deck support|Walkable escap
 let car77=null;
 function drivingClips77(u){
  if(u.driveClipVersion79)return;
- const idle=u.pipActions.Idle?.getClip();if(!idle)return;
+ const idle=u.pipActions?.Idle?.getClip();if(!idle)return;
  for(const name of ['Drive_Idle','Drive_Steer_Left','Drive_Steer_Right','Drive_Honk']){const old=u.pipActions[name];if(old){old.stop();delete u.pipActions[name];}}
  for(const [name,steer,horn]of [['Drive_Idle',0,0],['Drive_Steer_Left',-1,0],['Drive_Steer_Right',1,0],['Drive_Honk',0,1]]){
   const clip=idle.clone();clip.name=name;clip.duration=1.2;
@@ -2566,7 +2566,7 @@ function engine77(){if(!voiceOn||!car77?.riding)return;const ac=sfxCtx();if(!ac)
 function honk77(){if(!car77?.riding||!gameplayActive()||car77.horn>0)return;car77.horn=1.2;if(voiceOn){const ac=sfxCtx();if(ac){ac.resume().catch(()=>{});tone(ac,{f:390,f2:370,dur:.25,vol:.045,type:'square'});tone(ac,{f:490,f2:470,dur:.25,vol:.025,type:'triangle'});}}}
 function nearCar77(){return car77?.owner===root&&!car77.riding&&car77.g.position.distanceTo(rat.position)<2.4&&!rat.userData.air&&!rat.userData.pick&&!rat.userData.bird71&&!rat.userData.rope66&&!rat.userData.swim66&&!rat.userData.wallState&&!rat.userData.job67?.lock;}
 function blockedCar77(p,radius=.55){return wallSolids().some(o=>o.h>.12&&Math.abs(p.x-o.x)<o.hx+radius&&Math.abs(p.z-o.z)<o.hz+radius)||p.x<-19.4||p.x>29.4||p.z<.4||p.z>36.6;}
-function enterCar77(){if(!nearCar77())return false;const c=car77,u=rat.userData;u.driveClipVersion79=false;drivingClips77(u);if(!u.pipActions.Drive_Idle){sayToast('Pip is still loading. Try again.');return true;}c.riding=true;c.speed=0;u.drive77=true;u.job67=null;u.act=null;u.air=false;u.vy=0;u.vel=0;u.motionX=u.motionZ=0;c.originalScale=rat.scale.clone();rat.scale.multiplyScalar(.70);removeSolid78(c.g);engine77();sayToast('Joystick: steer and drive · pull back to reverse');return true;}
+function enterCar77(){if(!nearCar77())return false;const c=car77,u=rat.userData;u.driveClipVersion79=false;drivingClips77(u);if(!u.pipActions?.Drive_Idle){sayToast('Pip is still loading. Try again.');return true;}c.riding=true;c.speed=0;u.drive77=true;u.job67=null;u.act=null;u.air=false;u.vy=0;u.vel=0;u.motionX=u.motionZ=0;c.originalScale=rat.scale.clone();rat.scale.multiplyScalar(.70);removeSolid78(c.g);engine77();sayToast('Joystick: steer and drive · pull back to reverse');return true;}
 function exitCar77(){const c=car77;if(!c?.riding)return false;if(Math.abs(c.speed)>.4){c.speed=0;sayToast('Stopped. Tap Exit again.');return true;}let dest=null;for(const [x,z]of [[1.7,0],[-1.7,0],[0,-2.4],[0,2.4]]){const p=new THREE.Vector3(x,0,z).applyAxisAngle(new THREE.Vector3(0,1,0),c.g.rotation.y).add(c.g.position);p.y=0;if(!blockedCar77(p,.25)){dest=p;break;}}if(!dest){sayToast('Move to an open space to get out.');return true;}c.riding=false;registerSolid62(c.g);rat.userData.drive77=false;rat.scale.copy(c.originalScale);rat.position.copy(dest);rat.userData.air=false;rat.userData.vel=0;rat.userData.job67=null;stopEngine77();return true;}
 function disposeCar77(){if(!car77)return;stopEngine77();if(car77.riding&&rat){rat.userData.drive77=false;if(car77.originalScale)rat.scale.copy(car77.originalScale);}car77=null;carPanel77.style.display='none';}
 function addCar77(){disposeCar77();if(phase!=='scavenge'||!root)return;const owner=root,holder=new THREE.Group(),visual=new THREE.Group(),paint=new THREE.MeshStandardMaterial({color:0x2f6159,roughness:.42,metalness:.18}),trim=new THREE.MeshStandardMaterial({color:0xd8c79f,roughness:.72}),dark=new THREE.MeshStandardMaterial({color:0x252725,roughness:.9}),chrome=new THREE.MeshStandardMaterial({color:0xaeb7b2,roughness:.28,metalness:.7}),glass=new THREE.MeshStandardMaterial({color:0x83b3bd,roughness:.12,transparent:true,opacity:.46,depthWrite:false}),red=new THREE.MeshStandardMaterial({color:0xb8372e,emissive:0x47100b,emissiveIntensity:.35});holder.add(visual);
@@ -2898,15 +2898,16 @@ requestAnimationFrame(loop);
 <script src="wildlife-recovered118.js?v=211"></script>
 <script src="heaven-course183.js?v=207"></script>
 <script src="navigation201.js?v=215&old=210"></script>
-<script src="roadster202.js?v=209"></script>
-<script src="driving203.js?v=211"></script>
+<script src="roadster202.js?v=219"></script>
+<script src="vehiclePhysics219.js?v=219"></script>
+<script src="driving203.js?v=219"></script>
 <script src="original-city210.js?v=210"></script>
 <script src="city204.js?v=211"></script>
 <script src="smoking205.js?v=207"></script>
 <script src="cockpit205.js?v=207"></script>
-<script src="motoring206.js?v=211"></script>
+<script src="motoring206.js?v=219"></script>
 <script src="cockpit206.js?v=211"></script>
-<script src="camera207.js?v=209"></script>
+<script src="camera207.js?v=219"></script>
 <script src="cockpit207.js?v=211"></script>
 <script src="audio207.js?v=207"></script>
 <script src="hud208.js?v=210"></script>
@@ -2915,5 +2916,7 @@ requestAnimationFrame(loop);
 <script src="sewerAudio218.js?v=218"></script>
 <script src="sewerBoat215.js?v=218"></script>
 <script src="sewer211.js?v=215"></script>
+<script src="vehicle219.js?v=219"></script>
+<script src="tutorial219.js?v=219"></script>
 </body>
 </html>
