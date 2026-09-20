@@ -1851,7 +1851,7 @@ function model44(id){if(modelCache44[id])return Promise.resolve(modelCache44[id]
 function pumpModels44(){while(modelLoads44<2&&modelQueue44.length){const job=modelQueue44.shift();modelLoads44++;new THREE.GLTFLoader().load(job.id+(job.id==='osprey'?'-build74.glb':job.id==='cityrear'?'-build49.glb':['city','mma','tabby'].includes(job.id)?'-build48.glb':['broadleaf','slender','flowers'].includes(job.id)?'-build47.glb':['bird','grass','dumpster'].includes(job.id)?'-build46.glb':'-build44.glb'),a=>{a.scene.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.userData.keepGeometry=true;o.userData.noInk=true;}});a.scene.userData.clips=a.animations;modelCache44[job.id]=a.scene;job.resolve(a.scene);modelLoads44--;pumpModels44();},undefined,e=>{console.warn('Optional scenery model failed:',job.id,e);job.resolve(null);delete modelPromises44[job.id];modelLoads44--;pumpModels44();});}}
 function addModel44(owner,id,pos,size,kind='still',yaw=0){if(id==='flowers')return Promise.resolve(null);return model44(id).then(asset=>{if(!asset||root!==owner)return null;const holder=new THREE.Group(),visual=['bird','mma'].includes(id)?clonePipScene(asset):asset.clone(true);holder.add(visual);let mixer=null;if(['bird','mma'].includes(id)){mixer=new THREE.AnimationMixer(visual);for(const clip of asset.userData.clips||[])mixer.clipAction(clip).play();mixer.update(0);if(id==='mma')visual.traverse(o=>{if(o.isMesh&&!o.isSkinnedMesh)o.visible=false;});const b=posedBounds(visual),k=1/Math.max(.001,b.max.x-b.min.x,b.max.y-b.min.y,b.max.z-b.min.z);visual.scale.multiplyScalar(k);visual.position.sub(new THREE.Vector3((b.min.x+b.max.x)/2,b.min.y,(b.min.z+b.max.z)/2).multiplyScalar(k));}if(id==='osprey')visual.rotation.y=-Math.PI/2;holder.position.set(...pos);holder.rotation.y=yaw;holder.scale.setScalar(size);holder.name='Supplied '+id;root.add(holder);const actor={id,g:holder,visual,base:new THREE.Vector3(...pos),kind,owner,mixer,phase:actors44.length*1.9,near:false};if(id==='mma')prepareFight50(actor,asset.userData.clips||[]);actors44.push(actor);if(id==='dumpster')registerSolid62(holder);return actor;});}
 function seedModels44(){actors44=[];nearAnimal44=null;treeSolids44=[];if(phase!=='scavenge')return;const owner=root;const jobs=[];seedYard47();
- jobs.push(addModel44(owner,'city',[4,0,91],7,'still').then(a=>{if(a){a.g.scale.y*=1.6;a.g.updateWorldMatrix(true,true);const b=new THREE.Box3().setFromObject(a.g);a.g.position.z+=85-b.min.z;let floor=null;a.g.traverse(m=>{if(m.isMesh&&m.material?.name==='RoadsGround')floor=m;});a.g.position.y-=floor?new THREE.Box3().setFromObject(floor).max.y:b.min.y;a.g.updateWorldMatrix(true,true);registerSolid62(a.g);}return a;}));
+ jobs.push(addModel44(owner,'city',[4,0,91],7,'still').then(a=>{if(a){a.g.scale.y*=1.6;a.g.updateWorldMatrix(true,true);const b=new THREE.Box3().setFromObject(a.g);a.g.position.z+=56-b.min.z;let floor=null;a.g.traverse(m=>{if(m.isMesh&&m.material?.name==='RoadsGround')floor=m;});a.g.position.y-=floor?new THREE.Box3().setFromObject(floor).max.y:b.min.y;a.g.updateWorldMatrix(true,true);registerSolid62(a.g);}return a;}));
  jobs.push(addModel44(owner,'cityrear',[4,0,-36],8,'still',Math.PI).then(a=>{if(a){a.g.scale.y*=1.6;a.g.updateWorldMatrix(true,true);const b=new THREE.Box3().setFromObject(a.g);a.g.position.y-=b.min.y;}return a;}));
  jobs.push(addModel44(owner,'tabby',[37.5,3.8,17],1.6,'rest',-Math.PI/2));
  gymStage52=null;
@@ -2897,18 +2897,19 @@ requestAnimationFrame(loop);
 </script>
 <script src="wildlife-recovered118.js?v=209.1"></script>
 <script src="heaven-course183.js?v=207"></script>
-<script src="navigation201.js?v=209"></script>
+<script src="navigation201.js?v=210"></script>
 <script src="roadster202.js?v=209"></script>
 <script src="driving203.js?v=209"></script>
-<script src="city204.js?v=209.1"></script>
+<script src="original-city210.js?v=210"></script>
+<script src="city204.js?v=210"></script>
 <script src="smoking205.js?v=207"></script>
 <script src="cockpit205.js?v=207"></script>
-<script src="motoring206.js?v=209"></script>
-<script src="cockpit206.js?v=207"></script>
+<script src="motoring206.js?v=210"></script>
+<script src="cockpit206.js?v=210"></script>
 <script src="camera207.js?v=209"></script>
-<script src="cockpit207.js?v=207.1"></script>
+<script src="cockpit207.js?v=210"></script>
 <script src="audio207.js?v=207"></script>
-<script src="hud208.js?v=209.2"></script>
-<script src="touring209.js?v=209.1"></script>
+<script src="hud208.js?v=210"></script>
+<script src="touring209.js?v=210"></script>
 </body>
 </html>

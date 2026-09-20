@@ -1,5 +1,6 @@
 /* Exploration shortcuts are an opt-in panel, never a permanent button stack. */
 (()=>{
+ const actions=document.getElementById('pipActions205');document.body.appendChild(actions);actions.textContent='Actions';actions.hidden=true;actions.setAttribute('aria-label','Open Pip’s actions');
  const rail=document.getElementById('navigation201');
  const toggle=document.createElement('button');toggle.id='navigationToggle208';toggle.type='button';toggle.setAttribute('aria-label','Open exploration tools');toggle.setAttribute('aria-expanded','false');toggle.title='Map, objectives and actions';toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5z"/></svg>';rail.prepend(toggle);
  function open(value){rail.classList.toggle('tools-open208',value);toggle.setAttribute('aria-expanded',String(value));toggle.setAttribute('aria-label',value?'Close exploration tools':'Open exploration tools');}
@@ -10,6 +11,8 @@
  rail.querySelector('#mapTools207')?.addEventListener('click',()=>open(false),true);
  addEventListener('keydown',e=>{if(e.key==='Escape')open(false);});addEventListener('blur',()=>open(false));
  const style=document.createElement('style');style.textContent=`
+ #pipActions205{position:fixed!important;left:max(14px,env(safe-area-inset-left))!important;bottom:288px!important;z-index:48;min-height:44px!important;width:78px!important;padding:8px!important;border:1px solid #d4d9ba44!important;border-radius:12px!important;background:#20372ddd!important;color:#f2e6c9!important;font:600 12px system-ui!important;touch-action:manipulation}
+ #pipActions205[hidden]{display:none!important}@media(max-height:520px){#pipActions205{bottom:184px!important}}
  body #navigation201:not(.tools-open208)>button:not(#navigationToggle208),body #navigation201:not(.tools-open208)>#mapTools207,body #navigation201:not(.tools-open208)>#navTarget201{display:none!important}
  body #navigation201[data-map-size=hidden]:not(.tools-open208){width:44px!important}
  body #navigation201.tools-open208{width:200px!important;padding:8px;border:1px solid #d5dab235;border-radius:15px;background:#1e352eef;box-sizing:border-box;max-height:calc(100dvh - 330px);overflow:auto;overscroll-behavior:contain}
@@ -19,6 +22,6 @@
  body #navigation201.tools-open208 #miniMap171{display:none!important}
  @media(max-height:520px){body #navigation201.tools-open208{max-height:calc(100dvh - 90px)}}
  `;document.head.appendChild(style);
- const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(rail.dataset.inactive207==='true')open(false);};
+ const tick=tickWorld38;tickWorld38=function(dt){tick(dt);actions.hidden=!rat||photo.active||!gameplayActive();if(rail.dataset.inactive207==='true')open(false);};
  window.hud208={open};
 })();
