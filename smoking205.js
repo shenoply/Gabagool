@@ -27,7 +27,7 @@
  s.emit+=dt;const cycle=Math.max(0,s.time-5.1)%7,exhale=s.lit&&cycle>2.1&&cycle<3.4&&!s.ending;if(s.lit&&!s.ending&&s.tip&&s.emit>(exhale?.09:.3)){s.emit=0;const p=s.smoke.find(p=>p.age>1.7);if(p){p.age=0;p.m.visible=true;p.m.position.copy(exhale?s.mouth:s.tip);p.v.copy(s.forward).multiplyScalar(exhale?.09:.012);p.v.y=.045+(s.seed%3)*.006;s.seed++;}}
  for(const p of s.smoke){if(p.age>1.7)continue;p.age+=dt;p.m.position.addScaledVector(p.v,dt);const size=.004+p.age*.014;p.m.scale.set(size,size*.8,size);p.m.material.opacity=Math.max(0,.15*(1-p.age/1.7));p.m.visible=p.age<1.7;}
  }
- const make=makeRat;makeRat=function(){const g=make(),animate=g.animate;g.animate=function(...args){restoreHeadPose();animate(...args);if(!g.userData.drive77)pose(g);};return g;};
+ const make=makeRat;makeRat=function(){const g=make(),animate=g.animate;g.animate=function(...args){restoreHeadPose();animate(...args);if(window.motoring206)window.motoring206.restPose(g);if(!g.userData.drive77)pose(g);};return g;};
  const previous=tickWorld38;tickWorld38=function(dt){previous(dt);tick(dt);};
  const clearBefore=clear;clear=function(...args){dispose();return clearBefore(...args);};
  window.pipSmoke205={toggle,pose,tick,dispose,get state(){return state;}};

@@ -21,6 +21,7 @@ body.menu-open65 #navigation201,body.photo #navigation201,body.heaven-course #na
   let tracked=null,lastRefresh=0;
   const point=(x,z)=>({x:Math.max(5,Math.min(95,6+(x+22)/54*88)),y:Math.max(7,Math.min(94,95-(z+14)/84*88))});
   function destinations(){const s=progress76(),bird=typeof rideActor71==='function'?rideActor71():null;return [
+    ...(window.motoring206?.destinations()||[]),
     {id:'city',icon:'↟',name:'Open city streets',x:4,z:43,detail:'Drive north through the open gate at the top of the yard. Follow the marked street loop past the café, record shop and market. Traffic keeps to its lanes and slows for you.'},
     {id:'home',icon:'⌂',name:'Pip’s home',x:0,z:-2,detail:'Return home to decorate and arrange your crafted furniture.'},
     {id:'rat',icon:'R',name:'Big Rat',x:NB.x,z:NB.z,detail:s.jobs?'Jobs complete. Your reward is in storage.':'Talk to Big Rat, then recover the vinyl and silver key.'},
@@ -47,7 +48,7 @@ body.menu-open65 #navigation201,body.photo #navigation201,body.heaven-course #na
     ['Big Rat’s jobs',s.jobs?'Complete — reward collected':!s.missionsActive?'Talk to Big Rat to begin':s.vinyl&&s.pool?'Return to Big Rat to collect your reward':'In progress','rat',`<p>${s.vinyl?'✓':'○'} Recover the violet-label vinyl</p><p>${s.pool?'✓':'○'} Find the silver pool key</p>`],
     ['Alley route / Stairway to Heaven',home.stairwayPortrait183?'Portrait earned · replay any time':'Available · east gate, marked A','alley','<p>Complete the rooftop course and claim the framed rat portrait.</p>'],
     ['Meet your lizard',home.geckoTamed88?'Tamed · whistle to call it':'Visit the clay-stone den','den',''],
-    ['Explore the city streets','Open · north gate, marked ↟','city','<p>Drive the neighbourhood loop. Try the drift button, indicators and radio.</p>'],
+    ['City deliveries & hidden parking','Car controls → City','city','<p>Carry parcels between shops, discover three quiet parking spots, and earn supplies for your home.</p>'],
     ['Take the convertible for a drive','Available · marked C','car','<p>Drive, reverse, steer and honk. Stop before getting out.</p>'],
     ['Rebuild your home','Collect salvage → craft → decorate','bench','']
   ];modal('Objectives',`<div class="objectives200">${items.map(([name,status,id,body])=>`<section><b>${name}</b>${body}<p>${status}</p><button class="objective201-track" data-objective201="${id}">Show on map</button></section>`).join('')}</div>`,[['Yard map',()=>openYard201()],['Travel',openMap],['Close',closeModal]]);$('modalBody').querySelectorAll('[data-objective201]').forEach(b=>b.onclick=()=>openYard201(b.dataset.objective201));};
