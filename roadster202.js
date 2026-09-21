@@ -47,6 +47,27 @@ function createRoadster202(THREE){
  tube([[-.10,.32,-.25],[-.10,.564,-.25]],.009,chrome,'Ashtray stand',2);
  const ashtray=mesh(new THREE.CylinderGeometry(.039,.028,.012,16),chrome,'Console ashtray');ashtray.position.set(-.10,.57,-.25);const ashbed=mesh(new THREE.CircleGeometry(.032,16),black,'Ashtray bowl');ashbed.rotation.x=-Math.PI/2;ashbed.position.set(-.10,.577,-.25);const ashTarget=new THREE.Object3D();ashTarget.position.set(-.10,.59,-.25);body.add(ashTarget);
  car.userData={ashTarget,wipers,radioTarget,radioKnob,indicators,brake,brakeTarget,gearTarget,seat:new THREE.Vector3(-.28,.33,-.33).multiplyScalar(.70),wheel,hubs,steeringPivots,wheelRadius:.245*.70,scaleFactor:.70};
+ // 1920s coachwork: long narrow bonnet, upright radiator and separate swept wings.
+ const obsolete=new Set(['Sculpted bonnet','Recessed grille','Grille bar','Headlight bezel','Round headlight','Faired headlamp housing','Curved chrome bumper','Radial wheel spoke']);
+ body.traverse(o=>{if(obsolete.has(o.name))o.visible=false;});
+ paint.color.setHex(0x17372f);
+ loft([[.16,.47,.49,.07],[.34,.46,.51,.09],[.65,.40,.52,.10],[1.03,.34,.52,.11],[1.43,.285,.52,.11],[1.49,.27,.51,.10]],paint,'Long touring bonnet');
+ for(const o of body.children){if(o.name==='Curved wing'){const p=o.geometry.attributes.position;for(let i=0;i<p.count;i++){const z=p.getZ(i);if(z>.2)p.setZ(i,.2+(z-.2)*1.4);}p.needsUpdate=true;o.geometry.computeVertexNormals();}}
+ for(const pivot of steeringPivots)if(pivot.position.z>0)pivot.position.z=.99;
+ const radiator=rounded(.56,.47,.055,.04,chrome,'Upright radiator surround',0,.425,1.50);
+ rounded(.475,.385,.025,.024,black,'Radiator dark core',0,.425,1.58);
+ for(let i=-9;i<=9;i++)tube([[i*.023,.252,1.601],[i*.023,.594,1.601]],.0035,chrome,'Vertical radiator fin',2);
+ ellipsoid(0,.677,1.49,.03,.018,.028,chrome,'Radiator cap');
+ for(const side of [-1,1]){ellipsoid(side*.435,.52,1.39,.105,.105,.075,chrome,'Touring headlamp shell');ellipsoid(side*.435,.52,1.464,.085,.085,.012,lamp,'Touring headlamp lens');tube([[side*.435,.43,1.39],[side*.435,.34,1.35],[side*.29,.34,1.35]],.012,chrome,'Headlamp bracket',8);
+ rounded(.22,.035,1.13,.012,black,'Running board',side*.66,.235,-.03);for(let i=-1;i<=1;i++)tube([[side*.66+i*.045,.258,-.50],[side*.66+i*.045,.258,.47]],.004,chrome,'Running board tread',2);
+ for(let i=0;i<9;i++)tube([[side*(.407-i*.011),.45,.54+i*.075],[side*(.407-i*.011),.56,.54+i*.075]],.004,black,'Bonnet ventilation',2);
+ }
+ tube([[-.59,.235,1.54],[0,.235,1.59],[.59,.235,1.54]],.013,chrome,'Touring front bumper',20);
+ tube([[-.52,.24,-1.15],[0,.24,-1.21],[.52,.24,-1.15]],.014,chrome,'Touring rear bumper',20);
+ for(const h of hubs){const sign=Math.sign(h.parent.position.x);const cap=h.getObjectByName('Domed hubcap');cap.scale.set(.018,.052,.052);for(let i=0;i<40;i++){const a=i/40*Math.PI*2;for(const offset of [-.23,.23])tube([[sign*.083,Math.cos(a+offset)*.05,Math.sin(a+offset)*.05],[sign*.072,Math.cos(a)*.166,Math.sin(a)*.166]],.0024,chrome,'Cross-laced wire spoke',2,h);}}
+ // Batch the fine spokes to keep mobile draw calls bounded.
+ for(const h of hubs){const parts=h.children.filter(o=>o.name==='Cross-laced wire spoke'),positions=[],normals=[],indices=[];let offset=0;for(const o of parts){positions.push(...o.geometry.attributes.position.array);normals.push(...o.geometry.attributes.normal.array);indices.push(...Array.from(o.geometry.index.array,i=>i+offset));offset+=o.geometry.attributes.position.count;h.remove(o);o.geometry.dispose();}const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));geometry.setIndex(indices);mesh(geometry,chrome,'Cross-laced wire wheel',h);}
+ car.userData.touring244=true;
  return car;
 }
 scope.createRoadster202=createRoadster202;if(typeof module!=='undefined')module.exports=createRoadster202;
