@@ -55,8 +55,8 @@ function createRoadster202(THREE){
  for(const o of body.children){if(o.name==='Curved wing'){const p=o.geometry.attributes.position;for(let i=0;i<p.count;i++){const z=p.getZ(i);if(z>.2)p.setZ(i,.2+(z-.2)*1.4);}p.needsUpdate=true;o.geometry.computeVertexNormals();}}
  for(const pivot of steeringPivots)if(pivot.position.z>0)pivot.position.z=.99;
  const radiator=rounded(.56,.47,.055,.04,chrome,'Upright radiator surround',0,.425,1.50);
- rounded(.475,.385,.025,.024,black,'Radiator dark core',0,.425,1.58);
- for(let i=-9;i<=9;i++)tube([[i*.023,.252,1.601],[i*.023,.594,1.601]],.0035,chrome,'Vertical radiator fin',2);
+ const grilleCore=mesh(new THREE.BoxGeometry(.475,.385,.012),black,'Radiator dark core');grilleCore.position.set(0,.425,1.576);
+ for(let i=-9;i<=9;i++)tube([[i*.023,.252,1.587],[i*.023,.594,1.587]],.0035,chrome,'Vertical radiator fin',2);
  ellipsoid(0,.677,1.49,.03,.018,.028,chrome,'Radiator cap');
  for(const side of [-1,1]){ellipsoid(side*.435,.52,1.39,.105,.105,.075,chrome,'Touring headlamp shell');ellipsoid(side*.435,.52,1.464,.085,.085,.012,lamp,'Touring headlamp lens');tube([[side*.435,.43,1.39],[side*.435,.34,1.35],[side*.29,.34,1.35]],.012,chrome,'Headlamp bracket',8);
  rounded(.22,.035,1.13,.012,black,'Running board',side*.66,.235,-.03);for(let i=-1;i<=1;i++)tube([[side*.66+i*.045,.258,-.50],[side*.66+i*.045,.258,.47]],.004,chrome,'Running board tread',2);
