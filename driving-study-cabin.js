@@ -50,9 +50,11 @@ function createStudyCabin({THREE,car,renderer,camera,getMode,onReach,onStatus,li
  el.addEventListener('pointerdown',e=>{if(getMode()!=='cockpit')return;const r=el.getBoundingClientRect();camera.updateMatrixWorld();car.updateMatrixWorld(true);ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);const h=ray.intersectObjects(hits)[0];if(!h)return;down={id:e.pointerId,x:e.clientX,y:e.clientY,obj:h.object};el.setPointerCapture(e.pointerId);e.stopImmediatePropagation();},true);
  el.addEventListener('pointermove',e=>{if(down?.id===e.pointerId)e.stopImmediatePropagation();},true);
  for(const type of ['pointerup','pointercancel'])el.addEventListener(type,e=>{if(down?.id!==e.pointerId)return;const d=down;down=null;if(type==='pointerup'&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<15)activate(d.obj===handle?'door':d.obj===windowSwitch?'window':d.obj===knobs[0]?'volume':'radio');e.stopImmediatePropagation();},true);
- let mintX=0,mintVX=0,mintZ=0,mintVZ=0,lastSpeed=0;
+ let mintX=0,mintVX=0,mintZ=0,mintVZ=0,lastSpeed=0,lastYaw=null;
  function tick(dt,angle,moving){t+=dt;const speed=live?Number(live.speed||0):moving?2:0,delta=Math.min(.05,Math.max(0,dt)),accel=THREE.MathUtils.clamp((speed-lastSpeed)/Math.max(dt,.001),-6,6);lastSpeed=speed;
-  for(let left=delta;left>0;){const h=Math.min(left,1/120);left-=h;mintVX+=(-28*Math.sin(mintX)-3.1*mintVX-accel*.18)*h;mintVZ+=(-28*Math.sin(mintZ)-3.1*mintVZ+THREE.MathUtils.clamp(angle*speed*.25,-2,2))*h;mintX=THREE.MathUtils.clamp(mintX+mintVX*h,-.55,.55);mintZ=THREE.MathUtils.clamp(mintZ+mintVZ*h,-.55,.55);}charm.rotation.x=mintX;charm.rotation.z=mintZ;
+  const yaw=live?.g.rotation.y??0,yawDelta=lastYaw===null?0:Math.atan2(Math.sin(yaw-lastYaw),Math.cos(yaw-lastYaw));lastYaw=yaw;
+  const lateral=live?THREE.MathUtils.clamp(speed*yawDelta/Math.max(delta,.001),-5,5):angle*speed;
+  for(let left=delta;left>0;){const h=Math.min(left,1/120);left-=h;mintVX+=(-24*Math.sin(mintX)-1.8*mintVX-accel*1.1)*h;mintVZ+=(-24*Math.sin(mintZ)-1.8*mintVZ+lateral*1.1)*h;mintX+=mintVX*h;mintZ+=mintVZ*h;if(Math.abs(mintX)>.65){mintX=THREE.MathUtils.clamp(mintX,-.65,.65);mintVX*=-.2;}if(Math.abs(mintZ)>.65){mintZ=THREE.MathUtils.clamp(mintZ,-.65,.65);mintVZ*=-.2;}}charm.rotation.x=mintX;charm.rotation.z=mintZ;
 
   const kph=live?Math.abs(live.speed)*3.6:(moving?18+Math.sin(t*.8)*3:0),gear=live?(live.speed<-.08?'R':kph<.3?'N':kph<10?'1':kph<21?'2':'3'):(moving?'2':'N'),engine=live?live.ignition206:moving,service=live?vehicle219.data():{temperature:engine?78:22,oil:100,coolant:100};
   const rpm=engine?Math.min(6000,850+kph*(gear==='1'?410:gear==='2'?230:155)):0;

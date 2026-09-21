@@ -1,7 +1,7 @@
 /* Approved wall-cavity home integrated with the existing 60 persistent repair records. */
 (()=>{const T=THREE,paint={sage:0x809377,cream:0xd6c7a6,blue:0x6d8c96,clay:0xac7861};
 const woodTexture=new T.TextureLoader().load('wood_planks-build48.jpg');
-const gardenTexture=new T.TextureLoader().load('garden-view238.jpg');gardenTexture.encoding=T.sRGBEncoding;
+const gardenTexture=new T.TextureLoader().load('garden-cartoon241.svg');gardenTexture.encoding=T.sRGBEncoding;
 const wood=new T.MeshLambertMaterial({color:0x795434,map:woodTexture}),plaster=new T.MeshLambertMaterial({color:0xc5b899}),dark=new T.MeshLambertMaterial({color:0x393329}),stone=new T.MeshLambertMaterial({color:0x80796b});
 const windowX=2,windowY=1.9,windowR=1.12;
 function add(g,geo,m,x=0,y=0,z=0){const o=new T.Mesh(geo,m);o.position.set(x,y,z);o.receiveShadow=true;o.userData.noInk=true;g.add(o);return o;}
