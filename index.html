@@ -1123,7 +1123,7 @@ function houseTap(e){if(phase!=='house'||!hs||photo.active||$('modal').style.dis
   const hits=ray2.intersectObjects(hs.placed.map(e=>e.m),true);if(!hits.length)return;let o=hits[0].object;const entry=hs.placed.find(e=>{let ok=false;e.m.traverse(c=>{if(c===o)ok=true;});return ok;});if(entry)furnitureMenu(entry);}
 function tickHouse(dt){
  if(tickHomeUse41(dt))return;
-  const before47=rat.position.clone();let speed=control(dt,{walk:2.5,bounds:[-HW/2+0.5,HW/2-0.5,-HD/2+0.5,HD/2-0.5]});
+  const before47=rat.position.clone();let speed=control(dt,{walk:3.6,bounds:[-HW/2+0.5,HW/2-0.5,-HD/2+0.5,HD/2-0.5]});
   // Furniture uses its visible mesh; walking off a top remains possible.
   rat.position.x=THREE.MathUtils.clamp(rat.position.x,-HW/2+.5,HW/2-.5);rat.position.z=THREE.MathUtils.clamp(rat.position.z,-HD/2+.5,HD/2-.5);
   const actual47=Math.hypot(rat.position.x-before47.x,rat.position.z-before47.z)/Math.max(dt,.001);if(actual47<.03){rat.userData.motionX=rat.userData.motionZ=0;}rat.userData.vel=actual47;speed=speed>.01?Math.min(1,actual47/3.2):0;if(speed===0)rat.userData.vel=0;rat.userData.pushing=false;
@@ -2932,6 +2932,6 @@ requestAnimationFrame(loop);
 <script src="music227.js?v=230"></script>
 <script src="homestead230.js?v=230"></script>
 <script src="usability231.js?v=231"></script>
-<script src="house239.js?v=239"></script>
+<script src="house239.js?v=240"></script>
 </body>
 </html>

@@ -29,7 +29,7 @@ for(let i=0;i<4;i++){const shard=block(b.group,w/5,.09,.22+(i%3)*.13,-w*.38+i*w*
 add(decor,wallGeometry(-HW/2,HW/2,0,3.25,-HD/2-.03),dark);
 for(const r of [windowR+.045,windowR+.16])add(decor,new T.TorusGeometry(r,.065,8,64),wood,windowX,windowY,-HD/2+.16);
 block(decor,.045,windowR*2,.07,windowX,windowY,-HD/2+.18);block(decor,windowR*2,.045,.07,windowX,windowY,-HD/2+.18);block(decor,2.8,.12,.5,windowX,windowY-windowR-.1,-HD/2+.2);
-add(decor,new T.PlaneGeometry(11,7.33),new T.MeshBasicMaterial({map:gardenTexture,fog:false}),windowX,2,-HD/2-1.7);
+add(decor,new T.PlaneGeometry(4.8,3.2),new T.MeshBasicMaterial({map:gardenTexture,fog:false}),windowX,windowY,-HD/2-.16);
 block(decor,HW,.12,HD,0,-.4,0,dark);
 for(let z=-HD/2+.5;z<HD/2;z+=1.4)block(decor,HW,.18,.18,0,-.21,z,dark);
 for(const x of [-HW/2,HW/2]){block(decor,.22,.17,HD,x,.08,0);block(decor,.2,.15,HD,x,3.3,0);}
@@ -45,6 +45,14 @@ block(decor,80,.5,HD+.7,0,-.65,0,stone);
 // The left host mass is a cutaway in overhead play; it must not cover the usable doorway.
 for(const o of decor.children){if(o.isMesh&&o.geometry.parameters?.width===32&&o.position.x<0)o.visible=false;}
 const chips=new T.Group();decor.add(chips);for(let i=0;i<22;i++){const o=add(chips,new T.DodecahedronGeometry(.055+(i%4)*.025,0),plaster,HW/2-.4-(i%5)*.15,.07,-3+(i%7)*.21);o.scale.y=.3;}
+// Flood line, salvaged wall shelf, skirting and believable mixed debris.
+for(const x of [-HW/2+.12,HW/2-.12]){block(decor,.08,.2,HD-.2,x,.5,0,new T.MeshLambertMaterial({color:0x696450}));}
+block(decor,2.3,.1,.45,-5.2,1.65,-HD/2+.32);for(const x of [-6,-4.4])block(decor,.09,.42,.32,x,1.43,-HD/2+.22,dark);
+for(let i=0;i<3;i++){add(decor,new T.CylinderGeometry(.09,.12,.26,10),new T.MeshLambertMaterial({color:[0x7b9180,0xac9470,0x988975][i]}),-5.85+i*.35,1.83,-HD/2+.28);}
+for(let i=0;i<11;i++){const shard=block(chips,.07+(i%3)*.04,.04,.35+(i%4)*.18,HW/2-.6-(i%4)*.2,.055,-2.8+(i%6)*.32,wood);shard.rotation.y=i*1.31;}
+for(let i=0;i<7;i++){const nail=add(chips,new T.CylinderGeometry(.009,.009,.14,5),dark,HW/2-.8-(i%3)*.16,.025,-2.4+i*.12);nail.rotation.z=1.4;nail.rotation.y=i;}
+const damageTrim=new T.Group();decor.add(damageTrim);for(const x of [-6.8,5.8]){const p=block(damageTrim,.12,.8,.08,x,1,-HD/2+.2,dark);p.rotation.z=.16;}
+const lamp=new T.PointLight(0xffc78b,.4,7);lamp.position.set(-5.4,2.4,-4.6);decor.add(lamp);
 g.userData.wallHome239={ceiling,upper,chips};decor.traverse(o=>o.userData.noInk=true);return g;};
 const before=startHouse;startHouse=function(){before();const surround=root.userData.homeGarden231;if(surround){root.remove(surround);delete root.userData.homeGarden231;}scene.background.set(0x5c6457);scene.fog=new T.Fog(0x5c6457,45,100);
 for(const [x,z]of [[0,2.5],[-1,2.5],[1,3.5]]){if(!hs.placed.some(e=>!e.p.wall&&Math.hypot(e.p.x-x,e.p.z-z)<(defOf(e.p.id).r||.5)+.65)){rat.position.set(x,0,z);break;}}
