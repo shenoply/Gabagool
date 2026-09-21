@@ -51,13 +51,24 @@ function createRoadster202(THREE){
  const obsolete=new Set(['Sculpted bonnet','Recessed grille','Grille bar','Headlight bezel','Round headlight','Faired headlamp housing','Curved chrome bumper','Radial wheel spoke']);
  body.traverse(o=>{if(obsolete.has(o.name))o.visible=false;});
  paint.color.setHex(0x17372f);
- loft([[.16,.47,.49,.07],[.34,.46,.51,.09],[.65,.40,.52,.10],[1.03,.34,.52,.11],[1.43,.285,.52,.11],[1.49,.27,.51,.10]],paint,'Long touring bonnet');
+ // Flat bonnet crown and near-vertical side panels taper into the radiator shell.
+ const bonnetStations=[[.16,.48,.595],[.40,.45,.62],[.85,.38,.635],[1.20,.33,.64],[1.50,.30,.64]],bp=[],bi=[];
+ for(const [z,w,top]of bonnetStations){for(const [x,y]of [[-w,.29],[-w,top-.035],[-w+.035,top],[w-.035,top],[w,top-.035],[w,.29]])bp.push(x,y,z);}
+ for(let j=0;j<bonnetStations.length-1;j++)for(let k=0;k<5;k++){const a=j*6+k,b=a+6;bi.push(a,b,a+1,a+1,b,b+1);}
+ const bg=new THREE.BufferGeometry();bg.setAttribute('position',new THREE.Float32BufferAttribute(bp,3));bg.setIndex(bi);bg.computeVertexNormals();const bonnet=mesh(bg,paint,'Long touring bonnet');bonnet.material.side=THREE.DoubleSide;
+ tube([[0,.599,.18],[0,.624,.4],[0,.639,.85],[0,.644,1.48]],.0025,chrome,'Bonnet centre hinge',20);
  for(const o of body.children){if(o.name==='Curved wing'){const p=o.geometry.attributes.position;for(let i=0;i<p.count;i++){const z=p.getZ(i);if(z>.2)p.setZ(i,.2+(z-.2)*1.4);}p.needsUpdate=true;o.geometry.computeVertexNormals();}}
  for(const pivot of steeringPivots)if(pivot.position.z>0)pivot.position.z=.99;
- const radiator=rounded(.56,.47,.055,.04,chrome,'Upright radiator surround',0,.425,1.50);
- const grilleCore=mesh(new THREE.BoxGeometry(.475,.385,.012),black,'Radiator dark core');grilleCore.position.set(0,.425,1.576);
- for(let i=-9;i<=9;i++)tube([[i*.023,.252,1.587],[i*.023,.594,1.587]],.0035,chrome,'Vertical radiator fin',2);
- ellipsoid(0,.677,1.49,.03,.018,.028,chrome,'Radiator cap');
+ const surround=new THREE.Shape();surround.moveTo(-.3,.24);surround.lineTo(.3,.24);surround.lineTo(.3,.605);surround.quadraticCurveTo(.3,.64,.265,.64);surround.lineTo(-.265,.64);surround.quadraticCurveTo(-.3,.64,-.3,.605);surround.closePath();
+ const aperture=new THREE.Path();aperture.moveTo(-.266,.271);aperture.lineTo(-.266,.600);aperture.lineTo(.266,.600);aperture.lineTo(.266,.271);aperture.closePath();surround.holes.push(aperture);
+ const radiator=mesh(new THREE.ExtrudeGeometry(surround,{depth:.025,bevelEnabled:false,curveSegments:12}),chrome,'Inset radiator surround');radiator.position.z=1.495;
+ const grilleCore=mesh(new THREE.BoxGeometry(.54,.34,.012),black,'Radiator dark core');grilleCore.position.set(0,.437,1.503);
+ for(let i=-11;i<=11;i++)tube([[i*.022,.276,1.514],[i*.022,.596,1.514]],.0025,chrome,'Vertical radiator fin',2);
+ // Small cast-metal eagle mascot fixed to the bonnet, with swept feathered wings.
+ ellipsoid(0,.652,1.40,.027,.011,.04,chrome,'Eagle ornament plinth');
+ ellipsoid(0,.699,1.40,.017,.037,.023,chrome,'Eagle ornament body');ellipsoid(0,.738,1.416,.018,.018,.020,chrome,'Eagle ornament head');
+ const beak=mesh(new THREE.ConeGeometry(.009,.031,8),chrome,'Eagle ornament beak');beak.rotation.x=Math.PI/2;beak.position.set(0,.738,1.442);
+ for(const side of [-1,1]){const wing=new THREE.Shape();wing.moveTo(0,0);wing.lineTo(side*.04,.045);wing.lineTo(side*.115,.076);wing.lineTo(side*.10,.035);wing.lineTo(side*.081,.044);wing.lineTo(side*.073,.019);wing.lineTo(side*.054,.031);wing.lineTo(side*.042,.007);wing.lineTo(side*.02,.011);wing.closePath();const feather=mesh(new THREE.ExtrudeGeometry(wing,{depth:.007,bevelEnabled:false}),chrome,'Eagle ornament wing');feather.position.set(0,.704,1.398);}
  for(const side of [-1,1]){ellipsoid(side*.435,.52,1.39,.105,.105,.075,chrome,'Touring headlamp shell');ellipsoid(side*.435,.52,1.464,.085,.085,.012,lamp,'Touring headlamp lens');tube([[side*.435,.43,1.39],[side*.435,.34,1.35],[side*.29,.34,1.35]],.012,chrome,'Headlamp bracket',8);
  rounded(.22,.035,1.13,.012,black,'Running board',side*.66,.235,-.03);for(let i=-1;i<=1;i++)tube([[side*.66+i*.045,.258,-.50],[side*.66+i*.045,.258,.47]],.004,chrome,'Running board tread',2);
  for(let i=0;i<9;i++)tube([[side*(.407-i*.011),.45,.54+i*.075],[side*(.407-i*.011),.56,.54+i*.075]],.004,black,'Bonnet ventilation',2);
