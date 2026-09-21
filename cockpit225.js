@@ -8,7 +8,7 @@
    vehicle219.attach(c);carTouch220.attach();
    detailRoadster225(THREE,c.g,c);
    const model=clonePipScene(asset.scene),mixer=new THREE.AnimationMixer(model),clip=asset.animations.find(a=>a.name==='Idle');if(clip){mixer.clipAction(clip).play();mixer.update(0);}
-   const study=createPipDrivingStudy(model,c.g),bodies=[];model.name='Approved seated Pip';model.traverse(m=>{if(m.isSkinnedMesh)bodies.push(createStudyInsideBody(THREE,m));});model.visible=false;
+   const study=createPipDrivingStudy(model,c.g,{fast:true}),bodies=[];model.name='Approved seated Pip';model.traverse(m=>{if(m.isMesh){m.raycast=()=>{};m.castShadow=false;}if(m.isSkinnedMesh)bodies.push(createStudyInsideBody(THREE,m));});model.visible=false;
    const cabin=createStudyCabin({THREE,car:c.g,renderer,camera,live:c,getMode:()=>c.riding&&!cockpit223.entering&&roadsterControls203.viewIndex>0?'cockpit':'outside',onStatus:sayToast});
    // The new instrument panel replaces all legacy dial overlays.
    for(const needle of c.gauges206||[]){needle.visible=false;}
@@ -22,7 +22,7 @@
   if(active&&roadsterControls203.viewIndex>0&&c.reach?.target){const r=c.reach,q=r.time/r.duration;reach={kind:r.kind,target:r.target,side:r.side||'Right',weight:Math.max(0,Math.min(1,q/.28,(1-q)/.28))};}
   const angle=-c.steer*.55;d.clock+=dt;
   if(active&&d.clock>=1/24&&(d.angle===null||Math.abs(d.angle-angle)>.001||reach||d.reach)){
-   d.clock=0;d.bodies.forEach(b=>b.mesh.geometry=b.full);d.study.update(angle,reach);d.bodies.forEach(b=>b.sync());d.angle=angle;d.reach=!!reach;
+   d.clock=0;d.bodies.forEach(b=>b.mesh.geometry=b.full);d.study.update(angle,reach);d.bodies.forEach(b=>b.sync(false));d.angle=angle;d.reach=!!reach;
   }
   // The wheel stays in sync even when the animation update is throttled.
   c.wheel.rotation.z=angle;

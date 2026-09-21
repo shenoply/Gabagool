@@ -26,10 +26,10 @@ function createStudyInsideBody(THREE,mesh){
   for(let k=0;k<rim.length;k++)keep.push(rim[(k+1)%rim.length],rim[k],center);patches.push({center,vertices});
  }
  const inside=new THREE.BufferGeometry();for(const key of keys)inside.setAttribute(key,new THREE.BufferAttribute(new attrs[key].array.constructor(arrays[key]),attrs[key].itemSize,attrs[key].normalized));inside.setIndex(keep);smoothStudyNormals(THREE,inside);
- function sync(){const p=inside.attributes.position;p.array.set(full.attributes.position.array);for(const {index,source}of copies)for(let k=0;k<3;k++)p.array[index*3+k]=p.array[source*3+k];mesh.skeleton.update();
+ function sync(refreshNormals=true){const p=inside.attributes.position;p.array.set(full.attributes.position.array);for(const {index,source}of copies)for(let k=0;k<3;k++)p.array[index*3+k]=p.array[source*3+k];mesh.skeleton.update();
   for(const {center,vertices}of patches){const point=new THREE.Vector3();for(const i of vertices){const v=new THREE.Vector3().fromBufferAttribute(full.attributes.position,i);mesh.boneTransform(i,v);point.add(v);}point.divideScalar(vertices.length);
    const skin=new THREE.Matrix4();skin.elements.fill(0);for(let k=0;k<4;k++){const weight=inside.attributes.skinWeight.array[center*4+k],id=inside.attributes.skinIndex.array[center*4+k];if(!weight)continue;const bone=new THREE.Matrix4().fromArray(mesh.skeleton.boneMatrices,id*16);for(let j=0;j<16;j++)skin.elements[j]+=bone.elements[j]*weight;}point.applyMatrix4(mesh.bindMatrixInverse.clone().multiply(skin).multiply(mesh.bindMatrix).invert());p.setXYZ(center,point.x,point.y,point.z);
-  }p.needsUpdate=true;smoothStudyNormals(THREE,inside);
+  }p.needsUpdate=true;if(refreshNormals)smoothStudyNormals(THREE,inside);
  }
 
  return {mesh,full,inside,sync,patches};

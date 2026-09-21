@@ -31,6 +31,9 @@ check225(vehicle219.data().condition===100&&vehicle219.data().oil===100,'Old eng
 check225(carTouch220.parts.every(p=>p.mesh.parent===p.parent),'Old missing parts not remounted');
 check225(JSON.stringify(inv)===inventory225&&vehicle219.data().upgrades.engine,'Reset lost inventory or upgrades');
 check225(!vehicle219.interlocked(),'Migrated car blocked');
+const driver226=car77.driver225;driver226.bodies.forEach(b=>b.mesh.geometry=b.full);
+for(const angle of [-.3,0,.3]){driver226.study.update(angle);car77.g.updateWorldMatrix(true,true);for(const b of driver226.bodies){const m=b.mesh,g=m.geometry,si=g.attributes.skinIndex,sw=g.attributes.skinWeight;const handIds=['Left','Right'].map(s=>m.skeleton.bones.indexOf(driver226.study.bones[s+'Hand']));m.skeleton.update();const toWheel=car77.wheel.matrixWorld.clone().invert().multiply(m.matrixWorld);for(let i=0;i<g.attributes.position.count;i++){let weight=0;for(let k=0;k<4;k++)if(handIds.includes(si.array[i*4+k]))weight+=sw.array[i*4+k];if(weight<=.05)continue;const point=new THREE.Vector3().fromBufferAttribute(g.attributes.position,i);m.boneTransform(i,point);point.applyMatrix4(toWheel);const distance=Math.hypot(Math.hypot(point.x,point.y)-.095,point.z);check225(distance>.0131,'Hand vertex inside wheel after optimization');}}}
+report.gripClearance226=true;
 report.cockpit225={carpet:true,partsReset:true,engineDrives:true,windowWorks:true,firstPersonBody:true,grip:true};
 
 })()
