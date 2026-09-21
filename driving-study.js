@@ -10,7 +10,7 @@
  const firstPersonMeshes=[];let firstPersonFov=90;
  const originals=[];
  let lastAngle=null,study=null,mode='cockpit',yaw=-1.1,pitch=.28,distance=1.5,target=V(-.17,.34,-.17),motion=false,time=0,angle=0,dragged=false;
- const cabin=createStudyCabin({THREE,car,renderer,camera,getMode:()=>mode,onStatus:text=>$('status').textContent=text});car.traverse(o=>{if(o.isMesh)originals.push([o,o.visible]);});
+ const cabin=createStudyCabin({THREE,car,renderer,camera,getMode:()=>mode,onStatus:text=>$('status').textContent=text});detailRoadster225(THREE,car);car.traverse(o=>{if(o.isMesh)originals.push([o,o.visible]);});
  function choose(name){mode=name;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));const close=name!=='car'&&name!=='cockpit';for(const [o,v]of originals){o.visible=v&&(!close||/seat|steering|dashboard|pedal|gear/i.test(o.name));}
   if(study){study.model.visible=true;for(const {mesh,full,inside}of firstPersonMeshes)mesh.geometry=name==='cockpit'?inside:full;}
   target.set(-.17,.34,-.17);yaw=-1.1;pitch=.28;distance=Math.max(1.15,.76/camera.aspect);

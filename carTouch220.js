@@ -9,7 +9,7 @@
  function target(id,object,label,action,anchor=object,inside=false){tag(object,id);const t={id,object,label,action,anchor,inside};targets.push(t);return t;}
  function installed(p){return !state()[p.id]||state()[p.id].installed!==false;}
  function persist(p){state()[p.id]={installed:installed(p),position:p.mesh.getWorldPosition(V()).toArray(),upgraded:!!state()[p.id]?.upgraded};save();}
- function attach(){const c=car77;if(owner===c)return;owner=c;targets=[];parts=[];selected=null;mirror=null;if(!c)return;vehicle219.attach(c);const a=c.cabin219;const serviceState=vehicle219.data();if(serviceState.resetRevision223!==223){serviceState.parts220={};serviceState.oil=serviceState.coolant=serviceState.condition=100;serviceState.temperature=22;serviceState.resetRevision223=223;save();}
+ function attach(){const c=car77;if(owner===c)return;owner=c;targets=[];parts=[];selected=null;mirror=null;if(!c)return;vehicle219.attach(c);const a=c.cabin219;const serviceState=vehicle219.data();if(serviceState.resetRevision225!==225){serviceState.parts220={};serviceState.oil=serviceState.coolant=serviceState.condition=100;serviceState.temperature=22;serviceState.resetRevision225=225;serviceState.roof=false;serviceState.windows=false;c.ignition206=false;c.speed=0;c.handbrake=false;a.hoodOpen=false;a.hoodValue=0;a.doors.forEach(d=>{d.open=false;d.value=0;});held=null;save();}
   for(const [i,d]of a.doors.entries()){
    const side=i?1:-1,handle=mesh(d.pivot,new THREE.BoxGeometry(.025,.028,.10),0xc8c6ae,'Interior door handle',V(-side*.10,.15,-.43));
    const crank=mesh(d.pivot,new THREE.SphereGeometry(.025,10,8),0xc8b07a,'Window crank',V(-side*.12,.09,-.25));

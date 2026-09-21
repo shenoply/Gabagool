@@ -47,14 +47,14 @@
   tick(dt);
   if(entry){const e=entry;if(car77!==e.c||!e.c.riding){entry=null;}else if(gameplayActive()){
    e.time+=Math.min(dt,.05);if(e.time>=.6)e.c.cabin219.doors[e.side].open=e.time<2.9;if(e.time>=2.9)e.c.cabin219.doors.forEach(d=>d.open=false);
-   if(e.time>=3.9){e.c.cabin219.doors.forEach(d=>d.open=false);entry=null;roadsterControls203.setView(0);tutorial219.start('car');}
+   if(e.time>=3.9){e.c.cabin219.doors.forEach(d=>d.open=false);entry=null;roadsterControls203.setView(2);tutorial219.start('car');}
   }}
   if(car77?.riding&&roadsterControls203.viewIndex===0)car77.reach=null;
   handbrake.textContent=car77?.handbrake?'Release handbrake':'Handbrake';handbrake.setAttribute('aria-pressed',String(!!car77?.handbrake));
   pose();
  };
  const render=renderer.render;renderer.render=function(s,cam){
-  if(s===scene&&cam===camera)pose();const use=s===scene&&cam===camera&&car77?.riding&&[1,2,3].includes(roadsterControls203.viewIndex);
+  if(car77?.driver225&&!entry){if(rig)rig.visible=false;return render.call(this,s,cam);}if(s===scene&&cam===camera)pose();const use=s===scene&&cam===camera&&car77?.riding&&[1,2,3].includes(roadsterControls203.viewIndex);
   const rv=rat?.visible,gv=rig?.visible;if(rig)rig.visible=use;if(rat&&use)rat.visible=false;else if(rat&&s===scene&&car77?.riding)rat.visible=true;
   try{return render.call(this,s,cam);}finally{if(rat)rat.visible=rv;if(rig)rig.visible=gv;}
  };
