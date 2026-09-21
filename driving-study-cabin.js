@@ -16,7 +16,7 @@ function createStudyCabin({THREE,car,renderer,camera,getMode,onReach,onStatus}){
  box(.245,.078,.006,wood,V(.19,.369,.048));for(const y of [.342,.405])box(.244,.0015,.002,brass,V(.19,y,.043));box(.030,.005,.004,brass,V(.19,.387,.039));label('PIP · ROADSTER',.105,.012,V(.19,.36,.039));
  for(let i=0;i<9;i++)box(.004,.022,.003,rubber,V(.325+i*.005,.387,.041));
  // Sloped centre radio shelf within the seated rat's reach.
- const radio=new THREE.Group();radio.position.set(-.11,.423,-.112);radio.name='Dashboard radio';root.add(radio);box(.135,.012,.14,wood,V(-.11,.396,-.038));box(.15,.052,.030,wood,V(),radio);box(.143,.045,.004,brass,V(0,0,-.017),radio);box(.136,.038,.004,dark,V(0,0,-.020),radio);
+ const radio=new THREE.Group();radio.position.set(-.06,.423,-.025);radio.name='Dashboard radio';root.add(radio);for(const x of [-.115,-.005])box(.005,.008,.065,brass,V(x,.413,.014));box(.15,.052,.030,wood,V(),radio);box(.143,.045,.004,brass,V(0,0,-.017),radio);box(.136,.038,.004,dark,V(0,0,-.020),radio);
  const stations=['CANAL WALTZ','NIGHT PIANO','GARDEN JAZZ'];let station=0;const display=label(stations[0],.076,.015,V(0,.006,-.023),radio,'#b8aa73','#24382c');
  for(let i=0;i<13;i++)box(.002,.006,.001,brass,V(-.031+i*.005,-.010,-.024),radio);
  const knobs=[];for(const x of [-.057,.057]){const k=add(new THREE.CylinderGeometry(.009,.009,.008,20),rubber,V(x,0,-.027),radio);k.rotation.x=Math.PI/2;box(.0015,.007,.002,ivory,V(x,.002,-.032),radio);knobs.push(k);}label('VOL',.023,.007,V(-.055,-.016,-.026),radio);label('TUNE',.025,.007,V(.055,-.016,-.026),radio);
@@ -45,7 +45,7 @@ function createStudyCabin({THREE,car,renderer,camera,getMode,onReach,onStatus}){
  function tick(dt,angle,moving){t+=dt;const impulse=(angle-previousAngle)/Math.max(dt,.001);previousAngle=angle;swayV+=(-16*sway-3.4*swayV-impulse*.75+(moving?Math.sin(t*4.5)*.12:0))*dt;sway+=swayV*dt;charm.rotation.z=THREE.MathUtils.clamp(sway,-.42,.42);charm.rotation.x=moving?Math.sin(t*1.6)*.055:charm.rotation.x*Math.exp(-dt*3);
   needles.forEach(n=>n.pivot.rotation.z=n.title==='FUEL'?.6:2.2-(moving?(n.title==='RPM'?2.1:1.7)+Math.sin(t*.8)*.2:0));
   const old=doorAngle;doorAngle=THREE.MathUtils.damp(doorAngle,doorOpen?.85:0,4,dt);door.rotation.y=doorAngle;windowLevel=THREE.MathUtils.damp(windowLevel,windowOpen?0:1,3,dt);rightGlass.scale.y=windowLevel;rightGlass.position.y=rightBase.y-(1-windowLevel)*.09;
-  music();let reach=null;if(action){action.time+=dt;const a=action.time,weight=a<.7?THREE.MathUtils.smoothstep(a,0,.7):a<1.15?1:1-THREE.MathUtils.smoothstep(a,1.15,1.9);reach={target:action.target,weight,side:action.kind==='door'?'Right':'Left'};
+  music();let reach=null;if(action){action.time+=dt;const a=action.time,weight=a<.7?THREE.MathUtils.smoothstep(a,0,.7):a<1.15?1:1-THREE.MathUtils.smoothstep(a,1.15,1.9);reach={kind:action.kind,target:action.target,weight,side:action.kind==='door'?'Right':'Left'};
    if(a>=.85&&!action.fired){action.fired=true;if(action.kind==='door'){doorOpen=!doorOpen;onStatus(doorOpen?'Door opening':'Door closing');}else if(action.kind==='window'){windowOpen=!windowOpen;onStatus(windowOpen?'Right window lowering':'Right window closing');}else if(action.kind==='volume'){radioOn=!radioOn;onStatus(radioOn?'Radio on · original studio music':'Radio off');}else{station=(station+1)%stations.length;radioOn=true;display.set(stations[station]);knobs[1].rotation.y+=.7;onStatus(stations[station]+' · original studio music');}}
    if(a>=1.9){action=null;reach={weight:0};}
   }return reach;
