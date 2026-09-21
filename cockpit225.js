@@ -19,10 +19,10 @@
   const c=car77;if(!c||c.owner!==root)return;attach(c);const d=c.driver225;if(!d)return;
   const active=c.riding&&!cockpit223.entering;d.study.model.visible=active;
   let reach=d.cabin.tick(Math.min(dt,.05),-c.steer*.55,Math.abs(c.speed)>.05);
-  if(active&&roadsterControls203.viewIndex>0&&c.reach?.target){const r=c.reach,q=r.time/r.duration;reach={kind:r.kind,target:r.target,side:r.side||'Right',weight:Math.max(0,Math.min(1,q/.28,(1-q)/.28))};}
+  if(active&&roadsterControls203.viewIndex>0&&c.reach?.target){const r=c.reach,q=r.time/r.duration;reach={kind:r.kind,target:r.target.getWorldPosition?r.target.getWorldPosition(V()):r.target,side:r.side||'Right',weight:Math.max(0,Math.min(1,q/.28,(1-q)/.28))};}
   const angle=-c.steer*.55;d.clock+=dt;
-  if(active&&d.clock>=1/24&&(d.angle===null||Math.abs(d.angle-angle)>.001||reach||d.reach)){
-   d.clock=0;d.bodies.forEach(b=>b.mesh.geometry=b.full);d.study.update(angle,reach);d.bodies.forEach(b=>b.sync(false));d.angle=angle;d.reach=!!reach;
+  if(active&&d.clock>=1/24&&(d.angle===null||Math.abs(d.angle-angle)>.001||reach||d.reach||window.smokingGame227?.active)){
+   const poseDt=d.clock;d.clock=0;d.bodies.forEach(b=>b.mesh.geometry=b.full);d.study.update(angle,reach);window.smokingGame227?.poseCar(d,poseDt);d.bodies.forEach(b=>b.sync(false));d.angle=angle;d.reach=!!reach;
   }
   // The wheel stays in sync even when the animation update is throttled.
   c.wheel.rotation.z=angle;

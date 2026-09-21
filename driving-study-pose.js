@@ -88,5 +88,5 @@ function createPipDrivingStudy(model,car,options={}){
  }
  update();return {model,bones,update};
 }
-scope.createPipDrivingStudy=createPipDrivingStudy;
+scope.createPipDrivingStudy=createPipDrivingStudy;scope.solvePipArm227=solveArm203;
 })(typeof window!=='undefined'?window:globalThis);
