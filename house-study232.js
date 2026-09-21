@@ -111,7 +111,7 @@ box(80,.25,.4,0,7,3.5,stone,hostBuilding);
 // The inspection opening exposes the room; there is no independent exterior roof or plinth.
 // Photorealistic garden backdrop sits outside the actual circular opening.
 const gardenMaterial=new T.MeshBasicMaterial({color:0xffffff,fog:false});
-new T.TextureLoader().load('garden-view237.jpg',t=>{t.encoding=T.sRGBEncoding;gardenMaterial.map=t;gardenMaterial.needsUpdate=true;});
+new T.TextureLoader().load('garden-view238.jpg',t=>{t.encoding=T.sRGBEncoding;gardenMaterial.map=t;gardenMaterial.needsUpdate=true;});
 const gardenView=new T.Mesh(new T.PlaneGeometry(9,6),gardenMaterial);gardenView.position.set(.165,2.0,-4.15);scene.add(gardenView);
 // Load the actual game rat for an honest scale reference.
 new T.GLTFLoader().load('pip-animated.glb',g=>{const p=g.scene,b=new T.Box3().setFromObject(p),s=b.getSize(new T.Vector3());p.scale.setScalar(1.25/s.y/.55);p.position.set(-.9,-b.min.y*(1.25/s.y/.55),1.8);p.rotation.y=.3;p.traverse(o=>{if(o.isMesh)o.castShadow=true});house.add(p)},undefined,()=>{});
