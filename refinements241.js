@@ -61,7 +61,7 @@
   if(phase==='house'&&hs?.house){const h=hs.house.userData.wallHome239;for(const l of h?.lamps241||[])l.o.intensity=home.lights241===false?0:l.intensity;for(const entry of hs.placed||[])entry.m.traverse(l=>{if(l.isPointLight){l.userData.base241??=l.intensity;l.intensity=home.lights241===false?0:l.userData.base241;}});for(const l of hs.lights||[])if(l.isLight){l.userData.base241??=l.intensity;l.intensity=home.lights241===false?0:l.userData.base241;}lightButton.textContent=home.lights241===false?'Lights on':'Lights off';
    const d=world60?.door;if(d){if(d!==homeDoor){homeDoor=d;doorAngle=Math.PI/2;doorWas=!!home.doorOpen60;}if(home.doorOpen60&&!doorWas)foley('open');doorWas=!!home.doorOpen60;doorAngle=T.MathUtils.damp(doorAngle,home.doorOpen60?0:Math.PI/2,7,dt);d.rotation.y=doorAngle;doorButton.style.display=home.doorOpen60?'block':'none';}}
   const c=car77;if(!c||c.owner!==root||!c.cabin219)return;if(!c.refined241)coachwork(c);updateRoof(c);const r=c.refined241;
-  c.cabin219.doors.forEach((d,i)=>{if(r.doors[i]<=.001&&d.value>.001)foley('open');if(r.doors[i]>.001&&d.value<=.001)foley('close');r.doors[i]=d.value;});if(r.lights!==c.lights206){foley('switch');r.lights=c.lights206;}
+  // Car foley is handled by fixes242, including wiper sweeps and window motors.
  };
  window.refinements241={roofPoint,updateRoof,foley};
 })();

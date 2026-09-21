@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 241</title>
+<title>Wet Whiskers · Build 242</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -687,8 +687,8 @@ const home={floor:'wood',wall:'plaster',door:false,placed:[],storage:{}}; // pla
 function invCount(){return Object.values(inv).reduce((a,b)=>a+b,0);}
 function has(needs){return Object.entries(needs).every(([k,n])=>materialCount(k)>=n);}
 function spend(needs){return consumeMaterials(needs);}
-function save(){try{localStorage.setItem('ww-save',JSON.stringify({inv,home,v:1}));}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem('ww-save'));if(d&&d.v===1){inv=d.inv||{};Object.assign(home,{storage:{},tools:{},seen:{},life:null,pantry:{},collectibles:{}},d.home);home.storage=home.storage||{};return true;}}catch(e){}return false;}
+function save(){try{localStorage.setItem((new URLSearchParams(location.search).has('review242')?'ww-model-review242':'ww-save'),JSON.stringify({inv,home,v:1}));}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem((new URLSearchParams(location.search).has('review242')?'ww-model-review242':'ww-save')));if(d&&d.v===1){inv=d.inv||{};Object.assign(home,{storage:{},tools:{},seen:{},life:null,pantry:{},collectibles:{}},d.home);home.storage=home.storage||{};return true;}}catch(e){}return false;}
 const $=id=>document.getElementById(id);bindRadio();
 const ui={title:$('title'),sub:$('sub'),phase:$('phase'),bag:$('bag'),prompt:$('prompt'),skip:$('skip'),go:$('go'),hb:$('hb'),end:$('end'),pad:$('pad')};
 function clear(){stop66();world60=null;stopWorld58();surfaces57=[];ramp57=null;gate57=null;radioAnchor57=null;
@@ -1141,7 +1141,7 @@ function tickHouse(dt){
 $('hplacebtn').addEventListener('click',place);$('hrot').addEventListener('click',rotateSel);$('hcancel').addEventListener('click',cancelPlace);
 $('again').addEventListener('click',()=>{ui.end.style.display='none';startOpening51(false);});
 $('start').addEventListener('click',()=>startOpening51(load()));
-$('newgame').addEventListener('click',()=>{try{localStorage.removeItem('ww-save');}catch(e){}dewEnergy=0;inv={};Object.assign(home,{floor:'wood',wall:'plaster',door:false,placed:[],storage:{},tools:{},seen:{},life:null,pantry:{},collectibles:{},routes:{},wet:0,portraitDisplay48:false,gymSeen50:false,discoveries60:{},shortcuts60:{},recordFixed60:false,doorStyle65:null,doorStyles65:{}});startOpening51(false);});
+$('newgame').addEventListener('click',()=>{try{localStorage.removeItem((new URLSearchParams(location.search).has('review242')?'ww-model-review242':'ww-save'));}catch(e){}dewEnergy=0;inv={};Object.assign(home,{floor:'wood',wall:'plaster',door:false,placed:[],storage:{},tools:{},seen:{},life:null,pantry:{},collectibles:{},routes:{},wet:0,portraitDisplay48:false,gymSeen50:false,discoveries60:{},shortcuts60:{},recordFixed60:false,doorStyle65:null,doorStyles65:{}});startOpening51(false);});
 ui.skip.addEventListener('click',endCutscene);
 
 // ---------- After the rain: atmosphere, set dressing and photo mode ----------
@@ -1207,7 +1207,7 @@ function startTitle(){phase='title';clear();scene.background.set(0x536774);scene
   rat=makeRat();rat.position.set(2.8,0,1);rat.rotation.y=-.4;rat.scale.setScalar(1.65);root.add(rat);
   const lamp=new THREE.PointLight(0xffc37b,1.25,15);lamp.position.set(2,4,4);root.add(lamp);addMotes(root,50,18,6,12,0xffdfae);outline(root);
   camera.position.set(0,3.6,11.5);camera.lookAt(0,1.5,0);applyQuality();
-  try{if(localStorage.getItem('ww-save'))$('start').textContent='Come on home';}catch(e){}
+  try{if(localStorage.getItem((new URLSearchParams(location.search).has('review242')?'ww-model-review242':'ww-save')))$('start').textContent='Come on home';}catch(e){}
 }
 function tickTitle(dt){rat.animate(dt,0,false);camera.position.x=Math.sin(t*.12)*.25;camera.lookAt(innerHeight>innerWidth?1:0,1.65,0);}
 
@@ -2905,7 +2905,7 @@ requestAnimationFrame(loop);
 <script src="city204.js?v=211"></script>
 <script src="smoking205.js?v=207"></script>
 <script src="cockpit205.js?v=207"></script>
-<script src="motoring206.js?v=219"></script>
+<script src="motoring206.js?v=242"></script>
 <script src="cockpit206.js?v=211"></script>
 <script src="camera207.js?v=219"></script>
 <script src="cockpit207.js?v=222"></script>
@@ -2932,7 +2932,9 @@ requestAnimationFrame(loop);
 <script src="music227.js?v=230"></script>
 <script src="homestead230.js?v=230"></script>
 <script src="usability231.js?v=231"></script>
-<script src="house239.js?v=241"></script>
-<script src="refinements241.js?v=241"></script>
+<script src="house239.js?v=242"></script>
+<script src="refinements241.js?v=242"></script>
+<script src="fixes242.js?v=242"></script>
+<script src="model-review242.js?v=242"></script>
 </body>
 </html>
