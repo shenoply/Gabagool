@@ -543,7 +543,7 @@ function defOf(id){return CRAFT[id]||ITEMS[id];}
 
 
 // ---------- rat house (used in cutscene and build) ----------
-const HW=12,HD=9,DOORZ=2.2;
+const HW=16,HD=12,DOORZ=2.2;
 function makeHouse(state){
   const g=new THREE.Group();g.userData.parts={};
   const fl=FLOORS.find(f=>f.id===(state?state.floor:'wood'))||FLOORS[0];
@@ -2923,12 +2923,13 @@ requestAnimationFrame(loop);
 <script src="cockpit223.js?v=226"></script>
 <script src="driving-study-body.js?v=226"></script>
 <script src="driving-study-pose.js?v=227"></script>
-<script src="driving-study-cabin.js?v=227"></script>
+<script src="driving-study-cabin.js?v=230"></script>
 <script src="roadster-detail225.js?v=225"></script>
 <script src="cockpit225.js?v=227"></script>
 <script src="smoking227.js?v=227"></script>
 <script src="smoking-game227.js?v=227"></script>
-<script src="records227.js?v=227"></script>
-<script src="music227.js?v=227"></script>
+<script src="records227.js?v=230"></script>
+<script src="music227.js?v=230"></script>
+<script src="homestead230.js?v=230"></script>
 </body>
 </html>
