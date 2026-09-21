@@ -22,7 +22,7 @@
  function citySolid(p,r=.3){return inDistrict(p)&&!!city?.collision?.blocked(p,r);}
  const blocked=blockedCar77;blockedCar77=function(p,r=.39){if(phase==='scavenge')return citySolid(p,r);return blocked(p,r);};
  const resolve=resolveGeometry62;resolveGeometry62=function(p,before){if(phase==='scavenge'&&(inDistrict(p)||inDistrict(before))){city?.collision?.resolve(p,before,.2);return;}resolve(p,before);};
- const controlBefore=control;control=function(dt,options){if(phase==='scavenge'&&city?.owner===root&&options?.bounds){const ground=options.ground;options={...options,bounds:[-86,94,-25,145],ground:(x,z)=>inExtension({x,z})?0:ground?ground(x,z):0};const before=rat.position.clone(),result=controlBefore(dt,options);return result;}return controlBefore(dt,options);};
+ const controlBefore=control;control=function(dt,options){if(phase==='scavenge'&&city?.owner===root&&options?.bounds){const ground=options.ground,b=city?.collision?.bounds;const dynamic=b?[Math.min(-86,b.min.x-8),Math.max(94,b.max.x+8),Math.min(-25,b.min.z-8),Math.max(145,b.max.z+8)]:[-86,94,-25,145];options={...options,bounds:dynamic,ground:(x,z)=>inExtension({x,z})?0:ground?ground(x,z):0};const before=rat.position.clone(),result=controlBefore(dt,options);return result;}return controlBefore(dt,options);};
  function part(parent,w,h,d,x,y,z,color,name){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.8}));m.position.set(x,y,z);m.name=name;m.userData.noInk=true;parent.add(m);return m;}
  function seed(){if(phase!=='scavenge'||!root)return;
   if(city?.owner!==root){city={owner:root,g:new THREE.Group(),cars:[],solids:[],collision:null};root.add(city.g);city.g.name='Original city entrance';
@@ -31,7 +31,11 @@
    for(const x of [1.25,6.75])part(city.g,.22,2.3,.22,x,1.15,37.5,0x65513b,'Open city gate post');
    const sign=markerText('ORIGINAL CITY ↑');sign.position.set(4,2.5,37.5);sign.scale.setScalar(.32);city.g.add(sign);
   }
-  const actor=actors44.find(a=>a.id==='city'&&a.owner===root);if(actor&&!city.collision){city.collision=buildCityCollision210(THREE,actor.g);city.model=actor.g;}
+  const actor=actors44.find(a=>a.id==='city'&&a.owner===root);if(actor&&!city.collision){
+   // Build 246: make the supplied human city genuinely enormous from Pip's rat-scale viewpoint.
+   // Re-scale before generating collision, then pin the original entrance back to z=56 so the yard gate still joins it.
+   if(!actor.g.userData.cityScale246){actor.g.userData.cityScale246=true;actor.g.scale.multiplyScalar(2.35);actor.g.updateWorldMatrix(true,true);let b=new THREE.Box3().setFromObject(actor.g);actor.g.position.z+=56-b.min.z;actor.g.updateWorldMatrix(true,true);}
+   city.collision=buildCityCollision210(THREE,actor.g);city.model=actor.g;}
  }
  const add=addCar77;addCar77=function(){add();seed();};
  const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(phase!=='scavenge')return;seed();if(!gameplayActive()||document.hidden){release();return;}dt=Math.min(.05,Math.max(0,dt));clock+=dt;
