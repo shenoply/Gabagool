@@ -49,7 +49,7 @@ function createPipDrivingStudy(model,car){
     const nr=d>1e-7?offset/d:0,nz=d>1e-7?point.z/d:-1,r=.095+nr*clearance;point.x*=r/radial;point.y*=r/radial;point.z=nz*clearance;wheel.localToWorld(point);m.worldToLocal(point);
     const skin=new THREE.Matrix4();skin.elements.fill(0);for(let k=0;k<4;k++){const weight=sw.array[i*4+k];if(!weight)continue;const b=new THREE.Matrix4().fromArray(m.skeleton.boneMatrices,si.array[i*4+k]*16);for(let j=0;j<16;j++)skin.elements[j]+=b.elements[j]*weight;}
     const inverse=m.bindMatrixInverse.clone().multiply(skin).multiply(m.bindMatrix).invert();point.applyMatrix4(inverse);p.setXYZ(i,point.x,point.y,point.z);
-   }p.needsUpdate=true;m.geometry.computeVertexNormals();
+   }p.needsUpdate=true;if(typeof smoothStudyNormals==='function')smoothStudyNormals(THREE,m.geometry);else m.geometry.computeVertexNormals();
   }
  }
  function update(steering=0,reach=null){
