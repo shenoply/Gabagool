@@ -54,7 +54,7 @@
  };
  // Keep the first drive short; optional cabin controls remain available in the handbook.
  chapters.cabin=chapters.car.slice(5,-1);
- chapters.car=[...chapters.car.slice(0,5),['outside','Switch outside','Tap Outside view to see the whole car. Tap Cockpit to return.'],chapters.car.at(-1)];
+ chapters.car=[...chapters.car.slice(0,4),chapters.car.at(-1)];
  function readiness(){if(!car77?.riding||!chapter||chapter!=='car')return '';const id=chapters.car[index][0];if(!['drive','steer','brake'].includes(id))return '';if(car77.cabin219?.hoodOpen)return 'Hood open — stop, step out and close it at the front.';if(window.vehicle219?.interlocked())return 'Close the doors and refit missing parts before driving.';if(!car77.ignition206)return 'Engine off — tap Start engine first.';return '';}
  let lastHint='';
  const handbook=[
@@ -67,7 +67,7 @@
   ['Service supplies','Three parts crates: beside the original car spot, on the approach road, and near the city entrance. Grab transfers only what fits. Oil and water are consumed; installed upgrades stay saved.'],
   ['Upgrades','Ignition & belt improves acceleration; radiator reduces heating; tyres improve cornering; rebuilt brakes improve stopping. Tap the engine part to inspect it. With a matching upgrade in your bag, Fit upgrade becomes available.']
  ];
- function state(){const s=home.tutorial219??={done:{},step:{},started:{}};if(s.carRevision!==221){s.carRevision=221;delete s.done.car;s.step.car=0;}return s;}
+ function state(){const s=home.tutorial219??={done:{},step:{},started:{}};if(s.carRevision!==231){s.carRevision=231;delete s.done.car;s.step.car=0;}return s;}
  let chapter=null,index=0,passed=false,origin=null,yaw=0,previousContext=null,paused=false;
  const card=document.createElement('section');card.id='lesson219';card.hidden=true;card.setAttribute('aria-label','Control practice');document.body.appendChild(card);
  const style=document.createElement('style');style.textContent='#lesson219{position:fixed;z-index:45;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(300px,calc(100vw - 24px));padding:8px 10px;box-sizing:border-box;border:1px solid #d5bb83;border-radius:14px;background:#19382ff5;color:#f4e4bf;font:12px/1.35 system-ui;box-shadow:0 6px 20px #0005}#lesson219[hidden]{display:none}#lesson219 details{max-height:18vh;overflow:auto;margin:5px 0}#lesson219 summary{min-height:28px;cursor:pointer}#lesson219 p{margin:5px 0 9px}#lesson219 button{min-height:44px;margin-right:6px;padding:8px 12px;border:1px solid #d0b888;border-radius:9px;background:#e8d3a2;color:#1e382e;font-weight:600}#lesson219 button:disabled{opacity:.45}.tutorial-controls219{outline:3px solid #f4cc65!important;outline-offset:3px}body.menu-open65 #lesson219{display:none}@media(max-height:500px){#lesson219{left:12px;transform:none;width:280px;font-size:12px}}';document.head.appendChild(style);
@@ -84,8 +84,8 @@
  function menu(){closeModal();const rows=Object.entries(chapters).map(([name,steps])=>'<h3>'+name[0].toUpperCase()+name.slice(1)+(state().done[name]?' ✓':'')+'</h3>'+steps.map(s=>'<p><b>'+s[1]+':</b> '+s[2]+'</p>').join('')).join('');modal('Tutorial & button guide',rows+handbook.map(([title,text])=>'<p><b>'+title+':</b> '+text+'</p>').join(''),Object.keys(chapters).map(name=>['Practise '+name,()=>start(name,true)]).concat([['Resume saved lesson',()=>{const name=Object.keys(chapters).find(k=>state().started[k]&&!state().done[k])||'foot';start(name);}],['Close',closeModal]]));}
  const menuBefore=menu65;menu65=function(){menuBefore();const b=document.createElement('button');b.className='btn';b.textContent='Tutorial · read or practise';b.onclick=menu;$('modalActions').appendChild(b);};$('menu65').onclick=menu65;
  const enterCarBefore220=enterCar77;enterCar77=function(){const was=!!car77?.riding,result=enterCarBefore220();if(!was&&car77?.riding&&!state().done.car)start('car');return result;};
- const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(!rat||!gameplayActive()||document.hidden)return;const context=car77?.riding?'car':window.sewer211?.active?'sewer':'foot';if(context!==previousContext){previousContext=context;paused=false;if(chapter&&chapter!==context&&(chapter!=='service'||context==='car')){chapter=null;card.hidden=true;clearHighlight();}}
-  if(!chapter&&!paused&&!state().done[context]&&(context!=='foot'||phase==='scavenge'))start(context);
+ const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(!rat||!gameplayActive()||document.hidden)return;const context=car77?.riding?'car':window.sewer211?.active?'sewer':'foot';if(context!==previousContext){previousContext=context;paused=false;if(chapter&&chapter!==context&&chapter!=='tools'&&(chapter!=='service'||context==='car')){chapter=null;card.hidden=true;clearHighlight();}}
+  if(!chapter&&!paused&&!window.workshop231?.active&&!state().done[context]&&(context!=='foot'||phase==='scavenge'))start(context);
   if(!chapter)return;const hint=readiness();if(hint!==lastHint){lastHint=hint;const h=$('lessonHint221');if(h)h.textContent=hint;}const id=chapters[chapter][index][0];if(origin&&rat.position.distanceTo(origin)>.65&&id==='move')record('move');if(Math.abs(gameCam.yaw-yaw)>.16)record('look');if(car77?.riding){if(car77.ignition206)record('ignition');if(Math.abs(car77.speed)>.6)record('drive');if(Math.abs(car77.steer)>.3&&Math.abs(car77.speed)>.2)record('steer');if(car77.speed<-.2)record('brake');}if(window.sewerBoat215?.riding){record('boat');if(origin&&rat.position.distanceTo(origin)>.7)record('row');}else if(chapter==='sewer'&&id==='shore')record('shore');
  };
  window.tutorial219={start,next,pause,record,menu,chapters,handbook,get progress(){return {chapter,index,passed};}};

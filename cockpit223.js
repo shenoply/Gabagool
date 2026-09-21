@@ -47,7 +47,7 @@
   tick(dt);
   if(entry){const e=entry;if(car77!==e.c||!e.c.riding){entry=null;}else if(gameplayActive()){
    e.time+=Math.min(dt,.05);if(e.time>=.6)e.c.cabin219.doors[e.side].open=e.time<2.9;if(e.time>=2.9)e.c.cabin219.doors.forEach(d=>d.open=false);
-   if(e.time>=3.9){e.c.cabin219.doors.forEach(d=>d.open=false);entry=null;roadsterControls203.setView(2);tutorial219.start('car');}
+   if(e.time>=3.9){e.c.cabin219.doors.forEach(d=>d.open=false);entry=null;roadsterControls203.setView(2);if(!home.tutorial219?.done?.car)tutorial219.start('car');}
   }}
   if(car77?.riding&&roadsterControls203.viewIndex===0)car77.reach=null;
   handbrake.textContent=car77?.handbrake?'Release handbrake':'Handbrake';handbrake.setAttribute('aria-pressed',String(!!car77?.handbrake));
