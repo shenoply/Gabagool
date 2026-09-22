@@ -99,15 +99,15 @@
  function card(id){
   const c=CRAFT[id],isReady=ready(id),src=svg254(id)||preview(id),use=shortUse251(id);
   const missing=Object.entries(c.needs||{}).filter(([k,n])=>count(k)<n).map(([k,n])=>(n-count(k))+' '+(ITEMS[k]?.name||k)).join(', ');
-  return '<article class="recipe250 '+(isReady?'ready251':'')+'" data-card250="'+id+'">'+
+  return '<article class="recipe250 '+(isReady?'ready251':'')+'" data-card250="'+id+'" data-select256="'+id+'">'+
    (src?'<img class="recipeimg251" src="'+src+'" alt="'+esc(c.name)+'">':'')+
    '<div class="title251"><strong>'+esc(c.name)+'</strong>'+(use?'<small>'+esc(use)+'</small>':'')+'</div>'+
    (!isReady&&missing?'<div class="missingSummary254">Missing: '+esc(missing)+'</div>':'')+'<div class="needs250">'+needHtml(c)+'</div>'+
-   (isReady?'<button data-craft250="'+id+'">Craft</button>':'<span class="missingbtn251">Missing</span>')+
+   (isReady?'<button data-craft250="'+id+'">Craft</button>':'<button class="track256" data-track256="'+id+'">Track</button>')+
   '</article>';
  }
  function closeWorkshop251(){
-  const p=$('workshopPanel251');if(p)p.remove();
+  const p=$('workshopPanel251');if(p)p.remove();clearBenchPreview256();
   document.body.classList.remove('workshop-live251');
   if(window.workshop251State){window.workshop251State.open=false;window.workshop251State.crafting=false;}if(rat?.userData)rat.userData.seated41=false;
  }
@@ -130,7 +130,7 @@
    '<nav class="tabs250">'+[['essentials','🛠 Tools'],['materials','◆ Materials'],['home','⌂ Home'],['food','● Food']].map(([k,n])=>'<button data-tab250="'+k+'" aria-pressed="'+(tab===k)+'">'+n+'</button>').join('')+'</nav>'+
    '<div class="craftgrid251">'+(ids.map(card).join('')||'<p class="empty251">Nothing left here.</p>')+'</div>';
   body.querySelectorAll('[data-tab250]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab250;renderWorkshop251();});
-  body.querySelectorAll('[data-craft250]').forEach(b=>b.onclick=()=>doCraftAnimated251(b.dataset.craft250));
+  body.querySelectorAll('[data-craft250]').forEach(b=>b.onclick=e=>{e.stopPropagation();doCraftAnimated251(b.dataset.craft250);});body.querySelectorAll('[data-track256]').forEach(b=>b.onclick=e=>{e.stopPropagation();trackRecipe256(b.dataset.track256);});body.querySelectorAll('[data-select256]').forEach(card=>card.onclick=()=>{showBenchRecipe256(card.dataset.select256);body.querySelectorAll('[data-select256]').forEach(x=>x.classList.toggle('selected256',x===card));});
   const bf=$('bagFooter253'),sf=$('storageCount253');if(bf)bf.textContent='Bag '+totalBag()+' / '+bagCapacity();if(sf)sf.textContent='Home Storage '+Object.values(home.pantry||{}).reduce((a,n)=>a+(n||0),0);
   const uf=$('unloadFooter253'),stf=$('storageFooter253');if(uf)uf.onclick=()=>{unloadAll();renderWorkshop251();};if(stf)stf.onclick=()=>{closeWorkshop251();openPantry();};
   if(focus){body.querySelector('[data-card250="'+focus+'"]')?.scrollIntoView({block:'center'});}
@@ -144,10 +144,30 @@
   ensureHomeTable();ensureLife();home.tools=home.tools||{};home.pantry=home.pantry||{};
   seedWorkshop251();document.body.classList.add('workshop-live251');
   window.workshop251State.open=true;positionPip251();gameCam.yaw=-.52;gameCam.pitch=.30;gameCam.distance=5.3;gameCam.ready=false;
-  renderWorkshop251(focus);
+  renderWorkshop251(focus);setTimeout(()=>{const id=focus||recipeIds()[0];if(id)showBenchRecipe256(id);},0);
  }
 
- const workshop251State=window.workshop251State={open:false,crafting:false,until:0,kind:null,prop:null};
+ const workshop251State=window.workshop251State={open:false,crafting:false,until:0,kind:null,prop:null,selected:null,benchPreview:null};
+ function clearBenchPreview256(){
+  const g=workshop251State.benchPreview;if(!g)return;g.parent?.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose?.();});workshop251State.benchPreview=null;
+ }
+ function showBenchRecipe256(id){
+  clearBenchPreview256();const table=root?.userData?.workshop251,c=CRAFT[id];if(!table||!c)return;
+  const group=new THREE.Group();group.name='Selected recipe materials';table.add(group);group.position.set(-.18,.96,-.02);
+  let i=0;for(const [k,n] of Object.entries(c.needs||{})){
+   const def=ITEMS[k];if(!def?.build)continue;
+   const m=def.build();const box=new THREE.Box3().setFromObject(m),size=box.getSize(new THREE.Vector3()),span=Math.max(size.x,size.y,size.z)||1;
+   m.scale.multiplyScalar(.22/span);m.position.set((i%3-.9)*.30,.02+Math.floor(i/3)*.12,-.18+(i%2)*.18);m.rotation.y=i*.8;group.add(m);i++;
+  }
+  const result=(c.build||ITEMS[id]?.build)?.();if(result){const box=new THREE.Box3().setFromObject(result),size=box.getSize(new THREE.Vector3()),span=Math.max(size.x,size.y,size.z)||1;result.scale.multiplyScalar(.35/span);result.position.set(.72,.08,0);result.rotation.y=-.55;group.add(result);}
+  workshop251State.benchPreview=group;workshop251State.selected=id;
+ }
+ function trackRecipe256(id){
+  const c=CRAFT[id];if(!c)return;
+  pinnedRecipe=id;shoppingList();closeWorkshop251();
+  const missing=Object.entries(c.needs||{}).filter(([k,n])=>count(k)<n).map(([k,n])=>(n-count(k))+' '+(ITEMS[k]?.name||k)).join(', ');
+  sayToast(missing?'Tracking: '+missing:'All materials ready.');
+ }
  function seedWorkshop251(){
   if(phase!=='house'||!root)return;
   if(root.userData.workshop251)return;
@@ -186,6 +206,12 @@
   }
   g.scale.setScalar(.78);return g;
  }
+ function craftFlourish256(id){
+  if(!root?.userData?.workshop251)return;const g=new THREE.Group();g.name='Craft complete flourish';root.add(g);const origin=root.userData.workshop251.localToWorld(new THREE.Vector3(.55,1.15,-.05));
+  for(let i=0;i<10;i++){const m=new THREE.Mesh(new THREE.OctahedronGeometry(.025+(i%3)*.008),new THREE.MeshBasicMaterial({color:i%2?0xf5d27b:0xe9f3d0,transparent:true,opacity:.9}));m.position.copy(origin);m.userData={a:i/10*Math.PI*2,t:0};g.add(m);}
+  const start=performance.now();const anim=()=>{const q=(performance.now()-start)/700;for(const m of g.children){m.userData.t=q;m.position.set(origin.x+Math.cos(m.userData.a)*q*.45,origin.y+q*.55,origin.z+Math.sin(m.userData.a)*q*.45);m.material.opacity=Math.max(0,1-q);}if(q<1)requestAnimationFrame(anim);else{g.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});g.parent?.remove(g);}};anim();
+  try{sfx.craft();}catch(e){}
+ } 
  function doCraftAnimated251(id){
   if(workshop251State.crafting)return;
   const c=CRAFT[id];if(!c||!ready(id)){sayToast('Missing materials.');return;}
@@ -195,7 +221,7 @@
   const button=$('workshopBody251')?.querySelector('[data-craft250="'+id+'"]');if(button){button.disabled=true;button.textContent='Working…';}
   setTimeout(()=>{
    if(workshop251State.prop){workshop251State.prop.parent?.remove(workshop251State.prop);workshop251State.prop=null;}
-   if(phase==='house'&&ready(id))performCraft(id,1);
+   if(phase==='house'&&ready(id)){performCraft(id,1);craftFlourish256(id);}
    workshop251State.crafting=false;workshop251State.kind=null;
    if(workshop251State.open)renderWorkshop251(id);
   },1150);
