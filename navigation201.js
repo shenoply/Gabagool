@@ -32,7 +32,7 @@ body.menu-open65 #navigation201,body.photo #navigation201,body.heaven-course #na
     {id:'den',icon:'L',name:'Lizard den',x:-18.75,z:24.75,detail:home.geckoTamed88?'Use the whistle to call your lizard.':'Find the lizard at its clay-stone den and use Tame.'},
     {id:'car',icon:'C',name:'Convertible',x:car77?.g.position.x??5.4,z:car77?.g.position.z??17.6,detail:'Approach either side and press Drive. Joystick or WASD drives; Horn and Exit appear while seated.'},
     {id:'bird',icon:'B',name:'Osprey transport',x:bird?.g.position.x??0,z:bird?.g.position.z??0,detail:bird?'Live bird position. Approach its pickup range for a lift.':'The bird is not available in this area.',unavailable:!bird},
-    {id:'bench',icon:'W',name:'Workbench & storage',x:3.2,z:31.3,detail:'Bring salvage here to craft and manage your supplies.'},
+    {id:'bench',icon:'W',name:'Home crafting table',x:0,z:-2,detail:'Crafting is now done at Pip’s home. Unload your bag into home storage, then use the crafting table for tools, materials and furniture.'},
     {id:'pond',icon:'≈',name:'Willow Pond',x:23.2,z:32.1,detail:'Swim and dive beneath the pond surface.'},
     {id:'dumpster',icon:'D',name:'Dumpster',x:8.7,z:-10.8,detail:'Climb inside to search for salvage.'},
     {id:'vinyl',icon:'♪',name:'Violet-label vinyl',x:yard76?.vinyl?.m.position.x??0,z:yard76?.vinyl?.m.position.z??0,detail:s.vinyl?'Collected.':'Recover this for Big Rat.',unavailable:!yard76?.vinyl||!!s.vinyl},
