@@ -29,7 +29,7 @@
  };
 
  // Add Zaytona/Tay as a calm workshop companion, seated on the stool beside Pip.
- let tay=null,tayOwner=null;
+ let tay=null,tayOwner=null,tayMode=0,tayModeClock=0;
  function clearTay255(){if(tay){tay.mixer?.stopAllAction();tay.g.parent?.remove(tay.g);}tay=null;tayOwner=null;}
  function seedTay255(){
   if(phase!=='house'||!root?.userData?.workshop251||tayOwner===root)return;
@@ -44,19 +44,30 @@
  }
  function tickTay255(dt){
   if(phase!=='house'){clearTay255();return;}seedTay255();if(!tay)return;
-  tay.mixer?.update(Math.min(.05,dt));tay.time+=dt;
-  // gentle seated breathing/head-interest animation without leaving the stool
+  tay.mixer?.update(Math.min(.05,dt));tay.time+=dt;tayModeClock-=dt;if(tayModeClock<=0){tayMode=(tayMode+1)%3;tayModeClock=6+tayMode*2;}
   tay.g.position.y=tay.baseY+Math.sin(tay.time*1.6)*.004;
-  const head=tay.model.getObjectByName('Head');if(head)head.rotation.y=Math.sin(tay.time*.65)*.10;
+  const head=tay.model.getObjectByName('Head');if(head){head.rotation.y=tayMode===0?Math.sin(tay.time*.65)*.10:tayMode===1?.22:Math.sin(tay.time*2.4)*.05;head.rotation.z=tayMode===2?Math.sin(tay.time*2.8)*.08:0;}
+  const tail=tay.model.getObjectByName('Tail_01')||tay.model.getObjectByName('Tail');if(tail)tail.rotation.y=Math.sin(tay.time*(tayMode===2?2.8:1.1))*.12;
   tay.g.visible=!!window.workshop251State?.open||rat.position.distanceTo(root.userData.workshop251.position)<4;
  }
 
+ function bigRatObjectiveHint256(){
+  if(phase!=='scavenge'||!rat||!sc?.nearNb||sound66.utterance)return;
+  const tools=['axe230','hammer230','saw230','brush230'];const missing=tools.find(id=>!home.tools?.[id]);
+  const md=window.music227?.data?.();
+  let line='';
+  if(missing)line='Before you worry about fancy stuff, get your '+(CRAFT[missing]?.name||'tools')+' sorted. Check the yard for salvage and bring it home.';
+  else if(md?.mission250&&!md.headphones)line='Those walnut headphones are by the yard path. Stay low and look around the old work area.';
+  else if(!home.geckoTamed88)line='If you hear scratching near the clay stones, that gecko might be worth making friends with.';
+  else line='You are doing fine, kid. Keep fixing the place one job at a time.';
+  voice66('The Fat Rat',line,NB,.78);
+ }
  // Cigarette remains usable from Actions; keep it alive through later action-menu overrides.
  const actionsButton=$('pipActions205');
  actionsButton?.addEventListener('contextmenu',e=>e.preventDefault());
 
- const tickBefore255=tickWorld38;
- tickWorld38=function(dt){tickBefore255(dt);craftBirdTick255();tickTay255(dt);};
+ const tickBefore255=tickWorld38;let hintClock256=0;
+ tickWorld38=function(dt){tickBefore255(dt);craftBirdTick255();tickTay255(dt);hintClock256=Math.max(0,hintClock256-dt);if(phase==='scavenge'&&sc?.nearNb&&!sc.talk&&hintClock256===0&&home.craftBirdIntro255){hintClock256=28;bigRatObjectiveHint256();}};
  const clearBefore255=clear;
  clear=function(...args){clearTay255();birdState={owner:null,step:0,next:0};return clearBefore255(...args);};
 
