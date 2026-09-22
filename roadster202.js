@@ -69,6 +69,11 @@ function createRoadster202(THREE){
  ellipsoid(0,.699,1.40,.017,.037,.023,chrome,'Eagle ornament body');ellipsoid(0,.738,1.416,.018,.018,.020,chrome,'Eagle ornament head');
  const beak=mesh(new THREE.ConeGeometry(.009,.031,8),chrome,'Eagle ornament beak');beak.rotation.x=Math.PI/2;beak.position.set(0,.738,1.442);
  for(const side of [-1,1]){const wing=new THREE.Shape();wing.moveTo(0,0);wing.lineTo(side*.04,.045);wing.lineTo(side*.115,.076);wing.lineTo(side*.10,.035);wing.lineTo(side*.081,.044);wing.lineTo(side*.073,.019);wing.lineTo(side*.054,.031);wing.lineTo(side*.042,.007);wing.lineTo(side*.02,.011);wing.closePath();const feather=mesh(new THREE.ExtrudeGeometry(wing,{depth:.007,bevelEnabled:false}),chrome,'Eagle ornament wing');feather.position.set(0,.704,1.398);}
+ for(const side of [-1,1]){
+  // Continuous swept front wing bridges the bonnet/running-board area so the front wheel never reads as detached from the coachwork.
+  tube([[side*.50,.34,.46],[side*.56,.45,.60],[side*.59,.55,.79],[side*.59,.58,.99],[side*.56,.54,1.18],[side*.50,.43,1.34]],.072,paint,'Continuous front fender',30);
+  tube([[side*.49,.37,.47],[side*.55,.48,.62],[side*.57,.58,.80],[side*.57,.61,.99],[side*.54,.57,1.18],[side*.48,.46,1.33]],.010,chrome,'Front fender bright edge',26);
+ }
  for(const side of [-1,1]){ellipsoid(side*.435,.52,1.39,.105,.105,.075,chrome,'Touring headlamp shell');ellipsoid(side*.435,.52,1.464,.085,.085,.012,lamp,'Touring headlamp lens');tube([[side*.435,.43,1.39],[side*.435,.34,1.35],[side*.29,.34,1.35]],.012,chrome,'Headlamp bracket',8);
  rounded(.22,.035,1.13,.012,black,'Running board',side*.66,.235,-.03);for(let i=-1;i<=1;i++)tube([[side*.66+i*.045,.258,-.50],[side*.66+i*.045,.258,.47]],.004,chrome,'Running board tread',2);
  for(let i=0;i<9;i++)tube([[side*(.407-i*.011),.45,.54+i*.075],[side*(.407-i*.011),.56,.54+i*.075]],.004,black,'Bonnet ventilation',2);
