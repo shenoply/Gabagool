@@ -37,7 +37,7 @@
   }
  }
  function valid(t){if(!active()||!t)return false;const c=car77,a=c.cabin219;
-  if(c.riding)return roadsterControls203.viewIndex!==0&&t.inside;
+  if(c.riding)return /^(door|window|mirror|roof|hood)/.test(t.id);
   if(t.id.startsWith('mirror')||t.id==='roof'||t.id.startsWith('window'))return false;
   if(t.id==='oil'||t.id==='coolant'||t.id==='repair'||t.part?.requiresHood&&(t.id.startsWith('slot-')||t.id.startsWith('part-')&&installed(t.part))){if(!a.hoodOpen||a.hoodValue<.95)return false;}
   if(t.id.startsWith('slot-')&&(!held||held.part!==t.part))return false;
@@ -50,7 +50,7 @@
    if(t&&valid(t))return t;if(h.object.material?.transparent)continue;break;
   }
   // Expand small visible parts to a finger-sized screen target, never through an opaque panel.
-  const candidates=targets.filter(t=>valid(t)&&!/^(door|hood)/.test(t.id)).map(t=>{const p=t.anchor.getWorldPosition(V()).project(camera);return {t,p,d:Math.hypot((p.x+1)*rect.width/2+rect.left-x,(1-p.y)*rect.height/2+rect.top-y)};}).filter(k=>k.d<24&&k.p.z>-1&&k.p.z<1).sort((a,b)=>a.d-b.d);
+  const candidates=targets.filter(t=>valid(t)).map(t=>{const p=t.anchor.getWorldPosition(V()).project(camera);return {t,p,d:Math.hypot((p.x+1)*rect.width/2+rect.left-x,(1-p.y)*rect.height/2+rect.top-y)};}).filter(k=>k.d<38&&k.p.z>-1&&k.p.z<1).sort((a,b)=>a.d-b.d);
   for(const {t,p}of candidates){ray.setFromCamera(new THREE.Vector2(p.x,p.y),camera);for(const h of ray.intersectObjects(objects,true)){let visible=true;for(let o=h.object;o;o=o.parent)if(!o.visible)visible=false;if(!visible||h.object.material?.transparent)continue;let id;for(let o=h.object;o;o=o.parent)if(o.userData.touch220){id=o.userData.touch220;break;}if(id===t.id)return t;break;}}
   return null;
  }
@@ -88,7 +88,7 @@
  canvas.addEventListener('pointerup',release,true);canvas.addEventListener('pointercancel',release,true);canvas.addEventListener('click',e=>{if(performance.now()-lastTap<400){e.preventDefault();e.stopImmediatePropagation();}},true);
  addEventListener('blur',()=>{gesture=null;mirror=null;});document.addEventListener('visibilitychange',()=>{gesture=null;mirror=null;});
  const make=makeRat;makeRat=function(){const g=make(),animate=g.animate;g.animate=function(...args){animate(...args);if(held&&g===rat&&held.owner===root&&g.userData.pipBones?.LeftHand){const b=g.userData.pipBones,shoulder=b.LeftArm.getWorldPosition(V()),forward=V(0,-.025,.075).applyAxisAngle(V(0,1,0),g.rotation.y);let aim=held.aim?.clone()||shoulder.clone().add(forward);const delta=aim.clone().sub(shoulder);if(delta.length()>.095)aim=shoulder.clone().add(delta.setLength(.095));solveArm203(THREE,g,'Left',aim,shoulder.clone().add(V(0,-.15,0)));held.part.mesh.position.copy(b.LeftHand.getWorldPosition(V()));held.part.mesh.quaternion.copy(g.getWorldQuaternion(new THREE.Quaternion()));}};return g;};
- const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(!active()){bar.hidden=carry.hidden=done.hidden=exit.hidden=true;if(held&&held.owner!==root){held=null;}return;}attach();if(Math.abs(car77.speed)>.08||roadsterControls203.viewIndex===0){mirror=null;gesture=null;}if(held)persistTimer(dt);refresh+=dt;if(refresh>.10){refresh=0;renderUI();}};
+ const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(!active()){bar.hidden=carry.hidden=done.hidden=exit.hidden=true;if(held&&held.owner!==root){held=null;}return;}attach();if(Math.abs(car77.speed)>.08){mirror=null;gesture=null;}if(held)persistTimer(dt);refresh+=dt;if(refresh>.10){refresh=0;renderUI();}};
  let saveClock=0;function persistTimer(dt){saveClock+=dt;if(saveClock>2){saveClock=0;persist(held.part);}}
  window.carTouch220={serviceTarget(kind){return parts.find(p=>p.name===(kind==='coolant'?'Coolant cap':'Oil filler'))?.slot;},attach,hit,current,pickup,refit,drop,upgrade,renderUI,get targets(){return targets;},get parts(){return parts;},get held(){return held;},get mirror(){return mirror;}};
 })();
