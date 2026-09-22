@@ -61,21 +61,37 @@
   save();bag();sayToast(moved?'Loaded useful tool materials into your bag.':'No extra tool materials needed.');
  }
 
+ function svg254(id){
+  const map={
+   axe230:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="18" fill="#e7dbc3"/><path d="M57 88L67 30" stroke="#72472b" stroke-width="11" stroke-linecap="round"/><path d="M64 31L93 22 101 44 69 48Z" fill="#777b72" stroke="#535850" stroke-width="3"/><path d="M62 45c9-6 17-9 25-10" stroke="#c8aa76" stroke-width="4"/></svg>',
+   hammer230:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="18" fill="#e7dbc3"/><path d="M58 94L64 41" stroke="#714b30" stroke-width="11" stroke-linecap="round"/><path d="M37 32L88 38 86 54 36 49Z" fill="#85877f" stroke="#565950" stroke-width="3"/><path d="M56 45c9-2 19-1 29 3" stroke="#c2a16e" stroke-width="4"/></svg>',
+   saw230:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="18" fill="#e7dbc3"/><path d="M27 39H94L86 73 78 66 70 75 62 67 54 76 46 68 38 77 27 70Z" fill="#8c928c" stroke="#565d57" stroke-width="3"/><rect x="17" y="31" width="18" height="50" rx="6" fill="#704b31"/></svg>',
+   brush230:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="18" fill="#e7dbc3"/><path d="M60 97L61 55" stroke="#714b30" stroke-width="12" stroke-linecap="round"/><path d="M39 54L82 54 77 27 44 27Z" fill="#b89d68"/><path d="M45 33L76 33" stroke="#5e7e50" stroke-width="6"/></svg>',
+   stick:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"><rect width="90" height="90" rx="16" fill="#eadfc9"/><path d="M20 64C35 52 46 48 68 26" stroke="#71482d" stroke-width="8" stroke-linecap="round"/><path d="M45 45l-9-12M53 38l12-8" stroke="#71482d" stroke-width="5" stroke-linecap="round"/></svg>',
+   pebble:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"><rect width="90" height="90" rx="16" fill="#eadfc9"/><path d="M23 58Q20 42 31 31Q43 20 61 28Q74 35 68 55Q61 69 42 68Q29 68 23 58Z" fill="#9ca19a" stroke="#6d736d" stroke-width="3"/></svg>',
+   string:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"><rect width="90" height="90" rx="16" fill="#eadfc9"/><ellipse cx="45" cy="45" rx="26" ry="15" fill="none" stroke="#a47c49" stroke-width="7"/><ellipse cx="45" cy="45" rx="17" ry="8" fill="none" stroke="#d3b47a" stroke-width="4"/></svg>',
+   foil:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"><rect width="90" height="90" rx="16" fill="#eadfc9"/><path d="M22 28L69 22 65 63 29 69Z" fill="#bfc6c2" stroke="#7e8884" stroke-width="3"/><path d="M30 34L58 29M31 46L61 41" stroke="#eef2ef" stroke-width="3"/></svg>',
+   nail:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"><rect width="90" height="90" rx="16" fill="#eadfc9"/><path d="M27 28L64 65" stroke="#686f6d" stroke-width="7"/><path d="M23 24L36 19" stroke="#4d5553" stroke-width="8" stroke-linecap="round"/></svg>',
+   fiber:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"><rect width="90" height="90" rx="16" fill="#eadfc9"/><path d="M31 68L38 26M43 69L46 23M55 67L60 29" stroke="#73945a" stroke-width="6" stroke-linecap="round"/></svg>'
+  };
+  const s=map[id];return s?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s):'';
+ }
  function preview(id){try{return typeof recipePreview==='function'?recipePreview(id):'';}catch(e){return '';}}
- function ingredientIcon(id){const src=preview(id);return src?'<img src="'+src+'" alt="">':'<span class="fallback251">◆</span>';}
- function needHtml(c){return Object.entries(c.needs||{}).map(([k,n])=>{
-  const have=count(k),ok=have>=n;
-  return '<span class="need251 '+(ok?'ok250':'miss250')+'">'+ingredientIcon(k)+'<b>'+have+'/'+n+'</b></span>';
+ function ingredientIcon(id){const src=svg254(id)||preview(id);return src?'<img src="'+src+'" alt="'+esc(ITEMS[id]?.name||id)+'">':'<span class="fallback251">◆</span>';}
+ function needHtml(c){return Object.entries(c.needs||{}).sort(([ka,na],[kb,nb])=>(count(ka)>=na)-(count(kb)>=nb)).map(([k,n])=>{
+  const have=count(k),ok=have>=n,name=ITEMS[k]?.name||k;
+  return '<span class="need251 '+(ok?'ok250':'miss250')+'">'+ingredientIcon(k)+'<span><strong>'+esc(name)+'</strong><small>Have '+have+' · Need '+n+'</small></span></span>';
  }).join('');}
  function shortUse251(id){
   return ({axe230:'Chop',hammer230:'Repair',saw230:'Planks',brush230:'Paint',sawplanks230:'Make planks',salvagenails230:'Make nails',mixpaint230:'Mix paint'})[id]||'';
  }
  function card(id){
-  const c=CRAFT[id],isReady=ready(id),src=preview(id),use=shortUse251(id);
+  const c=CRAFT[id],isReady=ready(id),src=svg254(id)||preview(id),use=shortUse251(id);
+  const missing=Object.entries(c.needs||{}).filter(([k,n])=>count(k)<n).map(([k,n])=>(n-count(k))+' '+(ITEMS[k]?.name||k)).join(', ');
   return '<article class="recipe250 '+(isReady?'ready251':'')+'" data-card250="'+id+'">'+
    (src?'<img class="recipeimg251" src="'+src+'" alt="'+esc(c.name)+'">':'')+
    '<div class="title251"><strong>'+esc(c.name)+'</strong>'+(use?'<small>'+esc(use)+'</small>':'')+'</div>'+
-   '<div class="needs250">'+needHtml(c)+'</div>'+
+   (!isReady&&missing?'<div class="missingSummary254">Missing: '+esc(missing)+'</div>':'')+'<div class="needs250">'+needHtml(c)+'</div>'+
    (isReady?'<button data-craft250="'+id+'">Craft</button>':'<span class="missingbtn251">Missing</span>')+
   '</article>';
  }
@@ -86,7 +102,7 @@
  }
  function progressStrip251(){
   return '<div class="toolstrip251">'+primary.map((id,i)=>{
-   const done=!!home.tools?.[id],src=preview(id),active=!done&&primary.slice(0,i).every(x=>home.tools?.[x]);
+   const done=!!home.tools?.[id],src=svg254(id)||preview(id),active=!done&&primary.slice(0,i).every(x=>home.tools?.[x]);
    return '<div class="'+(done?'done251':active?'active251':'')+'">'+(src?'<img src="'+src+'" alt="">':'')+'<span>'+esc(CRAFT[id].name.replace(/^(Pebble |Salvage |Tin-tooth |Fibre )/i,''))+'</span>'+(done?'<b>✓</b>':'')+'</div>';
   }).join('<i>›</i>')+'</div>';
  }
@@ -262,16 +278,16 @@
  .needs250{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.needs250 span{padding:7px 9px;border-radius:9px;min-width:100px}.needs250 span b,.needs250 span small{display:block}.needs250 span small{font:12px system-ui}.ok250{background:#e1eedb}.miss250{background:#f3dfd4}
  .objective250{padding:12px;border:1px solid #d7d9cd;border-radius:12px;margin-bottom:10px;background:#fffdf8}.objective250 h3{margin:0 0 7px!important}.objtool250{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:8px 0;border-bottom:1px solid #e2e2d8}.objtool250 small{font:12px system-ui;color:#6a7267}.objtool250 em{grid-column:1/-1;font:12px/1.35 system-ui;color:#56645a}
 
- #workshopPanel251{position:fixed;z-index:90;inset:0;background:linear-gradient(180deg,#1a241fee,#101713f5);color:#f4ead6;font-family:system-ui;display:grid;grid-template-rows:auto minmax(130px,25vh) 1fr auto;overflow:hidden}
+ #workshopPanel251{position:fixed;z-index:90;inset:0;background:linear-gradient(180deg,rgba(26,36,31,.22),rgba(16,23,19,.96) 33%);color:#f4ead6;font-family:system-ui;display:grid;grid-template-rows:auto minmax(130px,25vh) 1fr auto;overflow:hidden}
  #workshopPanel251>header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:linear-gradient(90deg,#53391f,#6c4a28);border-bottom:2px solid #b89561;box-shadow:0 4px 20px #0007}
  #workshopPanel251>header>div small,#workshopPanel251>header>div em{display:block;font:600 10px/1.2 system-ui;letter-spacing:.14em;opacity:.75}#workshopPanel251>header>div b{display:block;font:700 24px Georgia,serif;letter-spacing:.01em}#workshopPanel251>header>div em{font-style:normal;letter-spacing:0;margin-top:2px}
  #closeWorkshop251{width:48px;height:48px;border:1px solid #e5d2aa55;border-radius:14px;background:#20352c;color:#f7edd7;font-size:28px}
- #workshopScene253{position:relative;background:radial-gradient(circle at 28% 45%,#9a7047 0,#5d442e 28%,#2e251d 58%,#18211c 100%);overflow:hidden}
+ #workshopScene253{position:relative;background:linear-gradient(90deg,rgba(24,33,28,.12),rgba(24,33,28,.72));overflow:hidden;pointer-events:none}
  #workshopScene253:before{content:'Pip at the workbench';position:absolute;left:18px;bottom:14px;padding:7px 10px;border-radius:10px;background:#1d2e27c9;color:#f2dfb8;font:600 12px system-ui}
  #workshopBody251{overflow:auto;padding:12px 14px 18px;touch-action:pan-y;background:linear-gradient(#1c2a24,#17231e)}
  .toolstrip251{display:flex;align-items:center;gap:6px;padding:10px;background:#253930;border:1px solid #dfc78733;border-radius:16px;max-width:760px;margin:0 auto 10px}.toolstrip251>div{position:relative;flex:1;text-align:center;opacity:.4}.toolstrip251 img{display:block;width:56px;height:56px;object-fit:contain;margin:auto;border-radius:50%;background:#efe4cf}.toolstrip251 span{font-size:11px}.toolstrip251 i{opacity:.4}.toolstrip251 .done251{opacity:1}.toolstrip251 .active251{opacity:1;filter:drop-shadow(0 0 10px #e5b75b)}.toolstrip251 b{display:block;color:#a7d9a4;font-size:12px;margin-top:2px}
  #workshopPanel251 .tabs250{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:900px;margin:0 auto 12px}#workshopPanel251 .tabs250 button{min-height:50px;border:1px solid #d8bd843f;border-radius:13px;background:#253a31;color:#f5e8cf;font:650 14px system-ui}#workshopPanel251 .tabs250 button[aria-pressed=true]{background:#d8ae63;color:#1f2d27}
- .craftgrid251{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:1000px;margin:0 auto}.recipe250{display:grid;grid-template-columns:118px 1fr auto;grid-template-rows:auto auto;gap:8px 12px;align-items:center;background:#f3e7d2;color:#25372f;border:2px solid #d5bd91;border-radius:18px;padding:12px;box-shadow:0 5px 0 #0002}.recipeimg251{grid-row:1/3;width:118px;height:118px;object-fit:contain;background:#e2d7c2;border-radius:14px}.title251 strong{display:block;font:700 18px Georgia,serif}.title251 small{display:block;font:12px system-ui;color:#6a7268;margin-top:3px}.recipe250>button{grid-column:3;grid-row:1/3;min-width:92px;min-height:48px;border:0;border-radius:12px;background:#35694c;color:#fff;font:700 14px system-ui}.recipe250>button:disabled{background:#aaa99e;color:#eee8dc}.needs250{grid-column:2;display:flex;gap:6px;overflow:hidden;flex-wrap:wrap}.need251{display:flex;align-items:center;gap:4px;padding:5px 7px!important;min-width:0!important;border-radius:9px}.need251 img{width:36px;height:36px;object-fit:contain}.need251 b{font:700 12px system-ui!important}.ok250{background:#dcebd8}.miss250{background:#f0d7cd}.missingbtn251{grid-column:3;grid-row:1/3;align-self:center;padding:11px 13px;border-radius:10px;background:#9d9b91;color:#f1eadc;font:700 12px system-ui}.recipe250.ready251{box-shadow:inset 4px 0 #4d8a62,0 5px 0 #0002}.empty251{grid-column:1/-1;text-align:center;opacity:.7}
+ .craftgrid251{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:1000px;margin:0 auto}.recipe250{display:grid;grid-template-columns:118px 1fr auto;grid-template-rows:auto auto;gap:8px 12px;align-items:center;background:#f3e7d2;color:#25372f;border:2px solid #d5bd91;border-radius:18px;padding:12px;box-shadow:0 5px 0 #0002}.recipeimg251{grid-row:1/3;width:118px;height:118px;object-fit:contain;background:#e2d7c2;border-radius:14px}.title251 strong{display:block;font:700 18px Georgia,serif}.title251 small{display:block;font:12px system-ui;color:#6a7268;margin-top:3px}.recipe250>button{grid-column:3;grid-row:1/3;min-width:92px;min-height:48px;border:0;border-radius:12px;background:#35694c;color:#fff;font:700 14px system-ui}.recipe250>button:disabled{background:#aaa99e;color:#eee8dc}.missingSummary254{grid-column:2/4;font:700 12px system-ui;color:#a34f3f;background:#f4ddd4;border-radius:9px;padding:6px 8px}.needs250{grid-column:2;display:flex;gap:6px;overflow:visible;flex-wrap:wrap}.need251{display:flex;align-items:center;gap:7px;padding:6px 8px!important;min-width:150px!important;border-radius:10px}.need251 img{width:38px;height:38px;object-fit:contain;border-radius:8px}.need251 span{min-width:0}.need251 strong{display:block;font:700 12px system-ui}.need251 small{display:block;font:11px system-ui;color:#59665c;margin-top:2px}.need251 b{font:700 12px system-ui!important}.ok250{background:#dcebd8}.miss250{background:#f0d7cd}.missingbtn251{grid-column:3;grid-row:1/3;align-self:center;padding:11px 13px;border-radius:10px;background:#9d9b91;color:#f1eadc;font:700 12px system-ui}.recipe250.ready251{box-shadow:inset 4px 0 #4d8a62,0 5px 0 #0002}.empty251{grid-column:1/-1;text-align:center;opacity:.7}
  #workshopPanel251>footer{display:grid;grid-template-columns:1fr auto auto 1fr;gap:10px;align-items:center;padding:12px 16px;background:linear-gradient(90deg,#4a341f,#5b4025);border-top:2px solid #b89561}#workshopPanel251>footer>div,#workshopPanel251>footer>button{min-height:44px;border-radius:11px;border:1px solid #d5bd8955;background:#20352c;color:#f7ead0;font:650 13px system-ui;padding:10px 13px}#workshopPanel251>footer>div:last-child{text-align:right}
  body.workshop-live251 #settings,body.workshop-live251 #survival,body.workshop-live251 #hud,body.workshop-live251 #pad,body.workshop-live251 #homePanelToggle,body.workshop-live251 #unloadHome250,body.workshop-live251 #pipActions205,body.workshop-live251 #tail67,body.workshop-live251 #wallControls,body.workshop-live251 #prompt{display:none!important}
  @media(max-width:700px){#workshopPanel251{grid-template-rows:auto 23vh 1fr auto}#workshopPanel251>header>div b{font-size:20px}.toolstrip251 img{width:42px;height:42px}.toolstrip251 span{display:none}.craftgrid251{grid-template-columns:1fr}.recipe250{grid-template-columns:86px 1fr auto}.recipeimg251{width:86px;height:86px}.title251 strong{font-size:16px}.need251 img{width:28px;height:28px}#workshopPanel251>footer{grid-template-columns:1fr 1fr;gap:7px}#workshopPanel251>footer>div:last-child{text-align:left}} `;document.head.appendChild(css);
