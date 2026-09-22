@@ -32,9 +32,9 @@
    const sign=markerText('ORIGINAL CITY ↑');sign.position.set(4,2.5,37.5);sign.scale.setScalar(.32);city.g.add(sign);
   }
   const actor=actors44.find(a=>a.id==='city'&&a.owner===root);if(actor&&!city.collision){
-   // Build 247: push the supplied city to unmistakable human scale from Pip's rat-scale viewpoint.
+   // Build 248: expand the supplied human city further so Pip reads as a true rat.
    // Re-scale before generating collision, then pin the original entrance back to z=56 so the yard gate still joins it.
-   if(!actor.g.userData.cityScale247){actor.g.userData.cityScale247=true;actor.g.scale.multiplyScalar(4.0);actor.g.updateWorldMatrix(true,true);let b=new THREE.Box3().setFromObject(actor.g);actor.g.position.z+=56-b.min.z;actor.g.updateWorldMatrix(true,true);}
+   if(!actor.g.userData.cityScale248){actor.g.userData.cityScale248=true;actor.g.scale.multiplyScalar(6.5);actor.g.updateWorldMatrix(true,true);let b=new THREE.Box3().setFromObject(actor.g);actor.g.position.z+=56-b.min.z;actor.g.updateWorldMatrix(true,true);}
    city.collision=buildCityCollision210(THREE,actor.g);city.model=actor.g;}
  }
  const add=addCar77;addCar77=function(){add();seed();};
@@ -43,5 +43,18 @@
  c.signalTime=(c.signalTime||0)+dt;if(Math.abs(c.steer)>.35)c.signalTurned=true;if(c.indicator&&(c.signalTime>9||(c.signalTurned&&Math.abs(c.steer)<.08&&c.signalTime>1.2))){c.indicator=0;updateSignals();}for(const l of c.indicators)l.material.emissiveIntensity=c.indicator===l.userData.side&&clock%.8<.4?2:0;
  if(c.reach?.kind==='radio')c.radioKnob.rotation.z=Math.sin(c.reach.time/c.reach.duration*Math.PI)*.8;
  };
- window.city204={roads209,onRoad,inDistrict,seed,inExtension,citySolid,get state(){return city;},release,tune,signal};
+ function climbSolids(){
+  if(!city?.collision)return [];
+  const top=Math.max(3,city.collision.bounds.max.y);
+  const out=[];
+  for(const s of city.collision.segments){
+   const dx=s.b.x-s.a.x,dz=s.b.z-s.a.z,len=Math.hypot(dx,dz);if(len<.45)continue;
+   // Use only nearly axis-aligned wall runs for climbing so diagonal facades do not become giant AABBs.
+   if(Math.abs(dx)>Math.abs(dz)*4)out.push({x:(s.a.x+s.b.x)/2,z:(s.a.z+s.b.z)/2,hx:len/2,hz:.06,h:top,cityClimb247:true});
+   else if(Math.abs(dz)>Math.abs(dx)*4)out.push({x:(s.a.x+s.b.x)/2,z:(s.a.z+s.b.z)/2,hx:.06,hz:len/2,h:top,cityClimb247:true});
+  }
+  return out;
+ }
+ const wallBefore248=wallSolids;wallSolids=function(){const base=wallBefore248();if(phase==='scavenge'&&city?.collision)return [...base,...climbSolids()];return base;};
+ window.city204={roads209,onRoad,inDistrict,seed,inExtension,citySolid,climbSolids,get state(){return city;},release,tune,signal};
 })();
