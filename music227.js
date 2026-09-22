@@ -2,7 +2,7 @@
 (()=>{
  const records=window.classicalRecords227,baseCount=music69.tracks.length;
  records.forEach(r=>music69.tracks.push({title:r.composer+' · '+r.title,file:r.file}));
- const data=()=>{home.music227??={headphones:false,wear:false,records:{}};home.music227.records??={};return home.music227;};
+ const data=()=>{home.music227??={headphones:false,wear:false,records:{},mission250:false};home.music227.records??={};if(home.music227.mission250===undefined)home.music227.mission250=false;return home.music227;};
  let source=null,anchor=null,station=null,near=null,world=null,pickups=[],elapsed=0;
  const originalStop=radioStop;originalStop();piano.enabled=false;music69.el?.pause();
  window.sewerAudio218={active:false,enter(){},leave(){},tick(){}};
@@ -27,8 +27,8 @@
   if(d.headphones){buttons.push([d.wear?'Remove headphones':'Wear headphones',()=>{d.wear=!d.wear;if(!d.wear&&source==='headphones')stop();save();menu(kind);}]);buttons.push(['Play through headphones',()=>{start('headphones');closeModal();}]);}
   if(valid()){buttons.push([piano.enabled?'Pause music':'Resume music',()=>{toggleMusicMute192();menu(kind);}]);buttons.push(['Next song',()=>{nextMusic190();menu(kind);}]);buttons.push(['Stop music',()=>{stop();menu(kind);}]);}
   buttons.push(['Volume · '+Math.round(music69.volume*100)+'%',()=>{music69.volume=music69.volume>=.16?.06:music69.volume+.04;musicTick69();menu(kind);}]);
-  if(!d.headphones)buttons.push(['Headphones search area',()=>openYard201('headphones227')]);buttons.push(['Close',closeModal]);
-  modal(kind==='vinyl'?'Pip’s record player':'Music collection',`<p>${d.headphones?'✓ Headphones found':'Mission: find Pip’s walnut headphones near the yard path.'}</p><p>${count} / 10 classical vinyls found. Bring records to your crafted record player. Headphones let you listen while exploring. Nothing starts until you press Play.</p><p>${source?source+' · '+(piano.enabled?'Playing':'Paused')+': '+music69.tracks[music69.index]?.title:'Music off'}</p><p><a href="music-credits227.html" target="_blank" rel="noopener">All ten recordings and licence credits</a></p>`+records.map(r=>`<p>${d.records[r.id]?'✓':'○'} ${r.composer} — ${r.title}<br><small>${d.records[r.id]?'In your collection':r.clue}</small></p>`).join(''),buttons);
+  if(!d.headphones&&!d.mission250)buttons.push(['Start headset mission',()=>{d.mission250=true;save();sayToast('Mission started: recover Pip’s walnut headset.');openYard201('headphones227');}]);else if(!d.headphones)buttons.push(['Headset mission area',()=>openYard201('headphones227')]);buttons.push(['Close',closeModal]);
+  modal(kind==='vinyl'?'Pip’s record player':'Music collection',`<p>${d.headphones?'✓ Headset mission complete · walnut headphones recovered':d.mission250?'Mission active: find Pip’s walnut headset near the yard path.':'Headset mission not started. Start it here or from Actions.'}</p><p>${count} / 10 classical vinyls found. Bring records to your crafted record player. Headphones let you listen while exploring. Nothing starts until you press Play.</p><p>${source?source+' · '+(piano.enabled?'Playing':'Paused')+': '+music69.tracks[music69.index]?.title:'Music off'}</p><p><a href="music-credits227.html" target="_blank" rel="noopener">All ten recordings and licence credits</a></p>`+records.map(r=>`<p>${d.records[r.id]?'✓':'○'} ${r.composer} — ${r.title}<br><small>${d.records[r.id]?'In your collection':r.clue}</small></p>`).join(''),buttons);
  }
  musicMenu69=menu;$('pianoToggle').onclick=()=>menu();$('musicMute').onclick=toggleMusicMute192;
  const stationUse=useStation65;useStation65=function(entry){if(entry.p.id!=='recordplayer65')return stationUse(entry);station={owner:root,pos:rat.position.clone()};menu('vinyl');};
@@ -39,7 +39,7 @@
  $('rnext').onclick=()=>radioNext();$('rfile').parentNode.style.display='none';$('rlist').textContent='Shared game soundtrack + collected classical records';
  // A contextual pickup, independent of the nearby salvage interaction.
  const prompt=document.createElement('button');prompt.className='btn';prompt.style.cssText='position:fixed;left:50%;bottom:170px;transform:translateX(-50%);z-index:29;max-width:230px;display:none';document.body.appendChild(prompt);
- function collect(){if(!near||car77?.riding)return false;const p=near,d=data();if(p.id==='headphones227'){d.headphones=true;sayToast('Headphones found! Equip them from Music collection.');}else{d.records[p.id]=true;sayToast('Vinyl found · '+p.title);}p.g.visible=false;near=null;prompt.style.display='none';save();sfx.pickup();return true;}
+ function collect(){if(!near||car77?.riding)return false;const p=near,d=data();if(p.id==='headphones227'){if(!d.mission250){sayToast('Start the headset mission from Actions or Music first.');return true;}d.headphones=true;sayToast('Headset mission complete! Headphones are now in Actions and Music.');}else{d.records[p.id]=true;sayToast('Vinyl found · '+p.title);}p.g.visible=false;near=null;prompt.style.display='none';save();sfx.pickup();return true;}
  prompt.onclick=collect;const oldGrab=grab;grab=function(){if(!collect())return oldGrab();};
  function build(){world=root;pickups.forEach(p=>{p.g.parent?.remove(p.g);p.g.traverse(o=>{o.geometry?.dispose();if(o.material){o.material.map?.dispose();o.material.dispose();}});});pickups=[];const zone=window.sewer211?.active?'sewer':phase==='scavenge'?'yard':null;if(!zone)return;
   const definitions=[{id:'headphones227',title:'Walnut headphones',x:7.5,z:20.8,zone:'yard'},...records].filter(d=>(d.zone||'yard')===zone);
@@ -48,9 +48,9 @@
    g.userData.noInk=true;root.add(g);pickups.push({...def,g});
   }
  }
- const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(world!==root)build();elapsed+=dt;if(elapsed<.15)return;elapsed=0;near=null;const d=data();for(const p of pickups){const found=p.id==='headphones227'?d.headphones:d.records[p.id];p.g.visible=!found;if(!found&&rat&&!car77?.riding&&rat.position.distanceTo(p.g.position)<.5)near=p;}
+ const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(world!==root)build();elapsed+=dt;if(elapsed<.15)return;elapsed=0;near=null;const d=data();for(const p of pickups){const found=p.id==='headphones227'?d.headphones:d.records[p.id];const locked=p.id==='headphones227'&&!d.mission250;p.g.visible=!found&&!locked;if(!found&&!locked&&rat&&!car77?.riding&&rat.position.distanceTo(p.g.position)<.5)near=p;}
   prompt.style.display=near&&gameplayActive()&&!photo.active?'block':'none';if(near)prompt.textContent='Pick up '+near.title;musicTick69();};
- window.music227={start,stop,menu,collect,data,records,get source(){return source;},get pickups(){return pickups;},get title(){return source?music69.tracks[music69.index]?.title:'RADIO OFF';},toggleCar(){if(source==='car'&&piano.enabled)stop();else start('car');},nextCar(){if(source!=='car')start('car');else nextMusic190();},destinations(){const d=data();return [{id:'headphones227',icon:'♫',name:'Walnut headphones',x:7.5,z:20.8,detail:'Find the headphones beside the yard path. Pick them up, then equip and press Play in Music collection.',unavailable:d.headphones},...[]];}};
+ window.music227={start,stop,menu,collect,data,records,get source(){return source;},get pickups(){return pickups;},get title(){return source?music69.tracks[music69.index]?.title:'RADIO OFF';},toggleCar(){if(source==='car'&&piano.enabled)stop();else start('car');},nextCar(){if(source!=='car')start('car');else nextMusic190();},destinations(){const d=data();return [{id:'headphones227',icon:'♫',name:'Headset mission',x:7.5,z:20.8,detail:d.headphones?'Mission complete. Headphones are available from Actions and Music.':'Recover Pip’s walnut headset beside the yard path.',unavailable:d.headphones||!d.mission250},...[]];}};
  const objectives=openObjectives200;openObjectives200=function(){objectives();const b=document.createElement('button');b.className='btn';b.textContent='Headphones & ten vinyls';b.onclick=()=>menu();$('modalActions').prepend(b);};
  syncMusicMute192();
 })();
