@@ -9,6 +9,17 @@
   brush230:'Paint repaired wall boards.'
  };
  let tab='essentials',placedOwner=null;
+ function tableRecord255(){return home.placed?.find(p=>p.id==='workbench')||null;}
+ function moveTableHere255(){
+  if(phase!=='house'||!rat)return;
+  ensureHomeTable();const p=tableRecord255();if(!p)return;
+  const fwd=new THREE.Vector3(Math.sin(rat.rotation.y),0,Math.cos(rat.rotation.y));
+  p.x=THREE.MathUtils.clamp(rat.position.x+fwd.x*1.2,-HW/2+1.7,HW/2-1.7);
+  p.z=THREE.MathUtils.clamp(rat.position.z+fwd.z*1.2,-HD/2+1.5,HD/2-1.5);
+  p.rot=rat.rotation.y+Math.PI;save();
+  if(root?.userData?.workshop251){root.remove(root.userData.workshop251);delete root.userData.workshop251;}
+  closeModal();startHouse();sayToast('Crafting table moved.');
+ }
 
  function ensureHomeTable(){
   home.placed=home.placed||[];
@@ -140,7 +151,7 @@
  function seedWorkshop251(){
   if(phase!=='house'||!root)return;
   if(root.userData.workshop251)return;
-  const g=new THREE.Group();g.name='Pip detailed crafting table';g.position.set(-4.4,0,-1.9);root.add(g);root.userData.workshop251=g;
+  const rec=tableRecord255()||{x:-4.4,z:-1.9,rot:0};const g=new THREE.Group();g.name='Pip detailed crafting table';g.position.set(rec.x,0,rec.z);g.rotation.y=rec.rot||0;root.add(g);root.userData.workshop251=g;
   const woodM=new THREE.MeshStandardMaterial({color:0x684628,roughness:.82}),darkM=new THREE.MeshStandardMaterial({color:0x33291f,roughness:.9}),metalM=new THREE.MeshStandardMaterial({color:0x7d827b,metalness:.55,roughness:.42}),paperM=new THREE.MeshStandardMaterial({color:0xd8c9a8,roughness:1});
   const add=(geo,mat,x,y,z,name)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.name=name;m.userData.noInk=true;m.castShadow=true;m.receiveShadow=true;g.add(m);return m;};
   add(new THREE.BoxGeometry(2.65,.14,1.12),woodM,0,.82,0,'Heavy workbench top');
@@ -158,7 +169,7 @@
  }
  function positionPip251(){
   const g=root?.userData?.workshop251;if(!g||!rat)return;
-  rat.position.set(g.position.x-.12,g.position.y,g.position.z-1.02);rat.rotation.y=0;rat.userData.vel=0;rat.userData.air=false;rat.userData.seated41=true;
+  const seat=g.localToWorld(new THREE.Vector3(-.12,0,-1.02));rat.position.copy(seat);rat.rotation.y=g.rotation.y;rat.userData.vel=0;rat.userData.air=false;rat.userData.seated41=true;
   gameCam.yaw=-.38;gameCam.pitch=.37;gameCam.distance=6.2;gameCam.ready=false;
  }
  function craftProp251(kind){
@@ -204,7 +215,7 @@
   if(phase!=='house')return homeMenuBefore250();
   ui.hb.style.display='none';
   modal('Your home','<p>Home is now the centre for storage, crafting and decorating.</p>',[
-   ['Crafting table',openWorkshop250],
+   ['Crafting table',openWorkshop250],['Move crafting table here',moveTableHere255],
    ['Unload bag to storage',()=>{unloadAll();homeMenu63();}],
    ['Place furniture',()=>chest60('furniture')],
    ['Storage chest',openPantry],
@@ -226,6 +237,7 @@
  function actions250(){
   const md=window.music227?.data?.(),found=!!md?.headphones,mission=!!md?.mission250;
   const arr=[
+   [window.pipSmoke205?.state?'Put out cigarette':'Light cigarette',()=>{closeModal();window.pipSmoke205?.toggle();}],
    ['Reset roadster',()=>{closeModal();resetCar250();}],
    [found?'Headphones · '+(md.wear?'equipped':'found'):mission?'Headset mission · in progress':'Start headset mission',()=>{
       closeModal();
@@ -309,5 +321,5 @@
 
  const grabBefore251=grab;grab=function(){const g=root?.userData?.workshop251;if(phase==='house'&&g&&rat&&!workshop251State.open&&rat.position.distanceTo(g.position)<1.7){openWorkshop250();return;}return grabBefore251();};
  const controlBefore251=control;control=function(dt,options){if(workshop251State.open)return 0;return controlBefore251(dt,options);};
- window.workshop250={open:openWorkshop250,close:closeWorkshop251,unloadAll,resetCar:resetCar250,actions:actions250};
+ window.workshop250={open:openWorkshop250,close:closeWorkshop251,unloadAll,resetCar:resetCar250,actions:actions250,moveTableHere:moveTableHere255};
 })();
