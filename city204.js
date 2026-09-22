@@ -45,14 +45,15 @@
  };
  function climbSolids(){
   if(!city?.collision)return [];
-  const top=Math.max(3,city.collision.bounds.max.y);
-  const out=[];
-  for(const s of city.collision.segments){
-   const dx=s.b.x-s.a.x,dz=s.b.z-s.a.z,len=Math.hypot(dx,dz);if(len<.45)continue;
-   // Use only nearly axis-aligned wall runs for climbing so diagonal facades do not become giant AABBs.
-   if(Math.abs(dx)>Math.abs(dz)*4)out.push({x:(s.a.x+s.b.x)/2,z:(s.a.z+s.b.z)/2,hx:len/2,hz:.06,h:top,cityClimb247:true});
-   else if(Math.abs(dz)>Math.abs(dx)*4)out.push({x:(s.a.x+s.b.x)/2,z:(s.a.z+s.b.z)/2,hx:.06,hz:len/2,h:top,cityClimb247:true});
+  if(city.climbCache248)return city.climbCache248;
+  const top=Math.max(3,city.collision.bounds.max.y),out=[],segments=city.collision.segments;
+  const stride=Math.max(1,Math.ceil(segments.length/120));
+  for(let i=0;i<segments.length&&out.length<120;i+=stride){
+   const s=segments[i],dx=s.b.x-s.a.x,dz=s.b.z-s.a.z,len=Math.hypot(dx,dz);if(len<1.4)continue;
+   if(Math.abs(dx)>Math.abs(dz)*5)out.push({x:(s.a.x+s.b.x)/2,z:(s.a.z+s.b.z)/2,hx:Math.min(len/2,7),hz:.07,h:top,cityClimb247:true});
+   else if(Math.abs(dz)>Math.abs(dx)*5)out.push({x:(s.a.x+s.b.x)/2,z:(s.a.z+s.b.z)/2,hx:.07,hz:Math.min(len/2,7),h:top,cityClimb247:true});
   }
+  city.climbCache248=out;
   return out;
  }
  const wallBefore248=wallSolids;wallSolids=function(){const base=wallBefore248();if(phase==='scavenge'&&city?.collision)return [...base,...climbSolids()];return base;};
