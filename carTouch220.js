@@ -1,25 +1,29 @@
 /* Direct world interactions. Only the current nearby/looked-at part gets actions. */
 (()=>{
  const V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z),ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),clamp=THREE.MathUtils.clamp;
- let owner=null,targets=[],parts=[],selected=null,held=null,gesture=null,mirror=null,lastTap=0,refresh=0;
+ let owner=null,targets=[],parts=[],hotspots=[],selected=null,held=null,gesture=null,mirror=null,lastTap=0,refresh=0;
  const state=()=>vehicle219.data().parts220??={};
  const active=()=>phase==='scavenge'&&car77?.owner===root&&gameplayActive()&&!photo.active;
  function mesh(parent,geometry,color,name,position){const m=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color,roughness:.5}));m.name=name;m.position.copy(position);m.userData.noInk=true;parent.add(m);return m;}
  function tag(o,id){o.userData.touch220=id;return o;}
+ function hotspot(id,parent,size,pos){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(size.x,size.y,size.z),new THREE.MeshBasicMaterial({transparent:true,opacity:.001,depthWrite:false,color:0xffffff}));
+  m.name='Touch hotspot '+id;m.position.copy(pos);m.userData.touch220=id;m.userData.noInk=true;m.renderOrder=99;parent.add(m);hotspots.push(m);return m;
+ }
  function target(id,object,label,action,anchor=object,inside=false){tag(object,id);const t={id,object,label,action,anchor,inside};targets.push(t);return t;}
  function installed(p){return !state()[p.id]||state()[p.id].installed!==false;}
  function persist(p){state()[p.id]={installed:installed(p),position:p.mesh.getWorldPosition(V()).toArray(),upgraded:!!state()[p.id]?.upgraded};save();}
- function attach(){const c=car77;if(owner===c)return;owner=c;targets=[];parts=[];selected=null;mirror=null;if(!c)return;vehicle219.attach(c);const a=c.cabin219;const serviceState=vehicle219.data();if(serviceState.resetRevision225!==225){serviceState.parts220={};serviceState.oil=serviceState.coolant=serviceState.condition=100;serviceState.temperature=22;serviceState.resetRevision225=225;serviceState.roof=false;serviceState.windows=false;c.ignition206=false;c.speed=0;c.handbrake=false;a.hoodOpen=false;a.hoodValue=0;a.doors.forEach(d=>{d.open=false;d.value=0;});held=null;save();}
+ function attach(){const c=car77;if(owner===c)return;owner=c;targets=[];parts=[];hotspots=[];selected=null;mirror=null;if(!c)return;vehicle219.attach(c);const a=c.cabin219;const serviceState=vehicle219.data();if(serviceState.resetRevision225!==225){serviceState.parts220={};serviceState.oil=serviceState.coolant=serviceState.condition=100;serviceState.temperature=22;serviceState.resetRevision225=225;serviceState.roof=false;serviceState.windows=false;c.ignition206=false;c.speed=0;c.handbrake=false;a.hoodOpen=false;a.hoodValue=0;a.doors.forEach(d=>{d.open=false;d.value=0;});held=null;save();}
   for(const [i,d]of a.doors.entries()){
    const side=i?1:-1,handle=mesh(d.pivot,new THREE.BoxGeometry(.025,.028,.10),0xc8c6ae,'Interior door handle',V(-side*.10,.15,-.43));
    const crank=mesh(d.pivot,new THREE.SphereGeometry(.025,10,8),0xc8b07a,'Window crank',V(-side*.12,.09,-.25));
-   target('door'+i,d.pivot,()=>car77.riding?(d.open?'Close door':'Open door'):(d.open?'Close door':'Open door'),()=>vehicle219.toggle('door',i),handle,true);tag(handle,'door'+i);
-   target('window'+i,crank,()=>vehicle219.data().windows?'Lower window':'Raise window',()=>vehicle219.toggle('windows'),crank,true);
+   target('door'+i,d.pivot,()=>car77.riding?(d.open?'Close door':'Open door'):(d.open?'Close door':'Open door'),()=>vehicle219.toggle('door',i),handle,true);tag(handle,'door'+i);hotspot('door'+i,d.pivot,V(.16,.34,.55),V(-side*.05,.20,-.28));
+   target('window'+i,crank,()=>vehicle219.data().windows?'Lower window':'Raise window',()=>vehicle219.toggle('windows'),crank,true);hotspot('window'+i,d.pivot,V(.12,.20,.28),V(-side*.06,.36,-.28));
   }
   const hoodPoint=new THREE.Object3D();hoodPoint.position.set(0,.32,.74);c.g.add(hoodPoint);
-  target('hood',a.hood,()=>a.hoodOpen?'Close hood':'Open hood',()=>vehicle219.toggle('hood'),hoodPoint);
-  const latch=mesh(c.visual,new THREE.BoxGeometry(.12,.035,.05),0xb7a786,'Roof latch',V(-.28,.91,.10));target('roof',latch,()=>vehicle219.data().roof?'Open roof':'Close roof',()=>vehicle219.toggle('roof'),latch,true);
-  for(const [i,m]of a.mirrors.entries())target('mirror'+i,m.pivot219,()=> 'Adjust '+['centre','left','right'][i]+' mirror',()=>{mirror=i;selected=null;sayToast('Drag the mirror to aim it. Tap Done to finish.');},m.face,true);
+  target('hood',a.hood,()=>a.hoodOpen?'Close hood':'Open hood',()=>vehicle219.toggle('hood'),hoodPoint);hotspot('hood',c.visual,V(.72,.24,1.22),V(0,.50,.88));
+  const latch=mesh(c.visual,new THREE.BoxGeometry(.12,.035,.05),0xb7a786,'Roof latch',V(-.28,.91,.10));target('roof',latch,()=>vehicle219.data().roof?'Open roof':'Close roof',()=>vehicle219.toggle('roof'),latch,true);hotspot('roof',c.visual,V(.75,.16,.28),V(0,.84,-.10));
+  for(const [i,m]of a.mirrors.entries()){target('mirror'+i,m.pivot219,()=> 'Adjust '+['centre','left','right'][i]+' mirror',()=>{mirror=i;selected=null;sayToast('Drag the mirror to aim it. Tap Done to finish.');},m.face,true);hotspot('mirror'+i,c.g,V(i? .18:.24,.16,.16),V(m.x,m.y,m.z));}
   target('oil',a.oil,()=>vehicle219.data().oil>=99?'Oil full':(inv.oil219?'Add oil':'Oil bottle needed'),()=>vehicle219.serviceStart('oil'));
   target('coolant',a.coolant,()=>vehicle219.data().coolant>=99?'Cooling water full':(inv.coolant219?'Add cooling water':'Water bottle needed'),()=>vehicle219.serviceStart('coolant'));
   target('repair',a.engine.getObjectByName('Engine block'),()=>vehicle219.data().condition>=99?'Engine healthy':'Repair engine · 2 foil + 1 nail',()=>vehicle219.serviceStart('repair'));
@@ -44,6 +48,8 @@
   return rat.position.distanceTo(t.anchor.getWorldPosition(V()))<.95;
  }
  function hit(x,y){if(!active())return null;attach();const rect=renderer.domElement.getBoundingClientRect();ndc.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);camera.updateMatrixWorld(true);car77.g.updateWorldMatrix(true,true);ray.setFromCamera(ndc,camera);
+  // Hotspots are tested first so the current coachwork cannot occlude its own controls after model revisions.
+  for(const h of ray.intersectObjects(hotspots,true)){let id;for(let o=h.object;o;o=o.parent)if(o.userData.touch220){id=o.userData.touch220;break;}const t=targets.find(t=>t.id===id);if(t&&valid(t))return t;}
   const objects=[car77.g,...parts.filter(p=>!installed(p)).map(p=>p.mesh)];const hits=ray.intersectObjects(objects,true);
   for(const h of hits){let visible=true;for(let o=h.object;o;o=o.parent)if(!o.visible){visible=false;break;}if(!visible)continue;let t=null;for(let o=h.object;o;o=o.parent){if(o.userData.touch220){t=targets.find(t=>t.id===o.userData.touch220);break;}}
    // Opaque body surfaces occlude parts behind them. Transparent glass is skipped.
