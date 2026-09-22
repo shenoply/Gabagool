@@ -6,7 +6,7 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 247</title>
+<title>Wet Whiskers · Build 248</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -799,8 +799,8 @@ function tickWall(dt){const u=rat.userData,w=u.wallState;if(!w)return false;if(p
  // Tall smooth refrigerator sides offer an animated failed attempt, then a safe drop.
  if(w.o.x===23&&w.o.z===-7&&input==='up'&&!w.failure)w.failure=.001;
  if(w.failure){w.failure+=dt;w.mode='ClimbFailed';w.moving=true;rat.position.y=Math.max(0,Math.sin(Math.min(1,w.failure/1.2)*Math.PI)*.25);if(w.failure>=1.2){leaveWall();sayToast('Too slippery — try the crates or timber');}return true;}
- if(input==='up')rat.position.y+=dt*.8;if(input==='down')rat.position.y-=dt*.8;
- if(input==='left'||input==='right'){const dir=input==='left'?1:-1,tx=-w.nz,tz=w.nx;const x=rat.position.x+tx*dir*dt*.65,z=rat.position.z+tz*dir*dt*.65;
+ if(input==='up')rat.position.y+=dt*(w.o.cityClimb247?.28:.8);if(input==='down')rat.position.y-=dt*(w.o.cityClimb247?.28:.8);
+ if(input==='left'||input==='right'){const dir=input==='left'?1:-1,tx=-w.nz,tz=w.nx;const climbSide=w.o.cityClimb247?.32:.65,x=rat.position.x+tx*dir*dt*climbSide,z=rat.position.z+tz*dir*dt*climbSide;
   const within=w.nx?Math.abs(z-w.o.z)<Math.max(.02,w.o.hz-.12):Math.abs(x-w.o.x)<Math.max(.02,w.o.hx-.12);const blocked=wallSolids().some(o=>o.x!==w.o.x||o.z!==w.o.z?rat.position.y<o.h-.05&&Math.abs(x-o.x)<o.hx+.16&&Math.abs(z-o.z)<o.hz+.16:false);if(within&&!blocked){rat.position.x=x;rat.position.z=z;}else w.moving=false;}
  if(rat.position.y>=w.o.h){const x=w.nx?Math.max(w.o.x-w.o.hx+.03,Math.min(w.o.x+w.o.hx-.03,rat.position.x-w.nx*.4)):rat.position.x,z=w.nz?Math.max(w.o.z-w.o.hz+.03,Math.min(w.o.z+w.o.hz-.03,rat.position.z-w.nz*.4)):rat.position.z;const blocked=wallSolids().some(o=>(o.x!==w.o.x||o.z!==w.o.z)&&o.h>w.o.h+.1&&Math.abs(x-o.x)<o.hx+.16&&Math.abs(z-o.z)<o.hz+.16);if(!blocked){rat.position.set(x,w.o.h,z);u.wallState=null;u.air=false;u.vy=0;wallInput='';}else rat.position.y=w.o.h-.01;}
  else if(rat.position.y<=0&&input==='down'){rat.position.y=0;leaveWall();}return true;}
@@ -2903,14 +2903,14 @@ requestAnimationFrame(loop);
 <script src="navigation201.js?v=227"></script>
 <script src="roadster202.js?v=247"></script>
 <script src="vehiclePhysics219.js?v=219"></script>
-<script src="driving203.js?v=231-225"></script>
-<script src="original-city210.js?v=210"></script>
-<script src="city204.js?v=247"></script>
+<script src="driving203.js?v=248"></script>
+<script src="original-city210.js?v=248"></script>
+<script src="city204.js?v=248"></script>
 <script src="smoking205.js?v=207"></script>
 <script src="cockpit205.js?v=207"></script>
 <script src="motoring206.js?v=242"></script>
 <script src="cockpit206.js?v=211"></script>
-<script src="camera207.js?v=219"></script>
+<script src="camera207.js?v=248"></script>
 <script src="cockpit207.js?v=222"></script>
 <script src="audio207.js?v=247"></script>
 <script src="hud208.js?v=210"></script>
@@ -2919,9 +2919,9 @@ requestAnimationFrame(loop);
 <script src="sewerAudio218.js?v=218"></script>
 <script src="sewerBoat215.js?v=218"></script>
 <script src="sewer211.js?v=215"></script>
-<script src="vehicle219.js?v=247"></script>
+<script src="vehicle219.js?v=248"></script>
 <script src="tutorial219.js?v=231-222"></script>
-<script src="carTouch220.js?v=247"></script>
+<script src="carTouch220.js?v=248"></script>
 <script src="cockpit221.js?v=224"></script>
 <script src="cockpit223.js?v=231"></script>
 <script src="driving-study-body.js?v=226"></script>
@@ -2940,6 +2940,6 @@ requestAnimationFrame(loop);
 <script src="fixes242.js?v=247"></script>
 <script src="damage243.js?v=247"></script>
 <script src="model-review242.js?v=247"></script>
-<div id="buildStamp247" style="position:fixed;left:8px;bottom:8px;z-index:99999;font:600 10px system-ui;color:#f0e2bf;background:#1d312acc;border:1px solid #f0e2bf33;padding:4px 7px;border-radius:7px;pointer-events:none">BUILD 247</div>
+<div id="buildStamp247" style="position:fixed;left:8px;bottom:8px;z-index:99999;font:600 10px system-ui;color:#f0e2bf;background:#1d312acc;border:1px solid #f0e2bf33;padding:4px 7px;border-radius:7px;pointer-events:none">BUILD 248</div>
 </body>
 </html>
