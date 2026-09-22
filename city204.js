@@ -32,9 +32,9 @@
    const sign=markerText('ORIGINAL CITY ↑');sign.position.set(4,2.5,37.5);sign.scale.setScalar(.32);city.g.add(sign);
   }
   const actor=actors44.find(a=>a.id==='city'&&a.owner===root);if(actor&&!city.collision){
-   // Build 246: make the supplied human city genuinely enormous from Pip's rat-scale viewpoint.
+   // Build 247: push the supplied city to unmistakable human scale from Pip's rat-scale viewpoint.
    // Re-scale before generating collision, then pin the original entrance back to z=56 so the yard gate still joins it.
-   if(!actor.g.userData.cityScale246){actor.g.userData.cityScale246=true;actor.g.scale.multiplyScalar(2.35);actor.g.updateWorldMatrix(true,true);let b=new THREE.Box3().setFromObject(actor.g);actor.g.position.z+=56-b.min.z;actor.g.updateWorldMatrix(true,true);}
+   if(!actor.g.userData.cityScale247){actor.g.userData.cityScale247=true;actor.g.scale.multiplyScalar(4.0);actor.g.updateWorldMatrix(true,true);let b=new THREE.Box3().setFromObject(actor.g);actor.g.position.z+=56-b.min.z;actor.g.updateWorldMatrix(true,true);}
    city.collision=buildCityCollision210(THREE,actor.g);city.model=actor.g;}
  }
  const add=addCar77;addCar77=function(){add();seed();};
