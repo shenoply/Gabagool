@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 246</title>
+<title>Wet Whiskers · Build 247</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -2562,7 +2562,7 @@ function drivingClips77(u){
  u.driveClipVersion79=true;
 }
 function stopEngine77(){if(!car77?.audio)return;const a=car77.audio;try{a.osc.stop();}catch(e){}a.osc.disconnect();a.filter.disconnect();a.gain.disconnect();car77.audio=null;}
-function engine77(){if(!voiceOn||!car77?.riding)return;const ac=sfxCtx();if(!ac)return;ac.resume().catch(()=>{});if(car77.audio)return;const osc=ac.createOscillator(),filter=ac.createBiquadFilter(),gain=ac.createGain();osc.type='sawtooth';filter.type='lowpass';filter.frequency.value=350;gain.gain.value=.018;osc.connect(filter).connect(gain).connect(ac.destination);osc.frequency.value=48;osc.start();car77.audio={osc,filter,gain};}
+function engine77(){if(!voiceOn||!car77?.riding)return;const ac=sfxCtx();if(!ac)return;ac.resume().catch(()=>{});if(car77.audio)return;const osc=ac.createOscillator(),filter=ac.createBiquadFilter(),gain=ac.createGain();osc.type='sawtooth';filter.type='lowpass';filter.frequency.value=350;gain.gain.value=.045;osc.connect(filter).connect(gain).connect(ac.destination);osc.frequency.value=48;osc.start();car77.audio={osc,filter,gain};}
 function honk77(){if(!car77?.riding||!gameplayActive()||car77.horn>0)return;car77.horn=1.2;if(voiceOn){const ac=sfxCtx();if(ac){ac.resume().catch(()=>{});tone(ac,{f:390,f2:370,dur:.25,vol:.045,type:'square'});tone(ac,{f:490,f2:470,dur:.25,vol:.025,type:'triangle'});}}}
 function nearCar77(){return car77?.owner===root&&!car77.riding&&car77.g.position.distanceTo(rat.position)<2.4&&!rat.userData.air&&!rat.userData.pick&&!rat.userData.bird71&&!rat.userData.rope66&&!rat.userData.swim66&&!rat.userData.wallState&&!rat.userData.job67?.lock;}
 function blockedCar77(p,radius=.55){return wallSolids().some(o=>o.h>.12&&Math.abs(p.x-o.x)<o.hx+radius&&Math.abs(p.z-o.z)<o.hz+radius)||p.x<-19.4||p.x>29.4||p.z<.4||p.z>36.6;}
@@ -2898,33 +2898,33 @@ requestAnimationFrame(loop);
 <script src="wildlife-recovered118.js?v=211"></script>
 <script src="heaven-course183.js?v=207"></script>
 <script src="navigation201.js?v=227"></script>
-<script src="roadster202.js?v=245"></script>
+<script src="roadster202.js?v=247"></script>
 <script src="vehiclePhysics219.js?v=219"></script>
 <script src="driving203.js?v=231-225"></script>
 <script src="original-city210.js?v=210"></script>
-<script src="city204.js?v=246"></script>
+<script src="city204.js?v=247"></script>
 <script src="smoking205.js?v=207"></script>
 <script src="cockpit205.js?v=207"></script>
 <script src="motoring206.js?v=242"></script>
 <script src="cockpit206.js?v=211"></script>
 <script src="camera207.js?v=219"></script>
 <script src="cockpit207.js?v=222"></script>
-<script src="audio207.js?v=207"></script>
+<script src="audio207.js?v=247"></script>
 <script src="hud208.js?v=210"></script>
 <script src="touring209.js?v=215"></script>
 <script src="canoe212.js?v=214"></script>
 <script src="sewerAudio218.js?v=218"></script>
 <script src="sewerBoat215.js?v=218"></script>
 <script src="sewer211.js?v=215"></script>
-<script src="vehicle219.js?v=223"></script>
+<script src="vehicle219.js?v=247"></script>
 <script src="tutorial219.js?v=231-222"></script>
-<script src="carTouch220.js?v=225"></script>
+<script src="carTouch220.js?v=247"></script>
 <script src="cockpit221.js?v=224"></script>
 <script src="cockpit223.js?v=231"></script>
 <script src="driving-study-body.js?v=226"></script>
 <script src="driving-study-pose.js?v=227"></script>
 <script src="driving-study-cabin.js?v=241"></script>
-<script src="roadster-detail225.js?v=225"></script>
+<script src="roadster-detail225.js?v=247"></script>
 <script src="cockpit225.js?v=227"></script>
 <script src="smoking227.js?v=227"></script>
 <script src="smoking-game227.js?v=227"></script>
@@ -2934,8 +2934,8 @@ requestAnimationFrame(loop);
 <script src="usability231.js?v=231"></script>
 <script src="house239.js?v=242"></script>
 <script src="refinements241.js?v=242"></script>
-<script src="fixes242.js?v=243"></script>
-<script src="damage243.js?v=244"></script>
-<script src="model-review242.js?v=245"></script>
+<script src="fixes242.js?v=247"></script>
+<script src="damage243.js?v=247"></script>
+<script src="model-review242.js?v=247"></script>
 </body>
 </html>
