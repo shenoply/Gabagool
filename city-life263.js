@@ -84,6 +84,13 @@
   people=[];gulls=[];owner=null;
  }
 
+ function nearCity263(){
+  const state=window.city204?.state,p=car77?.riding?car77.g.position:rat?.position;
+  if(!state?.collision||!p)return false;
+  const b=state.collision.bounds,dx=p.x<b.min.x?b.min.x-p.x:p.x>b.max.x?p.x-b.max.x:0,dz=p.z<b.min.z?b.min.z-p.z:p.z>b.max.z?p.z-b.max.z:0;
+  return Math.hypot(dx,dz)<42;
+ }
+ function setVisible263(v){for(const p of people)p.g.visible=v;for(const g of gulls)g.visible=v;}
  function seed263(){
   const state=window.city204?.state;if(!state?.collision||state.owner!==root)return;
   if(owner!==root){clear263();owner=root;}
@@ -92,7 +99,13 @@
  }
 
  const tickBefore263=tickWorld38;
- tickWorld38=function(dt){tickBefore263(dt);if(phase!=='scavenge'){if(owner)clear263();return;}seed263();if(owner===root&&gameplayActive()&&!document.hidden)tickPeople263(dt);};
+ tickWorld38=function(dt){
+  tickBefore263(dt);
+  if(phase!=='scavenge'){if(owner)clear263();return;}
+  const near=nearCity263();
+  if(!near){if(owner===root)setVisible263(false);return;}
+  seed263();if(owner===root){setVisible263(true);if(gameplayActive()&&!document.hidden)tickPeople263(dt);}
+ };
  const clearBefore263=clear;clear=function(...args){clear263();return clearBefore263(...args);};
 
  window.cityLife263={get people(){return people;},get gulls(){return gulls;}};
