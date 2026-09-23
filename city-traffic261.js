@@ -41,6 +41,13 @@
   return {a,b:bestOther?.x??a+6,z0:col.bounds.min.z+10,z1:col.bounds.max.z-10};
  }
 
+ function nearCity261(){
+  const state=window.city204?.state,p=car77?.riding?car77.g.position:rat?.position;
+  if(!state?.collision||!p)return false;
+  const b=state.collision.bounds,dx=p.x<b.min.x?b.min.x-p.x:p.x>b.max.x?p.x-b.max.x:0,dz=p.z<b.min.z?b.min.z-p.z:p.z>b.max.z?p.z-b.max.z:0;
+  return Math.hypot(dx,dz)<48;
+ }
+ function setCityVisible261(v){for(const t of traffic)t.g.visible=v;for(const g of trees)g.visible=v;for(const g of parked)g.visible=v;for(const g of signals)g.visible=v;}
  function seedTraffic261(){
   const state=window.city204?.state;if(!state?.collision||state.owner!==root)return;
   if(owner===root)return;
@@ -121,7 +128,13 @@
  }
 
  const tickBefore261=tickWorld38;
- tickWorld38=function(dt){tickBefore261(dt);if(phase!=='scavenge'){if(owner)clear261();return;}seedTraffic261();seedTrees261();if(gameplayActive()&&!document.hidden)tickTraffic261(Math.min(.05,dt));};
+ tickWorld38=function(dt){
+  tickBefore261(dt);
+  if(phase!=='scavenge'){if(owner)clear261();return;}
+  const near=nearCity261();
+  if(!near){if(owner===root)setCityVisible261(false);return;}
+  seedTraffic261();seedTrees261();if(owner===root){setCityVisible261(true);if(gameplayActive()&&!document.hidden)tickTraffic261(Math.min(.05,dt));}
+ };
  const clearBefore261=clear;clear=function(...args){clear261();return clearBefore261(...args);};
 
  window.cityTraffic261={get traffic(){return traffic;},get trees(){return trees;},get parked(){return parked;},get signals(){return signals;},seedTraffic:seedTraffic261,seedTrees:seedTrees261};
