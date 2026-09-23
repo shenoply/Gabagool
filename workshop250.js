@@ -340,7 +340,7 @@
  #workshopPanel251>footer{display:grid;grid-template-columns:1fr auto auto 1fr;gap:10px;align-items:center;padding:12px 16px;background:linear-gradient(90deg,#4a341f,#5b4025);border-top:2px solid #b89561}#workshopPanel251>footer>div,#workshopPanel251>footer>button{min-height:44px;border-radius:11px;border:1px solid #d5bd8955;background:#20352c;color:#f7ead0;font:650 13px system-ui;padding:10px 13px}#workshopPanel251>footer>div:last-child{text-align:right}
  body.workshop-live251 #settings,body.workshop-live251 #survival,body.workshop-live251 #hud,body.workshop-live251 #pad,body.workshop-live251 #homePanelToggle,body.workshop-live251 #unloadHome250,body.workshop-live251 #pipActions205,body.workshop-live251 #tail67,body.workshop-live251 #wallControls,body.workshop-live251 #prompt{display:none!important}
  /* hud257: advanced movement lives in Actions to keep mobile play clean. */
- body:not(.driving203) #padB,body:not(.driving203) #padR,body:not(.driving203) #padC,body:not(.driving203) #tail67{display:none!important}
+ /* movement buttons restored per request */
  @media(max-width:700px){#workshopPanel251{grid-template-rows:auto 23vh 1fr auto}#workshopPanel251>header>div b{font-size:20px}.toolstrip251 img{width:42px;height:42px}.toolstrip251 span{display:none}.craftgrid251{grid-template-columns:1fr}.recipe250{grid-template-columns:86px 1fr auto}.recipeimg251{width:86px;height:86px}.title251 strong{font-size:16px}.need251 img{width:28px;height:28px}#workshopPanel251>footer{grid-template-columns:1fr 1fr;gap:7px}#workshopPanel251>footer>div:last-child{text-align:left}} `;document.head.appendChild(css);
 
  const tickBefore250=tickWorld38;
