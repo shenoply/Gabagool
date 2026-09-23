@@ -17,6 +17,29 @@
  const style=document.createElement('style');style.textContent='#carPanel203{right:max(8px,env(safe-area-inset-right))!important;bottom:156px!important;width:min(280px,61vw);max-width:280px;max-height:42dvh;overflow:auto;align-content:flex-end;touch-action:none}#carPanel203 button{min-height:40px;flex:1 0 42%;padding:7px 8px!important;font-size:12px!important}#carPanel203 button[aria-pressed=true]{background:#efbe62;color:#1b322c}@media(max-height:500px){#carPanel203{bottom:12px!important;right:12px!important;width:270px;max-height:64dvh}}';document.head.appendChild(style);
  const roads209=[[1.15,6.85,33.4,72]];
  const entryCorridor259=p=>p.x>=1.0&&p.x<=7.0&&p.z>=32.5&&p.z<=74;
+ function findSafeCityEntry260(){
+  const col=city?.collision;if(!col)return null;
+  const b=col.bounds,centerX=(b.min.x+b.max.x)/2;
+  // Search progressively deeper into the imported city for a genuinely open rat/car-sized patch.
+  for(const z of [b.min.z+6,b.min.z+12,b.min.z+20,b.min.z+30,b.min.z+42,b.min.z+58]){
+   for(let ring=0;ring<18;ring++)for(const side of ring?[1,-1]:[1]){
+    const x=centerX+side*ring*2.2,p={x,z};
+    if(x<b.min.x+2||x>b.max.x-2||z>b.max.z-2)continue;
+    if(!col.blocked(p,.8))return new THREE.Vector3(x,0,z);
+   }
+  }
+  return new THREE.Vector3(centerX,0,Math.min(b.max.z-4,b.min.z+18));
+ }
+ function transferIntoCity260(){
+  if(!city?.collision)return false;const dest=findSafeCityEntry260();if(!dest)return false;
+  if(car77?.riding){
+   car77.g.position.copy(dest);car77.g.position.y=0;car77.speed=0;car77.g.rotation.y=0;
+   rat.position.copy(dest);
+  }else{
+   rat.position.copy(dest);rat.position.y=0;rat.userData.air=false;rat.userData.vy=0;rat.userData.wallState=null;rat.userData.climb=null;
+  }
+  gameCam.ready=false;sayToast('Entered the city');return true;
+ }
  const inDistrict=p=>{const b=city?.collision?.bounds;return !!b&&p.x>=b.min.x&&p.x<=b.max.x&&p.z>=b.min.z&&p.z<=b.max.z;};
  const onRoad=p=>roads209.some(([a,b,c,d])=>p.x>=a&&p.x<=b&&p.z>=c&&p.z<=d);
  const inExtension=p=>onRoad(p)||inDistrict(p);
@@ -35,11 +58,13 @@
   const actor=actors44.find(a=>a.id==='city'&&a.owner===root);if(actor&&!city.collision){
    // Build 248: expand the supplied human city further so Pip reads as a true rat.
    // Re-scale before generating collision, then pin the original entrance back to z=56 so the yard gate still joins it.
-   if(!actor.g.userData.cityScale259){actor.g.userData.cityScale259=true;actor.g.scale.multiplyScalar(6.5);actor.g.updateWorldMatrix(true,true);let b=new THREE.Box3().setFromObject(actor.g);actor.g.position.x+=4-(b.min.x+b.max.x)/2;actor.g.position.z+=64-b.min.z;actor.g.updateWorldMatrix(true,true);}
+   if(!actor.g.userData.cityScale259){actor.g.userData.cityScale259=true;actor.g.scale.multiplyScalar(6.5);actor.g.updateWorldMatrix(true,true);let b=new THREE.Box3().setFromObject(actor.g);actor.g.position.x+=4-(b.min.x+b.max.x)/2;actor.g.position.z+=70-b.min.z;actor.g.updateWorldMatrix(true,true);}
    city.collision=buildCityCollision210(THREE,actor.g);city.model=actor.g;}
  }
  const add=addCar77;addCar77=function(){add();seed();};
  const tick=tickWorld38;tickWorld38=function(dt){tick(dt);if(phase!=='scavenge')return;seed();if(!gameplayActive()||document.hidden){release();return;}dt=Math.min(.05,Math.max(0,dt));clock+=dt;
+ // Crossing the north-gate threshold transfers Pip/the roadster to an open street in the real imported city.
+ if(city?.collision&&rat&&rat.position.x>1&&rat.position.x<7&&rat.position.z>55&&rat.position.z<69&&!inDistrict(rat.position)){transferIntoCity260();}
  const c=car77;if(!c)return;const wet=weather42().rain,mode=c.wiperMode||0,on=mode===1||(mode===0&&wet>.08);c.wiperPhase=(c.wiperPhase||0)+(on?dt*(3+wet*4):0);const target=on?Math.cos(c.wiperPhase)*1.05:1.12;for(const w of c.wipers)w.rotation.z=THREE.MathUtils.damp(w.rotation.z,target,18,dt);
  c.signalTime=(c.signalTime||0)+dt;if(Math.abs(c.steer)>.35)c.signalTurned=true;if(c.indicator&&(c.signalTime>9||(c.signalTurned&&Math.abs(c.steer)<.08&&c.signalTime>1.2))){c.indicator=0;updateSignals();}for(const l of c.indicators)l.material.emissiveIntensity=c.indicator===l.userData.side&&clock%.8<.4?2:0;
  if(c.reach?.kind==='radio')c.radioKnob.rotation.z=Math.sin(c.reach.time/c.reach.duration*Math.PI)*.8;
@@ -58,5 +83,5 @@
   return out;
  }
  const wallBefore248=wallSolids;wallSolids=function(){const base=wallBefore248();if(phase==='scavenge'&&city?.collision)return [...base,...climbSolids()];return base;};
- window.city204={roads209,onRoad,inDistrict,entryCorridor259,seed,inExtension,citySolid,climbSolids,get state(){return city;},release,tune,signal};
+ window.city204={roads209,onRoad,inDistrict,entryCorridor259,findSafeCityEntry260,transferIntoCity260,seed,inExtension,citySolid,climbSolids,get state(){return city;},release,tune,signal};
 })();
