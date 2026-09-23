@@ -3,36 +3,26 @@
  const V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
  let owner=null,traffic=[],trees=[],lanes=null,treeLoading=false;
 
- function mat(color,rough=.62,metal=.18){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});}
- function add(g,geo,m,x=0,y=0,z=0,name=''){const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.name=name;o.userData.noInk=true;o.castShadow=false;o.receiveShadow=true;g.add(o);return o;}
- function trafficCar261(kind=0,color=0x485c69){
-  const g=new THREE.Group();g.name=kind===1?'City estate car':'City sedan';
-  const body=mat(color,.52,.28),dark=mat(0x1d2224,.45,.28),trim=mat(0xb5b7b2,.28,.72),glass=new THREE.MeshStandardMaterial({color:0x263944,roughness:.16,metalness:.35,transparent:true,opacity:.76});
-  // Human-scale proportions: roughly 4.7m long, 1.85m wide, 1.5m high relative to Pip's world.
-  const length=kind===1?5.3:4.8,width=1.86,hood=1.35,cabinL=kind===1?2.8:2.35;
-  add(g,new THREE.BoxGeometry(width,.55,length),body,0,.58,0,'Lower body');
-  add(g,new THREE.BoxGeometry(width*.94,.32,length*.88),body,0,.91,-.02,'Upper belt');
-  add(g,new THREE.BoxGeometry(width*.88,.22,hood),body,0,1.08,length*.32,'Bonnet');
-  add(g,new THREE.BoxGeometry(width*.84,.65,cabinL),glass,0,1.35,-.28,'Cabin glass');
-  add(g,new THREE.BoxGeometry(width*.88,.14,cabinL+.08),body,0,1.69,-.28,'Roof');
-  add(g,new THREE.BoxGeometry(width*.92,.18,.20),trim,0,.58,length*.505,'Front bumper');
-  add(g,new THREE.BoxGeometry(width*.92,.18,.18),trim,0,.58,-length*.505,'Rear bumper');
-  add(g,new THREE.BoxGeometry(width*.46,.14,.05),dark,0,.83,length*.512,'Grille');
-  for(const side of [-1,1]){
-    for(const z of [-length*.32,length*.32]){
-      const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.39,.39,.24,18),dark);wheel.rotation.z=Math.PI/2;wheel.position.set(side*width*.51,.48,z);wheel.name='Traffic wheel';wheel.userData.noInk=true;g.add(wheel);
-      const hub=new THREE.Mesh(new THREE.CylinderGeometry(.20,.20,.25,16),trim);hub.rotation.z=Math.PI/2;hub.position.copy(wheel.position);hub.position.x+=side*.005;hub.userData.noInk=true;g.add(hub);
-    }
-    add(g,new THREE.BoxGeometry(.07,.16,.34),trim,side*width*.51,1.35,.30,'Mirror');
-  }
-  const lightM=new THREE.MeshStandardMaterial({color:0xf1e7c5,emissive:0xffd98a,emissiveIntensity:.65,roughness:.3});
-  for(const x of [-.55,.55])add(g,new THREE.BoxGeometry(.28,.16,.05),lightM,x,.85,length*.515,'Headlamp');
-  const rearM=new THREE.MeshStandardMaterial({color:0x8a211c,emissive:0x7a110d,emissiveIntensity:.45});
-  for(const x of [-.55,.55])add(g,new THREE.BoxGeometry(.28,.15,.05),rearM,x,.85,-length*.515,'Rear lamp');
-  g.scale.setScalar(1.42); // intentionally large compared with Pip
-  return g;
+ const trafficAssets261={saloon:null,wagon:null,loading:null};
+ function loadTrafficAssets261(){
+  if(trafficAssets261.loading)return trafficAssets261.loading;
+  const loader=new THREE.GLTFLoader();
+  const load=url=>new Promise((resolve,reject)=>loader.load(url,g=>resolve(g.scene),undefined,reject));
+  trafficAssets261.loading=Promise.all([
+   load('https://cdn.3dassets.dev/assets/32490/v1/model.glb'),
+   load('https://cdn.3dassets.dev/assets/27328/v1/model.glb')
+  ]).then(([saloon,wagon])=>{
+   for(const src of [saloon,wagon])src.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.userData.noInk=true;o.frustumCulled=true;}});
+   trafficAssets261.saloon=saloon;trafficAssets261.wagon=wagon;return trafficAssets261;
+  }).catch(e=>{console.warn('CC0 traffic assets failed to load',e);return trafficAssets261;});
+  return trafficAssets261.loading;
  }
-
+ function cloneTrafficAsset261(kind){
+  const src=kind==='wagon'?trafficAssets261.wagon:trafficAssets261.saloon;
+  if(!src)return null;const g=src.clone(true);g.name=kind==='wagon'?'CC0 station wagon traffic':'CC0 saloon traffic';
+  g.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.userData.noInk=true;}});
+  g.scale.setScalar(kind==='wagon'?1.18:1.12);return g;
+ }
  function laneScore261(x,b){
   const col=city204.state?.collision;if(!col)return -1;let open=0,total=0;
   for(let z=b.min.z+10;z<b.max.z-10;z+=8){total++;if(!col.blocked({x,z},1.55))open++;}
@@ -49,13 +39,14 @@
 
  function seedTraffic261(){
   const state=window.city204?.state;if(!state?.collision||state.owner!==root)return;
-  if(owner===root)return;clear261();owner=root;lanes=chooseLanes261();if(!lanes)return;
-  const palette=[0x3d4b55,0x6e756e,0x4e3e3d,0x2f3438,0x7a6a55,0x405c66];
-  for(let i=0;i<6;i++){
-    const g=trafficCar261(i%3===0?1:0,palette[i%palette.length]);root.add(g);
-    const dir=i%2?1:-1,lane=dir>0?lanes.a:lanes.b,span=lanes.z1-lanes.z0,z=lanes.z0+(i/6)*span;
+  if(owner===root)return;
+  if(!trafficAssets261.saloon||!trafficAssets261.wagon){loadTrafficAssets261().then(()=>{if(owner!==root)seedTraffic261();});return;}
+  clear261();owner=root;lanes=chooseLanes261();if(!lanes)return;
+  for(let i=0;i<4;i++){
+    const kind=i%2?'wagon':'saloon',g=cloneTrafficAsset261(kind);if(!g)continue;root.add(g);
+    const dir=i%2?1:-1,lane=dir>0?lanes.a:lanes.b,span=lanes.z1-lanes.z0,z=lanes.z0+(i/4)*span;
     g.position.set(lane,0,z);g.rotation.y=dir>0?0:Math.PI;
-    traffic.push({g,dir,lane,speed:5.0+(i%3)*.45,baseSpeed:5.0+(i%3)*.45,halfL:3.7,halfW:1.45});
+    traffic.push({g,dir,lane,speed:4.1+(i%2)*.35,baseSpeed:4.1+(i%2)*.35,halfL:kind==='wagon'?3.0:2.8,halfW:1.35});
   }
  }
 
@@ -73,7 +64,7 @@
       }
     }
     for(const [x,z] of spots.slice(0,12)){
-      const h=new THREE.Group(),v=asset.clone(true);h.add(v);h.position.set(x,0,z);h.rotation.y=(x*1.37+z*.41)%6.28;h.scale.setScalar(12);h.name='City cherry tree from Pip garden';h.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.userData.noInk=true;o.userData.keepGeometry=true;}});root.add(h);trees.push(h);
+      const h=new THREE.Group(),v=asset.clone(true);h.add(v);h.position.set(x,0,z);h.rotation.y=(x*1.37+z*.41)%6.28;h.scale.setScalar(8.5);h.name='City cherry tree from Pip garden';h.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.userData.noInk=true;o.userData.keepGeometry=true;}});root.add(h);trees.push(h);
     }
   }).catch(()=>{treeLoading=false;});
  }
@@ -99,10 +90,7 @@
   const p=car77?.riding?car77.g.position:rat.position;
   for(const t of traffic){
     const dx=p.x-t.g.position.x,dz=p.z-t.g.position.z;if(Math.abs(dx)>t.halfW+1||Math.abs(dz)>t.halfL+1)continue;
-    if(car77?.riding){car77.speed*=.25;}else{
-      if(Math.abs(dx)/(t.halfW+1)>Math.abs(dz)/(t.halfL+1))rat.position.x=t.g.position.x+Math.sign(dx||1)*(t.halfW+1);
-      else rat.position.z=t.g.position.z+Math.sign(dz||1)*(t.halfL+1);
-    }
+    if(car77?.riding){car77.speed=0;const away=new THREE.Vector3(dx,0,dz);if(away.lengthSq()<.001)away.set(1,0,0);away.normalize();car77.g.position.addScaledVector(away,.18);rat.position.copy(car77.g.position);}else{const away=new THREE.Vector3(dx,0,dz);if(away.lengthSq()<.001)away.set(1,0,0);away.normalize();rat.position.addScaledVector(away,.22);}
   }
  }
 
