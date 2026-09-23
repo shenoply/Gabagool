@@ -56,9 +56,9 @@
  function part(parent,w,h,d,x,y,z,color,name){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.8}));m.position.set(x,y,z);m.name=name;m.userData.noInk=true;parent.add(m);return m;}
  function seed(){if(phase!=='scavenge'||!root)return;
   if(city?.owner!==root){city={owner:root,g:new THREE.Group(),cars:[],solids:[],collision:null};root.add(city.g);city.g.name='Original city entrance';
-   part(city.g,7.2,.045,43,4,-.02,53.5,0x3f4245,'Main city road');
-   part(city.g,1.0,.24,43,.6,.10,53.5,0xb8b0a2,'Left city curb');
-   part(city.g,1.0,.24,43,7.4,.10,53.5,0xb8b0a2,'Right city curb');
+   part(city.g,7.2,.018,45,4,.001,53.5,0x3f4245,'Main city road');
+   part(city.g,.72,.12,31,.55,.055,60.5,0xb8b0a2,'Left city curb');
+   part(city.g,.72,.12,31,7.45,.055,60.5,0xb8b0a2,'Right city curb');
    part(city.g,.55,3.2,.55,.55,1.6,34.2,0x5c5041,'Main city gate left');
    part(city.g,.55,3.2,.55,7.45,1.6,34.2,0x5c5041,'Main city gate right');
    part(city.g,7.45,.42,.55,4,3.05,34.2,0x5c5041,'Main city gate lintel');
