@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 256</title>
+<title>Wet Whiskers · Build 257</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -2305,8 +2305,10 @@ function voiceBuffer69(){const ac=audio();if(!ac)return Promise.reject(Error('Au
 function stopVoice69(){speech69.token++;if(speech69.current){const c=speech69.current;speech69.current=null;try{c.source.stop();}catch(e){}c.source.disconnect();c.gain.disconnect();}if(sound66.utterance?.recorded69)sound66.utterance=null;}
 function playVoice69(cue,pos=null,onend=null){if(!voiceOn||!cue)return false;stopVoice69();const token=speech69.token;voiceBuffer69().then(buffer=>{if(token!==speech69.token||!voiceOn||document.hidden||(pos&&(!gameplayActive()||pos.distanceTo(rat.position)>8)))return;const ac=audio(),source=ac.createBufferSource(),gain=ac.createGain();source.buffer=buffer;gain.gain.value=pos?Math.max(.15,Math.min(.9,1-pos.distanceTo(rat.position)/10)):.9;source.connect(gain).connect(ac.destination);const current={source,gain,pos};speech69.current=current;source.onended=()=>{if(speech69.current!==current)return;speech69.current=null;source.disconnect();gain.disconnect();if(sound66.utterance?.recorded69)sound66.utterance=null;if(onend)onend();};if(pos)sound66.voiceClock=cue.duration+1;source.start(0,cue.offset,cue.duration);}).catch(()=>{if(token===speech69.token&&sound66.utterance?.recorded69)sound66.utterance=null;});return true;}
 function ambientVoice69(name,line,pos){if(!voiceOn||!gameplayActive()||sound66.utterance||sound66.voiceClock>1||pos.distanceTo(rat.position)>8)return false;
- const cue=recordings69.find(c=>c.name===name&&c.text.replace(/[^a-z]/gi,'').toLowerCase()===line.replace(/[^a-z]/gi,'').toLowerCase())||recordings69.find(c=>c.name===name);
- const el=$('chatter66');el.textContent=name+': '+line;el.style.display='block';sound66.voicePos=pos;sound66.voiceClock=(cue?.duration||5)+2;playVoice69(cue,pos);sound66.utterance={recorded69:true};return true;}
+ const normal=s=>s.replace(/[^a-z]/gi,'').toLowerCase(),cue=recordings69.find(c=>c.name===name&&normal(c.text)===normal(line));
+ const el=$('chatter66');el.textContent=name+': '+line;el.style.display='block';sound66.voicePos=pos;sound66.voiceClock=(cue?.duration||Math.max(4,line.length/14))+1.5;
+ // Never play a different recorded sentence just because the speaker name matches.
+ if(cue)playVoice69(cue,pos);sound66.utterance={recorded69:!!cue,subtitleOnly257:!cue};return true;}
 function lineVoice69(text,onend){return playVoice69(recordings69.find(c=>c.text===text),null,onend);}
 // Build 190: shared shuffled soundtrack across gameplay and the course.
 const music69={index:-1,last:null,bag:[],el:null,pending:false,blocked:false,unlocked:false,volume:.12,tracks:[
@@ -2907,7 +2909,6 @@ requestAnimationFrame(loop);
 <script src="driving203.js?v=248"></script>
 <script src="original-city210.js?v=249"></script>
 <script src="city204.js?v=249"></script>
-<script src="smoking205.js?v=207"></script>
 <script src="cockpit205.js?v=207"></script>
 <script src="motoring206.js?v=242"></script>
 <script src="cockpit206.js?v=211"></script>
@@ -2931,7 +2932,7 @@ requestAnimationFrame(loop);
 <script src="roadster-detail225.js?v=247"></script>
 <script src="cockpit225.js?v=227"></script>
 <script src="smoking227.js?v=227"></script>
-<script src="smoking-game227.js?v=255"></script>
+<script src="smoking-game227.js?v=257"></script>
 <script src="records227.js?v=230"></script>
 <script src="music227.js?v=250"></script>
 <script src="homestead230.js?v=230"></script>
@@ -2941,8 +2942,8 @@ requestAnimationFrame(loop);
 <script src="fixes242.js?v=254"></script>
 <script src="damage243.js?v=247"></script>
 <script src="model-review242.js?v=247"></script>
-<script src="workshop250.js?v=256"></script>
-<script src="build255.js?v=256"></script>
-<div id="buildStamp247" style="position:fixed;left:8px;bottom:8px;z-index:99999;font:600 10px system-ui;color:#f0e2bf;background:#1d312acc;border:1px solid #f0e2bf33;padding:4px 7px;border-radius:7px;pointer-events:none">BUILD 256</div>
+<script src="workshop250.js?v=257"></script>
+<script src="build255.js?v=257"></script>
+<div id="buildStamp247" style="position:fixed;left:8px;bottom:8px;z-index:99999;font:600 10px system-ui;color:#f0e2bf;background:#1d312acc;border:1px solid #f0e2bf33;padding:4px 7px;border-radius:7px;pointer-events:none">BUILD 257</div>
 </body>
 </html>
