@@ -13,19 +13,23 @@
   const d=birds.g.position.distanceTo(rat.position);if(d>5.4)return;
   if(birdState.owner!==root){birdState={owner:root,step:0,next:0};}
   sound66.birdCooldown=Math.max(sound66.birdCooldown||0,12);
-  if(birdState.step>=birdTutorial.length){home.craftBirdIntro255=true;save();return;}
+  if(birdState.step>=birdTutorial.length){home.craftBirdIntro255=true;sound66.birdCooldown=10;save();sayToast('New objective: craft your first tool at home.');return;}
   if(performance.now()<birdState.next||sound66.utterance)return;
   const [name,line]=birdTutorial[birdState.step++];voice66(name,line,birds.g.position,[1.15,.88,1.42][birdState.step%3]);birdState.next=performance.now()+6500;
  }
 
- // After the normal recorded Big Rat introduction, add a separate voiced headset hint.
+ // After the normal recorded Big Rat introduction, give one relevant hint only when Pip chose to talk to him.
  const endTalkBefore255=endTalk;
  endTalk=function(){
-  endTalkBefore255();
-  const d=window.music227?.data?.();if(!d?.mission250||d.headphones||home.bigRatHeadsetHint255||phase!=='scavenge')return;
-  home.bigRatHeadsetHint255=true;save();
-  setTimeout(()=>{if(phase==='scavenge'&&voiceOn)voice66('The Fat Rat','You looking for those walnut headphones? I saw them by the yard path, near the old work area.',NB,.78);},500);
-  setTimeout(()=>{if(phase==='scavenge'&&voiceOn)voice66('The Fat Rat','Check just north of here. Keep your eyes low; they are rat-sized and easy to miss.',NB,.78);},7000);
+  endTalkBefore255();if(phase!=='scavenge'||!voiceOn)return;
+  const tools=['axe230','hammer230','saw230','brush230'],missing=tools.find(id=>!home.tools?.[id]),d=window.music227?.data?.();
+  let line='';
+  if(missing)line='Start with your '+(CRAFT[missing]?.name||'tools')+'. Check the yard for what you need, then use the workbench at home.';
+  else if(d?.mission250&&!d.headphones)line='You looking for those walnut headphones? Check the yard path near the old work area, and keep your eyes low.';
+  else if(!home.geckoTamed88)line='Something keeps scratching around the clay stones. Might be worth a look.';
+  else if(Object.keys(home.homestead230?.boards||{}).length<20)line='One plank and one nail at a time, kid. Fix the floor before you worry about making it pretty.';
+  else line='You are doing fine. Keep rebuilding, and do not waste good salvage.';
+  setTimeout(()=>{if(phase==='scavenge'&&voiceOn)voice66('The Fat Rat',line,NB,.78);},450);
  };
 
  // Add Zaytona/Tay as a calm workshop companion, seated on the stool beside Pip.
@@ -51,23 +55,12 @@
   tay.g.visible=!!window.workshop251State?.open||rat.position.distanceTo(root.userData.workshop251.position)<4;
  }
 
- function bigRatObjectiveHint256(){
-  if(phase!=='scavenge'||!rat||!sc?.nearNb||sound66.utterance)return;
-  const tools=['axe230','hammer230','saw230','brush230'];const missing=tools.find(id=>!home.tools?.[id]);
-  const md=window.music227?.data?.();
-  let line='';
-  if(missing)line='Before you worry about fancy stuff, get your '+(CRAFT[missing]?.name||'tools')+' sorted. Check the yard for salvage and bring it home.';
-  else if(md?.mission250&&!md.headphones)line='Those walnut headphones are by the yard path. Stay low and look around the old work area.';
-  else if(!home.geckoTamed88)line='If you hear scratching near the clay stones, that gecko might be worth making friends with.';
-  else line='You are doing fine, kid. Keep fixing the place one job at a time.';
-  voice66('The Fat Rat',line,NB,.78);
- }
  // Cigarette remains usable from Actions; keep it alive through later action-menu overrides.
  const actionsButton=$('pipActions205');
  actionsButton?.addEventListener('contextmenu',e=>e.preventDefault());
 
- const tickBefore255=tickWorld38;let hintClock256=0;
- tickWorld38=function(dt){tickBefore255(dt);craftBirdTick255();tickTay255(dt);hintClock256=Math.max(0,hintClock256-dt);if(phase==='scavenge'&&sc?.nearNb&&!sc.talk&&hintClock256===0&&home.craftBirdIntro255){hintClock256=28;bigRatObjectiveHint256();}};
+ const tickBefore255=tickWorld38;
+ tickWorld38=function(dt){tickBefore255(dt);craftBirdTick255();tickTay255(dt);};
  const clearBefore255=clear;
  clear=function(...args){clearTay255();birdState={owner:null,step:0,next:0};return clearBefore255(...args);};
 
