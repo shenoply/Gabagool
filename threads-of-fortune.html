@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Threads of Fortune</title>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Threads of Fortune · Build 258</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#090404;color:#f6e7c4;font-family:Georgia,serif}button{font:inherit}#app{max-width:900px;margin:auto;padding:10px}
 .c{background:linear-gradient(#351a10,#1a0d09);border:1px solid #81592b;border-radius:17px}.top{display:flex;gap:8px;flex-wrap:wrap}.brand{flex:1;padding:11px}.brand h1{margin:0;font-size:30px}.stats{display:flex;gap:6px}.stat{min-width:74px;text-align:center;padding:8px}.stat b{display:block;font-size:22px}
@@ -12,6 +12,64 @@
 .pro{position:fixed;inset:0;z-index:50;background:#0b0504ee;display:flex;align-items:center;justify-content:center;padding:14px}.pro.hide{display:none}.pc{max-width:600px;padding:17px;text-align:center}.pb{display:grid;grid-template-columns:1fr 1fr;gap:7px}.pb button{padding:11px;border-radius:10px;border:1px solid #76502a;background:#321a10;color:#fff}
 .modal{position:fixed;inset:0;z-index:40;background:#000b;display:none;align-items:flex-end;padding:9px}.modal.on{display:flex}.sheet{max-width:700px;margin:auto;width:100%;padding:12px}.sheet img{width:100%;border-radius:10px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:none;background:#21110b;padding:10px;border-radius:10px}.toast.on{display:block}
 @media(max-width:700px){.grid{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.acts{grid-template-columns:1fr 1fr}.hero img{height:270px}}
+
+/* BUILD 258 MOBILE OVERRIDES */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{min-width:0}
+#app{width:100%;max-width:900px;margin:0 auto;padding:8px 8px calc(86px + env(safe-area-inset-bottom));overflow-x:hidden}
+.top{width:100%;display:flex;align-items:stretch;gap:6px;flex-wrap:nowrap}
+.brand{min-width:0;flex:1 1 auto;padding:8px 10px}
+.brand h1{font-size:clamp(20px,5.6vw,30px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{flex:0 0 auto;display:flex;gap:5px}
+.stat{min-width:54px;padding:7px 6px;font-size:11px}
+.stat b{font-size:19px}
+.hero{width:100%;margin-top:7px;border-radius:16px}
+.hero img{width:100%;height:clamp(280px,58vh,430px);object-fit:cover;object-position:center;display:block}
+.hero span{left:10px;right:auto;bottom:10px;max-width:calc(100% - 20px);font-size:13px}
+.tabs{z-index:30}
+.rug{flex:0 0 min(84vw,360px);min-width:min(84vw,360px);max-width:360px}
+.shelf{width:100%;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding:2px 7vw 8px;scroll-padding-inline:7vw;-webkit-overflow-scrolling:touch}
+.rug{scroll-snap-align:center}
+.art{height:clamp(170px,46vw,230px)}
+.actions,.acts{width:100%}
+.dialogue,.prof,.rug,.sup,.bc,.goal,.map{max-width:100%}
+@media(max-width:700px){
+  #app{max-width:none}
+  .top{position:relative}
+  .brand h1{font-size:21px}
+  .brand small{display:none}
+  .stats{gap:4px}
+  .stat{min-width:50px;padding:6px 5px}
+  .stat b{font-size:18px}
+  .hero img{height:42vh;min-height:285px;max-height:390px}
+  .grid{display:flex;flex-direction:column;gap:8px}
+  .grid>div:nth-child(2){order:-1}
+  .grid>div:nth-child(2) .prof:nth-child(2){display:none}
+  .prof{padding:9px}
+  .profileTop,.prof>div:first-child{align-items:center}
+  .dialogue{grid-template-columns:48px 1fr;padding:9px}
+  .dialogue .av{width:48px;height:48px}
+  .name{font-size:18px}
+  .speech{font-size:16px}
+  .title{margin-top:9px}
+  .shelf{margin-left:-8px;width:calc(100% + 16px)}
+  .rug{flex-basis:88vw;min-width:88vw;max-width:380px}
+  .art{height:210px}
+  .acts{grid-template-columns:1fr 1fr;gap:7px}
+  .act{min-height:48px;font-size:15px}
+  .tabs{
+    position:fixed;left:0;right:0;bottom:0;margin:0;padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom));
+    background:rgba(12,6,4,.96);backdrop-filter:blur(10px);border-top:1px solid #704a25;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:5px;overflow:visible
+  }
+  .tabs button{min-width:0;padding:10px 4px;font-size:12px;white-space:normal;line-height:1.05;min-height:50px}
+  .grid2{grid-template-columns:1fr}
+  .bc{grid-template-columns:82px 1fr}
+  .bc img{width:82px;height:96px}
+  .map{height:430px}
+}
+
 </style></head><body>
 <div class="pro" id="pro"><div class="pc c"><h2>Threads of Fortune</h2><p>Giza, 1925. A struggling rug merchant begins with three carpets, 120 coins and Saffron. Learn the rugs, read the buyer and earn the road to Cairo.</p><div class="pb"><button id="play">▶ Documentary opening</button><button id="skip">Begin Day One</button></div></div></div>
 <div id="app"><div class="top"><div class="brand c"><h1>Threads of Fortune</h1><small>Giza · A Carpet Merchant’s Journey</small></div><div class="stats"><div class="stat c"><b id="coins">120</b>coins</div><div class="stat c"><b id="rep">0</b>rep</div><div class="stat c"><b id="day">1</b>day</div></div></div>
