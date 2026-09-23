@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Threads of Fortune · Build 280</title>
+<style>
+:root{--bg:#080403;--panel:#23110b;--panel2:#160b08;--gold:#d8a84e;--cream:#f6e6c2;--muted:#c5aa84;--green:#85c274;--amber:#e5bb63;--blue:#77a6d1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:Georgia,"Times New Roman",serif}
+button{font:inherit;color:inherit}
+.hidden{display:none!important}
+.card{background:linear-gradient(180deg,#351a10,#1a0d09);border:1px solid #795229;border-radius:14px}
+#game{position:fixed;inset:0;display:grid;grid-template-rows:42px 1fr 58px;background:var(--bg);overflow:hidden}
+.topbar{display:grid;grid-template-columns:1fr auto;align-items:center;padding:4px 7px;background:#0e0705;border-bottom:1px solid #5e3d1f;z-index:20}
+.brand{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand small{display:block;font-size:9px;color:var(--muted);font-weight:400}
+.stats{display:flex;gap:5px}.stat{min-width:44px;text-align:center;padding:3px 5px;border-radius:9px;background:#1d0f0a;border:1px solid #5f4020}.stat b{display:block;font-size:14px}.stat span{font-size:8px;color:var(--muted);text-transform:uppercase}
+.main{position:relative;overflow:hidden}.mode{position:absolute;inset:0;display:none;overflow:hidden}.mode.active{display:block}.modeScroll{height:100%;overflow:auto;padding:7px 7px 14px}
+.bottomNav{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:4px 5px calc(4px + env(safe-area-inset-bottom));background:#0c0604;border-top:1px solid #5d3d1f;z-index:30}.bottomNav button{border:1px solid #5b3c1d;background:#21110b;border-radius:10px;font-size:9px;line-height:1.05}.bottomNav button.active{background:#8d591f;border-color:#dfb35d}
+
+/* STALL - zero document scrolling */
+#stall{padding:5px;display:grid;grid-template-rows:72px 88px 72px 66px 1fr 34px;gap:5px}
+.duel{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:5px;padding:5px;align-items:center}
+.person{display:grid;grid-template-columns:44px 1fr;gap:5px;align-items:center;min-width:0}.person.right{grid-template-columns:1fr 44px;text-align:right}.person img,.person .mono{width:44px;height:54px;border-radius:9px;object-fit:cover;border:1px solid #8b6030}.person .mono{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#77431f,#21110b);font-size:16px}.person b,.person span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.person b{font-size:10px}.person span{font-size:8px;color:var(--muted)}
+.meters{display:grid;gap:3px}.meters label{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:3px;font-size:8px;color:var(--muted)}.meter{height:5px;border-radius:99px;background:#090403;overflow:hidden}.meter i{display:block;height:100%;background:var(--green)}.meter.p i{background:var(--amber)}.meter.t i{background:var(--blue)}
+.dialogue{padding:7px;display:grid;grid-template-rows:auto 1fr auto}.dialogueHead{display:flex;gap:5px;align-items:baseline}.who{font-size:8px;color:#d7b47e;letter-spacing:.1em;text-transform:uppercase}.speaker{font-size:12px}.speech{margin-top:3px;padding:7px 8px;border-radius:10px;background:linear-gradient(#f7e8c8,#e2c390);color:#32170d;font-size:13px;line-height:1.25;overflow:auto}.audioRow{display:flex;gap:5px;margin-top:4px}.miniBtn{min-height:26px;padding:3px 7px;border:1px solid #65441f;border-radius:8px;background:#27140d;font-size:9px}
+.rugNow{display:grid;grid-template-columns:82px 1fr;gap:7px;padding:5px}.rugNow img{width:82px;height:60px;object-fit:cover;border-radius:8px}.rugNow b{display:block;font-size:12px}.rugNow span{display:block;font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rugActions{display:flex;gap:5px;margin-top:4px}.rugActions button{flex:1;min-height:25px;padding:3px;border:1px solid #65441f;border-radius:7px;background:#27140d;font-size:9px}
+.tutorial{padding:6px 8px}.tutorial b{font-size:10px;color:#efc36d}.tutorial span{display:block;font-size:9px;color:#dbc29a}.tutorial .bar{height:3px;background:#090403;border-radius:99px;overflow:hidden;margin-top:4px}.tutorial .bar i{display:block;height:100%;background:#e2b358}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start;overflow:auto}.choices button{min-height:48px;border:1px solid #694723;border-radius:10px;background:#2a160e;padding:7px;text-align:left;font-size:11px}.choices button.primary{background:#9f6524;border-color:#d9ac54}.choices small{display:block;font-size:8px;color:#c5aa84;margin-top:2px}
+.dealFooter{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;padding:5px 7px;font-size:9px}.dealFooter span{color:var(--muted)}.dealFooter b{font-size:13px}
+.drawer{position:fixed;z-index:80;left:0;right:0;bottom:58px;max-height:55vh;background:#0b0503f8;border-top:1px solid #7b5428;padding:7px;overflow:auto}.drawerHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.drawerHead button{min-height:28px;border:1px solid #68451f;border-radius:8px;background:#28150d}.rugShelf{display:flex;gap:7px;overflow-x:auto;scroll-snap-type:x mandatory}.rugCard{flex:0 0 72vw;max-width:300px;padding:6px;scroll-snap-align:center}.rugCard img{width:100%;height:130px;object-fit:cover;border-radius:8px}.rugCard b{display:block;margin-top:4px;font-size:12px}.rugCard span{display:block;font-size:9px;color:var(--muted)}.rugCard button{width:100%;min-height:30px;margin-top:5px;border:1px solid #68451f;border-radius:8px;background:#2a160e}
+
+/* Secondary screens */
+.grid{display:grid;gap:7px}.item{padding:9px}.item h3{margin:0 0 4px;font-size:15px}.item p{margin:3px 0;color:var(--muted);font-size:11px;line-height:1.35}.supplierItem{display:grid;grid-template-columns:90px 1fr;gap:8px}.supplierItem img{width:90px;height:72px;object-fit:cover;border-radius:8px}.buyerItem{display:grid;grid-template-columns:64px 1fr;gap:8px}.buyerItem img,.buyerItem .mono{width:64px;height:76px;border-radius:9px;object-fit:cover;border:1px solid #795229}.buyerItem .mono{display:flex;align-items:center;justify-content:center;background:#2b160e}
+.cityTitle{margin:9px 2px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#e1bd77}
+.mapBox{height:100%;position:relative;overflow:hidden;background:#153039}.mapCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}.mapInfo{position:absolute;left:8px;right:8px;bottom:8px;padding:8px;background:#1b0d08e8;border:1px solid #795229;border-radius:10px;font-size:10px}.mapInfo button{width:100%;min-height:34px;margin-top:5px;border:1px solid #704a25;border-radius:8px;background:#8e591f}
+.ledgerGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.metric{padding:8px;text-align:center}.metric b{display:block;font-size:19px}.metric span{font-size:9px;color:var(--muted)}.note{padding:8px;margin-top:6px;background:#170b07;border:1px solid #5d3d1f;border-radius:9px;color:var(--muted);font-size:10px;line-height:1.35}.upgrade{padding:8px;border:1px solid #5d3d1f;border-radius:9px;background:#170b07}.upgrade button{width:100%;min-height:32px;margin-top:5px;border:1px solid #68451f;border-radius:8px;background:#2a160e}
+.modal{position:fixed;inset:0;z-index:90;background:#000d;display:none;align-items:flex-end;padding:7px}.modal.open{display:flex}.sheet{width:min(720px,100%);max-height:88vh;overflow:auto;margin:auto;padding:10px}.viewer{height:45vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#080403;border-radius:10px}.viewer img{width:100%;transition:transform .15s ease}.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px}.tools button{min-height:34px;border:1px solid #68451f;border-radius:8px;background:#2a160e}
+.toast{position:fixed;left:50%;bottom:66px;z-index:100;transform:translateX(-50%) translateY(10px);opacity:0;transition:.2s;background:#21110b;border:1px solid #745028;padding:8px 11px;border-radius:9px;font-size:11px}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.opening{position:fixed;inset:0;z-index:110;background:#050302}.opening img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:sepia(.12)}.opening:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(4,2,1,.88))}.openBox{position:absolute;z-index:2;left:18px;right:18px;bottom:max(24px,env(safe-area-inset-bottom))}.openBox h1{font-size:clamp(38px,10vw,68px);margin:0}.openBox p{font-size:16px;line-height:1.45;color:#ead7b3}.openBtns{display:grid;grid-template-columns:1fr 1fr;gap:7px}.openBtns button{min-height:48px;border-radius:11px;border:1px solid #80572a;background:#2b160e}.openBtns .primary{background:#996222;border-color:#dfb35d}
+</style>
+</head>
+<body>
+<div class="opening" id="opening"><img src="https://gcdn.picsart.com/cloud-storage/d647fe3e-55af-40df-91f8-d44bf4080fac.jpg"><div class="openBox"><h1>Threads of Fortune</h1><p>Giza, 1925. A borrowed stall, three rugs, and barely enough cash to survive. Learn the buyers, protect your working capital, build relationships, and grow from a street mat into a trade house.</p><div class="openBtns"><button class="primary" id="playOpening">▶ Play opening</button><button id="enterGame">Begin Day One</button></div></div></div>
+
+<div id="game">
+  <header class="topbar"><div class="brand">Threads of Fortune<small id="cityLabel"></small></div><div class="stats"><div class="stat"><b id="coins"></b><span>pt</span></div><div class="stat"><b id="rep"></b><span>rep</span></div><div class="stat"><b id="day"></b><span>day</span></div></div></header>
+  <main class="main">
+    <section class="mode active" id="stall">
+      <div class="duel card">
+        <div class="person"><img src="https://gcdn.picsart.com/cloud-storage/5cea8ab5-f185-4d2d-9314-cf570394b9bc.jpg"><div><b>You</b><span>Carpet Merchant</span></div></div>
+        <div class="meters"><label>Interest<div class="meter"><i id="interest"></i></div></label><label>Patience<div class="meter p"><i id="patience"></i></div></label><label>Trust<div class="meter t"><i id="trust"></i></div></label></div>
+        <div class="person right"><div><b id="buyerName"></b><span id="buyerRole"></span></div><div id="buyerAvatar"></div></div>
+      </div>
+      <div class="dialogue card"><div class="dialogueHead"><span class="who" id="who"></span><span class="speaker" id="speaker"></span></div><div class="speech" id="speech"></div><div class="audioRow"><button class="miniBtn" id="replayLine">▶ Replay buyer line</button><button class="miniBtn" id="voicesBtn">🔊 Buyer voice</button></div></div>
+      <div class="rugNow card"><img id="rugNowImg"><div><b id="rugNowName"></b><span id="rugNowMeta"></span><span id="rugNowPrice"></span><div class="rugActions"><button id="changeRug">Change</button><button id="inspectRug">Inspect</button></div></div></div>
+      <div class="tutorial card" id="tutorial"><b id="tutorialTitle"></b><span id="tutorialText"></span><div class="bar"><i id="tutorialBar"></i></div></div>
+      <div class="choices" id="choices"></div>
+      <div class="dealFooter card"><span id="dayGoal"></span><div>🔥 <b id="streak"></b></div></div>
+    </section>
+
+    <section class="mode" id="market"><div class="modeScroll"><div class="card item"><h3 id="marketTitle"></h3><p id="marketIntro"></p><p id="supplierRel"></p></div><div class="grid" id="marketGrid"></div></div></section>
+    <section class="mode" id="buyers"><div class="modeScroll" id="buyersGrid"></div></section>
+    <section class="mode" id="map"><div class="mapBox"><svg id="tradeMap" class="mapCanvas" viewBox="0 0 1200 700"><rect width="1200" height="700" fill="#16323a"/><path d="M0,330 C170,285 270,315 360,285 C460,250 550,245 650,210 C760,170 845,160 930,190 C1040,220 1110,245 1200,240 L1200,0 L0,0 Z" fill="#b59b62"/><path d="M0,430 C180,410 305,390 410,410 C535,435 625,495 745,510 C860,525 955,500 1035,455 C1115,420 1160,425 1200,440 L1200,700 L0,700 Z" fill="#b59b62"/><path d="M540,260 C580,310 590,360 590,410 C590,455 610,500 650,540" fill="none" stroke="#695034" stroke-width="18"/><polyline points="515,430 530,395 425,370 690,320 760,275" fill="none" stroke="#e0ad4e" stroke-width="4" stroke-dasharray="10 8"/><g id="pins"></g></svg><div class="mapInfo"><b id="mapTitle"></b><div id="mapText"></div><button class="hidden" id="travelBtn"></button></div></div></section>
+    <section class="mode" id="ledger"><div class="modeScroll"><div class="ledgerGrid"><div class="metric card"><b id="lCash"></b><span>cash</span></div><div class="metric card"><b id="lStock"></b><span>stock</span></div><div class="metric card"><b id="lSales"></b><span>sales</span></div><div class="metric card"><b id="lMargin"></b><span>gross margin</span></div></div><div id="ledgerSummary" class="note"></div><div class="cityTitle">Shop upgrades</div><div class="grid" id="upgradeGrid"></div><div class="cityTitle">City progression</div><div id="cityProgress"></div><div class="cityTitle">Recent ledger</div><div id="ledgerEntries"></div></div></section>
+    <section class="mode" id="journal"><div class="modeScroll"><div class="card item"><h3>Journal</h3><p>Every rug has a journey. And now, so does he.</p><button class="miniBtn" id="musicBtn">♫ Music off</button><button class="miniBtn" id="replayOpening">Replay opening</button><button class="miniBtn" id="resetGame">Reset progress</button></div></div></section>
+  </main>
+  <nav class="bottomNav"><button class="active" data-mode="stall">Stall</button><button data-mode="market">Market</button><button data-mode="buyers">Buyers</button><button data-mode="map">Map</button><button data-mode="ledger">Ledger</button><button data-mode="journal">Journal</button></nav>
+</div>
+
+<div class="drawer hidden" id="rugDrawer"><div class="drawerHead"><b>Your rugs</b><button id="closeDrawer">Close</button></div><div class="rugShelf" id="rugShelf"></div></div>
+<div class="modal" id="modal"><div class="sheet card"><h3 id="modalTitle"></h3><p id="modalMeta"></p><div class="viewer"><img id="modalImg"></div><div class="tools"><button id="zoomIn">＋ Zoom</button><button id="zoomOut">− Zoom</button><button id="rotate">↻ Rotate</button><button id="flip">⇆ Flip</button><button id="resetView">Reset</button><button id="closeModal">Close</button></div><p id="modalText"></p></div></div>
+<div class="toast" id="toast"></div>
+<audio id="narrator" src="https://gcdn.picsart.com/editing-temp/9cd8ee4c-5e01-4641-8485-cb6da8c41b39.mpeg"></audio>
+<audio id="music" loop src="https://gcdn.picsart.com/editing-temp/4df84a5e-6382-42c4-9dd4-7ae2fce5675d.mp3"></audio>
+
+<script>
+const $=id=>document.getElementById(id);
+const DATA={"rugs":[["Desert Star","https://gcdn.picsart.com/cloud-storage/d9e05209-1242-4384-bf5d-204f107368cf.jpg",70,220,180,250,"Upper Egypt","Wool","~40 years","Excellent","Giza","story"],["Red Medina","https://gcdn.picsart.com/cloud-storage/83b23e6b-d725-4c5a-9ec8-4d58e20191cb.jpg",105,320,260,360,"Anatolia","Wool","~60 years","Very good","Giza","craft"],["Golden Palm","https://gcdn.picsart.com/cloud-storage/a412a450-4e30-43d0-bb50-891cabb6b0a7.jpg",80,250,190,280,"Cairo","Wool/Cotton","~20 years","Excellent","Giza","home"],["Cedar Caravan","https://gcdn.picsart.com/cloud-storage/517ebfe3-ea2f-4bab-a5ad-33a0bb532f7e.jpg",135,420,320,460,"Levant","Wool","~55 years","Good","Cairo","craft"],["Damascus Rose","https://gcdn.picsart.com/cloud-storage/eddf7d20-a8ad-4c33-b01f-6e2d69dae150.jpg",190,620,450,650,"Damascus","Fine wool","~70 years","Very good","Damascus","story"],["Sapphire Night","https://gcdn.picsart.com/cloud-storage/c6780761-8cb6-40ed-bfa4-f0196661980a.jpg",260,880,620,900,"Persia","Wool/Silk","~80 years","Collector grade","Damascus","collector"],["Cairo Garden","https://gcdn.picsart.com/cloud-storage/16a794ef-5ab7-4a6e-95fd-622e26753be5.jpg",115,340,270,390,"Cairo","Wool","~35 years","Excellent","Cairo","story"],["Nile Reed","https://gcdn.picsart.com/cloud-storage/9cfd218e-1ac6-4600-b16b-3ab42f439cc0.jpg",95,300,230,340,"Cairo","Wool/Cotton","~25 years","Very good","Cairo","home"],["Alexandria Port","https://gcdn.picsart.com/cloud-storage/17954009-aa4e-48e1-8b8d-1ce2ffed0153.jpg",140,430,330,480,"Alexandria","Wool","~45 years","Very good","Alexandria","craft"],["Delta House","https://gcdn.picsart.com/cloud-storage/fab5b5e8-07f3-48ae-b5f0-3b7e03d3af9e.jpg",88,275,210,315,"Nile Delta","Wool","~30 years","Good","Alexandria","home"],["Jaffa Citrus","https://gcdn.picsart.com/cloud-storage/3502b7e9-8ba4-40c5-8aaf-6a47182ecf9c.jpg",155,470,360,520,"Jaffa","Wool","~50 years","Very good","Jerusalem","story"],["Jerusalem Stone","https://gcdn.picsart.com/cloud-storage/adfbfdcd-92af-4d1e-b0cc-009ac88b0619.jpg",165,510,390,560,"Jerusalem","Wool","~55 years","Very good","Jerusalem","craft"],["Aleppo Courtyard","https://gcdn.picsart.com/cloud-storage/61fcef8f-8d67-44a3-93ed-2b5c1994fed5.jpg",175,540,410,590,"Aleppo","Wool","~60 years","Good","Damascus","craft"],["Damascus Blue","https://gcdn.picsart.com/cloud-storage/830fb69f-caf2-4b67-ae53-a594ce5257d9.jpg",220,700,520,760,"Damascus","Fine wool","~70 years","Excellent","Damascus","collector"],["Anatolian Hearth","https://gcdn.picsart.com/cloud-storage/f794bb93-8cce-4773-bac6-5197e1eb32fe.jpg",145,440,340,490,"Anatolia","Wool","~50 years","Good","Cairo","craft"],["Istanbul Tulip","https://gcdn.picsart.com/cloud-storage/bbec8bce-aff4-40ba-88a9-9dcf83629c5f.jpg",235,760,570,820,"Istanbul","Fine wool","~65 years","Excellent","Damascus","collector"],["Baghdad Night","https://gcdn.picsart.com/cloud-storage/8221ddd1-1243-4430-aca6-3710cd995d27.jpg",210,680,500,740,"Baghdad","Wool","~65 years","Very good","Damascus","collector"],["Basra Date Palm","https://gcdn.picsart.com/cloud-storage/01a45d81-9bfe-4fd4-b191-4fc20b9648d8.jpg",160,500,370,550,"Basra","Wool","~50 years","Good","Damascus","home"],["Caucasus Eagle","https://gcdn.picsart.com/cloud-storage/a075bd95-a8dd-46a5-b448-d1b5d4ca80d4.jpg",205,650,490,710,"Caucasus","Wool","~75 years","Very good","Damascus","collector"],["Moroccan Ember","https://gcdn.picsart.com/cloud-storage/47b61050-f4f9-4016-ac27-0b210240649e.jpg",185,590,440,650,"Morocco","Wool","~55 years","Excellent","Alexandria","story"]],"buyers":[["Samira al-Khatib","Wealthy traveller","Giza",[350,650],["Desert Star","Cairo Garden"],"story","Taste, restraint and provenance.","https://gcdn.picsart.com/cloud-storage/2071022e-8301-40a5-8248-2d230729d835.jpg","samira","https://gcdn.picsart.com/cloud-storage/f555bedf-61a8-415b-af2c-b5214ada3b2d.wav"],["Yusuf al-Masri","Hotel proprietor","Giza",[400,800],["Red Medina","Cedar Caravan"],"craft","Durability, cleaning and business value.","https://gcdn.picsart.com/cloud-storage/0f7e1602-3213-47dc-b324-cfa112d9bf44.jpg","yusuf","https://gcdn.picsart.com/cloud-storage/c7e8b606-2706-4a7d-bf84-c8b6643b4d4b.wav"],["Mariam Nassar","Newlywed homemaker","Giza",[250,480],["Golden Palm","Desert Star"],"home","Warmth and long-term domestic use.","https://gcdn.picsart.com/cloud-storage/a32d508e-957c-4b56-b07e-d4d1116b8afc.jpg","mariam",null],["Farid Haddad","Antique dealer","Cairo",[500,1100],["Damascus Rose","Sapphire Night"],"craft","Evidence, condition and provenance.","https://gcdn.picsart.com/cloud-storage/a351a702-e9a2-441f-8f0e-0ea90700c57b.jpg","farid","https://gcdn.picsart.com/cloud-storage/0c76c99e-fc59-42fa-9276-f45129d9cf54.wav"],["Evelyn Hart","Collector","Cairo",[450,900],["Sapphire Night","Cairo Garden"],"story","A memorable object with a journey.","https://gcdn.picsart.com/cloud-storage/a389768a-878f-45ac-a597-4a1099ed26f1.jpg","evelyn",null],["Nadia Fahmy","Wedding buyer","Cairo",[300,620],["Cairo Garden","Golden Palm"],"home","A generous gift without waste.",null,"NF",null],["Karim Boutros","Architect","Alexandria",[500,950],["Alexandria Port","Jerusalem Stone"],"craft","Construction and visual balance.",null,"KB",null],["Salma Riad","Modern homemaker","Alexandria",[300,650],["Nile Reed","Delta House"],"home","Something less traditional than her family expects.",null,"SR",null],["Tariq Mansour","Reseller","Alexandria",[600,1200],["Caucasus Eagle","Red Medina"],"value","Resale margin and liquidity.",null,"TM",null],["Noura Khalil","Scholar","Jerusalem",[350,700],["Jerusalem Stone","Jaffa Citrus"],"story","Quiet colours and cultural context.",null,"NK",null],["Omar Dajani","Restaurant owner","Jerusalem",[450,850],["Cedar Caravan","Anatolian Hearth"],"craft","Daily traffic, cleaning and durability.",null,"OD",null],["Rania Sayegh","Traveller","Jerusalem",[550,1000],["Jaffa Citrus","Sapphire Night"],"story","One meaningful piece from each city.",null,"RS",null],["Fadi Barakat","Decorator","Damascus",[700,1400],["Damascus Blue","Istanbul Tulip"],"value","Prestige balanced against client budget.",null,"FB",null],["Huda al-Azm","Household matriarch","Damascus",[500,950],["Damascus Rose","Basra Date Palm"],"home","Beauty that survives family life.",null,"HA",null],["Adel Nassar","Private collector","Damascus",[900,1800],["Sapphire Night","Caucasus Eagle"],"craft","Rarity only when evidence is strong.",null,"AN",null]],"env":["https://gcdn.picsart.com/cloud-storage/d647fe3e-55af-40df-91f8-d44bf4080fac.jpg","https://gcdn.picsart.com/cloud-storage/b6d3675c-bf6e-41d6-9617-e57e3e4e5eca.jpg","https://gcdn.picsart.com/cloud-storage/30658818-30fa-4983-9909-d35385abc027.jpg"]};
+const CITIES={
+ Giza:{x:515,y:430,unlock:[0,0,0],travel:0,mult:1,desc:"Starting market · households, tourists and practical buyers"},
+ Cairo:{x:530,y:395,unlock:[5,8,350],travel:25,mult:1.08,desc:"Large urban market · decorators, wealthy homes and collectors"},
+ Alexandria:{x:425,y:370,unlock:[12,18,700],travel:45,mult:1.12,desc:"Port market · hotels, exporters and traders"},
+ Jerusalem:{x:690,y:320,unlock:[20,30,1200],travel:70,mult:1.17,desc:"Crossroads market · households, scholars and institutions"},
+ Damascus:{x:760,y:275,unlock:[30,45,2000],travel:90,mult:1.24,desc:"Expert market · dealers, collectors and luxury clients"}
+};
+function rugObj(a,qty=1,damage=0){return{name:a[0],art:a[1],cost:a[2],ask:a[3],min:a[4],max:a[5],origin:a[6],material:a[7],age:a[8],condition:a[9],home:a[10],trait:a[11],qty,damage,restored:false,prov:(a[0].length%3===0?"uncertain":"documented"),history:a[0]+" is associated with "+a[6]+". It is "+a[7].toLowerCase()+" and currently in "+a[9].toLowerCase()+" condition.",craft:"Inspect the foundation, pile, edge wear and fringe before pricing."}}
+function buyerObj(a){return{name:a[0],role:a[1],city:a[2],budget:a[3],likes:a[4],style:a[5],goal:a[6],img:a[7],id:a[8],voice:a[9],opening:opening(a[1],a[5])}}
+function opening(role,style){if(style==="craft")return role+": I care about construction, condition and value. Show me evidence before price.";if(style==="value")return role+": I care about margin. Convince me there is room in this trade.";if(style==="home")return role+": I need something I can actually live with. Show me warmth, not theatre.";return role+": I want something with character. Show me the piece that fits why I came."}
+const DEFAULT={coins:120,rep:0,day:1,sales:0,city:"Giza",buyerIndex:0,selected:0,interest:42,patience:82,trust:20,phase:"discover",firstOffer:false,inventory:DATA.rugs.slice(0,3).map(r=>rugObj(r,1)),gross:0,encounters:0,ledger:["Day 1 · Opened the Giza stall with 120 pt and three rugs."],tutorial:0,customers:{},supplierRelations:{},commission:null,streak:0,daySales:0,dayProfit:0,dailyGoal:{sales:2,profit:150,reward:35},upgrades:{display:0,tea:0,ledger:0},lastLine:{who:"buyer",text:""},musicOn:false};
+let S=load();
+function load(){try{return{...DEFAULT,...JSON.parse(localStorage.getItem("tof280")||"{}")}}catch(e){return JSON.parse(JSON.stringify(DEFAULT))}}
+function save(){localStorage.setItem("tof280",JSON.stringify(S))}
+function buyersHere(){return DATA.buyers.map(buyerObj).filter(b=>b.city===S.city)}
+function B(){const a=buyersHere();return a[S.buyerIndex%Math.max(1,a.length)]||DATA.buyers.map(buyerObj)[0]}
+function R(){return S.inventory[S.selected]}
+function ckey(b=B()){return b.city+"|"+b.name}
+function cstate(b=B()){if(!S.customers[ckey(b)])S.customers[ckey(b)]={affinity:0,visits:0,purchases:0,spent:0};return S.customers[ckey(b)]}
+function sstate(city=S.city){if(!S.supplierRelations[city])S.supplierRelations[city]={level:0,purchases:0};return S.supplierRelations[city]}
+function relation(a){return a>=75?"Patron":a>=50?"Regular":a>=25?"Familiar":"New customer"}
+function tier(){return S.rep>=45?"Trade House":S.rep>=30?"Established Shop":S.rep>=18?"Bazaar Stall":S.rep>=8?"Rug Mat":"Borrowed Corner"}
+function effectiveBudget(b=B()){const cs=cstate(b);return[b.budget[0],Math.round(b.budget[1]*(1+Math.min(.35,cs.affinity*.0035)))]}
+function unlocked(n){const u=CITIES[n].unlock;return S.sales>=u[0]&&S.rep>=u[1]&&S.coins>=u[2]}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),1300)}
+
+/* Audio: no browser speech for seller */
+let AC=null;
+function ac(){return AC||(AC=new (window.AudioContext||window.webkitAudioContext)())}
+function tone(f,d=.07,type="sine",g=.035,delay=0){try{const a=ac(),o=a.createOscillator(),v=a.createGain();o.type=type;o.frequency.value=f;v.gain.setValueAtTime(g,a.currentTime+delay);v.gain.exponentialRampToValueAtTime(.0001,a.currentTime+delay+d);o.connect(v).connect(a.destination);o.start(a.currentTime+delay);o.stop(a.currentTime+delay+d)}catch(e){}}
+function sfx(k){if(k==="tap")tone(520,.035,"triangle",.02);if(k==="rug"){tone(230,.05,"triangle",.02);tone(180,.06,"triangle",.015,.03)}if(k==="coin"){tone(920,.07,"sine",.04);tone(1340,.08,"sine",.035,.06)}if(k==="success"){tone(523,.09);tone(659,.09,"sine",.04,.09);tone(784,.14,"sine",.045,.18)}if(k==="fail"){tone(180,.18,"sawtooth",.025);tone(130,.2,"sawtooth",.02,.1)}}
+document.addEventListener("pointerdown",e=>{if(e.target.closest("button"))sfx("tap")},{passive:true});
+function playBuyerVoice(text){const b=B();S.lastLine={who:"buyer",text};if(b.voice&&text===b.opening){try{new Audio(b.voice).play().catch(()=>{})}catch(e){}}}
+function say(who,text){S.lastLine={who,text};$("who").textContent=who==="buyer"?"Buyer":"You";$("speaker").textContent=who==="buyer"?B().name:"Carpet Merchant";$("speech").textContent=text;if(who==="buyer")playBuyerVoice(text)}
+$("replayLine").onclick=()=>{if(S.lastLine.who==="buyer")playBuyerVoice(S.lastLine.text)};
+
+/* Mode switching */
+function showMode(n){document.querySelectorAll(".mode").forEach(x=>x.classList.toggle("active",x.id===n));document.querySelectorAll(".bottomNav button").forEach(x=>x.classList.toggle("active",x.dataset.mode===n));if(n==="map")renderMap()}
+document.querySelectorAll(".bottomNav button").forEach(b=>b.onclick=()=>showMode(b.dataset.mode));
+
+function render(){
+ $("coins").textContent=S.coins;$("rep").textContent=S.rep;$("day").textContent=S.day;$("cityLabel").textContent=S.city+" · 1925 · "+tier();
+ const b=B(),cs=cstate(b),eb=effectiveBudget(b);
+ $("buyerName").textContent=b.name;$("buyerRole").textContent=b.role+" · "+relation(cs.affinity);
+ $("buyerAvatar").innerHTML=b.img?'<img src="'+b.img+'">':'<div class="mono">'+b.id+'</div>';
+ $("interest").style.width=Math.min(100,S.interest)+"%";$("patience").style.width=Math.max(0,S.patience)+"%";$("trust").style.width=Math.min(100,S.trust)+"%";
+ const r=R();if(r){$("rugNowImg").src=r.art;$("rugNowName").textContent=r.name;$("rugNowMeta").textContent=r.origin+" · "+r.material+" · "+r.condition+(r.damage?" · damage "+r.damage+"%":"");$("rugNowPrice").textContent="Ask "+Math.round(r.ask*CITIES[S.city].mult)+" pt · buyer budget "+eb[0]+"–"+eb[1]+" pt"}else{$("rugNowImg").removeAttribute("src");$("rugNowName").textContent="No rug selected";$("rugNowMeta").textContent="Visit Market to restock";$("rugNowPrice").textContent=""}
+ renderTutorial();renderChoices();renderInventory();renderMarket();renderBuyers();renderLedger();renderMap();renderGoal();save();
+}
+function renderTutorial(){const steps=["Ask what the buyer needs","Choose a matching rug","Inspect the rug","Use story or craftsmanship","Negotiate","Close the deal"];if(localStorage.getItem("tof280-tut")||S.sales>0){$("tutorial").classList.add("hidden");return}$("tutorial").classList.remove("hidden");$("tutorialTitle").textContent="Day One tutorial · "+(S.tutorial+1)+"/6";$("tutorialText").textContent=steps[Math.min(S.tutorial,5)];$("tutorialBar").style.width=((S.tutorial+1)/6*100)+"%"}
+function adv(n){if(!localStorage.getItem("tof280-tut")&&S.tutorial===n){S.tutorial++;if(S.tutorial>=6)localStorage.setItem("tof280-tut","1")}}
+function renderChoices(){
+ const b=B(),r=R(),o=[];
+ if(S.phase==="discover"){
+   o.push(["Ask their need","Learn motive",()=>{S.trust+=8;S.interest+=4;S.phase="present";say("buyer",b.style==="craft"?"I need something that proves itself in use, not only in a story.":b.style==="value"?"I need enough room in the price to justify the trade.":b.style==="home"?"I want something warm enough for real life, not a showpiece.":"I want something chosen for me, not simply your most expensive rug.");adv(0);render()}],
+          ["Ask budget","Money first",()=>{S.patience-=2;say("buyer","I have a budget. First show me you understand what I need.");render()}]);
+ }else if(S.phase==="present"){
+   o.push(["Tell its story","Origin & meaning",()=>argument("story")],
+          ["Explain craft","Weave & condition",()=>argument("craft")],
+          ["Inspect together","Open details",()=>{inspect();S.trust+=5;adv(2);render()}],
+          ["Change rug","Compare stock",()=>{$("rugDrawer").classList.remove("hidden")}]);
+ }else{
+   o.push(["Offer price","Open bargaining",offer],
+          ["Lower price","Concede",counter],
+          ["Hold firm","Risk patience",hold],
+          ["Back to evidence","Rebuild trust",()=>{S.phase="present";say("merchant","You return to the rug before talking price.");render()}]);
+ }
+ $("choices").innerHTML=o.map((x,i)=>'<button class="'+(i===0&&S.phase==="negotiate"?"primary":"")+'" data-choice="'+i+'">'+x[0]+'<small>'+x[1]+'</small></button>').join("");
+ document.querySelectorAll("[data-choice]").forEach(x=>x.onclick=o[+x.dataset.choice][2]);
+}
+function argument(kind){
+ const r=R(),b=B();if(!r)return toast("Choose a rug");
+ const pref=b.style===kind||(b.style==="home"&&kind==="story"),match=b.likes.includes(r.name);
+ if(b.role==="Antique dealer"&&kind==="story"&&r.prov==="uncertain"){S.trust=Math.max(0,S.trust-12);S.patience-=8;say("buyer","You are claiming more than the evidence supports. Show me construction, not romance.");S.phase="present";render();return}
+ S.interest=Math.min(100,S.interest+(pref?15:7)+(match?5:0));S.trust=Math.min(100,S.trust+(pref?10:4));S.patience-=3;
+ say("merchant",kind==="story"?r.history:r.craft);setTimeout(()=>say("buyer",pref?"That addresses the thing I actually care about.":"Interesting, but that is not the main reason I came."),350);
+ S.phase="negotiate";adv(3);render();
+}
+function offer(){const r=R(),b=B();if(!r)return;S.firstOffer=true;S.patience-=8;adv(4);const ask=Math.round(r.ask*CITIES[S.city].mult*(1+(S.upgrades.ledger||0)*.05));if(ask>effectiveBudget(b)[1])say("buyer","That is beyond my budget. We are not close.");else if(S.interest>=70&&S.trust>=45)say("buyer","Serious price. What room do you have?");else say("buyer","You named the price before earning my confidence.");render()}
+function counter(){const r=R(),b=B();if(!S.firstOffer)return say("buyer","Name your price first.");const ask=Math.round(r.ask*CITIES[S.city].mult*(1+(S.upgrades.ledger||0)*.05)),p=Math.max(r.min,Math.round(ask*.84));S.patience-=5;if(p<=effectiveBudget(b)[1]&&S.interest>=62&&S.trust>=38)return sale(p,b.likes.includes(r.name)?2:1);say("buyer","Closer. I still need a reason to say yes.");render()}
+function hold(){const r=R(),b=B(),ask=Math.round(r.ask*CITIES[S.city].mult*(1+(S.upgrades.ledger||0)*.05));S.patience-=12;if(S.firstOffer&&S.interest>=82&&S.trust>=55&&ask<=effectiveBudget(b)[1]&&b.likes.includes(r.name))return sale(ask,3);if(S.patience<=15)return walk();say("buyer","Confidence is admirable. I still need evidence.");render()}
+function sale(price,rep){
+ const r=R(),b=B(),cs=cstate(b);let bonus=0,profit=price-r.cost;cs.purchases++;cs.spent+=price;cs.affinity=Math.min(100,cs.affinity+10+(b.likes.includes(r.name)?6:0));
+ if(S.commission&&S.commission.buyer===ckey(b)&&S.commission.rug===r.name){bonus=S.commission.bonus;S.coins+=bonus;cs.affinity=Math.min(100,cs.affinity+12);S.rep+=2;S.commission=null}
+ S.coins+=price;S.rep+=rep;S.sales++;S.gross+=profit+bonus;S.daySales++;S.dayProfit+=Math.max(0,profit+bonus);S.streak++;S.ledger.push("Day "+S.day+" · "+S.city+" · Sold "+r.name+" to "+b.name+" for "+price+" pt");
+ r.qty--;if(r.qty<=0)S.inventory.splice(S.selected,1);adv(5);localStorage.setItem("tof280-tut","1");sfx("success");toast("Sale +"+(price+bonus)+" pt");setTimeout(nextBuyer,700);
+}
+function walk(){cstate(B()).affinity=Math.max(0,cstate(B()).affinity-4);S.streak=0;sfx("fail");S.ledger.push("Day "+S.day+" · "+B().name+" walked away.");toast("Buyer walked away");setTimeout(nextBuyer,550)}
+function nextBuyer(){
+ S.encounters++;
+ if(S.encounters%5===0){finishDay();S.day++;S.coins=Math.max(0,S.coins-12);S.ledger.push("Day "+S.day+" · Paid 12 pt daily overhead.");newDailyGoal()}
+ randomEvent();
+ S.buyerIndex=(S.buyerIndex+1)%buyersHere().length;S.selected=Math.min(S.selected,Math.max(0,S.inventory.length-1));
+ const cs=cstate(B());cs.visits++;S.interest=40+(S.upgrades.display||0)*5+Math.min(10,Math.floor(cs.affinity/10));S.patience=78+(S.upgrades.tea||0)*5+Math.min(8,Math.floor(cs.affinity/15));S.trust=18+Math.min(20,Math.floor(cs.affinity/4));S.phase="discover";S.firstOffer=false;S.commission=makeCommission(B());say("buyer",cs.affinity>=50?"Good to see you again. Show me something worth returning for.":cs.affinity>=25?"I came back because the last conversation was useful.":" "+B().opening);render();
+}
+function makeCommission(b){const cs=cstate(b);if(cs.affinity<35||cs.visits<2)return null;const liked=b.likes.filter(n=>DATA.rugs.some(r=>r[0]===n));if(!liked.length)return null;return{buyer:ckey(b),rug:liked[(cs.visits+cs.purchases)%liked.length],bonus:20+Math.floor(cs.affinity/5)}}
+
+/* Inventory / inspection */
+$("changeRug").onclick=()=>$("rugDrawer").classList.remove("hidden");$("closeDrawer").onclick=()=>$("rugDrawer").classList.add("hidden");$("inspectRug").onclick=inspect;
+function renderInventory(){
+ $("rugShelf").innerHTML=S.inventory.map((r,i)=>'<div class="rugCard card"><img src="'+r.art+'"><b>'+r.name+'</b><span>'+r.origin+' · '+r.material+' · '+r.condition+'</span><span>Ask '+Math.round(r.ask*CITIES[S.city].mult)+' pt</span><button data-rug="'+i+'">'+(i===S.selected?"Selected":"Present this rug")+'</button></div>').join("")||'<div class="note">No stock. Visit Market.</div>';
+ document.querySelectorAll("[data-rug]").forEach(x=>x.onclick=()=>{S.selected=+x.dataset.rug;$("rugDrawer").classList.add("hidden");S.interest+=B().likes.includes(R().name)?8:1;S.trust+=B().likes.includes(R().name)?4:0;sfx("rug");say("merchant","You present "+R().name+".");adv(1);render()});
+}
+let vz=1,vr=0,vf=1;
+function inspect(){const r=R();if(!r)return;vz=1;vr=0;vf=1;applyView();$("modalTitle").textContent=r.name;$("modalMeta").textContent=r.origin+" · "+r.material+" · "+r.age+" · "+r.condition+" · provenance "+r.prov;$("modalImg").src=r.art;$("modalText").textContent=r.history+" "+r.craft+(r.damage?" Damage: "+r.damage+"%.":"");$("modal").classList.add("open")}
+function applyView(){$("modalImg").style.transform="scale("+vz+") rotate("+vr+"deg) scaleX("+vf+")"}
+$("zoomIn").onclick=()=>{vz=Math.min(3,vz+.25);applyView()};$("zoomOut").onclick=()=>{vz=Math.max(.6,vz-.25);applyView()};$("rotate").onclick=()=>{vr=(vr+90)%360;applyView()};$("flip").onclick=()=>{vf*=-1;applyView()};$("resetView").onclick=()=>{vz=1;vr=0;vf=1;applyView()};$("closeModal").onclick=()=>$("modal").classList.remove("open");
+
+/* Supplier rotation / restoration */
+function supplierStock(){
+ const pool=DATA.rugs.filter(a=>a[10]===S.city||(S.city==="Cairo"&&["Giza","Cairo"].includes(a[10]))||(S.city==="Alexandria"&&["Cairo","Alexandria"].includes(a[10]))||(S.city==="Jerusalem"&&["Jerusalem","Cairo"].includes(a[10]))||S.city==="Damascus");
+ return pool.filter((_,i)=>(i+S.day)%2===0||i<3).slice(0,8);
+}
+function renderMarket(){const sr=sstate(),discount=Math.min(.12,sr.level*.02);$("marketTitle").textContent=S.city+" Supplier Market";$("marketIntro").textContent="Rotating stock · supplier Lv "+sr.level+" · discount "+Math.round(discount*100)+"%";$("supplierRel").textContent=sr.purchases+" purchases with this supplier";
+ $("marketGrid").innerHTML=supplierStock().map(a=>{const r=rugObj(a,1,((a[0].length+S.day)%4===0?20:0)),cost=Math.round(r.cost*(1-discount)*(r.damage?.75:1));return'<div class="card item supplierItem"><img src="'+r.art+'"><div><h3>'+r.name+(r.damage?" · damaged":"")+'</h3><p>'+r.origin+' · '+r.material+'</p><p>Dealer '+cost+' pt · market '+r.min+'–'+r.max+' pt</p><button class="miniBtn" data-buy="'+DATA.rugs.indexOf(a)+'" data-cost="'+cost+'" data-dmg="'+r.damage+'">Buy</button></div></div>'}).join("");
+ document.querySelectorAll("[data-buy]").forEach(x=>x.onclick=()=>buy(+x.dataset.buy,+x.dataset.cost,+x.dataset.dmg));
+}
+function buy(i,cost,damage){if(S.coins<cost)return toast("Not enough working capital");const r=rugObj(DATA.rugs[i],1,damage);S.coins-=cost;const same=S.inventory.find(x=>x.name===r.name&&x.damage===r.damage);same?same.qty++:S.inventory.push(r);const sr=sstate();sr.purchases++;sr.level=Math.min(6,Math.floor(sr.purchases/2));S.ledger.push("Day "+S.day+" · Bought "+r.name+" for "+cost+" pt");sfx("coin");toast("Stock purchased");render()}
+function restoreSelected(){const r=R();if(!r||!r.damage)return toast("Selected rug does not need restoration");const cost=Math.round(r.cost*.18);if(S.coins<cost)return toast("Not enough cash");S.coins-=cost;r.damage=0;r.restored=true;r.ask=Math.round(r.ask*1.08);S.ledger.push("Day "+S.day+" · Restored "+r.name+" for "+cost+" pt");toast("Rug restored");render()}
+
+/* Buyer directory */
+function renderBuyers(){
+ const all=DATA.buyers.map(buyerObj);$("buyersGrid").innerHTML=Object.keys(CITIES).map(city=>'<div class="cityTitle">'+city+(unlocked(city)?"":" · locked")+'</div>'+all.filter(b=>b.city===city).map(b=>{const cs=cstate(b);return'<div class="card item buyerItem '+(unlocked(city)?"":"hidden")+'">'+(b.img?'<img src="'+b.img+'">':'<div class="mono">'+b.id+'</div>')+'<div><h3>'+b.name+'</h3><p>'+b.role+' · '+relation(cs.affinity)+'</p><p>'+b.goal+'</p><p>'+cs.visits+' visits · '+cs.purchases+' purchases</p></div></div>'}).join("")).join("");
+}
+
+/* Day goals / events / upgrades */
+function newDailyGoal(){S.daySales=0;S.dayProfit=0;S.dailyGoal={sales:2+(S.day%2),profit:140+S.day*15,reward:30+S.day*5}}
+function renderGoal(){const g=S.dailyGoal;$("dayGoal").textContent="Goal "+S.daySales+"/"+g.sales+" sales · "+S.dayProfit+"/"+g.profit+" pt · reward "+g.reward+" pt";$("streak").textContent=S.streak}
+function finishDay(){const g=S.dailyGoal;if(S.daySales>=g.sales&&S.dayProfit>=g.profit){S.coins+=g.reward;S.rep+=2;S.ledger.push("Day "+S.day+" · Daily goal completed · +"+g.reward+" pt");sfx("success")}}
+function randomEvent(){if(!S.encounters||S.encounters%4)return;const k=(S.encounters/4)%4;if(k===1){S.interest+=8;toast("Market rush: buyers are eager")}else if(k===2){S.patience-=8;toast("Heat wave: buyers are less patient")}else if(k===3){S.coins+=15;toast("Tip +15 pt")}else{sstate().level=Math.min(6,sstate().level+1);toast("Supplier favor improved")}}
+function renderLedger(){
+ $("lCash").textContent=S.coins+" pt";$("lStock").textContent=S.inventory.reduce((a,r)=>a+r.qty,0);$("lSales").textContent=S.sales;$("lMargin").textContent=S.gross+" pt";
+ $("ledgerSummary").innerHTML="<b>"+tier()+"</b> · "+S.city+" · repeat customers spend more and unlock commissions.";
+ $("upgradeGrid").innerHTML=[["display","Rug display",120,"+5 starting interest"],["tea","Tea service",100,"+5 starting patience"],["ledger","Better ledger",140,"+5% asking price"]].map(u=>{const lv=S.upgrades[u[0]]||0,cost=Math.round(u[2]*(1+lv*.65));return'<div class="upgrade"><b>'+u[1]+' · Lv '+lv+'</b><small>'+u[3]+'</small><button data-up="'+u[0]+'" data-cost="'+cost+'">Upgrade '+cost+' pt</button></div>'}).join("");
+ document.querySelectorAll("[data-up]").forEach(x=>x.onclick=()=>{const cost=+x.dataset.cost;if(S.coins<cost)return toast("Not enough cash");S.coins-=cost;S.upgrades[x.dataset.up]=(S.upgrades[x.dataset.up]||0)+1;sfx("coin");render()});
+ $("cityProgress").innerHTML=Object.entries(CITIES).map(([n,c])=>'<div class="note"><b>'+n+'</b> · '+(unlocked(n)?"Unlocked":"Needs "+c.unlock[0]+" sales / "+c.unlock[1]+" rep / "+c.unlock[2]+" pt")+'</div>').join("");
+ $("ledgerEntries").innerHTML=S.ledger.slice(-10).reverse().map(x=>'<div class="note">'+x+'</div>').join("");
+}
+
+/* Map */
+let mapTarget="Giza";function renderMap(){const g=$("pins");g.innerHTML="";Object.entries(CITIES).forEach(([n,c])=>{const ns="http://www.w3.org/2000/svg",grp=document.createElementNS(ns,"g"),circle=document.createElementNS(ns,"circle"),text=document.createElementNS(ns,"text");circle.setAttribute("cx",c.x);circle.setAttribute("cy",c.y);circle.setAttribute("r",n===S.city?16:11);circle.setAttribute("fill",unlocked(n)?"#ffd36d":"#6b4b32");circle.setAttribute("stroke","#2d160c");circle.setAttribute("stroke-width","4");text.setAttribute("x",c.x+18);text.setAttribute("y",c.y+7);text.setAttribute("fill","#f4e1bb");text.setAttribute("font-size","22");text.textContent=n;grp.append(circle,text);grp.style.cursor="pointer";grp.onclick=()=>selectCity(n);g.appendChild(grp)});selectCity(mapTarget)}
+function selectCity(n){mapTarget=n;const c=CITIES[n],open=unlocked(n);$("mapTitle").textContent=n;$("mapText").textContent=c.desc+" · "+(open?(n===S.city?"You are here":"Travel "+c.travel+" pt"):"Locked: "+c.unlock[0]+" sales / "+c.unlock[1]+" rep / "+c.unlock[2]+" pt");$("travelBtn").classList.toggle("hidden",!open||n===S.city);$("travelBtn").textContent="Travel to "+n;$("travelBtn").onclick=()=>travel(n)}
+function travel(n){const c=CITIES[n];if(!unlocked(n))return toast("Locked");if(S.coins<c.travel)return toast("Not enough cash");S.coins-=c.travel;S.day++;S.city=n;S.buyerIndex=0;S.phase="discover";S.interest=42;S.patience=82;S.trust=18;S.ledger.push("Day "+S.day+" · Travelled to "+n+" for "+c.travel+" pt");say("buyer",B().opening);showMode("stall");render()}
+
+/* Opening / audio */
+let openingPlaying=false;
+function stopOpening(){const n=$("narrator"),m=$("music");n.pause();m.pause();n.currentTime=0;m.currentTime=0}
+$("playOpening").onclick=()=>{if(openingPlaying)return;openingPlaying=true;const n=$("narrator"),m=$("music");n.volume=.95;m.volume=.13;n.currentTime=0;n.play().catch(()=>{});m.play().catch(()=>{});$("playOpening").textContent="Playing…";n.onended=()=>{$("playOpening").textContent="Opening finished";openingPlaying=false;stopOpening()}}
+$("enterGame").onclick=()=>{stopOpening();$("opening").style.display="none";localStorage.setItem("tof280-open","1");say("buyer",B().opening);render()}
+$("replayOpening").onclick=()=>{$("opening").style.display="block";$("playOpening").textContent="▶ Play opening";openingPlaying=false}
+$("musicBtn").onclick=()=>{const m=$("music");if(m.paused){m.volume=.14;m.play().catch(()=>{});S.musicOn=true;$("musicBtn").textContent="♫ Music on"}else{m.pause();S.musicOn=false;$("musicBtn").textContent="♫ Music off"};save()}
+$("resetGame").onclick=()=>{if(confirm("Reset all progress?")){localStorage.removeItem("tof280");localStorage.removeItem("tof280-open");localStorage.removeItem("tof280-tut");location.reload()}}
+
+if(localStorage.getItem("tof280-open"))$("opening").style.display="none";
+{const cs=cstate(B());if(!cs.visits)cs.visits=1}
+say("buyer",B().opening);render();
+</script>
+</body></html>
