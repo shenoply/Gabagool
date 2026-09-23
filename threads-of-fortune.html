@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Threads of Fortune · Build 261</title>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Threads of Fortune · Build 262</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#090404;color:#f6e7c4;font-family:Georgia,serif}button{font:inherit}#app{max-width:900px;margin:auto;padding:10px}
 .c{background:linear-gradient(#351a10,#1a0d09);border:1px solid #81592b;border-radius:17px}.top{display:flex;gap:8px;flex-wrap:wrap}.brand{flex:1;padding:11px}.brand h1{margin:0;font-size:30px}.stats{display:flex;gap:6px}.stat{min-width:74px;text-align:center;padding:8px}.stat b{display:block;font-size:22px}
@@ -125,7 +125,7 @@ linear-gradient(180deg,#26140c,#080403 72%);color:transparent}
         <button id="storyVoice">🔊 Narrate</button>
         <button id="storyNext">Next →</button>
       </div>
-      <button class="storySkip" id="skip">Skip documentary</button>
+      <button class="storySkip" id="skip">Skip documentary</button><button class="storySkip" id="enterGame">Enter game now</button>
     </div>
   </div>
 </div>
@@ -151,7 +151,7 @@ linear-gradient(180deg,#26140c,#080403 72%);color:transparent}
   </div>
 <section class="p on" id="p-stall"><div class="grid"><div><div class="dialogue c"><div class="av"><img id="si"></div><div><div class="who" id="sw"></div><div class="name" id="sn"></div><div class="speech" id="line"></div></div></div><div class="title">Your rugs</div><div class="shelf" id="rl"></div><div class="acts"><button class="act" id="inspect">Inspect</button><button class="act" id="story">Tell history</button><button class="act primary" id="offer">Offer price</button><button class="act" id="lower">Lower price</button><button class="act" id="hold">Hold firm</button><button class="act" id="cat">Pet Saffron</button></div><div class="acts"><button class="act" id="music">♫ Arabian music off</button><button class="act" id="next">Next buyer</button></div></div>
 <div><div class="prof c"><div style="display:flex;gap:8px"><div class="av"><img id="bi"></div><div><h3 id="bn"></h3><p id="bb"></p></div></div><div class="bars"><div>Interest<div class="bar"><i id="interest"></i></div></div><div>Patience<div class="bar y"><i id="patience"></i></div></div></div><div class="tags" id="bt"></div></div><div class="prof c" style="margin-top:7px"><h3 id="rn"></h3><p id="rd"></p><div class="tags" id="rt"></div></div></div></div></section>
-<section class="p" id="p-supplier"><div class="grid2" id="sg"></div></section><section class="p" id="p-buyers"><div class="grid2" id="bg"></div></section><section class="p" id="p-map"><div class="globeWrap c">
+<section class="p" id="p-supplier"><div class="grid2" id="sg"></div></section><section class="p" id="p-buyers"><div class="grid2" id="bg"></div></section><section class="p" id="p-map"><div id="mp" style="display:none"></div><div class="globeWrap c">
   <canvas id="globe" width="720" height="720"></canvas>
   <div class="globeHint">Drag to spin · tap a glowing city</div>
   <div class="cityPreview" id="cityPreview">Giza · your starting market</div>
@@ -300,6 +300,12 @@ if(storyPrevEl) storyPrevEl.onclick=()=>{storyIndex=Math.max(0,storyIndex-1);sho
 if(storyNextEl) storyNextEl.onclick=()=>{if(storyIndex<storySlides.length-1){storyIndex++;showStory()}else{document.getElementById('pro')?.classList.add('hide');startTutorial()}};
 if(storyVoiceEl) storyVoiceEl.onclick=()=>speakCharacter(storySlides[storyIndex].x,0,.88,.88);
 if(skipEl) skipEl.onclick=()=>{document.getElementById('pro')?.classList.add('hide');startTutorial()};
+const enterGameEl=document.getElementById('enterGame');
+if(enterGameEl)enterGameEl.onclick=()=>{
+ document.getElementById('pro')?.classList.add('hide');
+ document.getElementById('tutorial')?.classList.remove('on');
+ localStorage.setItem('tof-tutorial-done','1');
+};
 showStory();
 
 const tutorials=[
@@ -310,11 +316,29 @@ const tutorials=[
  ['Run the business','Profit is not free cash. Replace stock, pay daily overhead, build supplier trust, then use reputation to reach new markets.']
 ];
 let ti=0;
-function showTutorial(){tutorialStep.textContent=(ti+1)+' / '+tutorials.length;tutorialTitle.textContent=tutorials[ti][0];tutorialText.textContent=tutorials[ti][1]}
-function startTutorial(){if(localStorage.getItem('tof-tutorial-done'))return;tutorial.classList.add('on');showTutorial()}
-tutorialVoice.onclick=()=>speakCharacter(tutorials[ti][1],0,.9,.9);
-tutorialNext.onclick=()=>{if(ti<tutorials.length-1){ti++;showTutorial()}else{tutorial.classList.remove('on');localStorage.setItem('tof-tutorial-done','1')}};
-tutorialSkip.onclick=()=>{tutorial.classList.remove('on');localStorage.setItem('tof-tutorial-done','1')};
+const tutorialEl=document.getElementById('tutorial');
+const tutorialStepEl=document.getElementById('tutorialStep');
+const tutorialTitleEl=document.getElementById('tutorialTitle');
+const tutorialTextEl=document.getElementById('tutorialText');
+const tutorialVoiceEl=document.getElementById('tutorialVoice');
+const tutorialNextEl=document.getElementById('tutorialNext');
+const tutorialSkipEl=document.getElementById('tutorialSkip');
+function showTutorial(){
+ if(tutorialStepEl)tutorialStepEl.textContent=(ti+1)+' / '+tutorials.length;
+ if(tutorialTitleEl)tutorialTitleEl.textContent=tutorials[ti][0];
+ if(tutorialTextEl)tutorialTextEl.textContent=tutorials[ti][1];
+}
+function startTutorial(){
+ if(localStorage.getItem('tof-tutorial-done'))return;
+ if(tutorialEl)tutorialEl.classList.add('on');
+ showTutorial();
+}
+if(tutorialVoiceEl)tutorialVoiceEl.onclick=()=>speakCharacter(tutorials[ti][1],0,.9,.9);
+if(tutorialNextEl)tutorialNextEl.onclick=()=>{
+ if(ti<tutorials.length-1){ti++;showTutorial()}
+ else{if(tutorialEl)tutorialEl.classList.remove('on');localStorage.setItem('tof-tutorial-done','1')}
+};
+if(tutorialSkipEl)tutorialSkipEl.onclick=()=>{if(tutorialEl)tutorialEl.classList.remove('on');localStorage.setItem('tof-tutorial-done','1')};
 
 // Distinct voices whenever buyer/merchant dialogue changes.
 const oldSay=window.say;
