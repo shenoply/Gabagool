@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Wet Whiskers · Build 262</title>
+<title>Wet Whiskers · Build 263</title>
 <style>
   :root{
     --ink:#2b1d14; --paper:#e9dcc3; --moss:#5f7a4b; --brick:#a4432b; --puddle:#3e6b7a; --ochre:#d9a441;
@@ -1450,7 +1450,7 @@ function cameraReset(){gameCam.yaw=0;gameCam.pitch=phase==='house'?.8:.58;gameCa
 function zoomGame(factor){if(!gameplayActive())return;gameCam.distance=THREE.MathUtils.clamp(gameCam.distance*factor,phase==='house'?3:1.7,phase==='house'?19:12);}
 canvas.style.touchAction='none';
 canvas.addEventListener('pointerdown',e=>{if(!gameplayActive())return;gameCam.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});canvas.setPointerCapture(e.pointerId);if(gameCam.pointers.size===1){gameCam.start={x:e.clientX,y:e.clientY};gameCam.moved=false;}else{gameCam.moved=true;const a=[...gameCam.pointers.values()];gameCam.pinch=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);}});
-canvas.addEventListener('pointermove',e=>{const old=gameCam.pointers.get(e.pointerId);if(!old||!gameplayActive())return;const dx=e.clientX-old.x,dy=e.clientY-old.y;gameCam.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(gameCam.pointers.size>1){const a=[...gameCam.pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(gameCam.pinch>0&&d>5)zoomGame(gameCam.pinch/d);gameCam.pinch=d;}else{if(gameCam.start&&Math.hypot(e.clientX-gameCam.start.x,e.clientY-gameCam.start.y)>6)gameCam.moved=true;if(gameCam.moved){gameCam.yaw-=dx*.0048;gameCam.pitch=THREE.MathUtils.clamp(gameCam.pitch+dy*.0035,-.72,2.15);}}});
+canvas.addEventListener('pointermove',e=>{const old=gameCam.pointers.get(e.pointerId);if(!old||!gameplayActive())return;const dx=e.clientX-old.x,dy=e.clientY-old.y;gameCam.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(gameCam.pointers.size>1){const a=[...gameCam.pointers.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(gameCam.pinch>0&&d>5)zoomGame(gameCam.pinch/d);gameCam.pinch=d;}else{if(gameCam.start&&Math.hypot(e.clientX-gameCam.start.x,e.clientY-gameCam.start.y)>6)gameCam.moved=true;if(gameCam.moved){gameCam.yaw-=dx*.0048;gameCam.pitch=THREE.MathUtils.clamp(gameCam.pitch+dy*.0035,-.72,1.48);}}});
 function endCameraPointer(e){if(!gameCam.pointers.has(e.pointerId))return;const tap=gameCam.pointers.size===1&&!gameCam.moved;gameCam.pointers.delete(e.pointerId);gameCam.pinch=0;if(tap&&e.type==='pointerup'&&gameplayActive()&&phase==='house')houseTap(e);}
 for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(name,endCameraPointer);
 canvas.addEventListener('wheel',e=>{if(!gameplayActive())return;e.preventDefault();zoomGame(Math.exp(e.deltaY*.001));},{passive:false});
@@ -2908,12 +2908,13 @@ requestAnimationFrame(loop);
 <script src="vehiclePhysics219.js?v=219"></script>
 <script src="driving203.js?v=248"></script>
 <script src="original-city210.js?v=249"></script>
-<script src="city204.js?v=262"></script>
-<script src="city-traffic261.js?v=262"></script>
+<script src="city204.js?v=263"></script>
+<script src="city-traffic261.js?v=263"></script>
+<script src="city-life263.js?v=263"></script>
 <script src="cockpit205.js?v=207"></script>
 <script src="motoring206.js?v=242"></script>
 <script src="cockpit206.js?v=211"></script>
-<script src="camera207.js?v=249"></script>
+<script src="camera207.js?v=263"></script>
 <script src="cockpit207.js?v=222"></script>
 <script src="audio207.js?v=247"></script>
 <script src="hud208.js?v=210"></script>
@@ -2945,6 +2946,6 @@ requestAnimationFrame(loop);
 <script src="model-review242.js?v=247"></script>
 <script src="workshop250.js?v=258"></script>
 <script src="build255.js?v=257"></script>
-<div id="buildStamp247" style="position:fixed;left:8px;bottom:8px;z-index:99999;font:600 10px system-ui;color:#f0e2bf;background:#1d312acc;border:1px solid #f0e2bf33;padding:4px 7px;border-radius:7px;pointer-events:none">BUILD 262</div>
+<div id="buildStamp247" style="position:fixed;left:8px;bottom:8px;z-index:99999;font:600 10px system-ui;color:#f0e2bf;background:#1d312acc;border:1px solid #f0e2bf33;padding:4px 7px;border-radius:7px;pointer-events:none">BUILD 263</div>
 </body>
 </html>
