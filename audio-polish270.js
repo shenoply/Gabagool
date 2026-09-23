@@ -1,6 +1,6 @@
 /* Build 270: area ambience, interaction feedback and character reaction polish. */
 (()=>{
- let ctx=null,master=null,noise=null,filter=null,region='',pulse=0,catClock=8,birdClock=5,creakClock=9;
+ let ctx=null,master=null,noise=null,filter=null,region='',pulse=0,catClock=8,birdClock=5,creakClock=9,regionClock=0;
  function ensure270(){
   if(ctx)return true;ctx=audio();if(!ctx)return false;
   master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
@@ -35,7 +35,7 @@
   zaytona.userData270=zaytona.userData270||{near:false,cool:0};const u=zaytona.userData270;u.cool=Math.max(0,u.cool-dt);
   if(d<1.5&&!u.near&&u.cool===0){u.near=true;u.cool=10;meow66(zaytona.g.position);}else if(d>2.4)u.near=false;
  }
- const tick0=tickWorld38;tickWorld38=function(dt){tick0(dt);wrapFeedback270();setRegion270(region270());if(master&&(!voiceOn||document.hidden))master.gain.setTargetAtTime(0,ctx.currentTime,.25);else if(master&&voiceOn){const v={quiet:0,yard:.010,pond:.017,den:.008,city:.014,house:.005,dumpster:.007}[region]||0;master.gain.setTargetAtTime(v,ctx.currentTime,.5);}ambienceEvents270(dt);contextualCat270(dt);};
+ const tick0=tickWorld38;tickWorld38=function(dt){tick0(dt);wrapFeedback270();regionClock+=dt;if(regionClock>.25){regionClock=0;setRegion270(region270());if(master&&(!voiceOn||document.hidden))master.gain.setTargetAtTime(0,ctx.currentTime,.25);else if(master&&voiceOn){const v={quiet:0,yard:.010,pond:.017,den:.008,city:.014,house:.005,dumpster:.007}[region]||0;master.gain.setTargetAtTime(v,ctx.currentTime,.5);}}ambienceEvents270(dt);contextualCat270(dt);};
  document.addEventListener('visibilitychange',()=>{if(master&&document.hidden)master.gain.setTargetAtTime(0,ctx.currentTime,.1);});
  window.audioPolish270={get region(){return region;}};
 })();
