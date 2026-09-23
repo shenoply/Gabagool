@@ -30,19 +30,7 @@
    if(!c)return;
    [...(c.traffic||[]).map(x=>x.g),...(c.parked||[])].forEach(darkGlass264);
  }
- function regroundPeople264(){
-   const list=window.cityLife263?.people||[];
-   for(const p of list){
-     if(!p?.g||!p.model)continue;
-     p.g.position.y=0;
-     p.model.updateWorldMatrix(true,true);
-     const bb=new THREE.Box3().setFromObject(p.model);
-     if(Number.isFinite(bb.min.y)&&Math.abs(bb.min.y)>.002){
-       p.model.position.y-=bb.min.y;
-       p.model.updateWorldMatrix(true,true);
-     }
-   }
- }
+ function regroundPeople264(){}
  function cameraFloor264(){
    if(!rat||photo?.active)return;
    const focus=car77?.riding?car77.g.position:rat.position;
