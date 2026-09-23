@@ -42,7 +42,7 @@
    model.updateWorldMatrix(true,true);const box=new THREE.Box3().setFromObject(model),h=Math.max(.01,box.max.y-box.min.y),scale=2.45/h;model.scale.multiplyScalar(scale);model.position.y-=box.min.y*scale;
    const mixer=new THREE.AnimationMixer(model),action=walk?mixer.clipAction(walk):null;action?.play();if(action)action.time=i*.47;
    const dir=i===1?-1:1;g.rotation.y=dir>0?0:Math.PI;
-   people.push({g,model,mixer,dir,side,speed:.72+i*.08,z0,z1,baseX:x,phase:i*2.1});
+   people.push({g,model,mixer,dir,side,speed:.72+i*.08,z0,z1,baseX:x,phase:i*2.1,groundClock:0});
   }
  }
 
@@ -60,15 +60,22 @@
  function tickPeople263(dt){
   const col=city204.state?.collision;if(!col)return;
   for(const p of people){
-   p.mixer?.update(Math.min(.05,dt));let nextZ=p.g.position.z+p.dir*p.speed*dt;
+   p.mixer?.update(Math.min(.05,dt));
+   p.groundClock=(p.groundClock||0)+dt;
+   if(p.groundClock>.08){
+    p.groundClock=0;
+    p.g.position.y=0;
+    p.model.updateWorldMatrix(true,true);
+    const feetBox=new THREE.Box3().setFromObject(p.model);
+    if(Number.isFinite(feetBox.min.y))p.g.position.y=-feetBox.min.y+.002;
+   }
+   let nextZ=p.g.position.z+p.dir*p.speed*dt;
    if(nextZ>p.z1){nextZ=p.z0;p.g.position.x=openSide263(p.side,nextZ);}
    if(nextZ<p.z0){nextZ=p.z1;p.g.position.x=openSide263(p.side,nextZ);}
    if(col.blocked({x:p.g.position.x,z:nextZ},.45)){
     const nx=openSide263(p.side,nextZ);if(!col.blocked({x:nx,z:nextZ},.45))p.g.position.x=nx;else nextZ+=p.dir*2.2;
    }
    p.g.position.z=nextZ;p.g.rotation.y=p.dir>0?0:Math.PI;
-   // Subtle human stride weight shift; model animation still owns the limbs.
-   p.g.position.y=Math.sin(t*5+p.phase)*.012;
   }
  }
 
