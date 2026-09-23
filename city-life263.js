@@ -62,7 +62,7 @@
   for(const p of people){
    p.mixer?.update(Math.min(.05,dt));
    p.groundClock=(p.groundClock||0)+dt;
-   if(p.groundClock>.28){
+   if(p.groundClock>.75){
     p.groundClock=0;
     p.g.position.y=0;
     p.model.updateWorldMatrix(true,true);
