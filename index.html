@@ -892,7 +892,15 @@ function tickZaytona(dt){const c=zaytona;if(!c||c.owner!==root||!rat)return;if(p
  const name=moving?c.walkClip:(c.activity||'Idle');if(name!==c.clip){c.actions[c.clip].fadeOut(.3);const a=c.actions[name];a.reset().setEffectiveWeight(1).setEffectiveTimeScale(1).fadeIn(.3).play();a.setLoop(moving||name==='Idle'?THREE.LoopRepeat:THREE.LoopOnce,moving||name==='Idle'?Infinity:1);a.clampWhenFinished=true;c.clip=name;}
  c.mixer.update(dt);
  // Different Meshy clips use different hip heights; keep paws on the ground.
- const model=c.g.userData.zayModel;if(c.baseY===undefined)c.baseY=model.position.y;model.position.y=c.baseY;c.g.updateMatrixWorld(true);let floor=Infinity;const v=new THREE.Vector3();model.traverse(o=>{if(!o.isSkinnedMesh)return;o.skeleton.update();for(let i=0;i<o.geometry.attributes.position.count;i+=30){o.boneTransform(i,v);o.localToWorld(v);floor=Math.min(floor,v.y);}});if(Number.isFinite(floor))model.position.y+=.008-floor;
+ const model=c.g.userData.zayModel;if(c.baseY===undefined)c.baseY=model.position.y;
+ c.groundClock275=(c.groundClock275||0)+dt;
+ if(c.groundClock275>.24||c.groundY275===undefined){
+  c.groundClock275=0;model.position.y=c.baseY;c.g.updateMatrixWorld(true);let floor=Infinity;const v=c.groundVec275||(c.groundVec275=new THREE.Vector3());
+  const meshes=c.groundMeshes275||(c.groundMeshes275=[]);if(!meshes.length)model.traverse(o=>{if(o.isSkinnedMesh)meshes.push(o);});
+  for(const o of meshes){o.skeleton.update();const pos=o.geometry.attributes.position;for(let i=0;i<pos.count;i+=60){v.fromBufferAttribute(pos,i);o.boneTransform(i,v);o.localToWorld(v);floor=Math.min(floor,v.y);}}
+  if(Number.isFinite(floor))c.groundY275=.008-floor;
+ }
+ model.position.y=THREE.MathUtils.lerp(model.position.y,c.baseY+(c.groundY275||0),1-Math.exp(-dt*12));
 }
 
 // ---------- scavenge ----------
