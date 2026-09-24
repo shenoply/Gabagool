@@ -156,7 +156,13 @@ function Encounter(props){
   const voice=useRef(null);
 
   useEffect(function(){
-    setStage("discovery");setSelected(null);setOffer(null);setBuyerLine(buyer.opening);setSellerLine("Good morning. Take your time.");setTutorialStep(tutorial?1:0);
+    setStage("discovery");setSelected(null);setOffer(null);
+    const previous=g.relationships[buyer.id];
+    if(previous && previous.purchases>0 && previous.lastRug){
+      if(buyer.id==="samira") setBuyerLine("The "+previous.lastRug+" worked beautifully in the receiving room. My sister is now looking for something quieter.");
+      else setBuyerLine("I remember the "+previous.lastRug+". Show me what you have today.");
+    }else setBuyerLine(buyer.opening);
+    setSellerLine("Good morning. Take your time.");setTutorialStep(tutorial?1:0);
     patch(function(x){
       const rel=Object.assign({},x.relationships[buyer.id]);
       rel.visits=(rel.visits||0)+1;
@@ -370,6 +376,9 @@ function Inventory(props){
 
 function Supplier(props){
   const g=props.g,patch=props.patch;
+  function endDay(){
+    patch(function(x){return Object.assign({},x,{day:x.day+1,cash:x.cash-5,ledger:x.ledger.concat([{id:Date.now(),day:x.day,label:"Daily stall rent and food",amount:-5,type:"expense"}])})});
+  }
   const pool=useMemo(function(){
     return RUGS.filter(function(r){return g.inventory.indexOf(r.id)<0}).sort(function(a,b){return ((a.id.charCodeAt(0)+g.day)%7)-((b.id.charCodeAt(0)+g.day)%7)}).slice(0,4);
   },[g.day,g.inventory.join(",")]);
@@ -378,7 +387,7 @@ function Supplier(props){
     patch(function(x){return Object.assign({},x,{cash:x.cash-cost,inventory:x.inventory.concat([id]),supplierTrust:x.supplierTrust+1,ledger:x.ledger.concat([{id:Date.now(),day:x.day,label:"Bought "+r.name+" from Rashid",amount:-cost,type:"purchase"}])})});
   }
   return h(ScreenShell,{setTab:props.setTab},
-    h("div",{className:"screen-head"},h("div",null,h("div",{className:"eyebrow"},"Supplier · Giza"),h("h2",null,"Uncle Rashid"),h("p",null,"“Good rugs disappear faster than excuses.” · Trust "+g.supplierTrust)),h("button",{onClick:function(){props.setTab("stall")}},"Back")),
+    h("div",{className:"screen-head"},h("div",null,h("div",{className:"eyebrow"},"Supplier · Giza"),h("h2",null,"Uncle Rashid"),h("p",null,"“Good rugs disappear faster than excuses.” · Trust "+g.supplierTrust)),h("div",{className:"screen-actions"},h("button",{onClick:endDay},"End Day · -5pt"),h("button",{onClick:function(){props.setTab("stall")}},"Back"))),
     h("div",{className:"supplier-grid"},pool.map(function(r){
       const c=Math.max(1,r.cost-(g.supplierTrust>=3?4:0));
       return h("div",{className:"supplier-item",key:r.id},h("img",{src:r.img,alt:r.name}),h("div",null,h("h3",null,r.name),h("p",null,r.condition+" · "+r.material+" · "+r.rarity),h("small",null,r.id==="cedar"?"Cheap because the edge needs work. Might reward patience.":"I bought it well. You can do the same.")),h("button",{disabled:g.cash<c,onClick:function(){buy(r.id)}},"Buy ",money(c)));
