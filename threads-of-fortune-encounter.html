@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Threads of Fortune · Encounter Prototype</title>
+<style>
+:root{
+  --ink:#0a0503;--panel:#1d0e09e8;--gold:#d8aa55;--cream:#f6e6c2;--muted:#c9ad84;
+  --green:#7fb870;--red:#a85448;--shadow:0 18px 50px rgba(0,0,0,.45)
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:var(--cream);font-family:Georgia,"Times New Roman",serif}
+button{font:inherit;color:inherit}
+#game{position:fixed;inset:0;overflow:hidden;background:#130a06}
+.bg{position:absolute;inset:-3%;width:106%;height:106%;object-fit:cover;filter:brightness(.68) saturate(.92);transform:scale(1.02);transition:transform 8s ease}
+#game.live .bg{transform:scale(1.08)}
+.vignette{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,transparent 0 38%,rgba(0,0,0,.18) 68%,rgba(0,0,0,.55) 100%),linear-gradient(180deg,rgba(0,0,0,.16),transparent 35%,rgba(0,0,0,.32))}
+.hud{position:absolute;z-index:20;left:0;right:0;top:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:linear-gradient(180deg,#090403e8,#09040390,transparent)}
+.title{font-size:15px;font-weight:700;letter-spacing:.02em}.hudStats{display:flex;gap:8px;font-size:10px;color:#ead1a3}.hudStats b{font-size:13px;color:#fff1cf}
+.stageLabel{position:absolute;z-index:15;top:54px;left:50%;transform:translateX(-50%);padding:5px 10px;border-radius:99px;background:#120905bf;border:1px solid #6b4925;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#d8bd91;backdrop-filter:blur(6px)}
+.characters{position:absolute;z-index:8;left:0;right:0;bottom:150px;height:52%;pointer-events:none}
+.char{position:absolute;bottom:0;width:42%;max-width:290px;transition:transform .45s ease,opacity .45s ease,filter .45s ease;filter:drop-shadow(0 16px 24px #0008)}
+.char img{width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:18px;border:1px solid rgba(220,170,85,.45)}
+#seller{left:-6%;transform:translateX(-12%) scale(.92);opacity:.88}
+#buyer{right:-6%;transform:translateX(12%) scale(.92);opacity:.88}
+#seller.active{transform:translateX(0) scale(1);opacity:1;filter:drop-shadow(0 16px 30px #0009) brightness(1.05)}
+#buyer.active{transform:translateX(0) scale(1);opacity:1;filter:drop-shadow(0 16px 30px #0009) brightness(1.05)}
+.rugStage{position:absolute;z-index:10;left:50%;top:36%;transform:translate(-50%,-50%);width:min(62vw,390px);height:min(23vh,190px);display:flex;align-items:center;justify-content:center;perspective:900px;pointer-events:auto}
+.rugShadow{position:absolute;width:86%;height:24%;bottom:4%;border-radius:50%;background:#0008;filter:blur(14px)}
+.rug{position:relative;width:92%;height:76%;object-fit:cover;border-radius:6px;border:2px solid rgba(248,216,159,.26);box-shadow:0 20px 35px #0009;transform:rotateX(68deg) rotateZ(-2deg) scale(.66);opacity:.15;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .55s ease,filter .4s ease}
+.rug.shown{transform:rotateX(58deg) rotateZ(-2deg) scale(1);opacity:1}
+.rug.inspect{transform:rotateX(0deg) rotateZ(0deg) scale(1.22);filter:brightness(1.08);z-index:5}
+.rugBadge{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);padding:4px 8px;border-radius:99px;background:#170b07dd;border:1px solid #80552a;font-size:9px;color:#ecd09b;opacity:0;transition:.3s}
+.rugBadge.show{opacity:1}
+.dialogueBox{position:absolute;z-index:30;left:10px;right:10px;bottom:76px;min-height:88px;padding:9px 11px 10px;border-radius:15px;background:linear-gradient(180deg,rgba(38,18,11,.96),rgba(18,8,5,.96));border:1px solid #80572c;box-shadow:var(--shadow);backdrop-filter:blur(8px)}
+.speaker{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#d8b77f}
+.speaker b{font-size:12px;text-transform:none;letter-spacing:0;color:#fff0c9}
+.line{margin-top:5px;font-size:16px;line-height:1.28;color:#f9e8c4;min-height:42px;display:flex;align-items:center}
+.voiceDot{width:7px;height:7px;border-radius:50%;background:#7a5428;box-shadow:0 0 0 0 rgba(216,170,85,.5)}
+.voiceDot.playing{animation:pulse 1s infinite;background:#e0b257}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(216,170,85,0)}}
+.choices{position:absolute;z-index:35;left:10px;right:10px;bottom:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.choice{min-height:56px;border-radius:12px;border:1px solid #714923;background:linear-gradient(180deg,#2b160e,#1b0d08);padding:7px 8px;text-align:left;font-size:12px;box-shadow:0 8px 18px #0004;transition:transform .08s ease,filter .15s}
+.choice:active{transform:scale(.98);filter:brightness(1.15)}
+.choice strong{display:block;font-size:12px}.choice small{display:block;margin-top:2px;font-size:9px;color:#c7a980}
+.choice.primary{background:linear-gradient(180deg,#a26824,#6e431b);border-color:#e3b75d}
+.meters{position:absolute;z-index:18;left:50%;top:94px;transform:translateX(-50%);width:min(62vw,360px);display:flex;gap:8px}
+.meter{flex:1}.meter label{display:flex;justify-content:space-between;font-size:8px;color:#dfc79c}.bar{height:5px;border-radius:99px;background:#140a06;border:1px solid #4e3219;overflow:hidden}.bar i{display:block;height:100%;background:var(--green);transition:width .35s ease}.bar.pat i{background:#dfb45f}.bar.trust i{background:#75a4cd}
+.toast{position:absolute;z-index:80;left:50%;top:58px;transform:translate(-50%,-10px);opacity:0;padding:7px 10px;border-radius:10px;background:#160b08e8;border:1px solid #7a5227;font-size:10px;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+.start{position:absolute;z-index:100;inset:0;display:flex;align-items:flex-end;padding:24px;background:linear-gradient(180deg,transparent 25%,rgba(6,3,2,.9) 72%)}
+.startCard{width:100%;max-width:520px;margin:0 auto}.start h1{font-size:40px;line-height:.96;margin:0 0 8px}.start p{margin:0 0 14px;color:#e0c69b;line-height:1.4}.start button{width:100%;min-height:52px;border-radius:12px;border:1px solid #e1b65e;background:#9d6423;font-size:16px}
+.inspectOverlay{position:absolute;z-index:60;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:18px}.inspectOverlay.open{display:flex}.inspectCard{width:min(92vw,560px);background:#1a0c08;border:1px solid #80552a;border-radius:16px;padding:10px}.inspectCard img{width:100%;max-height:52vh;object-fit:contain;background:#080403;border-radius:10px}.inspectMeta{font-size:11px;color:#d4b78c;line-height:1.4;margin:7px 2px}.inspectBtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}.inspectBtns button{min-height:42px;border-radius:9px;border:1px solid #6e4823;background:#28140d}
+.outcome{position:absolute;z-index:90;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:#000c}.outcome.open{display:flex}.outcomeCard{width:min(90vw,480px);padding:18px;border-radius:16px;background:#211009;border:1px solid #8a5c2b;text-align:center}.outcomeCard h2{margin:0 0 8px;font-size:28px}.outcomeCard p{color:#d5bb90;line-height:1.4}.outcomeCard button{width:100%;min-height:46px;border-radius:10px;border:1px solid #dcae57;background:#925b21}
+@media(max-height:720px){
+  .characters{bottom:136px;height:48%}
+  .rugStage{top:34%;height:20vh}
+  .dialogueBox{bottom:72px;min-height:80px}
+  .line{font-size:14px;min-height:36px}
+  .choice{min-height:50px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div id="game">
+  <img class="bg" src="https://gcdn.picsart.com/cloud-storage/d647fe3e-55af-40df-91f8-d44bf4080fac.jpg" alt="">
+  <div class="vignette"></div>
+  <div class="hud"><div class="title">Threads of Fortune</div><div class="hudStats"><span><b id="coins">120</b> pt</span><span><b id="rep">0</b> rep</span><span>Day <b>1</b></span></div></div>
+  <div class="stageLabel" id="stageLabel">Giza · 1925 · Morning</div>
+  <div class="meters">
+    <div class="meter"><label><span>Interest</span><span id="interestN">42</span></label><div class="bar"><i id="interest" style="width:42%"></i></div></div>
+    <div class="meter"><label><span>Patience</span><span id="patienceN">82</span></label><div class="bar pat"><i id="patience" style="width:82%"></i></div></div>
+    <div class="meter"><label><span>Trust</span><span id="trustN">20</span></label><div class="bar trust"><i id="trust" style="width:20%"></i></div></div>
+  </div>
+  <div class="characters">
+    <div class="char" id="seller"><img src="https://gcdn.picsart.com/cloud-storage/5cea8ab5-f185-4d2d-9314-cf570394b9bc.jpg" alt="Merchant"></div>
+    <div class="char active" id="buyer"><img src="https://gcdn.picsart.com/cloud-storage/2071022e-8301-40a5-8248-2d230729d835.jpg" alt="Samira"></div>
+  </div>
+  <div class="rugStage" id="rugStage">
+    <div class="rugShadow"></div>
+    <img class="rug" id="rug" src="https://gcdn.picsart.com/cloud-storage/d9e05209-1242-4384-bf5d-204f107368cf.jpg" alt="Desert Star">
+    <div class="rugBadge" id="rugBadge">Desert Star · Upper Egypt · Wool</div>
+  </div>
+  <div class="dialogueBox">
+    <div class="speaker"><b id="speaker">Samira al-Khatib</b><span><i class="voiceDot" id="voiceDot"></i></span></div>
+    <div class="line" id="line">A rug seller should understand a room before he understands a price.</div>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="toast" id="toast"></div>
+  <div class="start" id="start"><div class="startCard"><h1>One customer.<br>One chance.</h1><p>Samira al-Khatib has stopped at your stall. Read her carefully, choose the right rug, and close the sale.</p><button id="startBtn">Begin encounter</button></div></div>
+  <div class="inspectOverlay" id="inspect"><div class="inspectCard"><img src="https://gcdn.picsart.com/cloud-storage/d9e05209-1242-4384-bf5d-204f107368cf.jpg"><div class="inspectMeta"><b>Desert Star</b><br>Upper Egypt · Wool · ~40 years · Excellent condition<br>Estimated market band: 180–250 pt · Your ask: 220 pt<br>Warm mineral and plant-dye palette. Medium-tight weave. Provenance documented.</div><div class="inspectBtns"><button id="flipBtn">Inspect reverse simulation</button><button id="closeInspect">Return to Samira</button></div></div></div>
+  <div class="outcome" id="outcome"><div class="outcomeCard"><h2 id="outcomeTitle"></h2><p id="outcomeText"></p><button onclick="location.reload()">Play encounter again</button></div></div>
+  <audio id="samiraVoice" src="https://gcdn.picsart.com/cloud-storage/f555bedf-61a8-415b-af2c-b5214ada3b2d.wav"></audio>
+  <audio id="music" loop src="https://gcdn.picsart.com/editing-temp/4df84a5e-6382-42c4-9dd4-7ae2fce5675d.mp3"></audio>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let state={phase:"arrival",interest:42,patience:82,trust:20,coins:120,rep:0,shown:false,inspected:false,story:false,price:220};
+let AC=null;
+function ac(){return AC||(AC=new (window.AudioContext||window.webkitAudioContext)())}
+function tone(f,d=.06,type="sine",g=.03,delay=0){try{const a=ac(),o=a.createOscillator(),v=a.createGain();o.type=type;o.frequency.value=f;v.gain.setValueAtTime(g,a.currentTime+delay);v.gain.exponentialRampToValueAtTime(.0001,a.currentTime+delay+d);o.connect(v).connect(a.destination);o.start(a.currentTime+delay);o.stop(a.currentTime+delay+d)}catch(e){}}
+function sfx(k){if(k==="tap")tone(500,.035,"triangle",.018);if(k==="fabric"){tone(180,.07,"triangle",.018);tone(230,.06,"triangle",.014,.04)}if(k==="coin"){tone(900,.08,"sine",.035);tone(1320,.09,"sine",.03,.06)}if(k==="good"){tone(520,.08);tone(660,.08,"sine",.035,.08);tone(780,.14,"sine",.04,.16)}if(k==="bad"){tone(170,.15,"sawtooth",.018);tone(120,.18,"sawtooth",.015,.1)}}
+document.addEventListener("pointerdown",e=>{if(e.target.closest("button"))sfx("tap")},{passive:true});
+function haptic(ms=20){try{navigator.vibrate?.(ms)}catch(e){}}
+function meter(id,v){$(id).style.width=Math.max(0,Math.min(100,v))+"%";$(id+"N").textContent=Math.round(v)}
+function update(){meter("interest",state.interest);meter("patience",state.patience);meter("trust",state.trust);$("coins").textContent=state.coins;$("rep").textContent=state.rep}
+function speak(name,text,who="buyer",playVoice=false){$("speaker").textContent=name;$("line").textContent=text;$("seller").classList.toggle("active",who==="seller");$("buyer").classList.toggle("active",who==="buyer");if(playVoice){const a=$("samiraVoice");$("voiceDot").classList.add("playing");a.currentTime=0;a.play().catch(()=>{});a.onended=()=> $("voiceDot").classList.remove("playing")}else $("voiceDot").classList.remove("playing")}
+function choices(arr){$("choices").innerHTML=arr.map((x,i)=>'<button class="choice '+(x.primary?"primary":"")+'" data-i="'+i+'"><strong>'+x.label+'</strong><small>'+x.sub+'</small></button>').join("");document.querySelectorAll("[data-i]").forEach(b=>b.onclick=arr[+b.dataset.i].run)}
+function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").classList.remove("show"),1300)}
+function showRug(){state.shown=true;$("rug").classList.add("shown");$("rugBadge").classList.add("show");sfx("fabric");haptic(18)}
+function arrival(){
+ speak("Samira al-Khatib","I am furnishing a receiving room. I want something beautiful, but not something that announces its price before its taste.", "buyer", true);
+ choices([
+  {label:"Ask about the room",sub:"Learn what she values",run:()=>{state.trust+=10;state.interest+=6;update();speak("Samira al-Khatib","Warm afternoon light. Cream walls. Dark wood. I want the rug to belong there, not dominate it.");state.phase="qualify";qualify()}},
+  {label:"Ask her budget",sub:"Go straight to money",run:()=>{state.patience-=8;state.trust-=3;update();speak("Samira al-Khatib","I have a budget. I would rather first know whether you understand what I am asking for.");state.phase="qualify";qualify()}},
+  {label:"Present Desert Star",sub:"Take a risk immediately",run:()=>{showRug();state.interest+=4;state.patience-=4;update();speak("Carpet Merchant","You unfold Desert Star across the low table.","seller");state.phase="present";present()}}
+ ])
+}
+function qualify(){
+ choices([
+  {label:"Show Desert Star",sub:"Warm, restrained geometry",primary:true,run:()=>{showRug();state.interest+=12;state.trust+=5;update();speak("Samira al-Khatib","That is closer. The colour is warm without being loud.");state.phase="present";present()}},
+  {label:"Describe your rarest rug",sub:"Try status instead",run:()=>{state.interest-=6;state.patience-=7;update();speak("Samira al-Khatib","I asked for taste, not rarity. Those are not the same thing.");state.phase="present";present()}},
+  {label:"Offer tea first",sub:"Slow the pace",run:()=>{state.patience=Math.min(100,state.patience+8);state.trust+=4;update();speak("Samira al-Khatib","Thank you. Now show me what you would actually choose for that room.");showRug();state.phase="present";present()}}
+ ])
+}
+function present(){
+ choices([
+  {label:"Tell its story",sub:"Origin, dyes, age",primary:true,run:()=>{state.story=true;state.interest+=16;state.trust+=12;state.patience-=3;update();speak("Carpet Merchant","Upper Egyptian wool. Warm mineral and plant dyes. The pattern is geometric, but the palette keeps it calm.","seller");setTimeout(()=>speak("Samira al-Khatib","That is useful. The story explains the restraint instead of competing with it."),450);state.phase="objection";setTimeout(objection,520)}},
+  {label:"Explain the weave",sub:"Technical craftsmanship",run:()=>{state.interest+=7;state.trust+=7;state.patience-=4;update();speak("Carpet Merchant","Medium-tight wool weave, sturdy fringe, very little structural wear.","seller");setTimeout(()=>speak("Samira al-Khatib","Good quality matters. But I am buying for a room, not an examination table."),450);state.phase="objection";setTimeout(objection,520)}},
+  {label:"Inspect together",sub:"Open detailed rug view",run:()=>{$("inspect").classList.add("open");state.inspected=true;state.trust+=7;update();}}
+ ])
+}
+function objection(){
+ speak("Samira al-Khatib","My concern is the red. In the wrong room it could become too heavy.");
+ choices([
+  {label:"Agree — and reframe",sub:"Explain why the border softens it",primary:true,run:()=>{state.interest+=12;state.trust+=10;update();speak("Carpet Merchant","That would be true with a darker border. Here, the indigo and cream break the red into smaller fields. It will read warmer than heavier.","seller");setTimeout(()=>{speak("Samira al-Khatib","That is exactly the sort of answer I was hoping for.");state.phase="price";pricePhase()},470)}},
+  {label:"Dismiss the concern",sub:"Tell her it will be fine",run:()=>{state.trust-=13;state.patience-=12;update();speak("Samira al-Khatib","Then you are asking me to trust your confidence instead of my own eye.");state.phase="price";pricePhase()}},
+  {label:"Offer another rug",sub:"Avoid the objection",run:()=>{state.interest-=4;state.patience-=6;update();speak("Samira al-Khatib","Perhaps. But you seemed rather sure of this one a moment ago.");state.phase="price";pricePhase()}}
+ ])
+}
+function pricePhase(){
+ const strong=state.trust>=48&&state.interest>=62;
+ choices([
+  {label:"Ask 220 pt",sub:"Full asking price",primary:strong,run:()=>price(220)},
+  {label:"Ask 205 pt",sub:"Small concession",run:()=>price(205)},
+  {label:"Ask 190 pt",sub:"Protect the sale",run:()=>price(190)}
+ ])
+}
+function price(p){
+ state.price=p;state.patience-=5;update();sfx("coin");haptic(15);
+ if(p===220 && state.trust>=55 && state.interest>=72) return success(p,"You held your price because you earned it.");
+ if(p<=205 && state.trust>=42 && state.interest>=60) return success(p,"A controlled concession closed the deal.");
+ if(p===190 && state.interest>=48) return success(p,"You secured the sale, but left margin on the table.");
+ if(state.patience<=28||state.trust<25) return fail("Samira thanks you politely and leaves. The price was not the real problem — trust was.");
+ speak("Samira al-Khatib","We are not there yet. Give me one reason not to keep looking.");
+ choices([
+  {label:"Return to the room",sub:"Connect the rug to her original need",primary:true,run:()=>{state.trust+=9;state.interest+=7;update();success(Math.max(190,p-10),"You stopped selling the rug and started solving her room.")}},
+  {label:"Cut another 15 pt",sub:"Use price alone",run:()=>{state.interest+=2;state.trust-=2;state.patience-=6;update();if(state.patience>25)success(Math.max(180,p-15),"The discount worked, but the relationship stayed shallow.");else fail("Too many concessions made the rug feel less credible.")}},
+  {label:"Hold firm",sub:"Risk the walk-away",run:()=>{state.patience-=12;update();if(state.trust>=52)success(p,"She respected the confidence because it was backed by evidence.");else fail("Without enough trust, firmness felt like stubbornness.")}}
+ ])
+}
+function success(p,why){state.coins+=p;state.rep+=2;update();sfx("good");haptic([20,40,20]);$("outcomeTitle").textContent="Sold — "+p+" pt";$("outcomeText").textContent=why+" Samira leaves with Desert Star, and she is more likely to return.";$("outcome").classList.add("open")}
+function fail(why){sfx("bad");haptic(40);$("outcomeTitle").textContent="No sale";$("outcomeText").textContent=why;$("outcome").classList.add("open")}
+$("startBtn").onclick=()=>{$("start").style.display="none";$("game").classList.add("live");const m=$("music");m.volume=.11;m.play().catch(()=>{});arrival()}
+$("closeInspect").onclick=()=>{$("inspect").classList.remove("open");speak("Samira al-Khatib","The condition is better than I expected. Now tell me why this one, not simply why it is well made.");state.phase="present";present()}
+$("flipBtn").onclick=e=>{e.currentTarget.textContent=e.currentTarget.textContent.includes("reverse")?"Return to front":"Inspect reverse simulation";const img=$("inspect").querySelector("img");img.style.filter=e.currentTarget.textContent.includes("front")?"sepia(.35) brightness(.8) contrast(1.15)":"none";toast(e.currentTarget.textContent.includes("front")?"Reverse inspection simulation":"Front view")}
+$("rugStage").onclick=()=>{if(!state.shown)return;state.inspected=true;$("inspect").classList.add("open");state.trust+=4;update()}
+update();
+choices([{label:"Begin encounter",sub:"Tap the button below first",run:()=>{}}]);
+</script>
+</body>
+</html>
