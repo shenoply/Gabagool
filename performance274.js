@@ -16,15 +16,5 @@
  if(window.cityLife263?.people){
   for(const p of window.cityLife263.people)if(p)p.groundClock=0;
  }
- // Cache DOM values that are commonly rewritten by older systems.
- const textCache=new WeakMap();
- const desc=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
- if(desc?.set&&desc?.get){
-  Object.defineProperty(Node.prototype,'textContent',{
-   configurable:true,
-   get:desc.get,
-   set(v){if(textCache.get(this)===v)return;textCache.set(this,v);desc.set.call(this,v);}
-  });
- }
- window.performance274={active:true};
+  window.performance274={active:true};
 })();
