@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Threads of Fortune · Encounter Prototype v2</title>
+<title>Threads of Fortune · Encounter Prototype v3</title>
 <style>
 :root{
   --ink:#0a0503;--panel:#1d0e09e8;--gold:#d8aa55;--cream:#f6e6c2;--muted:#c9ad84;
@@ -19,7 +19,7 @@ button{font:inherit;color:inherit}
 .hud{position:absolute;z-index:20;left:0;right:0;top:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:linear-gradient(180deg,#090403e8,#09040390,transparent)}
 .title{font-size:15px;font-weight:700;letter-spacing:.02em}.hudStats{display:flex;gap:8px;font-size:10px;color:#ead1a3}.hudStats b{font-size:13px;color:#fff1cf}
 .stageLabel{position:absolute;z-index:15;top:54px;left:50%;transform:translateX(-50%);padding:5px 10px;border-radius:99px;background:#120905bf;border:1px solid #6b4925;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#d8bd91;backdrop-filter:blur(6px)}
-.characters{position:absolute;z-index:8;left:0;right:0;bottom:150px;height:52%;pointer-events:none}
+.characters{display:none!important}
 .char{position:absolute;bottom:0;width:42%;max-width:290px;transition:transform .45s ease,opacity .45s ease,filter .45s ease;filter:drop-shadow(0 16px 24px #0008)}
 .char img{width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:18px;border:1px solid rgba(220,170,85,.45)}
 #seller{left:-6%;transform:translateX(-12%) scale(.92);opacity:.88}
@@ -61,7 +61,7 @@ button{font:inherit;color:inherit}
 }
 
 /* V2 COMPOSITION FIX */
-.characters{bottom:168px;height:40%}
+.characters{display:none!important}
 .char{width:30%;max-width:205px}
 #seller{left:1%;transform:translateX(-5%) scale(.94)}
 #buyer{right:1%;transform:translateX(5%) scale(.94)}
@@ -76,7 +76,7 @@ button{font:inherit;color:inherit}
 .stageLabel{top:50px}
 .meters{top:82px;width:min(70vw,420px)}
 @media(max-width:520px){
-  .characters{height:36%;bottom:176px}
+  .characters{display:none!important}
   .char{width:31%}
   .rugStage{top:43%;width:82vw;height:28vh}
   .dialogueBox{left:8px;right:8px;bottom:80px}
@@ -85,17 +85,29 @@ button{font:inherit;color:inherit}
   .choice small{font-size:8px}
 }
 @media(max-height:720px){
-  .characters{height:34%;bottom:162px}
+  .characters{display:none!important}
   .rugStage{top:42%;height:25vh}
   .dialogueBox{bottom:76px;min-height:70px}
   .choices{bottom:5px}
   .choice{min-height:52px}
 }
+
+.rugStage{top:48%!important;width:min(60vw,420px)!important;height:min(20vh,170px)!important}
+.dialogueBox{bottom:150px!important}
+.choices{bottom:8px!important}
+.rugChoices{position:absolute;z-index:34;left:10px;right:10px;bottom:74px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rugPick{background:#160b08e8;border:1px solid #6d4925;border-radius:10px;padding:5px;text-align:center;backdrop-filter:blur(6px)}
+.rugPick img{width:100%;height:46px;object-fit:cover;border-radius:6px;display:block}
+.rugPick b{display:block;font-size:9px;margin-top:3px}
+.rugPick.active{outline:2px solid #e0b45d;background:#28150d}
+.voiceControls{position:absolute;z-index:36;right:12px;top:48px;display:flex;gap:5px}
+.voiceControls button{min-height:28px;padding:4px 7px;border-radius:8px;border:1px solid #6f4a24;background:#160b08d9;font-size:9px}
+@media(max-height:720px){.dialogueBox{bottom:142px!important}.rugChoices{bottom:69px}.rugPick img{height:40px}}
 </style>
 </head>
 <body>
 <div id="game">
-  <img class="bg" src="https://gcdn.picsart.com/cloud-storage/d647fe3e-55af-40df-91f8-d44bf4080fac.jpg" alt="">
+  <img class="bg" src="https://d2jqrm6oza8nb6.cloudfront.net/datasets/5a19e2b0-2e21-440f-9777-06294a24a0c2.jpg?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNmFiYzA5YTE4MGQyNDgyOSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDM2MjUyOX0.ZQcdCAt23ZUku2N61qdcB8Aim49IsQ6M6qfE3QaEzEM" alt="">
   <div class="vignette"></div>
   <div class="hud"><div class="title">Threads of Fortune</div><div class="hudStats"><span><b id="coins">120</b> pt</span><span><b id="rep">0</b> rep</span><span>Day <b>1</b></span></div></div>
   <div class="stageLabel" id="stageLabel">Giza · 1925</div>
@@ -113,9 +125,15 @@ button{font:inherit;color:inherit}
     <img class="rug" id="rug" src="https://gcdn.picsart.com/cloud-storage/d9e05209-1242-4384-bf5d-204f107368cf.jpg" alt="Desert Star">
     <div class="rugBadge" id="rugBadge">Desert Star · Upper Egypt · Wool</div>
   </div>
+  <div class="voiceControls"><button id="sellerVoiceBtn">🎙 Seller voice</button><button id="buyerVoiceBtn">🎙 Buyer voice</button></div>
   <div class="dialogueBox">
     <div class="speaker"><b id="speaker">Samira al-Khatib</b><span><i class="voiceDot" id="voiceDot"></i></span></div>
     <div class="line" id="line">A rug seller should understand a room before he understands a price.</div>
+  </div>
+  <div class="rugChoices" id="rugChoices">
+    <button class="rugPick active" data-rug="0"><img src="https://gcdn.picsart.com/cloud-storage/d9e05209-1242-4384-bf5d-204f107368cf.jpg"><b>Desert Star</b></button>
+    <button class="rugPick" data-rug="1"><img src="https://gcdn.picsart.com/cloud-storage/83b23e6b-d725-4c5a-9ec8-4d58e20191cb.jpg"><b>Red Medina</b></button>
+    <button class="rugPick" data-rug="2"><img src="https://gcdn.picsart.com/cloud-storage/a412a450-4e30-43d0-bb50-891cabb6b0a7.jpg"><b>Golden Palm</b></button>
   </div>
   <div class="choices" id="choices"></div>
   <div class="toast" id="toast"></div>
@@ -127,7 +145,11 @@ button{font:inherit;color:inherit}
 </div>
 <script>
 const $=id=>document.getElementById(id);
-let state={phase:"arrival",interest:42,patience:82,trust:20,coins:120,rep:0,shown:false,inspected:false,story:false,price:220};
+const rugs=[
+{name:"Desert Star",img:"https://gcdn.picsart.com/cloud-storage/d9e05209-1242-4384-bf5d-204f107368cf.jpg",origin:"Upper Egypt",ask:220,fit:"story"},
+{name:"Red Medina",img:"https://gcdn.picsart.com/cloud-storage/83b23e6b-d725-4c5a-9ec8-4d58e20191cb.jpg",origin:"Anatolia",ask:320,fit:"craft"},
+{name:"Golden Palm",img:"https://gcdn.picsart.com/cloud-storage/a412a450-4e30-43d0-bb50-891cabb6b0a7.jpg",origin:"Cairo",ask:250,fit:"home"}];
+let state={phase:"arrival",interest:42,patience:82,trust:20,coins:120,rep:0,shown:false,inspected:false,story:false,price:220,rug:0};
 let AC=null;
 function ac(){return AC||(AC=new (window.AudioContext||window.webkitAudioContext)())}
 function tone(f,d=.06,type="sine",g=.03,delay=0){try{const a=ac(),o=a.createOscillator(),v=a.createGain();o.type=type;o.frequency.value=f;v.gain.setValueAtTime(g,a.currentTime+delay);v.gain.exponentialRampToValueAtTime(.0001,a.currentTime+delay+d);o.connect(v).connect(a.destination);o.start(a.currentTime+delay);o.stop(a.currentTime+delay+d)}catch(e){}}
@@ -136,14 +158,19 @@ document.addEventListener("pointerdown",e=>{if(e.target.closest("button"))sfx("t
 function haptic(ms=20){try{navigator.vibrate?.(ms)}catch(e){}}
 function meter(id,v){$(id).style.width=Math.max(0,Math.min(100,v))+"%";$(id+"N").textContent=Math.round(v)}
 function update(){meter("interest",state.interest);meter("patience",state.patience);meter("trust",state.trust);$("coins").textContent=state.coins;$("rep").textContent=state.rep}
-function speak(name,text,who="buyer",playVoice=false){$("speaker").textContent=name;$("line").textContent=text;$("seller").classList.toggle("active",who==="seller");$("buyer").classList.toggle("active",who==="buyer");if(playVoice){const a=$("samiraVoice");$("voiceDot").classList.add("playing");a.currentTime=0;a.play().catch(()=>{});a.onended=()=> $("voiceDot").classList.remove("playing")}else $("voiceDot").classList.remove("playing")}
+
+function getMaleVoice(){const vs=speechSynthesis?.getVoices?.()||[];return vs.find(v=>/male|daniel|george|david|mark|tom|james|alex|microsoft david|google uk english male/i.test(v.name))||null}
+function getFemaleVoice(){const vs=speechSynthesis?.getVoices?.()||[];return vs.find(v=>/female|samantha|victoria|karen|moira|zira|aria|sonia|jenny|susan/i.test(v.name))||vs.find(v=>/en/i.test(v.lang))||null}
+function browserVoice(text,gender){if(!("speechSynthesis" in window))return false;const v=gender==="male"?getMaleVoice():getFemaleVoice();if(!v)return false;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.voice=v;u.rate=gender==="male"?.88:.96;u.pitch=gender==="male"?.72:1.0;speechSynthesis.speak(u);return true}catch(e){return false}}
+function speak(name,text,who="buyer",playVoice=false){$("speaker").textContent=name;$("line").textContent=text;$("seller").classList.toggle("active",who==="seller");$("buyer").classList.toggle("active",who==="buyer");if(playVoice){const a=$("samiraVoice");$("voiceDot").classList.add("playing");a.currentTime=0;a.play().catch(()=>browserVoice(text,"female"));a.onended=()=> $("voiceDot").classList.remove("playing")}else{ $("voiceDot").classList.remove("playing"); if(who==="buyer") browserVoice(text,"female"); else browserVoice(text,"male"); }}
 function choices(arr){$("choices").innerHTML=arr.map((x,i)=>'<button class="choice '+(x.primary?"primary":"")+'" data-i="'+i+'"><strong>'+x.label+'</strong><small>'+x.sub+'</small></button>').join("");document.querySelectorAll("[data-i]").forEach(b=>b.onclick=arr[+b.dataset.i].run)}
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").classList.remove("show"),1300)}
-function showRug(){state.shown=true;$("rug").classList.add("shown");$("rugBadge").classList.add("show");$("stageLabel").textContent="Desert Star · on the table";sfx("fabric");haptic(18)}
+function showRug(){const r=rugs[state.rug];state.shown=true;$("rug").src=r.img;$("rug").classList.add("shown");$("rugBadge").classList.add("show");$("rugBadge").textContent=r.name+" · "+r.origin;$("stageLabel").textContent=r.name+" · on the table";state.price=r.ask;sfx("fabric");haptic(18)}
+document.querySelectorAll("[data-rug]").forEach(btn=>btn.onclick=()=>{state.rug=+btn.dataset.rug;document.querySelectorAll("[data-rug]").forEach(x=>x.classList.toggle("active",x===btn));showRug();const r=rugs[state.rug];if(r.name==="Desert Star"){state.interest+=8;state.trust+=3;speak("Samira al-Khatib","That colour is closer to what I imagined.")}else if(r.name==="Golden Palm"){state.interest+=4;speak("Samira al-Khatib","Elegant, but perhaps a little decorative for the room.")}else{state.interest-=3;state.patience-=3;speak("Samira al-Khatib","Beautiful, but stronger than what I described.")}update()});
 function arrival(){
  speak("Samira al-Khatib","I am furnishing a receiving room. I want something beautiful, but not something that announces its price before its taste.", "buyer", true);
  choices([
-  {label:"Ask about the room",sub:"Learn what she values",run:()=>{state.trust+=10;state.interest+=6;update();speak("Samira al-Khatib","Warm afternoon light. Cream walls. Dark wood. I want the rug to belong there, not dominate it.");state.phase="qualify";qualify()}},
+  {label:"Ask about the room",sub:"Learn what she values",run:()=>{state.trust+=10;state.interest+=6;update();speak("Samira al-Khatib","Warm afternoon light. Cream walls. Dark wood. I want the rug to belong there, not dominate it.");state.phase="qualify";setTimeout(qualify,120)}},
   {label:"Ask her budget",sub:"Go straight to money",run:()=>{state.patience-=8;state.trust-=3;update();speak("Samira al-Khatib","I have a budget. I would rather first know whether you understand what I am asking for.");state.phase="qualify";qualify()}},
   {label:"Present Desert Star",sub:"Take a risk immediately",run:()=>{showRug();state.interest+=4;state.patience-=4;update();speak("Carpet Merchant","You unfold Desert Star across the low table.","seller");state.phase="present";present()}}
  ])
@@ -171,11 +198,11 @@ function objection(){
  ])
 }
 function pricePhase(){
- const strong=state.trust>=48&&state.interest>=62;
+ const strong=state.trust>=48&&state.interest>=62; const base=rugs[state.rug].ask;
  choices([
-  {label:"Ask 220 pt",sub:"Full asking price",primary:strong,run:()=>price(220)},
-  {label:"Ask 205 pt",sub:"Small concession",run:()=>price(205)},
-  {label:"Ask 190 pt",sub:"Protect the sale",run:()=>price(190)}
+  {label:"Ask "+base+" pt",sub:"Full asking price",primary:strong,run:()=>price(base)},
+  {label:"Ask "+Math.round(base*.93)+" pt",sub:"Small concession",run:()=>price(Math.round(base*.93))},
+  {label:"Ask "+Math.round(base*.86)+" pt",sub:"Protect the sale",run:()=>price(Math.round(base*.86))}
  ])
 }
 function price(p){
@@ -193,6 +220,8 @@ function price(p){
 }
 function success(p,why){state.coins+=p;state.rep+=2;update();sfx("good");haptic([20,40,20]);$("outcomeTitle").textContent="Sold — "+p+" pt";$("outcomeText").textContent=why+" Samira leaves with Desert Star, and she is more likely to return.";$("outcome").classList.add("open")}
 function fail(why){sfx("bad");haptic(40);$("outcomeTitle").textContent="No sale";$("outcomeText").textContent=why;$("outcome").classList.add("open")}
+$("sellerVoiceBtn").onclick=()=>{if($("speaker").textContent==="Carpet Merchant")browserVoice($("line").textContent,"male");else toast("Seller is not speaking right now")};
+$("buyerVoiceBtn").onclick=()=>{if($("speaker").textContent==="Samira al-Khatib")browserVoice($("line").textContent,"female");else toast("Buyer is not speaking right now")};
 $("startBtn").onclick=()=>{$("start").style.display="none";$("game").classList.add("live");const m=$("music");m.volume=.11;m.play().catch(()=>{});arrival()}
 $("closeInspect").onclick=()=>{$("inspect").classList.remove("open");speak("Samira al-Khatib","The condition is better than I expected. Now tell me why this one, not simply why it is well made.");state.phase="present";present()}
 $("flipBtn").onclick=e=>{e.currentTarget.textContent=e.currentTarget.textContent.includes("reverse")?"Return to front":"Inspect reverse simulation";const img=$("inspect").querySelector("img");img.style.filter=e.currentTarget.textContent.includes("front")?"sepia(.35) brightness(.8) contrast(1.15)":"none";toast(e.currentTarget.textContent.includes("front")?"Reverse inspection simulation":"Front view")}
@@ -202,4 +231,5 @@ choices([{label:"Begin encounter",sub:"Tap the button below first",run:()=>{}}])
 </script>
 </body>
 <!-- encounter-v2 -->
+<!-- encounter-v3 -->
 </html>
