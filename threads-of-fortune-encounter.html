@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Threads of Fortune · Encounter Prototype</title>
+<title>Threads of Fortune · Encounter Prototype v2</title>
 <style>
 :root{
   --ink:#0a0503;--panel:#1d0e09e8;--gold:#d8aa55;--cream:#f6e6c2;--muted:#c9ad84;
@@ -59,6 +59,38 @@ button{font:inherit;color:inherit}
   .line{font-size:14px;min-height:36px}
   .choice{min-height:50px;font-size:11px}
 }
+
+/* V2 COMPOSITION FIX */
+.characters{bottom:168px;height:40%}
+.char{width:30%;max-width:205px}
+#seller{left:1%;transform:translateX(-5%) scale(.94)}
+#buyer{right:1%;transform:translateX(5%) scale(.94)}
+.rugStage{top:42%;width:min(78vw,520px);height:min(30vh,250px)}
+.rug{width:96%;height:86%;transform:rotateX(56deg) rotateZ(-1deg) scale(.82);opacity:.35}
+.rug.shown{transform:rotateX(42deg) rotateZ(-1deg) scale(1.08);opacity:1}
+.rug.inspect{transform:rotateX(0deg) rotateZ(0deg) scale(1.25)}
+.dialogueBox{bottom:82px;min-height:76px;padding:8px 10px}
+.line{font-size:14px;min-height:34px}
+.choices{bottom:8px;gap:5px}
+.choice{min-height:58px;padding:7px;font-size:11px}
+.stageLabel{top:50px}
+.meters{top:82px;width:min(70vw,420px)}
+@media(max-width:520px){
+  .characters{height:36%;bottom:176px}
+  .char{width:31%}
+  .rugStage{top:43%;width:82vw;height:28vh}
+  .dialogueBox{left:8px;right:8px;bottom:80px}
+  .line{font-size:13px}
+  .choice strong{font-size:11px}
+  .choice small{font-size:8px}
+}
+@media(max-height:720px){
+  .characters{height:34%;bottom:162px}
+  .rugStage{top:42%;height:25vh}
+  .dialogueBox{bottom:76px;min-height:70px}
+  .choices{bottom:5px}
+  .choice{min-height:52px}
+}
 </style>
 </head>
 <body>
@@ -66,7 +98,7 @@ button{font:inherit;color:inherit}
   <img class="bg" src="https://gcdn.picsart.com/cloud-storage/d647fe3e-55af-40df-91f8-d44bf4080fac.jpg" alt="">
   <div class="vignette"></div>
   <div class="hud"><div class="title">Threads of Fortune</div><div class="hudStats"><span><b id="coins">120</b> pt</span><span><b id="rep">0</b> rep</span><span>Day <b>1</b></span></div></div>
-  <div class="stageLabel" id="stageLabel">Giza · 1925 · Morning</div>
+  <div class="stageLabel" id="stageLabel">Giza · 1925</div>
   <div class="meters">
     <div class="meter"><label><span>Interest</span><span id="interestN">42</span></label><div class="bar"><i id="interest" style="width:42%"></i></div></div>
     <div class="meter"><label><span>Patience</span><span id="patienceN">82</span></label><div class="bar pat"><i id="patience" style="width:82%"></i></div></div>
@@ -107,7 +139,7 @@ function update(){meter("interest",state.interest);meter("patience",state.patien
 function speak(name,text,who="buyer",playVoice=false){$("speaker").textContent=name;$("line").textContent=text;$("seller").classList.toggle("active",who==="seller");$("buyer").classList.toggle("active",who==="buyer");if(playVoice){const a=$("samiraVoice");$("voiceDot").classList.add("playing");a.currentTime=0;a.play().catch(()=>{});a.onended=()=> $("voiceDot").classList.remove("playing")}else $("voiceDot").classList.remove("playing")}
 function choices(arr){$("choices").innerHTML=arr.map((x,i)=>'<button class="choice '+(x.primary?"primary":"")+'" data-i="'+i+'"><strong>'+x.label+'</strong><small>'+x.sub+'</small></button>').join("");document.querySelectorAll("[data-i]").forEach(b=>b.onclick=arr[+b.dataset.i].run)}
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").classList.remove("show"),1300)}
-function showRug(){state.shown=true;$("rug").classList.add("shown");$("rugBadge").classList.add("show");sfx("fabric");haptic(18)}
+function showRug(){state.shown=true;$("rug").classList.add("shown");$("rugBadge").classList.add("show");$("stageLabel").textContent="Desert Star · on the table";sfx("fabric");haptic(18)}
 function arrival(){
  speak("Samira al-Khatib","I am furnishing a receiving room. I want something beautiful, but not something that announces its price before its taste.", "buyer", true);
  choices([
@@ -169,4 +201,5 @@ update();
 choices([{label:"Begin encounter",sub:"Tap the button below first",run:()=>{}}]);
 </script>
 </body>
+<!-- encounter-v2 -->
 </html>
