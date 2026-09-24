@@ -1,0 +1,32 @@
+name: Threads of Fortune smoke test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'carpet-game/**'
+      - 'tests/threads-smoke.spec.js'
+      - '.github/workflows/threads-giza-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax check
+        run: node --check carpet-game/app.js
+      - name: Install Playwright
+        run: npm install --no-save @playwright/test@1.55.0
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start game server
+        run: |
+          python3 -m http.server 4173 --directory carpet-game >/tmp/threads-http.log 2>&1 &
+          sleep 2
+      - name: Run browser smoke test
+        run: npx playwright test tests/threads-smoke.spec.js --reporter=line
