@@ -62,8 +62,16 @@ function useGame(){
 function Opening(props){
   const g=props.g,patch=props.patch;
   const playingState=useState(false),playing=playingState[0],setPlaying=playingState[1];
+  const sceneState=useState(0),scene=sceneState[0],setScene=sceneState[1];
   const capState=useState("Giza, 1925."),caption=capState[0],setCaption=capState[1];
   const nar=useRef(null),mus=useRef(null),timer=useRef(null);
+  const scenes=[
+    {img:ASSETS.seller,text:"Giza, 1925. A man begins with a borrowed corner of the bazaar."},
+    {img:rug("desert").img,text:"Three rugs. A cat. Barely enough money to survive."},
+    {img:ASSETS.samira,text:"Every customer wants something different."},
+    {img:rug("cairo").img,text:"Every rug has a history. Profit becomes tomorrow's stock."},
+    {img:ASSETS.seller,text:"Reputation opens roads to other cities."}
+  ];
   function stop(){
     [nar.current,mus.current].forEach(function(a){if(a){a.pause();a.currentTime=0}});
     if(timer.current) clearInterval(timer.current);
@@ -71,27 +79,30 @@ function Opening(props){
   useEffect(function(){return stop},[]);
   function finish(){stop();setPlaying(false);patch({screen:"gate"})}
   function start(){
-    setPlaying(true);
+    setPlaying(true);setScene(0);setCaption(scenes[0].text);
     if(g.audio.dialogue && nar.current) nar.current.play().catch(function(){});
-    if(g.audio.music && mus.current){mus.current.volume=.2;mus.current.play().catch(function(){})}
-    const lines=[
-      "Giza, 1925.",
-      "A man begins with a borrowed corner of the bazaar, three rugs, a cat, and barely enough money to survive.",
-      "Every rug has a history. Every customer wants something different.",
-      "Profit becomes tomorrow's stock.",
-      "Reputation opens roads to other cities."
-    ];
-    let i=0;setCaption(lines[0]);
-    timer.current=setInterval(function(){i+=1;if(i<lines.length)setCaption(lines[i]);else finish()},5500);
+    if(g.audio.music && mus.current){mus.current.volume=.18;mus.current.play().catch(function(){})}
+    let i=0;
+    timer.current=setInterval(function(){
+      i+=1;
+      if(i<scenes.length){setScene(i);setCaption(scenes[i].text)}
+      else finish();
+    },5600);
   }
   return h("div",{className:"opening-shell"},
     h("audio",{ref:nar,src:ASSETS.narrator,preload:"auto"}),
     h("audio",{ref:mus,src:ASSETS.music,preload:"auto",loop:true}),
-    h("div",{className:"opening-art "+(playing?"playing":"")},
-      h("div",{className:"sun-disc"}),h("div",{className:"pyramid p1"}),h("div",{className:"pyramid p2"}),h("div",{className:"bazaar-sil"}),h("div",{className:"dust"})
+    h("div",{className:"opening-cinema"},
+      h("img",{key:scene,className:"opening-photo "+(playing?"playing":""),src:scenes[scene].img,alt:"Giza, 1925"}),
+      h("div",{className:"opening-warmth"}),
+      h("div",{className:"dust"})
     ),
     h("div",{className:"opening-vignette"}),
-    h("div",{className:"opening-copy"},h("div",{className:"eyebrow"},"A merchant story"),h("h1",null,"Threads of Fortune"),h("p",null,playing?caption:"Giza · 1925")),
+    h("div",{className:"opening-copy"},
+      h("div",{className:"eyebrow"},"A merchant story"),
+      h("h1",null,"Threads of Fortune"),
+      h("p",null,playing?caption:"Giza · 1925")
+    ),
     !playing?h("button",{className:"primary opening-btn",onClick:start},"PLAY OPENING"):h("button",{className:"skip",onClick:finish},"Skip")
   );
 }
@@ -287,8 +298,8 @@ function Encounter(props){
       h("img",{className:"character buyer",src:buyer.img,alt:buyer.name}),
       h("div",{className:"seller-bubble"},h("b",null,"Hassan"),sellerLine),
       h("div",{className:"buyer-bubble"},h("b",null,buyer.name),buyerLine),
-      selected?h("div",{className:"rug-presented"},h("img",{src:rug(selected).img,alt:rug(selected).name})):null,
-      h("div",{className:"cat"},h("span",null,"🐈"),h("b",null,"Saffron")),
+      h("div",{className:"rug-presented "+(!selected?"preview":"")},h("img",{src:rug(selected||"desert").img,alt:rug(selected||"desert").name})),
+      h("div",{className:"cat"},h("span",{className:"cat-mark"},"🐈"),h("b",null,"Saffron")),
       h("div",{className:"meters"},h(Meter,{label:"Interest",v:interest}),h(Meter,{label:"Trust",v:trust}),h(Meter,{label:"Patience",v:patience})),
       h("div",{className:"coach"},h("span",null,"◆"),coach)
     ),
