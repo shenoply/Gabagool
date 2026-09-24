@@ -192,6 +192,9 @@ function Encounter(props){
     setBuyerLine(buyer.budget);setPatience(function(v){return v-(buyer.id==="samira"?10:3)});setTrust(function(v){return v-(buyer.id==="samira"?4:0)});setStage("qualification");
   }
   function choose(id){
+    if(tutorial && tutorialStep===1){
+      setBuyerLine("Before the rugs, I would rather you understand the room.");return;
+    }
     if(tutorial && tutorialStep===2 && id!=="desert"){
       setBuyerLine("Beautiful, but stronger than what I described.");setInterest(function(v){return v-6});return;
     }
@@ -210,17 +213,20 @@ function Encounter(props){
   }
   function story(){
     if(!selected)return;
+    if(tutorial && tutorialStep===3){setBuyerLine("You have not examined it closely yet.");return;}
     setSellerLine("Its strength is not noise. The pattern rewards a second look, and its history is something I can defend without invention.");
     setTrust(function(v){return v+13});setInterest(function(v){return v+(buyer.id==="samira"?14:6)});setPatience(function(v){return v-3});
     setBuyerLine(buyer.id==="samira"?"That is exactly how I prefer to buy—without theatre. What are you asking?":"And the price?");
     setStage("bargaining");if(tutorialStep===4)setTutorialStep(5);
   }
   function craft(){
+    if(tutorial && tutorialStep<=4){setBuyerLine(tutorialStep===3?"Examine it first.":"That is not quite what I asked you to notice.");return;}
     setSellerLine("Look at the weave density and how evenly the pile has worn.");
     setTrust(function(v){return v+8});setInterest(function(v){return v+(buyer.id==="yusuf"?12:4)});setPatience(function(v){return v-4});
     setBuyerLine(buyer.id==="yusuf"?"That matters to me. Give me your figure.":"Useful. But I am choosing for a room, not a workshop.");setStage("bargaining");
   }
   function homePitch(){
+    if(tutorial && tutorialStep<=4){setBuyerLine(tutorialStep===3?"Examine it first.":"You are close, but tell me why this one suits my taste.");return;}
     setSellerLine("Imagine it after years of mornings and family visits—the room settling around it.");
     setInterest(function(v){return v+(buyer.id==="mariam"?14:5)});setTrust(function(v){return v+8});
     setBuyerLine(buyer.id==="mariam"?"That is what I want. Something that becomes ours.":"Go on.");setStage("bargaining");
