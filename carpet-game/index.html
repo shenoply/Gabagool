@@ -1,93 +1,18 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Threads of Fortune</title>
-<style>
-:root{
---bg:#241106;--bg2:#170b05;--card:#3a1f10;--card2:#2d160b;--gold:#e9b75f;--gold2:#c88c3a;
---text:#f6ead4;--muted:#c2aa8e;--line:#81562d;--dark:#150904;
-}
-*{box-sizing:border-box}html,body{margin:0;background:#0d0603;color:var(--text);font-family:Arial,Helvetica,sans-serif}
-body{overflow-x:hidden}.app{max-width:900px;margin:auto;min-height:100vh;background:linear-gradient(180deg,#2a1308 0,#1b0c05 100%);padding-bottom:76px}
-h1,h2,h3,.display{font-family:Georgia,"Times New Roman",serif}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:#1a0b04}
-.brand h1{margin:0;color:var(--gold);font-size:29px;line-height:1}.brand small{display:block;margin-top:8px;color:#d0b69a;letter-spacing:.18em;font-size:12px}
-.stats{display:flex;gap:10px}.stat{min-width:94px;border:1px solid #9a6938;background:#3a2011;padding:12px 14px;border-radius:3px;font-weight:700;font-size:20px;text-align:center}
-.view{display:none}.view.on{display:block}
-.eyebrow{letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:800;font-size:12px}.section{padding:32px 26px 24px}
-.section h2{margin:6px 0 10px;font-size:54px;line-height:.95}.lead{font-size:20px;color:var(--muted);margin:0}
-.hero{position:relative;height:300px;overflow:hidden}.hero img{width:100%;height:100%;object-fit:cover}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,#1b0c05)}.heroText{position:absolute;left:24px;bottom:24px;z-index:2}.heroText h2{font-size:42px;margin:4px 0}
-.buyerstrip{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:16px 20px;background:#3b2111;border-block:1px solid var(--line)}.buyerstrip img{width:86px;height:106px;object-fit:cover;object-position:center;border:1px solid #a8753f;border-radius:4px}.buyername{font-size:26px;color:var(--gold);font-weight:800}.small{font-size:13px;color:var(--muted)}.meters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.meterrow{display:flex;justify-content:space-between;font-size:12px}.bar{height:7px;background:#130904;border-radius:99px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--gold)}.bar.p i{background:#b65b3d}.speech{margin:14px 20px 0;padding:12px 14px;border-left:3px solid var(--gold);background:#261107;font-family:Georgia,serif;font-style:italic;font-size:18px}
-.rugwrap{padding:18px 20px}.rugcard{overflow:hidden;border:1px solid #976638;background:#3a1f10;border-radius:4px}.rugcard img{width:100%;height:265px;object-fit:cover;display:block}.rugmeta{display:flex;justify-content:space-between;gap:12px;padding:14px 16px}.rugtitle{font-size:27px;color:var(--gold);font-weight:800}.buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.btn{min-height:48px;border:1px solid #92643a;background:#3a2113;color:var(--text);font-size:15px;font-weight:700;border-radius:3px}.btn.gold{background:#865723}.btn:active{transform:scale(.99)}
-.cards{display:grid;gap:20px}.buyergrid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}.card{background:#3b2111;border:1px solid #82582f;border-radius:4px;overflow:hidden}.card img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center;display:block}.pad{padding:20px}.card h3{font-size:34px;margin:0 0 8px;color:var(--gold)}.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tag{padding:9px 12px;border:1px solid #8d6035;color:#e4bc73;font-size:13px}
-.supplier{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:16px}.supplier img{width:120px;height:145px;object-fit:cover;border-radius:3px}
-.mapimg{width:100%;display:block;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.roadcard{margin:26px 20px;background:#3b2111;border:1px solid #82582f;border-radius:4px;padding:24px}.roadhead{display:flex;justify-content:space-between;gap:12px;align-items:start}.roadhead h3{font-size:44px;margin:0;color:var(--gold)}.locked{font-size:18px;font-weight:800}.req{margin-top:20px;border:1px solid #8a6038;padding:18px;font-size:18px;color:#d6c0a4}
-.journal{padding:26px 20px}.journalbox{background:#3b2111;border:1px solid #82582f;padding:20px;border-radius:4px}.journalbox h3{font-size:30px;color:var(--gold);margin:0 0 8px}
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:30;width:min(900px,100%);height:76px;display:grid;grid-template-columns:repeat(5,1fr);background:#160a04f6;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}.nav button{border:0;background:none;color:#d5c0a3;font-weight:800;font-size:13px}.nav button.on{color:var(--gold)}
-.badge{display:inline-block;border:1px solid #8a6038;padding:8px 10px;color:var(--gold);font-size:12px;margin-top:8px}
-@media(max-width:520px){.topbar{padding:14px 18px}.brand h1{font-size:25px}.stats{gap:7px}.stat{min-width:0;padding:10px 12px;font-size:17px}.section{padding:28px 26px 22px}.section h2{font-size:52px}.lead{font-size:18px}.hero{height:255px}.rugcard img{height:230px}.roadhead h3{font-size:38px}}
-</style>
+<meta name="theme-color" content="#160f0a">
+<title>Threads of Fortune — Giza Vertical Slice</title>
+<meta name="description" content="A historical carpet merchant game set in Giza, 1925.">
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<div class="app">
-<header class="topbar">
-<div class="brand"><h1>Threads of Fortune</h1><small>GIZA · 1925</small></div>
-<div class="stats"><div class="stat">◉ <span id="coins">120</span></div><div class="stat">☆ <span id="rep">0</span></div><div class="stat">◉ <span id="day">1</span></div></div>
-</header>
-
-<section id="stall" class="view on">
-<div class="hero"><img src="https://gcdn.picsart.com/cloud-storage/d647fe3e-55af-40df-91f8-d44bf4080fac.jpg"><div class="heroText"><div class="eyebrow">THE WESTERN BAZAAR</div><h2>Hassan's Stall</h2></div></div>
-<div class="buyerstrip"><img id="buyerImg"><div><div class="buyername" id="buyerName"></div><div class="small" id="buyerMeta"></div><div class="meters"><div><div class="meterrow"><span>Interest</span><b id="interestText"></b></div><div class="bar"><i id="interestBar"></i></div></div><div><div class="meterrow"><span>Patience</span><b id="patienceText"></b></div><div class="bar p"><i id="patienceBar"></i></div></div></div></div></div>
-<div class="speech" id="speech">“Show me what deserves a place in my home.”</div>
-<div class="rugwrap"><div class="rugcard"><img id="rugImg"><div class="rugmeta"><div><div class="rugtitle" id="rugName"></div><div class="small" id="rugMeta"></div></div><div><b id="rugAsk"></b><div class="small" id="rugQty"></div></div></div></div><div class="buttons"><button class="btn" onclick="inspectRug()">Inspect</button><button class="btn" onclick="tellStory()">Tell its story</button><button class="btn gold" onclick="offer()">Offer price</button><button class="btn" onclick="nextRug()">Next rug</button></div><div class="badge">Negotiation voice: OFF · narration optional only</div></div>
-</section>
-
-<section id="buy" class="view"><div class="section"><div class="eyebrow">GIZA SUPPLIER</div><h2>Uncle Rashid</h2><p class="lead">Buy with your eyes. Sell with your ears.</p><div id="supplier" class="cards" style="margin-top:22px"></div></div></section>
-
-<section id="buyers" class="view"><div class="section"><div class="eyebrow">FACES OF THE BAZAAR</div><h2>The Buyers</h2><div id="buyersGrid" class="cards buyergrid"></div></div></section>
-
-<section id="world" class="view">
-<div class="section"><div class="eyebrow">THE ROAD AHEAD</div><h2>World Map</h2><p class="lead">Build a name in Giza. The old trade roads will follow.</p></div>
-<img class="mapimg" src="world-map.png" alt="Illustrated parchment trade map">
-<div class="roadcard"><div class="roadhead"><div><h3>The Road to Cairo</h3><div class="lead">Travel cost: 80 coins</div></div><div class="locked" id="lockText">Locked</div></div><div class="req" id="salesReq">× 0/6 sales</div><div class="req" id="repReq">× 0/8 reputation</div><div class="req" id="coinReq">× 120/400 coins</div></div>
-</section>
-
-<section id="journal" class="view"><div class="journal"><div class="eyebrow">HASSAN'S LEDGER</div><h2 class="display" style="font-size:52px;margin:6px 0 18px">Journal</h2><div class="journalbox"><h3>Road Beyond Giza</h3><p class="lead">Six sales, a trusted name and a full purse open Cairo.</p></div><div class="journalbox" style="margin-top:16px"><h3>Next chapter</h3><p>Bannerlord-style caravan travel, brother companion, settlement bazaars, courtship, marriage, children and a family-run trading house will be added without changing this visual identity.</p></div></div></section>
-
-<nav class="nav"><button class="on" onclick="show('stall',this)">⌂<br>Stall</button><button onclick="show('buy',this)">▣<br>Buy Rugs</button><button onclick="show('buyers',this)">♙<br>Buyers</button><button onclick="show('world',this)">▱<br>World Map</button><button onclick="show('journal',this)">▯<br>Journal</button></nav>
-</div>
-
-<script>
-const buyers=[
-{name:"Lady Samira al-Khatib",meta:"Wealthy traveller · Cairo · 350–650",img:"https://gcdn.picsart.com/cloud-storage/2071022e-8301-40a5-8248-2d230729d835.jpg",bio:"A patron of Cairo's new salons, Samira collects objects whose journeys are as elegant as their craft.",likes:["Desert Star","Red Medina"]},
-{name:"Yusuf al-Masri",meta:"Hotel proprietor · Alexandria · 400–800",img:"https://gcdn.picsart.com/cloud-storage/0f7e1602-3213-47dc-b324-cfa112d9bf44.jpg",bio:"Yusuf is furnishing a grand seaside hotel and measures beauty against durability—and every coin.",likes:["Red Medina","Cedar Caravan"]},
-{name:"Mariam Nassar",meta:"Newlywed homemaker · Jerusalem · 250–480",img:"https://gcdn.picsart.com/cloud-storage/a32d508e-957c-4b56-b07e-d4d1116b8afc.jpg",bio:"Mariam seeks the first heirloom for a bright new household, something to gather a lifetime around.",likes:["Golden Palm","Desert Star"]},
-{name:"Farid Haddad",meta:"Antique dealer · Damascus · 500–1100",img:"https://gcdn.picsart.com/cloud-storage/a351a702-e9a2-441f-8f0e-0ea90700c57b.jpg",bio:"Farid has spent thirty years exposing false provenance. A rare piece may impress him; a careless claim never will.",likes:["Sapphire Night","Damascus Rose"]},
-{name:"Evelyn Hart",meta:"Collector & traveller · London · 450–900",img:"https://gcdn.picsart.com/cloud-storage/a389768a-878f-45ac-a597-4a1099ed26f1.jpg",bio:"Evelyn writes dispatches from the old caravan roads and buys the pieces she cannot forget.",likes:["Sapphire Night","Desert Star"]}
-];
-const rugs=[
-{name:"Desert Star",origin:"Upper Egypt",material:"Wool",ask:220,cost:70,img:"https://gcdn.picsart.com/cloud-storage/d9e05209-1242-4384-bf5d-204f107368cf.jpg"},
-{name:"Red Medina",origin:"Anatolia",material:"Wool",ask:320,cost:105,img:"https://gcdn.picsart.com/cloud-storage/83b23e6b-d725-4c5a-9ec8-4d58e20191cb.jpg"},
-{name:"Golden Palm",origin:"Cairo",material:"Wool & cotton",ask:250,cost:80,img:"https://gcdn.picsart.com/cloud-storage/a412a450-4e30-43d0-bb50-891cabb6b0a7.jpg"},
-{name:"Cedar Caravan",origin:"Levant",material:"Wool",ask:420,cost:135,img:"https://gcdn.picsart.com/cloud-storage/517ebfe3-ea2f-4bab-a5ad-33a0bb532f7e.jpg"},
-{name:"Damascus Rose",origin:"Damascus",material:"Fine wool",ask:620,cost:190,img:"https://gcdn.picsart.com/cloud-storage/eddf7d20-a8ad-4c33-b01f-6e2d69dae150.jpg"},
-{name:"Sapphire Night",origin:"Persia",material:"Wool & silk",ask:880,cost:260,img:"https://gcdn.picsart.com/cloud-storage/c6780761-8cb6-40ed-bfa4-f0196661980a.jpg"}
-];
-let s=JSON.parse(localStorage.getItem("tof-fortune-v3")||"null")||{coins:120,rep:0,day:1,sales:0,buyer:0,rug:0,interest:36,patience:88,inv:{"Desert Star":1,"Red Medina":1,"Golden Palm":1}};
-function save(){localStorage.setItem("tof-fortune-v3",JSON.stringify(s))}
-function render(){let b=buyers[s.buyer],r=rugs[s.rug];coins.textContent=s.coins;rep.textContent=s.rep;day.textContent=s.day;buyerImg.src=b.img;buyerName.textContent=b.name;buyerMeta.textContent=b.meta;interestText.textContent=s.interest+"%";patienceText.textContent=s.patience+"%";interestBar.style.width=s.interest+"%";patienceBar.style.width=s.patience+"%";rugImg.src=r.img;rugName.textContent=r.name;rugMeta.textContent=r.origin+" · "+r.material;rugAsk.textContent=r.ask+" ◉";rugQty.textContent=(s.inv[r.name]||0)+" in stock";salesReq.textContent=(s.sales>=6?"✓ ":"× ")+s.sales+"/6 sales";repReq.textContent=(s.rep>=8?"✓ ":"× ")+s.rep+"/8 reputation";coinReq.textContent=(s.coins>=400?"✓ ":"× ")+s.coins+"/400 coins";lockText.textContent=(s.sales>=6&&s.rep>=8&&s.coins>=400)?"Ready":"Locked"}
-function react(t,di,dp){speech.textContent="“"+t+"”";s.interest=Math.max(0,Math.min(100,s.interest+di));s.patience=Math.max(0,Math.min(100,s.patience+dp));save();render()}
-function tellStory(){let b=buyers[s.buyer],r=rugs[s.rug];react(b.likes.includes(r.name)?"Now that gives the rug more weight. Continue.":"A fine tale. I am not yet certain this is the pattern I came for.",b.likes.includes(r.name)?22:11,-4)}
-function inspectRug(){let r=rugs[s.rug];alert(r.name+"\n"+r.origin+" · "+r.material+"\nAsking price: "+r.ask+" coins")}
-function offer(){let b=buyers[s.buyer],r=rugs[s.rug],m=(b.meta.match(/(\d+)–(\d+)/)||[]),budget=+m[2]||500;if(!(s.inv[r.name]>0))return react("You cannot sell what is not in your stall.",0,-5);if(r.ask<=budget&&s.interest>=42){s.coins+=r.ask;s.rep+=b.likes.includes(r.name)?2:1;s.sales++;s.day++;s.inv[r.name]--;s.buyer=(s.buyer+1)%buyers.length;s.interest=36;s.patience=88;speech.textContent="“Agreed. Let us call it a fair bargain.”";save();render()}else react(r.ask>budget?"Beautiful, perhaps—but that price is beyond my purse.":"You name a price before you have convinced me of the piece.",4,-12)}
-function nextRug(){s.rug=(s.rug+1)%rugs.length;save();render()}
-function buy(name,cost){if(s.coins<cost)return alert("Not enough coins.");s.coins-=cost;s.inv[name]=(s.inv[name]||0)+1;save();render()}
-function show(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));document.getElementById(id).classList.add("on");document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("on"));btn.classList.add("on")}
-buyersGrid.innerHTML=buyers.map(b=>'<article class="card"><img src="'+b.img+'"><div class="pad"><h3>'+b.name+'</h3><div class="small">'+b.meta+'</div><p>'+b.bio+'</p><div class="tags">'+b.likes.map(x=>'<span class="tag">Likes '+x+'</span>').join("")+'</div></div></article>').join("");
-supplier.innerHTML=rugs.map(r=>'<article class="card supplier"><img src="'+r.img+'"><div><h3 style="font-size:28px">'+r.name+'</h3><div class="small">'+r.origin+' · '+r.material+'</div><p>Dealer '+r.cost+' · Ask '+r.ask+'</p><button class="btn gold" onclick="buy(\''+r.name+'\','+r.cost+')">Buy for '+r.cost+'</button></div></article>').join("");
-render();
-</script>
-</body></html>
+<div id="root"></div>
+<script src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
